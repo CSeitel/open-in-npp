@@ -1,8 +1,13 @@
 {
   "name": "open-in-npp",
-  "displayName": "Open-In-Npp",
-  "description": "",
+  "displayName": "Open In Notepad++",
+  "description": "OPen the current file in Notepad++",
   "version": "0.0.1",
+  "publisher": "CSeitel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CSeitel/open-in-npp"
+  },
   "engines": {
     "vscode": "^1.38.0"
   },
@@ -17,7 +22,7 @@
     "commands": [
       {
         "command": "extension.openInNpp",
-        "title": "Open in Notepad++"
+        "title": "Open Current File in Notepad++"
       }
 	]
   , "configuration": {
@@ -25,13 +30,13 @@
       "properties": {
         "openInNpp.Executable": {
           "type": "string"
-        , "default": "C:\\Program Files\\Notepad++\\notepad++.exe"
+        , "default": ""
         , "description": "Specifies the path of the Notepad++ executable"
         }
-      , "openInNpp.NewWindow": {
-          "type": ["string", "null"],
-          "default": null,
-          "description": "Specifies the folder path containing the tsserver and lib*.d.ts files to use."
+      , "openInNpp.multiInst": {
+          "type": "boolean"
+        , "default": false
+        , "description": "Open a separate instance of Notepad++ for each command execution"
         }
       }
     }

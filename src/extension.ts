@@ -1,56 +1,89 @@
+/*
+http://code.visualstudio.com/docs/languages/markdown
+https://help.github.com/articles/markdown-basics/
+https://dev.azure.com/cseitel/
+https://code.visualstudio.com/api/get-started/your-first-extension
+*/
   import * as ßß_vsCode from 'vscode';
   import * as ßß_cp     from 'child_process';
   import * as ßß_fs     from 'fs';
 //==============================================================================
-  const ß_id_cmd:string = 'extension.openInNpp';
+  const ß_id_cmd:string = 'extension.openInNpp' ; // package.json
   const ß_id_exe:string = 'openInNpp.Executable';
+  const ß_id_mi :string = 'openInNpp.multiInst' ;
+  const ß_exe_path = {
+    x86_32bit: "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
+  , x64_64bit: "C:\\Program Files\\Notepad++\\notepad++.exe"
+  , path_env: "notepad++.exe"
+  , previous: ""
+  }
 //==============================================================================
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: ßß_vsCode.ExtensionContext) {
+export function activate(ü_extContext: ßß_vsCode.ExtensionContext) {
 
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "open-in-npp" is now active!');
+  const disposable = ßß_vsCode.commands.registerCommand( ß_id_cmd, ß_commandImpl );
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  let disposable = ßß_vsCode.commands.registerCommand( ß_id_cmd, ß_command );
-
-  context.subscriptions.push(disposable);
+  ü_extContext.subscriptions.push( disposable );
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}
 
 //==============================================================================
 
-function ß_command() {
+interface IConfig {
+  exeName: string;
+  mi: boolean;
+}
+
+function ß_getConfig():IConfig | null {
+  const ü_config = ßß_vsCode.workspace.getConfiguration();
+//
+   let ü_exeName:string = ü_config.get( ß_id_exe ) || '';
+  if ( ü_exeName.length === 0 ) {
+         if (                   ß_exe_path.previous.length > 0
+           && ßß_fs.existsSync( ß_exe_path.previous  ) ) { ü_exeName = ß_exe_path.previous ; }
+    else if ( ßß_fs.existsSync( ß_exe_path.x64_64bit ) ) { ü_exeName = ß_exe_path.previous = ß_exe_path.x64_64bit; }
+    else if ( ßß_fs.existsSync( ß_exe_path.x86_32bit ) ) { ü_exeName = ß_exe_path.previous = ß_exe_path.x86_32bit; }
+    else                                                 { ü_exeName = ß_exe_path.previous = ß_exe_path.path_env ; }
+  } else if ( ! ßß_fs.existsSync( ü_exeName ) ) {
+      ßß_vsCode.window.showInformationMessage( `Notepad++ executable not found: ${ ü_exeName }` );
+      return null;
+  }
+//
+  return { exeName: ü_exeName
+         , mi: <boolean> ü_config.get( ß_id_mi )
+         };
+}
+
+function ß_commandImpl() {
 //
   const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
   if ( ü_activeEditor === undefined ) {
-    ßß_vsCode.window.showInformationMessage('Hello World!');
+    ßß_vsCode.window.showInformationMessage( 'No Current File' );
     return;
   }
   const ü_fileName = ü_activeEditor.document.fileName;
 //
-  const ü_config = ßß_vsCode.workspace.getConfiguration()
-  const ü_exeName:string = ü_config.get( ß_id_exe ) || '';
-  if ( ! ßß_fs.existsSync( ü_exeName ) ) {
-    ßß_vsCode.window.showInformationMessage( `Exe not found: ${ ü_exeName }` );
+  let ü_config = ß_getConfig();
+  if ( ü_config == null ) {
     return;
   }
+  ü_config = ( <IConfig> ü_config );
 //
-  const ü_proc = ßß_cp.execFile( ü_exeName, [ü_fileName],
-   (err, stdout, stderr) => {
-    console.log('stdout: ' + stdout);
-    console.log('stderr: ' + stderr);
-    if (err) {
-        console.log('error: ' + err);
-    }
-});
-    ßß_vsCode.window.showInformationMessage( 'Done' + ü_fileName );
+  let ü_args = [ü_fileName];
+  if ( ü_config.mi ) {
+    ü_args.push( "-multiInst" ); 
+  }
+  const ü_proc = ßß_cp.execFile( ü_config.exeName, ü_args, ß_callback );
+//
+function ß_callback( err: Error | null, stdout: string, stderr: string) {
+  //console.log('stdout: ' + stdout);
+  //console.log('stderr: ' + stderr);
+  if ( err ) {
+        console.error( 'error: ' + err );
+  } else {
+    ßß_vsCode.window.showInformationMessage( 'Done ' + ü_fileName );
+  }
+}
 
 }
 
