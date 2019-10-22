@@ -1,8 +1,8 @@
 {
   "name": "open-in-npp",
   "displayName": "Open In Notepad++",
-  "description": "OPen the current file in Notepad++",
-  "version": "0.0.1",
+  "description": "Open the active file in Notepad++",
+  "version": "0.0.2",
   "publisher": "CSeitel",
   "repository": {
     "type": "git",
@@ -21,10 +21,16 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.openInNpp",
-        "title": "Open Current File in Notepad++"
+        "command": "extension.openInNpp"
+      , "title": "Open Active File in Notepad++"
       }
-	]
+    ]
+    , "keybindings": [
+      {
+        "command": "extension.openInNpp"
+      , "key": "ctrl+k ctrl+n"
+      }
+    ]
   , "configuration": {
       "title": "Notepad++",
       "properties": {

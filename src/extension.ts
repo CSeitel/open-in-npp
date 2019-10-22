@@ -3,10 +3,12 @@ http://code.visualstudio.com/docs/languages/markdown
 https://help.github.com/articles/markdown-basics/
 https://dev.azure.com/cseitel/
 https://code.visualstudio.com/api/get-started/your-first-extension
+https://phrase.com/blog/posts/step-step-guide-javascript-localization/
 */
   import * as ßß_vsCode from 'vscode';
   import * as ßß_cp     from 'child_process';
   import * as ßß_fs     from 'fs';
+  import * as ßß_util   from 'util';
 //==============================================================================
   const ß_id_cmd:string = 'extension.openInNpp' ; // package.json
   const ß_id_exe:string = 'openInNpp.Executable';
@@ -58,7 +60,7 @@ function ß_commandImpl() {
 //
   const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
   if ( ü_activeEditor === undefined ) {
-    ßß_vsCode.window.showInformationMessage( 'No Current File' );
+    ßß_vsCode.window.showInformationMessage( 'No Active File' );
     return;
   }
   const ü_fileName = ü_activeEditor.document.fileName;
@@ -73,20 +75,25 @@ function ß_commandImpl() {
   if ( ü_config.mi ) {
     ü_args.push( "-multiInst" ); 
   }
-  const ü_proc = ßß_cp.execFile( ü_config.exeName, ü_args, ß_callback );
 //
+  const execFile = ßß_util.promisify( ßß_cp.execFile );
+  execFile( ü_config.exeName, ü_args ).then( ü_proc => {
+    ßß_vsCode.window.showInformationMessage( 'XXXX ' + ü_fileName );
+  });
+  return;
+//
+
+}
+
+//==============================================================================
+/*
+  const ü_proc = ßß_cp.execFile( ü_config.exeName, ü_args, ß_callback );
 function ß_callback( err: Error | null, stdout: string, stderr: string) {
   //console.log('stdout: ' + stdout);
   //console.log('stderr: ' + stderr);
   if ( err ) {
         console.error( 'error: ' + err );
   } else {
-    ßß_vsCode.window.showInformationMessage( 'Done ' + ü_fileName );
   }
 }
-
-}
-
-//==============================================================================
-/*
 */

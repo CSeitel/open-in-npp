@@ -1,6 +1,13 @@
 code --install-extension .\open-in-npp-0.0.1.vsix
 
 
+    , "menus": {
+      "explorer/context": [
+        { "command": "extension.openInNpp",
+          "group": "navigation"
+        }
+      ]
+    }
 
 
 ## Working with Markdown
