@@ -6,6 +6,7 @@ https://code.visualstudio.com/api/get-started/your-first-extension
 https://phrase.com/blog/posts/step-step-guide-javascript-localization/
 */
   import * as ßß_vsCode from 'vscode';
+  import * as ßß_impl   from './implementation';
   import * as ßß_cp     from 'child_process';
   import * as ßß_fs     from 'fs';
   import * as ßß_util   from 'util';

@@ -2,9 +2,9 @@
 
 ## Features
 
-This installs a command for opening the current file with [Notepad++](https://notepad-plus-plus.org/).
+This installs a command palette for opening the active file with [Notepad++](https://notepad-plus-plus.org/).
 
-\!\[feature X\]\(images/feature-x.png\)
+[feature X](images/VSC.png)
 
 
 ## Requirements
@@ -14,13 +14,12 @@ https://notepad-plus-plus.org/downloads/
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+The following settings are provided:
 
-For example:
-
-This extension contributes the following settings:
-
-* `openInNpp.Executable`: Specifies the path of the Notepad++ executable
+* `openInNpp.Executable`: Specifies the path of the Notepad++ executable, if not set a lookup in the following order is made
+  - 1. `C:\Program Files\Notepad++\notepad++.exe` or
+  - `C:\Program Files (x86)\Notepad++\notepad++.exe`
+  - 2. path_env: `notepad++.exe`
 * `openInNpp.multiInst` : Open a separate instance of Notepad++ for each command execution
 
 ## Known Issues

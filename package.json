@@ -52,7 +52,8 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "mocha": "mocha ./out/test/mocha/**/*.spec.js"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
