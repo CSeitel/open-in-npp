@@ -1,8 +1,10 @@
-import * as ßß_fs     from 'fs'    ;
-import * as ßß_vsCode from 'vscode';
+/*
+https://www.linux.com/tutorials/understanding-linux-file-permissions/
+*/
+import * as ßß_fs     from 'fs';
+import * as ßß_cp     from 'child_process';
 
-  const ß_id_exe:string = 'openInNpp.Executable';
-  const ß_id_mi :string = 'openInNpp.multiInst' ;
+//==============================================================================
   const ß_exe_path = {
     x86_32bit: "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
   , x64_64bit: "C:\\Program Files\\Notepad++\\notepad++.exe"
@@ -11,33 +13,43 @@ import * as ßß_vsCode from 'vscode';
   };
 
 export interface IConfig {
-  exeName: string;
-  mi: boolean;
+  Executable: string;
+  multiInst?: boolean;
 }
 
-export class implementation {
+export function defaultNppExecutable():string {
+         if (                                          ß_exe_path.previous.length > 0
+                                            ) { return ß_exe_path.previous ; }
+    else if ( isExe( ß_exe_path.x64_64bit ) ) { return ß_exe_path.previous = ß_exe_path.x64_64bit; }
+    else if ( isExe( ß_exe_path.x86_32bit ) ) { return ß_exe_path.previous = ß_exe_path.x86_32bit; }
+    else                                      { return ß_exe_path.previous = ß_exe_path.path_env ; }
+}
 
-  static ß_getConfig():IConfig | null {
-  const ü_config = ßß_vsCode.workspace.getConfiguration();
+function isExe( path:string ):boolean {
+  let ü_stats: ßß_fs.Stats;
+  try {
+    ü_stats = ßß_fs.statSync( path );
+  } catch (error) {
+    return false;
+  }
+  if ( ü_stats.isDirectory() ) { return false; }
+//console.log( ü_stats.mode );
 //
-   let ü_exeName:string = ü_config.get( ß_id_exe ) || '';
-  if ( ü_exeName.length === 0 ) {
-         if (                   ß_exe_path.previous.length > 0
-           && ßß_fs.existsSync( ß_exe_path.previous  ) ) { ü_exeName = ß_exe_path.previous ; }
-    else if ( ßß_fs.existsSync( ß_exe_path.x64_64bit ) ) { ü_exeName = ß_exe_path.previous = ß_exe_path.x64_64bit; }
-    else if ( ßß_fs.existsSync( ß_exe_path.x86_32bit ) ) { ü_exeName = ß_exe_path.previous = ß_exe_path.x86_32bit; }
-    else                                                 { ü_exeName = ß_exe_path.previous = ß_exe_path.path_env ; }
-  } else if ( ! ßß_fs.existsSync( ü_exeName ) ) {
-      ßß_vsCode.window.showInformationMessage( `Notepad++ executable not found: ${ ü_exeName }` );
-      return null;
+  return true;
+//( ü_stats.mode >>9 ) & 0o111
+}
+
+export function spawnProcess( ü_config:IConfig, ü_fileName:string ) {
+//
+  let ü_args = [ ü_fileName ];
+  if ( ü_config.multiInst ) {
+    ü_args.push( "-multiInst" );
   }
 //
-  return { exeName: ü_exeName
-         , mi: <boolean> ü_config.get( ß_id_mi )
-         };
+  let ü_proc:ßß_cp.ChildProcess;
+     ü_proc = ßß_cp.spawn( ü_config.Executable, ü_args );
+  try {
+  } catch ( eX ) {
+  }
+//
 }
-
-
-}
-
-//export = { getConfig: ß_getConfig }
