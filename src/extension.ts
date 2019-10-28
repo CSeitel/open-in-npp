@@ -9,7 +9,7 @@ import * as ßß_vsCode from 'vscode';
 import * as ßß_fs     from 'fs'    ;
 import { IConfig
        , defaultNppExecutable
-       , spawnProcess } from 'open-in-npp/src/implementation';
+       , spawnProcess } from './implementation';
   const ß_IDs = {
     Extension : 'extension.openInNpp' // package.json
   , Executable: 'openInNpp.Executable'
@@ -59,7 +59,11 @@ function ß_executeCommand() {
     return;
   }
 //
-  spawnProcess( <IConfig> ü_config, ü_fileName );
+  spawnProcess( <IConfig> ü_config, ü_fileName ).catch( eX => {
+    ßß_vsCode.window.showErrorMessage( `Exe ${ ( <IConfig> ü_config ).Executable } Error ${ eX.message }` );
+
+  });
+//
   return;
 }
 

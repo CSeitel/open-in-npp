@@ -10,11 +10,15 @@ it('it', async () => {
 //const Executable = ßß_testApi.defaultExe();
 //ßß_testApi.spawn( {Executable, multiInst: false }, __filename );
   const Executable = ßß_impl.defaultNppExecutable();
-  ßß_impl.spawnProcess( {Executable }, __filename );
+  return ßß_impl.spawnProcess( {Executable }, __filename );
 });
 
 });
 
 /*
   console.log( exe );
+{
+  detached: true,
+  stdio: 'ignore'
+}
 */
