@@ -8,6 +8,7 @@ https://phrase.com/blog/posts/step-step-guide-javascript-localization/
 import * as ßß_vsCode from 'vscode';
 import * as ßß_fs     from 'fs'    ;
 import { IConfig
+       , isExe
        , defaultNppExecutable
        , spawnProcess } from './implementation';
   const ß_IDs = {
@@ -28,14 +29,15 @@ export function deactivate() {}
 
 //==============================================================================
 
-function ß_getConfig():IConfig | null {
+async function ß_getConfig():Promise<IConfig> {
   const ü_config = ßß_vsCode.workspace.getConfiguration();
 //
    let ü_exeName:string = ü_config.get( ß_IDs.Executable ) || '';
-  if ( ü_exeName.length === 0 ) { ü_exeName = defaultNppExecutable();
-  } else if ( ! ßß_fs.existsSync( ü_exeName ) ) {
-      ßß_vsCode.window.showErrorMessage( `Notepad++ executable not found: ${ ü_exeName }` );
-      return null;
+  if ( ü_exeName.length === 0 ) {
+       ü_exeName = await defaultNppExecutable();
+  } else if ( ! await isExe( ü_exeName ) ) {
+    const msg = `Notepad++ executable not found: ${ ü_exeName }`;
+    throw new Error( msg );
   }
 //
   return { Executable: ü_exeName
@@ -45,26 +47,32 @@ function ß_getConfig():IConfig | null {
 
 //------------------------------------------------------------------------------
 
-function ß_executeCommand() {
+async function ß_executeCommand():Promise<number> {
 //
   const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
   if ( ü_activeEditor === undefined ) {
-    ßß_vsCode.window.showInformationMessage( 'No Active File' );
-    return;
+    const msg = 'No Active File';
+    ßß_vsCode.window.showInformationMessage( msg );
+    return -1;
   }
   const ü_fileName = ü_activeEditor.document.fileName;
 //
-  let ü_config = ß_getConfig();
-  if ( ü_config == null ) {
-    return;
+  let ü_config:IConfig;
+  try {
+    ü_config = await ß_getConfig();
+  } catch ( eX ) {
+    ßß_vsCode.window.showErrorMessage( eX.message );
+    return -1;
   }
 //
-  spawnProcess( <IConfig> ü_config, ü_fileName ).catch( eX => {
-    ßß_vsCode.window.showErrorMessage( `Exe ${ ( <IConfig> ü_config ).Executable } Error ${ eX.message }` );
-
+  return spawnProcess( ü_config, ü_fileName ).catch( eX => {
+    const msg = `Exe_ ${ ü_config.Executable } Error ${ eX.message }`;
+    ßß_vsCode.window.showErrorMessage( msg );
+    return -1;
   });
 //
-  return;
 }
 
 //==============================================================================
+/*
+*/
