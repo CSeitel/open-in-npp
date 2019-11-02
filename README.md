@@ -33,4 +33,4 @@ The following settings are provided:
 
 ### 0.0.3
 
-Initial release
+This is the initial release.
