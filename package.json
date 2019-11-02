@@ -1,16 +1,20 @@
 {
   "name": "open-in-npp",
   "displayName": "Open In Notepad++",
-  "description": "Open the active file in Notepad++",
-  "version": "0.0.2",
+  "description": "Visual Studio Code Extension: Open the active file in Notepad++",
+  "version": "0.0.3",
   "publisher": "CSeitel",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CSeitel/open-in-npp"
+    "url": "https://github.com/CSeitel/open-in-npp"
+  },
+  "bugs": {
+    "url": "https://github.com/CSeitel/open-in-npp/issues"
   },
   "engines": {
     "vscode": "^1.38.0"
   },
+  "license": "MIT",
   "categories": [
     "Other"
   ],

@@ -18,9 +18,9 @@ Notepad++ needs to be installed. See https://notepad-plus-plus.org/downloads/
 The following settings are provided:
 
 * `openInNpp.Executable`: Specifies the path of the Notepad++ executable, if not set a lookup in the following order is made
-  - 1. `C:\Program Files\Notepad++\notepad++.exe`
-  - 2. `C:\Program Files (x86)\Notepad++\notepad++.exe`
-  - 3. `notepad++.exe` (Fallback lookup via the folders of the Windows *PATH* environment variable)
+  1. `C:\Program Files\Notepad++\notepad++.exe`
+  2. `C:\Program Files (x86)\Notepad++\notepad++.exe`
+  3. `notepad++.exe` (Fallback lookup via the folders of the Windows *PATH* environment variable)
 * `openInNpp.multiInst` : Open a separate instance of Notepad++ for each command execution
 
 ## Known Issues
@@ -31,6 +31,6 @@ The following settings are provided:
 
 ## Release Notes
 
-### 0.0.1
+### 0.0.3
 
 Initial release
