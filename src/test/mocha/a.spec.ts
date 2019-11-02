@@ -4,33 +4,42 @@ import * as ßß_assert from "assert";
 import * as ßß_path   from 'path';
 import * as ßß_impl from '../../implementation';
 
-describe('Test', () => {
+describe( 'Test', () => {
 
 it( 'it', async () => {
-  return;
+//return;
   const Executable = await ßß_impl.defaultNppExecutable();
-  const pid = await ßß_impl.spawnProcess( {Executable }, __filename );
-  console.log( pid );
-  ßß_assert.notEqual( pid, -1 );
-  ßß_assert.notEqual( pid, +0 );
+  const detached = false;
+  const ü_pid = await ßß_impl.spawnProcess( {executable: Executable, detached}, __filename );
+  console.log( ü_pid );
+  ßß_assert.notEqual( ü_pid, -1 );
+  ßß_assert.notEqual( ü_pid, +0 );
+  await ß_kill( ü_pid );
 });
 
-it( 'Exe', async () => {
-  const Executable = await ßß_impl.defaultNppExecutable();
+it( 'isExe', async () => {
 //await ßß_impl.isExe( Executable );
-  await ßß_impl.isExe( __filename );
-  await ßß_impl.isExe( 'C:\\zzz_Dev\\node_modules\\open-in-npp\\.gitignore' );
+  await ß_isExe( __filename                                          , false );
+  await ß_isExe( 'C:\\zzz_Dev\\node_modules\\open-in-npp\\.gitignore', false );
+  await ß_isExe( await ßß_impl.defaultNppExecutable()                , true  );
 });
 
 });
 
-/*
-    //ßß_path.resolve( __dirname, '' )
-//const Executable = ßß_testApi.defaultExe();
-//ßß_testApi.spawn( {Executable, multiInst: false }, __filename );
-  console.log( exe );
-{
-  detached: true,
-  stdio: 'ignore'
+async function ß_isExe( ü_fileName:string, ü_isExe:boolean ) {
+  const ü_actual = await ßß_impl.isExe( ü_fileName );
+  ßß_assert.equal( ü_actual, ü_isExe );
 }
+
+async function ß_kill( ü_pid:number ):Promise<void> {
+  return new Promise( (ü_resolve,ü_reject) => {
+    setTimeout( () => {
+      process.kill( ü_pid );
+      ü_resolve();
+    }, 1000 );
+  });
+}
+
+//==============================================================================
+/*
 */

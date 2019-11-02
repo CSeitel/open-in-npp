@@ -7,22 +7,28 @@ https://phrase.com/blog/posts/step-step-guide-javascript-localization/
 */
 import * as ßß_vsCode from 'vscode';
 import * as ßß_fs     from 'fs'    ;
+import { i18n    as ßß_i18n,
+         textIds as ßß_text }    from './i18n';
+//------------------------------------------------------------------------------
 import { IConfig
        , isExe
        , defaultNppExecutable
        , spawnProcess } from './implementation';
+//==============================================================================
   const ß_IDs = {
     Extension : 'extension.openInNpp' // package.json
   , Executable: 'openInNpp.Executable'
   , multiInst : 'openInNpp.multiInst'
   };
+  let ß_previousExecutable:string | undefined ;
 //==============================================================================
 
 export function activate(ü_extContext: ßß_vsCode.ExtensionContext) {
 
-  const disposable = ßß_vsCode.commands.registerCommand( ß_IDs.Extension, ß_executeCommand );
+  const ü_disposable = ßß_vsCode.commands.registerCommand( ß_IDs.Extension, ß_executeCommand );
+  ü_extContext.subscriptions.push( ü_disposable );
 
-  ü_extContext.subscriptions.push( disposable );
+//const ü_nls = process.env.VSCODE_NLS_CONFIG || '{}'; const ü_config = JSON.parse( ü_nls );
 }
 
 export function deactivate() {}
@@ -30,18 +36,24 @@ export function deactivate() {}
 //==============================================================================
 
 async function ß_getConfig():Promise<IConfig> {
-  const ü_config = ßß_vsCode.workspace.getConfiguration();
 //
-   let ü_exeName:string = ü_config.get( ß_IDs.Executable ) || '';
-  if ( ü_exeName.length === 0 ) {
-       ü_exeName = await defaultNppExecutable();
-  } else if ( ! await isExe( ü_exeName ) ) {
-    const msg = `Notepad++ executable not found: ${ ü_exeName }`;
-    throw new Error( msg );
+  const ü_config = ßß_vsCode.workspace.getConfiguration();
+  let ü_exeName:string = ü_config.get( ß_IDs.Executable ) || '';
+  const ü_change = ß_previousExecutable !== ü_exeName;
+//
+  if ( ü_exeName.length === 0 ) { // default
+    ü_exeName = ü_change
+              ? await defaultNppExecutable()
+              : <string> ß_previousExecutable
+              ;
+  } else if ( ü_change
+           && ! await isExe( ü_exeName ) ) {
+    throw new Error( ßß_i18n( ßß_text.exe_not_found, ü_exeName ) );
   }
 //
-  return { Executable: ü_exeName
+  return { executable: ß_previousExecutable = ü_exeName
          , multiInst: <boolean> ü_config.get( ß_IDs.multiInst )
+         , detached: true
          };
 }
 
@@ -51,8 +63,7 @@ async function ß_executeCommand():Promise<number> {
 //
   const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
   if ( ü_activeEditor === undefined ) {
-    const msg = 'No Active File';
-    ßß_vsCode.window.showInformationMessage( msg );
+    ßß_vsCode.window.showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
     return -1;
   }
   const ü_fileName = ü_activeEditor.document.fileName;
@@ -66,8 +77,12 @@ async function ß_executeCommand():Promise<number> {
   }
 //
   return spawnProcess( ü_config, ü_fileName ).catch( eX => {
-    const msg = `Exe_ ${ ü_config.Executable } Error ${ eX.message }`;
-    ßß_vsCode.window.showErrorMessage( msg );
+    console.error( eX );
+    switch ( eX.code ) {
+      case 'UNKNOWN': ßß_vsCode.window.showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ü_config.executable             ) ); break;
+      default       : ßß_vsCode.window.showErrorMessage( ßß_i18n( ßß_text.exe_error    , ü_config.executable, eX.message ) );
+    }
+    ß_previousExecutable = undefined; // store failure
     return -1;
   });
 //

@@ -6,15 +6,15 @@ export function run(): Promise<void> {
 // Create the mocha test
   const ü_mocha = new Mocha({
     ui: 'tdd',
+    timeout: 7000
   });
   ü_mocha.useColors( true );
 
   const ü_testsRoot = ßß_path.resolve( __dirname, '..' );
 
-  return new Promise(
-(resolve,reject) => {
-  ßß_glob( '**/**.test.js', { cwd: ü_testsRoot }, (err, files) => {
-    if (err) { return reject(err); }
+  return new Promise( (resolve,reject) => {
+    ßß_glob( '**/**.test.js', { cwd: ü_testsRoot }, (err, files) => {
+      if (err) { return reject(err); }
 
 // Add files to the test suite
   files.forEach( fileName => ü_mocha.addFile( ßß_path.resolve( ü_testsRoot, fileName ) ) );
