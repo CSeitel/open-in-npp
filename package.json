@@ -6,7 +6,7 @@
   "publisher": "CSeitel",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CSeitel/open-in-npp"
+    "url": "git+https://github.com/CSeitel/open-in-npp"
   },
   "bugs": {
     "url": "https://github.com/CSeitel/open-in-npp/issues"
