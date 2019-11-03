@@ -2,7 +2,7 @@
   "name": "open-in-npp",
   "displayName": "Open In Notepad++",
   "description": "Visual Studio Code Extension: Open the active file in Notepad++",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "CSeitel",
   "repository": {
     "type": "git",

@@ -4,7 +4,7 @@
 
 The command palette is enriched by an additional command for opening the active file with [Notepad++](https://notepad-plus-plus.org/).
 
-![](images/VSC.png)
+![](https://user-images.githubusercontent.com/43964178/68082571-cb03ab00-fe1e-11e9-8727-14cf950e0503.PNG)
 
 ## Keyboard Shortcut
 A keyboard shortcut `Ctrl+K Ctrl+N` is set for triggering this command.
@@ -31,6 +31,6 @@ The following settings are provided:
 
 ## Release Notes
 
-### 0.0.3
+### 0.0.4
 
 This is the initial release.
