@@ -10,7 +10,8 @@ it( 'it', async () => {
 //return;
   const Executable = await ßß_impl.defaultNppExecutable();
   const detached = false;
-  const ü_pid = await ßß_impl.spawnProcess( {executable: Executable, detached}, __filename );
+  const lineNumber = 0;
+  const ü_pid = await ßß_impl.spawnProcess( {executable: Executable, detached, lineNumber}, __filename );
   console.log( ü_pid );
   ßß_assert.notEqual( ü_pid, -1 );
   ßß_assert.notEqual( ü_pid, +0 );

@@ -1,9 +1,4 @@
 /*
-http://code.visualstudio.com/docs/languages/markdown
-https://help.github.com/articles/markdown-basics/
-https://dev.azure.com/cseitel/
-https://code.visualstudio.com/api/get-started/your-first-extension
-https://phrase.com/blog/posts/step-step-guide-javascript-localization/
 */
 import * as ßß_vsCode from 'vscode';
 import * as ßß_fs     from 'fs'    ;
@@ -54,6 +49,7 @@ async function ß_getConfig():Promise<IConfig> {
   return { executable: ß_previousExecutable = ü_exeName
          , multiInst: <boolean> ü_config.get( ß_IDs.multiInst )
          , detached: true
+         , lineNumber: 0
          };
 }
 
@@ -74,6 +70,11 @@ async function ß_executeCommand():Promise<number> {
   } catch ( eX ) {
     ßß_vsCode.window.showErrorMessage( eX.message );
     return -1;
+  }
+//
+  if ( ü_activeEditor.selection.isEmpty ) {
+    ü_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
+  //console.log( ü_config.lineNumber );
   }
 //
   return spawnProcess( ü_config, ü_fileName ).catch( eX => {

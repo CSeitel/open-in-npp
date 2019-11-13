@@ -12,7 +12,8 @@ import * as ßß_path from 'path';
   , x64_64bit: "C:\\Program Files\\Notepad++\\notepad++.exe"
   , path_env: "notepad++.exe"
   };
-  const ß_arg_multiInst = '-multiInst';
+  const ß_arg_multiInst  = '-multiInst';
+  const ß_arg_lineNumber = '-n';
   const ß_spawnOpts:ßß_cp.SpawnOptions =
   { stdio: 'ignore'
   , detached: false
@@ -24,6 +25,7 @@ export interface IConfig {
   executable: string;
   multiInst?: boolean;
   detached: boolean;
+  lineNumber: number;
 }
 
 //------------------------------------------------------------------------------
@@ -59,8 +61,9 @@ export async function defaultNppExecutable():Promise<string> {
 
 export async function spawnProcess( ü_config:IConfig, ü_fileName:string ) {
 //
-                          let ü_args = [ ü_fileName ];
-  if ( ü_config.multiInst ) { ü_args.push( ß_arg_multiInst ); }
+                               let ü_args = [ ü_fileName ];
+  if ( ü_config.multiInst      ) { ü_args.push( ß_arg_multiInst                        ); }
+  if ( ü_config.lineNumber > 0 ) { ü_args.push( ß_arg_lineNumber + ü_config.lineNumber ); }
 //
   ß_spawnOpts.detached = ü_config.detached;
   return new Promise<number>( (ü_resolve,ü_reject) => {
