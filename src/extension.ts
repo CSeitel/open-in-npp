@@ -14,6 +14,7 @@ import { IConfig
     Extension : 'extension.openInNpp' // package.json
   , Executable: 'openInNpp.Executable'
   , multiInst : 'openInNpp.multiInst'
+  , preserveCursor: 'openInNpp.preserveCursorPosition'
   };
   let ß_previousExecutable:string | undefined ;
 //==============================================================================
@@ -49,7 +50,7 @@ async function ß_getConfig():Promise<IConfig> {
   return { executable: ß_previousExecutable = ü_exeName
          , multiInst: <boolean> ü_config.get( ß_IDs.multiInst )
          , detached: true
-         , lineNumber: 0
+         , lineNumber: <boolean> ü_config.get( ß_IDs.preserveCursor ) ? 0 : -1
          };
 }
 
@@ -72,7 +73,8 @@ async function ß_executeCommand():Promise<number> {
     return -1;
   }
 //
-  if ( ü_activeEditor.selection.isEmpty ) {
+  if ( ü_config.lineNumber > -1
+    && ü_activeEditor.selection.isEmpty ) {
     ü_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
   //console.log( ü_config.lineNumber );
   }

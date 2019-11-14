@@ -1,9 +1,9 @@
 # Change Log
 
-All notable changes to the "open-in-npp" extension will be documented in this file.
+## [0.0.4] - 2019-11-03
+This is the initial release. 
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+## [0.0.5] - 2019-11-14
+### Added
+- configurable feature: `Preserve Cursor Position`
+- editor context menu entry: `Open in Notepad++`

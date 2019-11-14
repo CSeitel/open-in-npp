@@ -1,8 +1,8 @@
 {
   "name": "open-in-npp",
-  "displayName": "Open In Notepad++",
+  "displayName": "Open in Notepad++",
   "description": "Visual Studio Code Extension: Open the active file in Notepad++",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "CSeitel",
   "repository": {
     "type": "git",
@@ -48,10 +48,23 @@
         , "default": false
         , "description": "Open a separate instance of Notepad++ for each command execution"
         }
+      , "openInNpp.preserveCursorPosition": {
+          "type": "boolean"
+        , "default": true
+        , "description": "Let Notepad++ preserve the cursor position of the VS Code editor"
+        }
       }
     }
+  , "menus": {
+    "editor/context": [
+        {
+          "command": "extension.openInNpp"
+        , "group": "openInNpp@1"
+        }
+      ]
+    }
   }
-, "scripts": {
+  , "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",

@@ -6,8 +6,11 @@ The command palette of [Visual Studio Code](https://code.visualstudio.com/) is e
 
 ![](https://user-images.githubusercontent.com/43964178/68082571-cb03ab00-fe1e-11e9-8727-14cf950e0503.PNG)
 
-## Keyboard Shortcut
+### Keyboard Shortcut
 A keyboard shortcut `Ctrl+K Ctrl+N` is set for triggering this command.
+
+### Context menu
+The context menu of the VS Code editor is extended correspondingly by an additional entry.
 
 ## Requirements
 
@@ -21,18 +24,12 @@ The following settings are provided:
   1. `C:\Program Files\Notepad++\notepad++.exe`
   2. `C:\Program Files (x86)\Notepad++\notepad++.exe`
   3. `notepad++.exe` (fallback lookup via the folders of the Windows *PATH* environment variable)
-* `openInNpp.multiInst`: Open a separate instance of Notepad++ for each command execution
+* `openInNpp.multiInst`: Open a separate instance of Notepad++ for each command execution (default: *false*)
+* `openInNpp.preserveCursorPosition`: Let Notepad++ preserve the cursor position of the VS Code editor (default: *true*); if set to *false*  Notepad++ will position the cursor on the first line
 
 ## Known Issues
 
 ... not yet; tested on Windows 10 64bit only
-
------------------------------------------------------------------------------------------------------------
-
-## Release Notes
-
-### 0.0.4
-This is the initial release.
 
 -----------------------------------------------------------------------------------------------------------
 ### Source Code
