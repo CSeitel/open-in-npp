@@ -62,12 +62,12 @@
       , "openInNpp.extendExplorerContextMenu": {
           "type": "boolean"
         , "default": true
-        , "description": "explorerContextMenu"
+        , "description": "Add 'Open in Notepad++' to the context menu of the VS Code explorer"
         }
       , "openInNpp.extendEditorContextMenu": {
           "type": "boolean"
         , "default": true
-        , "description": "editorContextMenu"
+        , "description": "Add 'Open in Notepad++' to the context menu of the VS Code editor"
         }
       }
     }

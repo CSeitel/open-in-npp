@@ -73,22 +73,30 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
   }
 //
   let ü_fileName:string;
-  if ( ü_fileUri === undefined ) {
-    const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
-    if ( ü_activeEditor === undefined ) {
+  const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
+  if ( ü_activeEditor === undefined ) {
+    if ( ü_fileUri === undefined ) {
       ßß_vsCode.window.showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
       return -1;
+    } else {
+      ü_fileName = ü_fileUri.fsPath;
     }
-  //
-    if ( ü_config.lineNumber > -1
-      && ü_activeEditor.selection.isEmpty ) {
-      ü_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
-    }
-    ü_fileName = ü_activeEditor.document.fileName;
   } else {
-    ü_fileName = ü_fileUri.fsPath;
+    if ( ü_fileUri === undefined ) {
+      ü_fileName = ü_activeEditor.document.fileName;
+    } else {
+      ü_fileName = ü_fileUri.fsPath;
+    }
+    if ( ü_config.lineNumber > -1
+      && ü_activeEditor.selection.isEmpty
+      && ü_activeEditor.document.fileName === ü_fileName
+       ) {
+      ü_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
+      if(ß_trc){ß_trc( ü_config.lineNumber );}
+    }
   }
-    if(ß_trc){ß_trc( ü_fileName );}
+//
+  if(ß_trc){ß_trc( ü_fileName );}
 //
   return spawnProcess( ü_config, ü_fileName ).catch( eX => {
     if(ß_trc){ß_trc( eX );}

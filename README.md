@@ -11,6 +11,7 @@ A keyboard shortcut `Ctrl+K Ctrl+N` is set for triggering this command.
 
 ### Context menus
 The context menus of the VS Code editor and explorer are extended correspondingly by an additional entry.
+This can be configured via the extension settings (see below).
 
 ## Requirements
 
@@ -31,12 +32,13 @@ The following settings are provided:
 
 ## Known Issues
 
-... not yet; tested on Windows 10 64bit only
+* *Open in Notepad++* is shown in the context menu of the explorer for directories (bug or feature ?)
+[Please report @](https://github.com/CSeitel/open-in-npp/issues)
 
 -----------------------------------------------------------------------------------------------------------
 
 ## Icon
-[Icons8](https://icons8.com/)
+Sponsored by [Icons8](https://icons8.com/)
 
 -----------------------------------------------------------------------------------------------------------
 ### Source Code
