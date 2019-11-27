@@ -8,5 +8,7 @@ https://dev.azure.com/cseitel/
 https://code.visualstudio.com/api/get-started/your-first-extension
 https://phrase.com/blog/posts/step-step-guide-javascript-localization/
 https://sumtips.com/how-to/open-file-at-a-specific-line-number-in-notepad/
-
+https://stackoverflow.com/questions/46714353/how-to-customize-context-menu-in-visual-studio-code
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+        , "when": "resourceExtname == .js && config.openInNpp.explorerContextMenu"
+        , "when": "resourceLangId == javascript"

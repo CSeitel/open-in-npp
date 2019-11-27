@@ -7,3 +7,8 @@ This is the initial release.
 ### Added
 - configurable feature: `Preserve Cursor Position`
 - editor context menu entry: `Open in Notepad++`
+
+## [0.1.0] - 2019-11-27
+### Added
+- explorer context menu entry: `Open in Notepad++`
+- configuration options to remove the additional context menu entries

@@ -1,12 +1,12 @@
 {
   "name": "open-in-npp",
   "displayName": "Open in Notepad++",
-  "description": "Visual Studio Code Extension: Open the active file in Notepad++",
+  "description": "Open the active file in Notepad++",
   "version": "0.0.5",
   "publisher": "CSeitel",
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CSeitel/open-in-npp"
+    "type": "git"
+  , "url": "https://github.com/CSeitel/open-in-npp"
   },
   "bugs": {
     "url": "https://github.com/CSeitel/open-in-npp/issues"
@@ -15,18 +15,24 @@
     "vscode": "^1.38.0"
   },
   "license": "MIT",
+  "icon": "images/icons8-notepad++-144.png",
   "categories": [
     "Other"
   ],
   "activationEvents": [
     "onCommand:extension.openInNpp"
-  ],
-  "main": "./out/extension.js",
-  "contributes": {
+  , "onCommand:extension.openInNppX"
+  ]
+, "main": "./out/extension.js"
+, "contributes": {
     "commands": [
       {
         "command": "extension.openInNpp"
       , "title": "Open Active File in Notepad++"
+      }
+    , {
+        "command": "extension.openInNppX"
+      , "title": "Open in Notepad++"
       }
     ]
     , "keybindings": [
@@ -36,7 +42,7 @@
       }
     ]
   , "configuration": {
-      "title": "Notepad++",
+      "title": "Open in Notepad++",
       "properties": {
         "openInNpp.Executable": {
           "type": "string"
@@ -53,13 +59,29 @@
         , "default": true
         , "description": "Let Notepad++ preserve the cursor position of the VS Code editor"
         }
+      , "openInNpp.extendExplorerContextMenu": {
+          "type": "boolean"
+        , "default": true
+        , "description": "explorerContextMenu"
+        }
+      , "openInNpp.extendEditorContextMenu": {
+          "type": "boolean"
+        , "default": true
+        , "description": "editorContextMenu"
+        }
       }
     }
   , "menus": {
-    "editor/context": [
+      "editor/context": [
         {
-          "command": "extension.openInNpp"
+          "command": "extension.openInNppX"
+        , "when": "config.openInNpp.extendEditorContextMenu"
         , "group": "openInNpp@1"
+        }
+      ]
+    , "explorer/context": [
+        { "command": "extension.openInNppX"
+        , "when": "config.openInNpp.extendExplorerContextMenu"
         }
       ]
     }

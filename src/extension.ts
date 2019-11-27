@@ -1,30 +1,36 @@
 /*
 */
 import * as ßß_vsCode from 'vscode';
-import * as ßß_fs     from 'fs'    ;
 import { i18n    as ßß_i18n,
          textIds as ßß_text }    from './i18n';
 //------------------------------------------------------------------------------
+import { ß_trc } from './trace';
 import { IConfig
        , isExe
        , defaultNppExecutable
        , spawnProcess } from './implementation';
 //==============================================================================
   const ß_IDs = {
-    Extension : 'extension.openInNpp' // package.json
-  , Executable: 'openInNpp.Executable'
-  , multiInst : 'openInNpp.multiInst'
+    openInNppActive : 'extension.openInNpp'
+  , openInNppCurrent: 'extension.openInNppX'
+  , Executable    : 'openInNpp.Executable'
+  , multiInst     : 'openInNpp.multiInst'
   , preserveCursor: 'openInNpp.preserveCursorPosition'
   };
   let ß_previousExecutable:string | undefined ;
 //==============================================================================
 
-export function activate(ü_extContext: ßß_vsCode.ExtensionContext) {
+export function activate( ü_extContext: ßß_vsCode.ExtensionContext ) {
 
-  const ü_disposable = ßß_vsCode.commands.registerCommand( ß_IDs.Extension, ß_executeCommand );
-  ü_extContext.subscriptions.push( ü_disposable );
+  let ü_disposable:ßß_vsCode.Disposable;
+  ü_extContext.subscriptions.push(
+                   ßß_vsCode.commands.registerCommand( ß_IDs.openInNppActive , ß_executeCommand )
+  , ü_disposable = ßß_vsCode.commands.registerCommand( ß_IDs.openInNppCurrent, ß_executeCommand )
+  );
 
+//ü_disposable.dispose();
 //const ü_nls = process.env.VSCODE_NLS_CONFIG || '{}'; const ü_config = JSON.parse( ü_nls );
+//const ü_disposabl_ = ßß_vsCode.commands.registerTextEditorCommand( ß_IDs.openInNppActive, ß_a );
 }
 
 export function deactivate() {}
@@ -56,14 +62,7 @@ async function ß_getConfig():Promise<IConfig> {
 
 //------------------------------------------------------------------------------
 
-async function ß_executeCommand():Promise<number> {
-//
-  const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
-  if ( ü_activeEditor === undefined ) {
-    ßß_vsCode.window.showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
-    return -1;
-  }
-  const ü_fileName = ü_activeEditor.document.fileName;
+async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promise<number> {
 //
   let ü_config:IConfig;
   try {
@@ -73,14 +72,26 @@ async function ß_executeCommand():Promise<number> {
     return -1;
   }
 //
-  if ( ü_config.lineNumber > -1
-    && ü_activeEditor.selection.isEmpty ) {
-    ü_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
-  //console.log( ü_config.lineNumber );
+  let ü_fileName:string;
+  if ( ü_fileUri === undefined ) {
+    const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
+    if ( ü_activeEditor === undefined ) {
+      ßß_vsCode.window.showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
+      return -1;
+    }
+  //
+    if ( ü_config.lineNumber > -1
+      && ü_activeEditor.selection.isEmpty ) {
+      ü_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
+    }
+    ü_fileName = ü_activeEditor.document.fileName;
+  } else {
+    ü_fileName = ü_fileUri.fsPath;
   }
+    if(ß_trc){ß_trc( ü_fileName );}
 //
   return spawnProcess( ü_config, ü_fileName ).catch( eX => {
-    console.error( eX );
+    if(ß_trc){ß_trc( eX );}
     switch ( eX.code ) {
       case 'UNKNOWN': ßß_vsCode.window.showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ü_config.executable             ) ); break;
       default       : ßß_vsCode.window.showErrorMessage( ßß_i18n( ßß_text.exe_error    , ü_config.executable, eX.message ) );
@@ -89,6 +100,25 @@ async function ß_executeCommand():Promise<number> {
     return -1;
   });
 //
+}
+
+//==============================================================================
+
+async function ß_a( ü_editor: ßß_vsCode.TextEditor, ü_edit: ßß_vsCode.TextEditorEdit ) {
+  const ü_selection = (() => {
+  if ( ü_editor.selection.end.isAfter( ü_editor.selection.start ) ) {
+                return ü_editor.selection;
+  } else {
+    const ü_lastLine = ü_editor.document.lineAt(ü_editor.document.lineCount - 1);
+    return new ßß_vsCode.Selection(
+             new ßß_vsCode.Position( 0, 0 )
+           , new ßß_vsCode.Position( ü_lastLine.lineNumber, ü_lastLine.text.length )
+                );
+  }
+        })();
+  return ü_editor.edit( (builder) => {
+            builder.replace(ü_selection, ü_editor.document.getText(ü_selection));
+        });
 }
 
 //==============================================================================

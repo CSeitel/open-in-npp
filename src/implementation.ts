@@ -44,8 +44,8 @@ export async function isExe( ü_path:string ):Promise<boolean> {
   const ü_ext = ßß_path.extname( ü_path ).toLocaleLowerCase();
   if ( ! ß_exe_exts.includes( ü_ext ) ) { return false; }
 //
-//console.log( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
-//console.log( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
+//ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
+//ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
   return true;
 }
 
