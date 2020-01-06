@@ -11,7 +11,7 @@ it( 'it', async () => {
   const Executable = await ßß_impl.defaultNppExecutable();
   const detached = false;
   const lineNumber = 0;
-  const ü_pid = await ßß_impl.spawnProcess( {executable: Executable, detached, lineNumber}, __filename );
+  const ü_pid = await ßß_impl.spawnProcess( {executable: Executable, detached, lineNumber, preserveCursor:false, multiInst:false }, __filename );
   console.log( ü_pid );
   ßß_assert.notEqual( ü_pid, -1 );
   ßß_assert.notEqual( ü_pid, +0 );
@@ -28,8 +28,6 @@ it( 'isExe', async () => {
 });
 
 async function ß_isExe( ü_fileName:string, ü_isExe:boolean ) {
-  const ü_actual = await ßß_impl.isExe( ü_fileName );
-  ßß_assert.equal( ü_actual, ü_isExe );
 }
 
 async function ß_kill( ü_pid:number ):Promise<void> {
@@ -43,4 +41,6 @@ async function ß_kill( ü_pid:number ):Promise<void> {
 
 //==============================================================================
 /*
+  const ü_actual = await ßß_impl.isExe( ü_fileName );
+  ßß_assert.equal( ü_actual, ü_isExe );
 */

@@ -1,0 +1,26 @@
+{
+  "defaults": {
+  }
+, "nodes": [
+    { "label": "Source-Code"
+    , "baseFolder": "src"
+    , "baseFolderIgnore": "test"
+    , "siblingFolder": "../../out/test/"
+    }
+  , { "label": "Test-Code"
+    , "baseFolder": "src/test"
+    , "siblingFolder": "../../out/test/"
+    }
+  , { "label": "Config"
+    , "baseFolderPattern": ".vscode"
+    , "filePattern": "*.json"
+    , "fileIgnore": "package-lock.json"
+    }
+
+  , { "prependHeader": true
+    , "label": "any-tree"
+    ,    "baseFolder": "../any-tree/src"
+    , "siblingFolder": "../open-in-npp/src"
+    }
+  ]
+}

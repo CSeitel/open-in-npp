@@ -2,10 +2,9 @@
 https://www.linux.com/tutorials/understanding-linux-file-permissions/
 https://nodejs.org/api/child_process.html#child_process_event_error
 */
-import * as ßß_fs   from 'fs';
-import * as ßß_cp   from 'child_process';
-import * as ßß_util from 'util';
-import * as ßß_path from 'path';
+  import * as ßß_cp from 'child_process';
+  import { isExe
+         } from "./lib/any";
 //==============================================================================
   const ß_exe_path = {
     x86_32bit: "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
@@ -18,36 +17,17 @@ import * as ßß_path from 'path';
   { stdio: 'ignore'
   , detached: false
   };
-  const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
-//==============================================================================
-
-export interface IConfig {
-  executable: string;
-  multiInst?: boolean;
-  detached: boolean;
-  lineNumber: number;
-}
 
 //------------------------------------------------------------------------------
-
-export async function isExe( ü_path:string ):Promise<boolean> {
-  const promiseStat = ßß_util.promisify( ßß_fs.stat );
-//
-  let ü_stats: ßß_fs.Stats;
-  try {
-    ü_stats = await promiseStat( ü_path );
-  } catch ( eX ) {
-    return false;
-  }
-  if ( ü_stats.isDirectory() ) { return false; }
-//
-  const ü_ext = ßß_path.extname( ü_path ).toLocaleLowerCase();
-  if ( ! ß_exe_exts.includes( ü_ext ) ) { return false; }
-//
-//ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
-//ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
-  return true;
+export interface IConfig {
+  executable: string
+  detached  : boolean
+  multiInst : boolean
+  preserveCursor : boolean
+  lineNumber: number
 }
+
+//==============================================================================
 
 //------------------------------------------------------------------------------
 

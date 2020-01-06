@@ -1,4 +1,4 @@
-# open-in-npp (Notepad++)
+# Open in Notepad++
 
 ## Features
 

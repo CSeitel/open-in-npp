@@ -1,14 +1,24 @@
 /*
 */
-import * as ßß_vsCode from 'vscode';
-import { i18n    as ßß_i18n,
-         textIds as ßß_text }    from './i18n';
+  import * as ßß_vsCode from 'vscode';
+  import { i18n    as ßß_i18n
+         , textIds as ßß_text
+         } from './i18n';
 //------------------------------------------------------------------------------
-import { ß_trc } from './trace';
-import { IConfig
-       , isExe
-       , defaultNppExecutable
-       , spawnProcess } from './implementation';
+  import { ß_trc } from './trace';
+  import { IConfig
+         , defaultNppExecutable
+         , spawnProcess
+         } from './implementation';
+  import { isExe
+         } from './lib/any';
+  import { ß_getConfig
+         , ß_parseConfig
+         } from './configHandler';
+//------------------------------------------------------------------------------
+  const ß_showInformationMessage = ßß_vsCode.window.showInformationMessage;
+  const ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage    ;
+  const ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage      ;
 //==============================================================================
   const ß_IDs = {
     openInNppActive : 'extension.openInNpp'
@@ -17,11 +27,20 @@ import { IConfig
   , multiInst     : 'openInNpp.multiInst'
   , preserveCursor: 'openInNpp.preserveCursorPosition'
   };
+//------------------------------------------------------------------------------
+  let ß_config:IConfig;
   let ß_previousExecutable:string | undefined ;
 //==============================================================================
 
-export function activate( ü_extContext: ßß_vsCode.ExtensionContext ) {
-
+export async function activate( ü_extContext: ßß_vsCode.ExtensionContext ) {
+  ß_config = ß_getConfig();
+  try {
+    await ß_parseConfig( ß_config );
+  } catch ( ü_eX ) {
+    ß_showErrorMessage( ü_eX.message );
+  }
+//
+//
   let ü_disposable:ßß_vsCode.Disposable;
   ü_extContext.subscriptions.push(
                    ßß_vsCode.commands.registerCommand( ß_IDs.openInNppActive , ß_executeCommand )
@@ -37,46 +56,14 @@ export function deactivate() {}
 
 //==============================================================================
 
-async function ß_getConfig():Promise<IConfig> {
-//
-  const ü_config = ßß_vsCode.workspace.getConfiguration();
-  let ü_exeName:string = ü_config.get( ß_IDs.Executable ) || '';
-  const ü_change = ß_previousExecutable !== ü_exeName;
-//
-  if ( ü_exeName.length === 0 ) { // default
-    ü_exeName = ü_change
-              ? await defaultNppExecutable()
-              : <string> ß_previousExecutable
-              ;
-  } else if ( ü_change
-           && ! await isExe( ü_exeName ) ) {
-    throw new Error( ßß_i18n( ßß_text.exe_not_found, ü_exeName ) );
-  }
-//
-  return { executable: ß_previousExecutable = ü_exeName
-         , multiInst: <boolean> ü_config.get( ß_IDs.multiInst )
-         , detached: true
-         , lineNumber: <boolean> ü_config.get( ß_IDs.preserveCursor ) ? 0 : -1
-         };
-}
-
-//------------------------------------------------------------------------------
-
 async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promise<number> {
-//
-  let ü_config:IConfig;
-  try {
-    ü_config = await ß_getConfig();
-  } catch ( eX ) {
-    ßß_vsCode.window.showErrorMessage( eX.message );
-    return -1;
-  }
+  let ü_pid = -1;
 //
   let ü_fileName:string;
   const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
   if ( ü_activeEditor === undefined ) {
     if ( ü_fileUri === undefined ) {
-      ßß_vsCode.window.showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
+      ß_showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
       return -1;
     } else {
       ü_fileName = ü_fileUri.fsPath;
@@ -87,27 +74,29 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
     } else {
       ü_fileName = ü_fileUri.fsPath;
     }
-    if ( ü_config.lineNumber > -1
+    if ( ß_config.preserveCursor
       && ü_activeEditor.selection.isEmpty
       && ü_activeEditor.document.fileName === ü_fileName
        ) {
-      ü_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
-      if(ß_trc){ß_trc( ü_config.lineNumber );}
+      ß_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
+      if(ß_trc){ß_trc( ß_config.lineNumber );}
     }
   }
 //
   if(ß_trc){ß_trc( ü_fileName );}
 //
-  return spawnProcess( ü_config, ü_fileName ).catch( eX => {
-    if(ß_trc){ß_trc( eX );}
-    switch ( eX.code ) {
-      case 'UNKNOWN': ßß_vsCode.window.showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ü_config.executable             ) ); break;
-      default       : ßß_vsCode.window.showErrorMessage( ßß_i18n( ßß_text.exe_error    , ü_config.executable, eX.message ) );
+  try {
+    ü_pid = await spawnProcess( ß_config, ü_fileName );
+  } catch ( ü_eX ) {
+    console.log( ü_eX );
+    switch ( ü_eX.code ) {
+      case 'UNKNOWN': ß_showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ß_config.executable             ) ); break;
+      default       : ß_showErrorMessage( ßß_i18n( ßß_text.exe_error    , ß_config.executable, ü_eX.message ) );
     }
     ß_previousExecutable = undefined; // store failure
-    return -1;
-  });
+  }
 //
+  return ü_pid;
 }
 
 //==============================================================================
