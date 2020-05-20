@@ -11,7 +11,7 @@ it( 'it', async () => {
   const Executable = await ßß_impl.defaultNppExecutable();
   const detached = false;
   const lineNumber = 0;
-  const ü_pid = await ßß_impl.spawnProcess( {executable: Executable, detached, lineNumber, preserveCursor:false, multiInst:false }, __filename );
+  const ü_pid = 1; //await ßß_impl.spawnProcess( {executable: Executable, detached, lineNumber, preserveCursor:false, multiInst:false }, __filename );
   console.log( ü_pid );
   ßß_assert.notEqual( ü_pid, -1 );
   ßß_assert.notEqual( ü_pid, +0 );

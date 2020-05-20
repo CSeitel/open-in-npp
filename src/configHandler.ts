@@ -1,48 +1,55 @@
 /*
 */
   import * as ßß_vsCode from 'vscode';
-  import { IConfig
-         } from './implementation';
-  import { isExe
-         } from './lib/any';
 //------------------------------------------------------------------------------
-  const ß_configIds =
-  { executable    : 'openInNpp.Executable'
-  , multiInst     : 'openInNpp.multiInst'
-  , preserveCursor: 'openInNpp.preserveCursorPosition'
-  };
-  const ß_exe_path = {
-    x86_32bit: "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
-  , x64_64bit: "C:\\Program Files\\Notepad++\\notepad++.exe"
-  , path_env : "notepad++.exe"
-  };
+  import { defaultNppExecutable
+         } from './implementation';
+//------------------------------------------------------------------------------
+  const enum EConfigurationIds
+    { executable    = 'openInNpp.Executable'
+    , multiInst     = 'openInNpp.multiInst'
+    , preserveCursor= 'openInNpp.preserveCursorPosition'
+    };
 //==============================================================================
 
-export function ß_getConfig():IConfig {
-                           const ü_configApi = ßß_vsCode.workspace.getConfiguration();
-  return { executable    : <string>  ü_configApi.get( ß_configIds.executable     )
-         , detached      : true
-         , multiInst     : <boolean> ü_configApi.get( ß_configIds.multiInst      )
-         , preserveCursor: <boolean> ü_configApi.get( ß_configIds.preserveCursor )
-         , lineNumber: -1
-         };
+class ConfigProxy {
+    private readonly _configApi = ßß_vsCode.workspace.getConfiguration();
+
+get executable    ():string  { 
+  const ü_a = this._configApi.get<string> ( EConfigurationIds.executable     )!;
+  return ü_a;
+}
+get multiInst     ():boolean { return this._configApi.get<boolean>( EConfigurationIds.multiInst      )!; }
+get preserveCursor():boolean { return this._configApi.get<boolean>( EConfigurationIds.preserveCursor )!; }
+
 }
 
-export async function ß_parseConfig( ü_config:IConfig ):Promise<void> {
+export class ConfigSnapshot extends ConfigProxy {
+static async getInstance():Promise<ConfigSnapshot> {
+    return new ConfigSnapshot().parseConfig();
+}
 //
-  if ( ü_config.executable.length === 0 ) { // default
-       ü_config.executable = await defaultNppExecutable();
-  } else {
-//    if ( ! await isExe( ü_config.executable ) ) {
-//  throw new Error( ßß_i18n( ßß_text.exe_not_found, ü_exeName ) );
-  }
+    executable:string
+  //multiInst      = super.multiInst      ;
+  //preserveCursor = super.preserveCursor ;
+    detached       = true;
+    lineNumber     = -1;
+//
+constructor() {
+    super();
+    this.executable = 'ddd'     ;
+}
+//
+async parseConfig():Promise<ConfigSnapshot> {
+    if ( this.executable.length === 0 ) { // default
+         this.executable = await defaultNppExecutable();
+    } else {
+  //    if ( ! await isExe( ü_config.executable ) ) {
+  //  throw new Error( ßß_i18n( ßß_text.exe_not_found, ü_exeName ) );
+    }
+    return this;
+}
 //
 }
 
-//------------------------------------------------------------------------------
-
-async function defaultNppExecutable():Promise<string> {
-       if ( await isExe( ß_exe_path.x64_64bit ) ) { return ß_exe_path.x64_64bit; }
-  else if ( await isExe( ß_exe_path.x86_32bit ) ) { return ß_exe_path.x86_32bit; }
-  else                                            { return ß_exe_path.path_env ; }
-}
+//==============================================================================

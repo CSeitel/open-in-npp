@@ -6,14 +6,11 @@
          } from './i18n';
 //------------------------------------------------------------------------------
   import { ß_trc } from './trace';
-  import { IConfig
-         , defaultNppExecutable
-         , spawnProcess
+  import { spawnProcess
          } from './implementation';
   import { isExe
          } from './lib/any';
-  import { ß_getConfig
-         , ß_parseConfig
+  import { ConfigSnapshot
          } from './configHandler';
 //------------------------------------------------------------------------------
   const ß_showInformationMessage = ßß_vsCode.window.showInformationMessage;
@@ -28,32 +25,38 @@
   , preserveCursor: 'openInNpp.preserveCursorPosition'
   };
 //------------------------------------------------------------------------------
-  let ß_config:IConfig;
+  let ß_config:ConfigSnapshot;
   let ß_previousExecutable:string | undefined ;
 //==============================================================================
 
 export async function activate( ü_extContext: ßß_vsCode.ExtensionContext ) {
-  ß_config = ß_getConfig();
-  try {
-    await ß_parseConfig( ß_config );
-  } catch ( ü_eX ) {
-    ß_showErrorMessage( ü_eX.message );
-  }
-//
-//
-  let ü_disposable:ßß_vsCode.Disposable;
-  ü_extContext.subscriptions.push(
-                   ßß_vsCode.commands.registerCommand( ß_IDs.openInNppActive , ß_executeCommand )
-  , ü_disposable = ßß_vsCode.commands.registerCommand( ß_IDs.openInNppCurrent, ß_executeCommand )
-  );
-
-//ü_disposable.dispose();
-//const ü_nls = process.env.VSCODE_NLS_CONFIG || '{}'; const ü_config = JSON.parse( ü_nls );
-//const ü_disposabl_ = ßß_vsCode.commands.registerTextEditorCommand( ß_IDs.openInNppActive, ß_a );
+  //
+     
+    try {
+      ß_config = await ConfigSnapshot.getInstance();
+    } catch ( ü_eX ) {
+      ß_showErrorMessage( ü_eX.message );
+    }
+  //
+    let ü_disposable:ßß_vsCode.Disposable;
+    ü_extContext.subscriptions.push(
+                     ßß_vsCode.commands.registerCommand( ß_IDs.openInNppActive , ß_executeCommand )
+    , ü_disposable = ßß_vsCode.commands.registerCommand( ß_IDs.openInNppCurrent, ß_executeCommand )
+    );
+  //
+    ßß_vsCode.workspace.onDidChangeConfiguration( ß_updateConfig );
+  
 }
 
 export function deactivate() {}
 
+
+function ß_updateConfig( ü_change:ßß_vsCode.ConfigurationChangeEvent ) {
+    if ( ü_change.affectsConfiguration( 'openInNpp' ) ) {
+      console.log( 'config' );
+      ß_config = new ConfigSnapshot();
+    }
+}
 //==============================================================================
 
 async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promise<number> {
@@ -119,5 +122,8 @@ async function ß_a( ü_editor: ßß_vsCode.TextEditor, ü_edit: ßß_vsCode.Tex
 }
 
 //==============================================================================
+  //ü_disposable.dispose();
+  //const ü_nls = process.env.VSCODE_NLS_CONFIG || '{}'; const ü_config = JSON.parse( ü_nls );
+  //const ü_disposabl_ = ßß_vsCode.commands.registerTextEditorCommand( ß_IDs.openInNppActive, ß_a );
 /*
 */

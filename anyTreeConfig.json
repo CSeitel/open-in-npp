@@ -1,26 +1,31 @@
 {
-  "defaults": {
+  "treeTemplate": {
   }
-, "nodes": [
+, "trees": [
     { "label": "Source-Code"
     , "baseFolder": "src"
-    , "baseFolderIgnore": "test"
-    , "siblingFolder": "../../out/test/"
+    , "excludeBaseFolders": "test"
+    , "associatedFolder": "out"
     }
   , { "label": "Test-Code"
     , "baseFolder": "src/test"
-    , "siblingFolder": "../../out/test/"
+    , "associatedFolder": "out/test/"
     }
   , { "label": "Config"
     , "baseFolderPattern": ".vscode"
     , "filePattern": "*.json"
-    , "fileIgnore": "package-lock.json"
+    , "excludeFiles": "package-lock.json"
     }
 
   , { "prependHeader": true
     , "label": "any-tree"
     ,    "baseFolder": "../any-tree/src"
-    , "siblingFolder": "../open-in-npp/src"
+    , "associatedFolder": "../open-in-npp/src"
+    }
+  , { "prependHeader": false
+    , "label": "sap-logon"
+    , "baseFolder": "../sap-logon"
+    , "repository": "https://github.com/CSeitel/sap-logon"
     }
   ]
 }
