@@ -20,7 +20,7 @@ https://nodejs.org/api/child_process.html#child_process_event_error
     , columnNumber      = '-c'
     };
 //------------------------------------------------------------------------------
-export const CNaLineNumber = 0;
+  export const CNaLineNumber = 0;
 //==============================================================================
 
 export async function defaultNppExecutable():Promise<string> {
@@ -31,13 +31,16 @@ export async function defaultNppExecutable():Promise<string> {
 
 //------------------------------------------------------------------------------
 
-export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string ):Promise<number> {
+export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string, ü_files:string[] | undefined ):Promise<number> {
   //
-                                           const ü_args = ü_config.commandLineArguments;
+                                           const ü_args = [ ... ü_config.commandLineArguments ];
     if ( ü_config.multiInst                  ) { ü_args.push( ECLIParameters.multipleInstances                    ); }
-    if ( ü_config.lineNumber > CNaLineNumber ) { ü_args.push( ECLIParameters.lineNumber   + ü_config.  lineNumber );
+    if ( ü_config.lineNumber > CNaLineNumber ) { ü_args.push( ECLIParameters.  lineNumber + ü_config.  lineNumber );
                                                  ü_args.push( ECLIParameters.columnNumber + ü_config.columnNumber ); }
-                                                 ü_args.push( ü_fileName );
+    if ( ü_files === undefined               ) { ü_args.push(     ü_fileName ); }
+    else                                       { ü_args.push( ... ü_files    ); }
+  //
+    console.log( ü_args, process.cwd );
   //
     const ü_opts:ßß_cp.SpawnOptions =
       { stdio   : 'ignore'

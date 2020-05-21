@@ -50,10 +50,9 @@ export function deactivate() {}
 
 
 async function ß_updateConfig( ü_change:ßß_vsCode.ConfigurationChangeEvent ):Promise<void> {
-    if ( ü_change.affectsConfiguration( 'openInNpp' ) ) {
-      console.log( 'config' );
-    ß_config = await ConfigSnapshot.getInstance();
-    //ß_config = new ConfigSnapshot();
+    if ( ü_change.affectsConfiguration( EExtensionIds.prefix ) ) {
+      ß_config = await ConfigSnapshot.getInstance();
+    //console.log( ß_config );
     }
 }
 
@@ -66,6 +65,7 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
     const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
   //
     let ü_selection :ßß_vsCode.Selection | undefined
+    let ü_files     :string[]            | undefined
     let ü_fileName  :string
     if ( ü_fileUri === undefined ) {
 
@@ -76,18 +76,29 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
 
                                        ü_fileName  = ü_activeEditor.document.fileName;
       if ( ß_config.preserveCursor ) { ü_selection = ü_activeEditor.selection; }
-    } else {
-      const ü_isFolder = await isDirectory( ü_fileUri );
+    } else { //-----------------------------------------------------------------
                                        ü_fileName  = ü_fileUri.fsPath;
       if ( ß_config.preserveCursor
-        && ! ü_isFolder
-        && ü_activeEditor !== undefined 
+        && ü_activeEditor                   !== undefined
         && ü_activeEditor.document.fileName === ü_fileName
                                    ) { ü_selection = ü_activeEditor.selection; }
+      if ( ß_config.filesInFolderPattern.length > 0
+        && ü_selection === undefined
+        && await isDirectory( ü_fileUri )
+         ) {
+        const ü_glob = new ßß_vsCode.RelativePattern( ü_fileName, ß_config.filesInFolderPattern );
+        const ü_hits = await ßß_vsCode.workspace.findFiles( ü_glob );
+        ü_files = ü_hits.map( ü_fileUri => ü_fileUri.fsPath );
+        if ( ü_files.length === 0 ) {
+          ß_showInformationMessage( `No matches for "${ ß_config.filesInFolderPattern }" @ "${ ü_fileName }"` );
+        } else {
+          ß_showInformationMessage( `${ ü_files.length } matches for "${ ß_config.filesInFolderPattern }" @ "${ ü_fileName }"` );
+        }
+      }
     }
   //
     if ( ü_selection !== undefined
-       && ü_selection.isEmpty
+      && ü_selection.isEmpty
        ) { ß_config.  lineNumber = ü_selection.active.line      + 1;
            ß_config.columnNumber = ü_selection.active.character + 1; }
     else { ß_config.  lineNumber = CNaLineNumber;
@@ -98,7 +109,7 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
 //
   let ü_pid = -1;
   try {
-    ü_pid = await spawnProcess( ß_config, ü_fileName );
+    ü_pid = await spawnProcess( ß_config, ü_fileName, ü_files );
   } catch ( ü_eX ) {
     console.log( ü_eX );
     switch ( ü_eX.code ) {

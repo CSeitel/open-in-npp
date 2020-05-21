@@ -5,7 +5,6 @@
     }
   ],
   "settings": {
-    "openInNpp.Executable": ""
-  , "openInNpp.commandLineArguments": [ "-notabbar" ]
+    "openInNpp.commandLineArguments_": [ "-notabbar" ]
   }
 }

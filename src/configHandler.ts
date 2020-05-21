@@ -10,6 +10,7 @@
     , multiInst            = 'openInNpp.multiInst'
     , preserveCursor       = 'openInNpp.preserveCursorPosition'
     , commandLineArguments = 'openInNpp.commandLineArguments'
+    , filesInFolderPattern          = 'openInNpp.filesInFolderPattern'
     };
 //==============================================================================
 
@@ -19,9 +20,8 @@ class ConfigProxy {
 protected get _executable          ():string   { return this._configApi.get<string>       ( EConfigurationIds.executable           )!; }
 protected get _multiInst           ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.multiInst            )!; }
 protected get _preserveCursor      ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.preserveCursor       )!; }
-protected get _commandLineArguments():string[] { return this._configApi.get<Array<string>>( EConfigurationIds.commandLineArguments )!;
-}
-
+protected get _commandLineArguments():string[] { return this._configApi.get<Array<string>>( EConfigurationIds.commandLineArguments )!; }
+protected get _filesInFolderPattern         ():string   { return this._configApi.get<string>       ( EConfigurationIds.filesInFolderPattern          )!; }
 
 }
 
@@ -34,9 +34,10 @@ static async getInstance():Promise<ConfigSnapshot> {
     readonly multiInst            = super._multiInst      ;
     readonly preserveCursor       = super._preserveCursor ;
     readonly commandLineArguments = super._commandLineArguments ;
+    readonly filesInFolderPattern          = super._filesInFolderPattern    ;
     readonly detached             = true;
-    lineNumber   = -1;
-    columnNumber = -1;
+             lineNumber   = -1;
+             columnNumber = -1;
 //
 async parseConfig():Promise<ConfigSnapshot> {
     if ( this.executable.length === 0 ) { // default

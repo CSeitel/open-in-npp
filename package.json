@@ -2,7 +2,7 @@
   "name": "open-in-npp",
   "displayName": "Open in Notepad++",
   "description": "Open the active file in Notepad++",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "publisher": "CSeitel",
   "repository": {
     "type": "git"
@@ -19,8 +19,8 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:openInNpp.openSettings"
+  "activationEvents":
+  [ "onCommand:openInNpp.openSettings"
   , "onCommand:extension.openInNpp"
   , "onCommand:extension.openInNppX"
   ]
@@ -28,39 +28,40 @@
 , "contributes":
   { "commands":
     [ { "command": "openInNpp.openSettings"
-      , "title": "Open Settings Notepad++"
+      , "title"  : "Open Settings for `Open in Notepad++`"
       }
     , { "command": "extension.openInNpp"
-      , "title": "Open Active File in Notepad++"
+      , "title"  : "Open Active File in Notepad++"
       }
     , { "command": "extension.openInNppX"
-      , "title": "Open in Notepad++"
-      }
-    ]
-  , "keybindings": [
-      { "command": "extension.openInNpp"
-      , "key": "ctrl+k ctrl+n"
+      , "title"  : "Open in Notepad++"
       }
     ]
 
   , "menus":
     { "commandPalette":
       [ { "command": "extension.openInNppX"
-        , "when": "false"
+        , "when"   : "false"
         }
       ]
     , "editor/context":
       [ { "command": "extension.openInNppX"
-        , "when": "config.openInNpp.extendEditorContextMenu"
-        , "group": "openInNpp@1"
+        , "when"   : "config.openInNpp.extendEditorContextMenu"
+        , "group"  : "openInNpp@1"
         }
       ]
     , "explorer/context":
       [ { "command": "extension.openInNppX"
-        , "when": "config.openInNpp.extendExplorerContextMenu"
+        , "when"   : "config.openInNpp.extendExplorerContextMenu"
+        , "group"  : "openInNpp@1"
         }
       ]
     }
+  , "keybindings": [
+      { "command": "extension.openInNpp"
+      , "key"    : "ctrl+k ctrl+n"
+      }
+    ]
 
   , "configuration": {
       "title": "Open in Notepad++"
@@ -68,33 +69,38 @@
         "openInNpp.Executable":
         { "type"   : "string"
         , "default": ""
-        , "markdownDescription": "Specifies the path of the _Notepad++_ executable ([?](https://github.com/CSeitel/open-in-npp#extension-settings))"
+        , "markdownDescription": "Specifies the path of the _Notepad++_ executable ([more](https://github.com/CSeitel/open-in-npp#extension-settings))"
         }
       , "openInNpp.multiInst":
         { "type"   : "boolean"
         , "default": false
-        , "markdownDescription": "Open a separate instance of _Notepad++_ for each command execution"
+        , "markdownDescription": "Open a separate instance of _Notepad++_ for each command execution; corresponds to command line parameter [-multiInst](https://npp-user-manual.org/docs/command-prompt/)"
         }
       , "openInNpp.preserveCursorPosition":
         { "type"   : "boolean"
         , "default": true
-        , "markdownDescription": "Let _Notepad++_ preserve the cursor position of the _VS Code_ editor"
+        , "markdownDescription": "Let _Notepad++_ preserve the cursor position of the _VS-Code_ editor"
         }
       , "openInNpp.commandLineArguments":
-        { "type"   : "array"
-        , "markdownDescription": "Let _Notepad++_ [?](https://npp-user-manual.org/docs/command-prompt/)"
+        { "type": "array"
+        , "markdownDescription": "Pass additional arguments along to _Notepad++_; a comprehensive overview of the command line parameters of _Notepad++_ is given [here](https://npp-user-manual.org/docs/command-prompt/)"
         }
+      , "openInNpp.filesInFolderPattern":
+        { "type": "string"
+        , "markdownDescription": "Instead of passing a folder name to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and pass their names along to _Notepad++_"
+        }
+
       , "openInNpp.extendExplorerContextMenu":
         { "type"   : "boolean"
         , "default": true
-        , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS Code_ explorer"
+        , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS-Code_ explorer"
         }
       , "openInNpp.extendEditorContextMenu": {
           "type"   : "boolean"
         , "default": true
-        , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS Code_ editor"
+        , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS-Code_ editor"
         }
-        
+
       }
     }
 
@@ -107,7 +113,7 @@
   , "test": "node ./out/test/runTest.js"
   , "mocha": "mocha ./out/test/mocha/**/*.spec.js"
   , "vscode:package": "vsce package"
-  , "vscode:install": "code --install-extension any-tree-0.0.1.vsix"
+  , "vscode:install": "code --install-extension open-in-npp-0.1.5.vsix"
 
   },
   "devDependencies": {
