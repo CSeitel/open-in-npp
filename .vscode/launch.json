@@ -13,6 +13,7 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
+      , "${workspaceFolder}/src/test/suite/cliArguments/workspaces/Some.code-workspace"
       ],
       "outFiles": [
         "${workspaceFolder}/out/**/*.js"

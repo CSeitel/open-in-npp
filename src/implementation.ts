@@ -14,9 +14,13 @@ https://nodejs.org/api/child_process.html#child_process_event_error
     , x64_64bit = "C:\\Program Files\\Notepad++\\notepad++.exe"
     , path_env  = "notepad++.exe"
     };
-  const ß_arg_multiInst  = '-multiInst';
-  const ß_arg_lineNumber = '-n';
-
+  const enum ECLIParameters
+    { multipleInstances = '-multiInst'
+    ,   lineNumber      = '-n'
+    , columnNumber      = '-c'
+    };
+//------------------------------------------------------------------------------
+export const CNaLineNumber = 0;
 //==============================================================================
 
 export async function defaultNppExecutable():Promise<string> {
@@ -29,9 +33,11 @@ export async function defaultNppExecutable():Promise<string> {
 
 export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string ):Promise<number> {
   //
-                               const ü_args = [ ü_fileName ];
-    if ( ü_config.multiInst      ) { ü_args.push( ß_arg_multiInst                        ); }
-    if ( ü_config.lineNumber > 0 ) { ü_args.push( ß_arg_lineNumber + ü_config.lineNumber ); }
+                                           const ü_args = ü_config.commandLineArguments;
+    if ( ü_config.multiInst                  ) { ü_args.push( ECLIParameters.multipleInstances                    ); }
+    if ( ü_config.lineNumber > CNaLineNumber ) { ü_args.push( ECLIParameters.lineNumber   + ü_config.  lineNumber );
+                                                 ü_args.push( ECLIParameters.columnNumber + ü_config.columnNumber ); }
+                                                 ü_args.push( ü_fileName );
   //
     const ü_opts:ßß_cp.SpawnOptions =
       { stdio   : 'ignore'

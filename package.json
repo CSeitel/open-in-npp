@@ -20,13 +20,17 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.openInNpp"
+    "onCommand:openInNpp.openSettings"
+  , "onCommand:extension.openInNpp"
   , "onCommand:extension.openInNppX"
   ]
 , "main": "./out/extension.js"
 , "contributes":
   { "commands":
-    [ { "command": "extension.openInNpp"
+    [ { "command": "openInNpp.openSettings"
+      , "title": "Open Settings Notepad++"
+      }
+    , { "command": "extension.openInNpp"
       , "title": "Open Active File in Notepad++"
       }
     , { "command": "extension.openInNppX"
@@ -40,7 +44,12 @@
     ]
 
   , "menus":
-    { "editor/context":
+    { "commandPalette":
+      [ { "command": "extension.openInNppX"
+        , "when": "false"
+        }
+      ]
+    , "editor/context":
       [ { "command": "extension.openInNppX"
         , "when": "config.openInNpp.extendEditorContextMenu"
         , "group": "openInNpp@1"
@@ -56,31 +65,36 @@
   , "configuration": {
       "title": "Open in Notepad++"
     , "properties": {
-        "openInNpp.Executable": {
-          "type"   : "string"
+        "openInNpp.Executable":
+        { "type"   : "string"
         , "default": ""
-        , "description": "Specifies the path of the Notepad++ executable"
+        , "markdownDescription": "Specifies the path of the _Notepad++_ executable ([?](https://github.com/CSeitel/open-in-npp#extension-settings))"
         }
-      , "openInNpp.multiInst": {
-          "type"   : "boolean"
+      , "openInNpp.multiInst":
+        { "type"   : "boolean"
         , "default": false
-        , "description": "Open a separate instance of Notepad++ for each command execution"
+        , "markdownDescription": "Open a separate instance of _Notepad++_ for each command execution"
         }
-      , "openInNpp.preserveCursorPosition": {
-          "type"   : "boolean"
+      , "openInNpp.preserveCursorPosition":
+        { "type"   : "boolean"
         , "default": true
-        , "description": "Let Notepad++ preserve the cursor position of the VS Code editor"
+        , "markdownDescription": "Let _Notepad++_ preserve the cursor position of the _VS Code_ editor"
         }
-      , "openInNpp.extendExplorerContextMenu": {
-          "type"   : "boolean"
+      , "openInNpp.commandLineArguments":
+        { "type"   : "array"
+        , "markdownDescription": "Let _Notepad++_ [?](https://npp-user-manual.org/docs/command-prompt/)"
+        }
+      , "openInNpp.extendExplorerContextMenu":
+        { "type"   : "boolean"
         , "default": true
-        , "description": "Add 'Open in Notepad++' to the context menu of the VS Code explorer"
+        , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS Code_ explorer"
         }
       , "openInNpp.extendEditorContextMenu": {
           "type"   : "boolean"
         , "default": true
-        , "description": "Add 'Open in Notepad++' to the context menu of the VS Code editor"
+        , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS Code_ editor"
         }
+        
       }
     }
 

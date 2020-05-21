@@ -6,42 +6,40 @@
          } from './i18n';
 //------------------------------------------------------------------------------
   import { ß_trc } from './trace';
-  import { spawnProcess
+  import { CNaLineNumber
+         , spawnProcess
          } from './implementation';
-  import { isExe
-         } from './lib/any';
   import { ConfigSnapshot
          } from './configHandler';
 //------------------------------------------------------------------------------
   const ß_showInformationMessage = ßß_vsCode.window.showInformationMessage;
   const ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage    ;
   const ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage      ;
-//==============================================================================
-  const ß_IDs = {
-    openInNppActive : 'extension.openInNpp'
-  , openInNppCurrent: 'extension.openInNppX'
-  , Executable    : 'openInNpp.Executable'
-  , multiInst     : 'openInNpp.multiInst'
-  , preserveCursor: 'openInNpp.preserveCursorPosition'
-  };
+//------------------------------------------------------------------------------
+  const enum EExtensionIds
+    { openInNppActive  = 'extension.openInNpp'
+    , openInNppContext = 'extension.openInNppX'
+    , openNppSettings  =           'openInNpp.openSettings'
+    , openWbSettings   = 'workbench.action.openSettings'
+    , prefix           = 'openInNpp'
+    };
 //------------------------------------------------------------------------------
   let ß_config:ConfigSnapshot;
-  let ß_previousExecutable:string | undefined ;
 //==============================================================================
 
 export async function activate( ü_extContext: ßß_vsCode.ExtensionContext ) {
   //
-     
+    ß_config = await ConfigSnapshot.getInstance();
     try {
-      ß_config = await ConfigSnapshot.getInstance();
     } catch ( ü_eX ) {
       ß_showErrorMessage( ü_eX.message );
     }
   //
     let ü_disposable:ßß_vsCode.Disposable;
     ü_extContext.subscriptions.push(
-                     ßß_vsCode.commands.registerCommand( ß_IDs.openInNppActive , ß_executeCommand )
-    , ü_disposable = ßß_vsCode.commands.registerCommand( ß_IDs.openInNppCurrent, ß_executeCommand )
+      ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppActive , ß_executeCommand )
+    , ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppContext, ß_executeCommand )
+    , ßß_vsCode.commands.registerCommand( EExtensionIds.openNppSettings , ß_openSettings   )
     );
   //
     ßß_vsCode.workspace.onDidChangeConfiguration( ß_updateConfig );
@@ -51,43 +49,54 @@ export async function activate( ü_extContext: ßß_vsCode.ExtensionContext ) {
 export function deactivate() {}
 
 
-function ß_updateConfig( ü_change:ßß_vsCode.ConfigurationChangeEvent ) {
+async function ß_updateConfig( ü_change:ßß_vsCode.ConfigurationChangeEvent ):Promise<void> {
     if ( ü_change.affectsConfiguration( 'openInNpp' ) ) {
       console.log( 'config' );
-      ß_config = new ConfigSnapshot();
+    ß_config = await ConfigSnapshot.getInstance();
+    //ß_config = new ConfigSnapshot();
     }
+}
+
+async function ß_openSettings() {
+    await ßß_vsCode.commands.executeCommand( EExtensionIds.openWbSettings, EExtensionIds.prefix );
 }
 //==============================================================================
 
 async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promise<number> {
+    const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
+  //
+    let ü_selection :ßß_vsCode.Selection | undefined
+    let ü_fileName  :string
+    if ( ü_fileUri === undefined ) {
+
+      if ( ü_activeEditor === undefined ) {
+        ß_showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
+        return -1;
+      }
+
+                                       ü_fileName  = ü_activeEditor.document.fileName;
+      if ( ß_config.preserveCursor ) { ü_selection = ü_activeEditor.selection; }
+    } else {
+      const ü_isFolder = await isDirectory( ü_fileUri );
+                                       ü_fileName  = ü_fileUri.fsPath;
+      if ( ß_config.preserveCursor
+        && ! ü_isFolder
+        && ü_activeEditor !== undefined 
+        && ü_activeEditor.document.fileName === ü_fileName
+                                   ) { ü_selection = ü_activeEditor.selection; }
+    }
+  //
+    if ( ü_selection !== undefined
+       && ü_selection.isEmpty
+       ) { ß_config.  lineNumber = ü_selection.active.line      + 1;
+           ß_config.columnNumber = ü_selection.active.character + 1; }
+    else { ß_config.  lineNumber = CNaLineNumber;
+           ß_config.columnNumber = CNaLineNumber; }
+  //
+    if(ß_trc){ß_trc( ß_config.lineNumber );}
+    if(ß_trc){ß_trc( ü_fileName );}
+//
   let ü_pid = -1;
-//
-  let ü_fileName:string;
-  const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
-  if ( ü_activeEditor === undefined ) {
-    if ( ü_fileUri === undefined ) {
-      ß_showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
-      return -1;
-    } else {
-      ü_fileName = ü_fileUri.fsPath;
-    }
-  } else {
-    if ( ü_fileUri === undefined ) {
-      ü_fileName = ü_activeEditor.document.fileName;
-    } else {
-      ü_fileName = ü_fileUri.fsPath;
-    }
-    if ( ß_config.preserveCursor
-      && ü_activeEditor.selection.isEmpty
-      && ü_activeEditor.document.fileName === ü_fileName
-       ) {
-      ß_config.lineNumber = 1 + ü_activeEditor.selection.active.line;
-      if(ß_trc){ß_trc( ß_config.lineNumber );}
-    }
-  }
-//
-  if(ß_trc){ß_trc( ü_fileName );}
-//
   try {
     ü_pid = await spawnProcess( ß_config, ü_fileName );
   } catch ( ü_eX ) {
@@ -96,13 +105,21 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
       case 'UNKNOWN': ß_showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ß_config.executable             ) ); break;
       default       : ß_showErrorMessage( ßß_i18n( ßß_text.exe_error    , ß_config.executable, ü_eX.message ) );
     }
-    ß_previousExecutable = undefined; // store failure
   }
 //
   return ü_pid;
 }
 
+async function isDirectory( ü_fileUri:ßß_vsCode.Uri ):Promise<boolean> {
+  //
+    const ü_stat = await ßß_vsCode.workspace.fs.stat( ü_fileUri );
+    return ü_stat.type === ßß_vsCode.FileType.Directory;
+}
 //==============================================================================
+  //ü_disposable.dispose();
+  //const ü_nls = process.env.VSCODE_NLS_CONFIG || '{}'; const ü_config = JSON.parse( ü_nls );
+  //const ü_disposabl_ = ßß_vsCode.commands.registerTextEditorCommand( ß_IDs.openInNppActive, ß_a );
+/*
 
 async function ß_a( ü_editor: ßß_vsCode.TextEditor, ü_edit: ßß_vsCode.TextEditorEdit ) {
   const ü_selection = (() => {
@@ -120,10 +137,4 @@ async function ß_a( ü_editor: ßß_vsCode.TextEditor, ü_edit: ßß_vsCode.Tex
             builder.replace(ü_selection, ü_editor.document.getText(ü_selection));
         });
 }
-
-//==============================================================================
-  //ü_disposable.dispose();
-  //const ü_nls = process.env.VSCODE_NLS_CONFIG || '{}'; const ü_config = JSON.parse( ü_nls );
-  //const ü_disposabl_ = ßß_vsCode.commands.registerTextEditorCommand( ß_IDs.openInNppActive, ß_a );
-/*
 */

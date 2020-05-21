@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "path": "../"
+    }
+  ],
+  "settings": {
+    "openInNpp.Executable": ""
+  , "openInNpp.commandLineArguments": [ "-notabbar" ]
+  }
+}

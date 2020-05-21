@@ -6,21 +6,22 @@
          } from './implementation';
 //------------------------------------------------------------------------------
   const enum EConfigurationIds
-    { executable    = 'openInNpp.Executable'
-    , multiInst     = 'openInNpp.multiInst'
-    , preserveCursor= 'openInNpp.preserveCursorPosition'
+    { executable           = 'openInNpp.Executable'
+    , multiInst            = 'openInNpp.multiInst'
+    , preserveCursor       = 'openInNpp.preserveCursorPosition'
+    , commandLineArguments = 'openInNpp.commandLineArguments'
     };
 //==============================================================================
 
 class ConfigProxy {
     private readonly _configApi = ßß_vsCode.workspace.getConfiguration();
 
-get executable    ():string  { 
-  const ü_a = this._configApi.get<string> ( EConfigurationIds.executable     )!;
-  return ü_a;
+protected get _executable          ():string   { return this._configApi.get<string>       ( EConfigurationIds.executable           )!; }
+protected get _multiInst           ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.multiInst            )!; }
+protected get _preserveCursor      ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.preserveCursor       )!; }
+protected get _commandLineArguments():string[] { return this._configApi.get<Array<string>>( EConfigurationIds.commandLineArguments )!;
 }
-get multiInst     ():boolean { return this._configApi.get<boolean>( EConfigurationIds.multiInst      )!; }
-get preserveCursor():boolean { return this._configApi.get<boolean>( EConfigurationIds.preserveCursor )!; }
+
 
 }
 
@@ -28,17 +29,14 @@ export class ConfigSnapshot extends ConfigProxy {
 static async getInstance():Promise<ConfigSnapshot> {
     return new ConfigSnapshot().parseConfig();
 }
-//
-    executable:string
-  //multiInst      = super.multiInst      ;
-  //preserveCursor = super.preserveCursor ;
-    detached       = true;
-    lineNumber     = -1;
-//
-constructor() {
-    super();
-    this.executable = 'ddd'     ;
-}
+  //
+             executable           = super._executable     ;
+    readonly multiInst            = super._multiInst      ;
+    readonly preserveCursor       = super._preserveCursor ;
+    readonly commandLineArguments = super._commandLineArguments ;
+    readonly detached             = true;
+    lineNumber   = -1;
+    columnNumber = -1;
 //
 async parseConfig():Promise<ConfigSnapshot> {
     if ( this.executable.length === 0 ) { // default
