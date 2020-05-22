@@ -28,6 +28,21 @@ export async function isExe( ü_path:string ):Promise<boolean> {
   return true;
 }
 
+export function expandEnvVariables( ü_path:string ):string {
+  //
+    const ü_rgXp = /%([^%]+)%/g;
+    return ü_path.replace( ü_rgXp, ö_win32 );
+//
+function ö_win32( ü_original:string, ü_name:string ):string {
+    const ü_resolved = process.env[ ü_name ];
+    return ü_resolved === undefined
+         ? ü_original
+         : ü_resolved
+         ;
+}
+//
+}
+
 //==============================================================================
 /*
 //ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );

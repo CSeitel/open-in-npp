@@ -2,15 +2,18 @@
 */
   import * as ßß_vsCode from 'vscode';
 //------------------------------------------------------------------------------
+  import { expandEnvVariables
+         } from "./lib/any";
   import { defaultNppExecutable
          } from './implementation';
 //------------------------------------------------------------------------------
   const enum EConfigurationIds
     { executable           = 'openInNpp.Executable'
+    , workingDirectory     = 'openInNpp.workingDirectory'
     , multiInst            = 'openInNpp.multiInst'
     , preserveCursor       = 'openInNpp.preserveCursorPosition'
     , commandLineArguments = 'openInNpp.commandLineArguments'
-    , filesInFolderPattern          = 'openInNpp.filesInFolderPattern'
+    , filesInFolderPattern = 'openInNpp.filesInFolderPattern'
     };
 //==============================================================================
 
@@ -21,7 +24,8 @@ protected get _executable          ():string   { return this._configApi.get<stri
 protected get _multiInst           ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.multiInst            )!; }
 protected get _preserveCursor      ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.preserveCursor       )!; }
 protected get _commandLineArguments():string[] { return this._configApi.get<Array<string>>( EConfigurationIds.commandLineArguments )!; }
-protected get _filesInFolderPattern         ():string   { return this._configApi.get<string>       ( EConfigurationIds.filesInFolderPattern          )!; }
+protected get _filesInFolderPattern():string   { return this._configApi.get<string>       ( EConfigurationIds.filesInFolderPattern )!; }
+protected get _workingDirectory    ():string   { return this._configApi.get<string>       ( EConfigurationIds.workingDirectory     )!; }
 
 }
 
@@ -30,9 +34,10 @@ static async getInstance():Promise<ConfigSnapshot> {
     return new ConfigSnapshot().parseConfig();
 }
   //
-             executable           = super._executable     ;
-    readonly multiInst            = super._multiInst      ;
-    readonly preserveCursor       = super._preserveCursor ;
+             executable           = expandEnvVariables( super._executable       );
+             workingDirectory     = expandEnvVariables( super._workingDirectory );
+    readonly multiInst            = super._multiInst        ;
+    readonly preserveCursor       = super._preserveCursor   ;
     readonly commandLineArguments = super._commandLineArguments ;
     readonly filesInFolderPattern          = super._filesInFolderPattern    ;
     readonly detached             = true;

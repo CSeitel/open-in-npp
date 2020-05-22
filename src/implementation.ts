@@ -40,16 +40,20 @@ export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string
     if ( ü_files === undefined               ) { ü_args.push(     ü_fileName ); }
     else                                       { ü_args.push( ... ü_files    ); }
   //
-    console.log( ü_args, process.cwd );
+    console.log( ü_args, process.cwd() );
   //
     const ü_opts:ßß_cp.SpawnOptions =
       { stdio   : 'ignore'
       , detached: ü_config.detached
+      , cwd     : ü_config.workingDirectory
       };
     const ö_proc = ßß_cp.spawn( ü_config.executable, ü_args, ü_opts );
   //
     return new Promise<number>( (ü_resolve,ü_reject) => {
-      ö_proc.on( 'error', ü_eX => { ü_reject( ü_eX ); });
+      ö_proc.on( 'error', ü_eX => {
+        console.error( ü_eX.message );
+        ü_reject( ü_eX );
+      });
       if ( ö_proc.pid !== undefined ) {
         ü_resolve( ö_proc.pid );
       }

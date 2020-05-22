@@ -5,6 +5,7 @@
     }
   ],
   "settings": {
-    "openInNpp.commandLineArguments_": [ "-notabbar" ]
+    "openInNpp.filesInFolderPattern": "*.xx",
+    "openInNpp.workingDirectory": ""
   }
 }

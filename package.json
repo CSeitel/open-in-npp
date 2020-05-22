@@ -71,6 +71,11 @@
         , "default": ""
         , "markdownDescription": "Specifies the path of the _Notepad++_ executable ([more](https://github.com/CSeitel/open-in-npp#extension-settings))"
         }
+      , "openInNpp.workingDirectory":
+        { "type"   : "string"
+        , "default": "%USERPROFILE%"
+        , "markdownDescription": ""
+        }
       , "openInNpp.multiInst":
         { "type"   : "boolean"
         , "default": false

@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "path": "../"
+    }
+  ],
+  "settings": {
+    "openInNpp.preserveCursorPosition": false,
+    "openInNpp.Executable": "notepad.exe"
+  }
+}

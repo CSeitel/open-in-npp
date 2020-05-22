@@ -3,6 +3,8 @@
   }
 , "trees": [
     { "label": "Source-Code"
+    , "expandBaseFolder": "true"
+    , "autoReveal": 9
     , "baseFolder": "src"
     , "excludeBaseFolders": "test"
     , "associatedFolder": "out"
