@@ -29,6 +29,7 @@
     , "baseFolderPattern": ".vscode"
     , "filePattern": "*.json"
     , "excludeFiles": "package-lock.json"
+    , "associatedFolder": "../any-tree"
     }
 
   , { "prependHeader": true

@@ -15,6 +15,12 @@
   const ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage    ;
   const ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage      ;
 //------------------------------------------------------------------------------
+    const enum ESystemErrorCodes {
+      ENOENT    = 'ENOENT'
+    , ENOTDIR   = 'ENOTDIR'
+    , EPERM     = 'EPERM'
+    , ENOTEMPTY = 'ENOTEMPTY'
+    }
 export const enum EExtensionIds
     { fullName         = 'CSeitel.open-in-npp'
     , prefix           = 'openInNpp'
@@ -108,7 +114,16 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
     console.error( ü_eX );
     switch ( ü_eX.code ) {
       case 'UNKNOWN': ß_showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ß_config.executable             ) ); break;
-      default       : ß_showErrorMessage( ßß_i18n( ßß_text.exe_error    , ß_config.executable, ü_eX.message ) );
+      case ESystemErrorCodes.ENOENT:
+        if ( ! await exists( ß_config.workingDirectory, true ) ) {
+          ß_showErrorMessage( `Not a valid working directory: "${ ß_config.workingDirectory }";  ${ ü_eX.message }` );
+        }
+        if ( ! await exists( ß_config.executable ) ) {
+          ß_showErrorMessage( ßß_i18n( ßß_text.exe_error    , ß_config.executable, ü_eX.message ) );
+        }
+        break;
+      default       : 
+        ß_showErrorMessage( ßß_i18n( ßß_text.exe_error    , ß_config.executable, ü_eX.message ) );
     }
   }
 //
@@ -126,9 +141,24 @@ async function findFiles( ü_folder:string, ü_pattern:string ):Promise<string[]
 
 async function isDirectory( ü_fileUri:ßß_vsCode.Uri ):Promise<boolean> {
   //
-    const ü_stat = await ßß_vsCode.workspace.fs.stat( ü_fileUri );
-    return ü_stat.type === ßß_vsCode.FileType.Directory;
+      const ü_stat = await ßß_vsCode.workspace.fs.stat( ü_fileUri );
+      return ü_stat.type === ßß_vsCode.FileType.Directory;
 }
+
+async function exists( ü_path:string, ü_isDirectory = false ):Promise<boolean> {
+  //
+    try {
+      const ü_stat = await ßß_vsCode.workspace.fs.stat( ßß_vsCode.Uri.file( ü_path ) );
+      return ü_isDirectory
+           ? ü_stat.type === ßß_vsCode.FileType.Directory
+           : true
+           ;
+    } catch ( ü_eX ) {
+      console.log( ü_eX );
+      return false;
+    }
+}
+
 //==============================================================================
   //ü_disposable.dispose();
   //const ü_nls = process.env.VSCODE_NLS_CONFIG || '{}'; const ü_config = JSON.parse( ü_nls );

@@ -41,13 +41,19 @@ export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string
       };
   //
     if ( ü_config.workingDirectory.length > 0 ) {
-         ü_opts  .cwd =
-         ü_config.workingDirectory;
+      if ( ßß_path.isAbsolute( ü_config.workingDirectory ) ) {
+         ü_opts.cwd = ü_config.workingDirectory;
+      } else {
+         ü_opts.cwd = ßß_path.join(    ü_isFolder
+                    ?                  ü_fileName
+                    : ßß_path.dirname( ü_fileName )
+                    ,                  ü_config.workingDirectory );
+      }
     } else {
-         ü_opts  .cwd = ü_isFolder
-                      ?                  ü_fileName
-                      : ßß_path.dirname( ü_fileName )
-                      ;
+         ü_opts.cwd =                  ü_isFolder
+                    ?                  ü_fileName
+                    : ßß_path.dirname( ü_fileName )
+                    ;
     }
   //
     console.info( `${ EExtensionIds.fullName }`, [ ü_config.executable, ü_opts.cwd, ... ü_args ] );
@@ -55,7 +61,7 @@ export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string
   //
     return new Promise<number>( (ü_resolve,ü_reject) => {
       ö_proc.on( 'error', ü_eX => {
-        console.error( ü_eX.message );
+      //console.error( ü_eX );
         ü_reject( ü_eX );
       });
       if ( ö_proc.pid !== undefined ) {
