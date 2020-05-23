@@ -5,7 +5,6 @@
          , textIds as ßß_text
          } from './i18n';
 //------------------------------------------------------------------------------
-  import { ß_trc } from './trace';
   import { CNaLineNumber
          , spawnProcess
          } from './implementation';
@@ -16,12 +15,13 @@
   const ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage    ;
   const ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage      ;
 //------------------------------------------------------------------------------
-  const enum EExtensionIds
-    { openInNppActive  = 'extension.openInNpp'
+export const enum EExtensionIds
+    { fullName         = 'CSeitel.open-in-npp'
+    , prefix           = 'openInNpp'
+    , openInNppActive  = 'extension.openInNpp'
     , openInNppContext = 'extension.openInNppX'
     , openNppSettings  =           'openInNpp.openSettings'
     , openWbSettings   = 'workbench.action.openSettings'
-    , prefix           = 'openInNpp'
     };
 //------------------------------------------------------------------------------
   let ß_config:ConfigSnapshot;
@@ -59,6 +59,7 @@ async function ß_updateConfig( ü_change:ßß_vsCode.ConfigurationChangeEvent )
 async function ß_openSettings() {
     await ßß_vsCode.commands.executeCommand( EExtensionIds.openWbSettings, EExtensionIds.prefix );
 }
+
 //==============================================================================
 
 async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promise<number> {
@@ -82,18 +83,14 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
         && ü_activeEditor                   !== undefined
         && ü_activeEditor.document.fileName === ü_fileName
                                    ) { ü_selection = ü_activeEditor.selection; }
-      if ( ß_config.filesInFolderPattern.length > 0
-        && ü_selection === undefined
+      if ( ü_selection === undefined // selection = file
+        && ( ß_config.filesInFolderPattern.length > 0 || ß_config.openFolderAsWorkspace )
         && await isDirectory( ü_fileUri )
          ) {
-        const ü_glob = new ßß_vsCode.RelativePattern( ü_fileName, ß_config.filesInFolderPattern );
-        const ü_hits = await ßß_vsCode.workspace.findFiles( ü_glob );
-        ü_files = ü_hits.map( ü_fileUri => ü_fileUri.fsPath );
-        if ( ü_files.length === 0 ) {
-          ß_showInformationMessage( `No matches for "${ ß_config.filesInFolderPattern }" @ "${ ü_fileName }"` );
-        } else {
-          ß_showInformationMessage( `${ ü_files.length } matches for "${ ß_config.filesInFolderPattern }" @ "${ ü_fileName }"` );
-        }
+        ü_files = ß_config.filesInFolderPattern.length > 0
+                ? await findFiles( ü_fileName, ß_config.filesInFolderPattern )
+                : []
+                ;
       }
     }
   //
@@ -104,14 +101,11 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
     else { ß_config.  lineNumber = CNaLineNumber;
            ß_config.columnNumber = CNaLineNumber; }
   //
-    if(ß_trc){ß_trc( ß_config.lineNumber );}
-    if(ß_trc){ß_trc( ü_fileName );}
-//
   let ü_pid = -1;
   try {
     ü_pid = await spawnProcess( ß_config, ü_fileName, ü_files );
   } catch ( ü_eX ) {
-    console.log( ü_eX );
+    console.error( ü_eX );
     switch ( ü_eX.code ) {
       case 'UNKNOWN': ß_showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ß_config.executable             ) ); break;
       default       : ß_showErrorMessage( ßß_i18n( ßß_text.exe_error    , ß_config.executable, ü_eX.message ) );
@@ -119,6 +113,15 @@ async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promi
   }
 //
   return ü_pid;
+}
+
+async function findFiles( ü_folder:string, ü_pattern:string ):Promise<string[]> {
+    const ü_glob = new ßß_vsCode.RelativePattern( ü_folder, ü_pattern );
+    const ü_hits = await ßß_vsCode.workspace.findFiles( ü_glob );
+  //
+    ß_showInformationMessage( `${ ü_hits.length } matches for "${ ü_pattern }" @ "${ ü_folder }"` );
+  //
+    return ü_hits.map( ü_fileUri => ü_fileUri.fsPath );
 }
 
 async function isDirectory( ü_fileUri:ßß_vsCode.Uri ):Promise<boolean> {

@@ -5,15 +5,27 @@
     { "label": "Source-Code"
     , "expandBaseFolder": "true"
     , "autoReveal": 9
-    , "baseFolder": "src"
+    , "baseFolder"        : "src"
     , "excludeBaseFolders": "test"
-    , "associatedFolder": "out"
+    , "associatedFolder"  : "out"
+    , "fileExtensionMappings": "ts:js"
     }
   , { "label": "Test-Code"
     , "baseFolder": "src/test"
     , "associatedFolder": "out/test/"
     }
-  , { "label": "Config"
+
+  , { "prependHeader": true
+    , "autoReveal": 9
+    , "label": "Compiled-Code"
+    , "baseFolder"        : "out"
+    , "excludeBaseFolders": "test"
+    , "associatedFolder"  : "src"
+    , "fileExtensionMappings": "ts:js"
+    , "excludeFiles": "*.map"
+    }
+  , { "prependHeader": true
+    , "label": "Config-Files"
     , "baseFolderPattern": ".vscode"
     , "filePattern": "*.json"
     , "excludeFiles": "package-lock.json"

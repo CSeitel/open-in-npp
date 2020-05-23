@@ -5,7 +5,7 @@
     }
   ],
   "settings": {
-    "openInNpp.filesInFolderPattern": "*.xx",
-    "openInNpp.workingDirectory": ""
+    "openInNpp.filesInFolderPattern": "*.txt",
+    "openInNpp.openFolderAsWorkspace": true
   }
 }

@@ -73,9 +73,14 @@
         }
       , "openInNpp.workingDirectory":
         { "type"   : "string"
-        , "default": "%USERPROFILE%"
+        , "default": ""
         , "markdownDescription": ""
         }
+      , "openInNpp.commandLineArguments":
+        { "type": "array"
+        , "markdownDescription": "Pass additional arguments along to _Notepad++_; a comprehensive overview of the command line parameters of _Notepad++_ is given [here](https://npp-user-manual.org/docs/command-prompt/)"
+        }
+
       , "openInNpp.multiInst":
         { "type"   : "boolean"
         , "default": false
@@ -86,13 +91,14 @@
         , "default": true
         , "markdownDescription": "Let _Notepad++_ preserve the cursor position of the _VS-Code_ editor"
         }
-      , "openInNpp.commandLineArguments":
-        { "type": "array"
-        , "markdownDescription": "Pass additional arguments along to _Notepad++_; a comprehensive overview of the command line parameters of _Notepad++_ is given [here](https://npp-user-manual.org/docs/command-prompt/)"
-        }
       , "openInNpp.filesInFolderPattern":
         { "type": "string"
         , "markdownDescription": "Instead of passing a folder name to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and pass their names along to _Notepad++_"
+        }
+      , "openInNpp.openFolderAsWorkspace":
+        { "type": "boolean"
+        , "default": false
+        , "markdownDescription": "When passing a folder name to _Notepad++_  command line parameter [-openFoldersAsWorkspace](https://npp-user-manual.org/docs/command-prompt/)"
         }
 
       , "openInNpp.extendExplorerContextMenu":
@@ -105,10 +111,8 @@
         , "default": true
         , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS-Code_ editor"
         }
-
       }
     }
-
   }
   , "scripts": {
     "vscode:prepublish": "npm run compile"

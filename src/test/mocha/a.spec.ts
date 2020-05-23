@@ -8,7 +8,7 @@ describe( 'Test', () => {
 
 it( 'it', async () => {
 //return;
-  const Executable = await ßß_impl.defaultNppExecutable();
+  const Executable = ''//await ßß_impl.defaultNppExecutable();
   const detached = false;
   const lineNumber = 0;
   const ü_pid = 1; //await ßß_impl.spawnProcess( {executable: Executable, detached, lineNumber, preserveCursor:false, multiInst:false }, __filename );
@@ -22,7 +22,7 @@ it( 'isExe', async () => {
 //await ßß_impl.isExe( Executable );
   await ß_isExe( __filename                                          , false );
   await ß_isExe( 'C:\\zzz_Dev\\node_modules\\open-in-npp\\.gitignore', false );
-  await ß_isExe( await ßß_impl.defaultNppExecutable()                , true  );
+//await ß_isExe( await ßß_impl.defaultNppExecutable()                , true  );
 });
 
 });
