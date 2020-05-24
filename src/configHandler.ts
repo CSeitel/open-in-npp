@@ -10,11 +10,13 @@
 //------------------------------------------------------------------------------
   const enum EConfigurationIds
     { executable            = 'openInNpp.Executable'
+    , detachProcess         = 'openInNpp.detachProcess'
     , workingDirectory      = 'openInNpp.workingDirectory'
     , commandLineArguments  = 'openInNpp.commandLineArguments'
     , multiInst             = 'openInNpp.multiInst'
     , preserveCursor        = 'openInNpp.preserveCursorPosition'
     , filesInFolderPattern  = 'openInNpp.filesInFolderPattern'
+    , skipSessionHandling   = 'openInNpp.skipSessionHandling'
     , openFolderAsWorkspace = 'openInNpp.openFolderAsWorkspace'
     };
   const enum EExecutables
@@ -28,11 +30,13 @@ class ConfigProxy {
     private readonly _configApi = ßß_vsCode.workspace.getConfiguration();
 
 protected get _executable            ():string   { return this._configApi.get<string>       ( EConfigurationIds.executable            )!; }
+protected get _detachProcess         ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.detachProcess         )!; }
 protected get _workingDirectory      ():string   { return this._configApi.get<string>       ( EConfigurationIds.workingDirectory      )!; }
 protected get _commandLineArguments  ():string[] { return this._configApi.get<Array<string>>( EConfigurationIds.commandLineArguments  )!; }
 protected get _multiInst             ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.multiInst             )!; }
 protected get _preserveCursor        ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.preserveCursor        )!; }
 protected get _filesInFolderPattern  ():string   { return this._configApi.get<string>       ( EConfigurationIds.filesInFolderPattern  )!; }
+protected get _skipSessionHandling   ():string   { return this._configApi.get<string>       ( EConfigurationIds.skipSessionHandling   )!; }
 protected get _openFolderAsWorkspace ():string   { return this._configApi.get<string>       ( EConfigurationIds.openFolderAsWorkspace )!; }
 
 }
@@ -43,14 +47,15 @@ static async getInstance():Promise<ConfigSnapshot> {
 }
   //
              executable            = expandEnvVariables( super._executable       );
+    readonly detachProcess         = super._detachProcess         ;
              workingDirectory      = expandEnvVariables( super._workingDirectory );
-    readonly commandLineArguments  = super._commandLineArguments ;
-    readonly multiInst             = super._multiInst        ;
-    readonly preserveCursor        = super._preserveCursor   ;
-    readonly filesInFolderPattern  = super._filesInFolderPattern    ;
-    readonly openFolderAsWorkspace = super._openFolderAsWorkspace    ;
+    readonly commandLineArguments  = super._commandLineArguments  ;
+    readonly multiInst             = super._multiInst             ;
+    readonly preserveCursor        = super._preserveCursor        ;
+    readonly filesInFolderPattern  = super._filesInFolderPattern  ;
+    readonly skipSessionHandling   = super._skipSessionHandling   ;
+    readonly openFolderAsWorkspace = super._openFolderAsWorkspace ;
   //
-    readonly detached             = true;
              lineNumber   = -1;
              columnNumber = -1;
 //

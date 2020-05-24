@@ -12,9 +12,10 @@ https://nodejs.org/api/child_process.html#child_process_event_error
 //------------------------------------------------------------------------------
   const enum ECLIParameters
     { multipleInstances      = '-multiInst'
+    , openFoldersAsWorkspace = '-openFoldersAsWorkspace'
+    , skipSessionHandling    = '-nosession'
     ,   lineNumber           = '-n'
     , columnNumber           = '-c'
-    , openFoldersAsWorkspace = '-openFoldersAsWorkspace'
     };
 //------------------------------------------------------------------------------
   export const CNaLineNumber = 0;
@@ -27,8 +28,11 @@ export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string
     if ( ü_config.multiInst
     || ( ü_isFolder
       && ü_config.openFolderAsWorkspace    ) ) { ü_args.push( ECLIParameters.multipleInstances                    ); }
+    if ( ü_config.skipSessionHandling        ) { ü_args.push( ECLIParameters.skipSessionHandling                  ); }
+  //
     if ( ü_config.lineNumber > CNaLineNumber ) { ü_args.push( ECLIParameters.  lineNumber + ü_config.  lineNumber );
                                                  ü_args.push( ECLIParameters.columnNumber + ü_config.columnNumber ); }
+  //
     if ( ü_isFolder                          ) {
     if ( ü_config.openFolderAsWorkspace      ) { ü_args.push( ECLIParameters.openFoldersAsWorkspace               );
                                                  ü_args.push(     ü_fileName ); }
@@ -37,7 +41,7 @@ export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string
   //
     const ü_opts:ßß_cp.SpawnOptions =
       { stdio   : 'ignore'
-      , detached: ü_config.detached
+      , detached: ü_config.detachProcess
       };
   //
     if ( ü_config.workingDirectory.length > 0 ) {
@@ -56,7 +60,7 @@ export async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string
                     ;
     }
   //
-    console.info( `${ EExtensionIds.fullName }`, [ ü_config.executable, ü_opts.cwd, ... ü_args ] );
+    console.info( `${ EExtensionIds.fullName }`, ü_opts, [ ü_config.executable, ... ü_args ] );
     const ö_proc = ßß_cp.spawn( ü_config.executable, ü_args, ü_opts );
   //
     return new Promise<number>( (ü_resolve,ü_reject) => {

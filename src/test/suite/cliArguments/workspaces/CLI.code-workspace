@@ -7,7 +7,7 @@
   "settings": {
     "openInNpp.commandLineArguments": [
       "-loadingTime"
-    , "-openFoldersAsWorkspace"
-    ]
+    ],
+    "openInNpp.filesInFolderPattern": "*.*"
   }
 }

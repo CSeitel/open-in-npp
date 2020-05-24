@@ -24,12 +24,17 @@
     , "fileExtensionMappings": "ts:js"
     , "excludeFiles": "*.map"
     }
+
   , { "prependHeader": true
     , "label": "Config-Files"
     , "baseFolderPattern": ".vscode"
     , "filePattern": "*.json"
     , "excludeFiles": "package-lock.json"
     , "associatedFolder": "../any-tree"
+    }
+  , { "label": "Test-Workspace"
+    , "baseFolder": "src/test/suite/cliArguments"
+    , "filePattern_": "*.code-workspace"
     }
 
   , { "prependHeader": true
