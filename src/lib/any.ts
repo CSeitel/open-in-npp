@@ -45,6 +45,7 @@ function ö_win32( ü_original:string, ü_name:string ):string {
 
 //==============================================================================
 /*
+https://www.linux.com/tutorials/understanding-linux-file-permissions/
 //ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
 //ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
 */
