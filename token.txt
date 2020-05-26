@@ -12,3 +12,5 @@ https://stackoverflow.com/questions/46714353/how-to-customize-context-menu-in-vi
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
         , "when": "resourceExtname == .js && config.openInNpp.explorerContextMenu"
         , "when": "resourceLangId == javascript"
+
+        &#x1F6C8;

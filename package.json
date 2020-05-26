@@ -68,21 +68,23 @@
     , "properties": {
         "openInNpp.Executable":
         { "type"   : "string"
-        , "default": ""
-        , "markdownDescription": "Specifies the path of the _Notepad++_ executable ([more](https://github.com/CSeitel/open-in-npp#extension-settings))"
+        , "markdownDescription": "Specifies the path of the _Notepad++_ executable; in case the empty default is not overwritten the path is provisioned as explained ([here](https://github.com/CSeitel/open-in-npp#extension-settings))"
         }
-      , "openInNpp.detachProcess":
-        { "type"   : "boolean"
-        , "default": true
-        , "markdownDescription": "Run _Notepad++_ independently of _VS-Code_, in particular, if _VS-Code_ is closed _Notepad++_ will continue to run ([more](https://nodejs.org/api/child_process.html#child_process_options_detached))"
+      , "openInNpp.spawnOptions":
+        { "type"   : "object"
+        , "markdownDescription": "Expert mode [here](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options)"
         }
       , "openInNpp.workingDirectory":
         { "type"   : "string"
-        , "default": ""
-        , "markdownDescription": "Specifies the path of the folder used as [working directory](https://en.wikipedia.org/wiki/Working_directory) during the execution of _Notepad++_"
+        , "markdownDescription": "Specifies the path of the folder used as [working directory](https://en.wikipedia.org/wiki/Working_directory) during the execution of _Notepad++_; ([empty default](https://github.com/CSeitel/open-in-npp#extension-settings))"
+        }
+      , "openInNpp.decoupledExecution":
+        { "type"   : "boolean"
+        , "default": true
+        , "markdownDescription": "Run _Notepad++_ independently of _VS-Code_, in particular, do not close _Notepad++_ upon exit of _VS-Code_ ([&#128712;](https://nodejs.org/api/child_process.html#child_process_options_detached))"
         }
       , "openInNpp.commandLineArguments":
-        { "type": "array"
+        { "type"   : "array"
         , "markdownDescription": "Specifies additional arguments to be passed along to _Notepad++_; a comprehensive overview of the command line parameters of _Notepad++_ is available [here](https://npp-user-manual.org/docs/command-prompt/)"
         }
 
@@ -91,24 +93,24 @@
         , "default": false
         , "markdownDescription": "Open a separate [instance](https://npp-user-manual.org/docs/preferences/#multi-instance) of _Notepad++_ for each command execution; corresponds to command line parameter [-multiInst](https://npp-user-manual.org/docs/command-prompt/)"
         }
-      , "openInNpp.preserveCursorPosition":
-        { "type"   : "boolean"
-        , "default": true
-        , "markdownDescription": "Let _Notepad++_ preserve the cursor position of the _VS-Code_ editor; corresponds to command line parameters [-n/-c](https://npp-user-manual.org/docs/command-prompt/)"
-        }
-      , "openInNpp.filesInFolderPattern":
-        { "type": "string"
-        , "markdownDescription": "Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_"
-        }
       , "openInNpp.skipSessionHandling":
-        { "type": "boolean"
+        { "type"   : "boolean"
         , "default": false
         , "markdownDescription": "Prevent _Notepad++_ from loading the [previous session](https://npp-user-manual.org/docs/preferences/#backup) and changing its state; corresponds to command line parameter [-nosession](https://npp-user-manual.org/docs/command-prompt/)"
         }
       , "openInNpp.openFolderAsWorkspace":
-        { "type": "boolean"
+        { "type"   : "boolean"
         , "default": false
         , "markdownDescription": "When passing a folder path along to _Notepad++_ let this folder be handled as a _workspace_; corresponds to command line parameter [-openFoldersAsWorkspace](https://npp-user-manual.org/docs/command-prompt/)"
+        }
+      , "openInNpp.filesInFolderPattern":
+        { "type"   : "string"
+        , "markdownDescription": "Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_"
+        }
+      , "openInNpp.preserveCursorPosition":
+        { "type"   : "boolean"
+        , "default": true
+        , "markdownDescription": "Let _Notepad++_ preserve the cursor position of the _VS-Code_ editor; corresponds to command line parameters [-n / -c](https://npp-user-manual.org/docs/command-prompt/)"
         }
 
       , "openInNpp.extendExplorerContextMenu":

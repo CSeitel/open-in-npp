@@ -126,7 +126,7 @@ async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string, ü_fi
   //
     const ü_opts:ßß_cp.SpawnOptions =
       { stdio   : 'ignore'
-      , detached: ü_config.detachProcess
+      , detached: ü_config.decoupledExecution
       };
   //
     if ( ü_config.workingDirectory.length > 0 ) {
@@ -144,6 +144,7 @@ async function spawnProcess( ü_config:ConfigSnapshot, ü_fileName:string, ü_fi
                     : ßß_path.dirname( ü_fileName )
                     ;
     }
+    Object.assign( ü_opts, ü_config.spawnOptions );
   //
     console.info( `${ EExtensionIds.fullName }`, ü_opts, [ ü_config.executable, ... ü_args ] );
     const ö_proc = ßß_cp.spawn( ü_config.executable, ü_args, ü_opts );

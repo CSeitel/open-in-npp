@@ -1,5 +1,7 @@
 /*
 */
+  import { SpawnOptions
+         } from 'child_process';
   import * as ßß_vsCode from 'vscode';
 //------------------------------------------------------------------------------
   import { expandEnvVariables
@@ -8,19 +10,23 @@
   import {
          } from './implementation';
 //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 export const enum EConfigurationIds
     { prefix                    = 'openInNpp'
-    , executable                = 'openInNpp.Executable'
     , extendEditorContextMenu   = 'openInNpp.extendEditorContextMenu'
     , extendExplorerContextMenu = 'openInNpp.extendExplorerContextMenu'
-    , detachProcess             = 'openInNpp.detachProcess'
+  //
+    , executable                = 'openInNpp.Executable'
+    , spawnOptions              = 'openInNpp.spawnOptions'
     , workingDirectory          = 'openInNpp.workingDirectory'
+    , decoupledExecution        = 'openInNpp.decoupledExecution'
     , commandLineArguments      = 'openInNpp.commandLineArguments'
     , multiInst                 = 'openInNpp.multiInst'
-    , preserveCursor            = 'openInNpp.preserveCursorPosition'
-    , filesInFolderPattern      = 'openInNpp.filesInFolderPattern'
     , skipSessionHandling       = 'openInNpp.skipSessionHandling'
+  //
     , openFolderAsWorkspace     = 'openInNpp.openFolderAsWorkspace'
+    , filesInFolderPattern      = 'openInNpp.filesInFolderPattern'
+    , preserveCursor            = 'openInNpp.preserveCursorPosition'
     };
   const enum EExecutables
     { x64_64bit  = "%ProgramFiles%\\Notepad++\\notepad++.exe"
@@ -45,15 +51,17 @@ export function handleModification( ü_change:ßß_vsCode.ConfigurationChangeEve
 class ConfigProxy {
     private readonly _configApi = ßß_vsCode.workspace.getConfiguration();
 
-protected get _executable            ():string   { return this._configApi.get<string>       ( EConfigurationIds.executable            )!; }
-protected get _detachProcess         ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.detachProcess         )!; }
-protected get _workingDirectory      ():string   { return this._configApi.get<string>       ( EConfigurationIds.workingDirectory      )!; }
-protected get _commandLineArguments  ():string[] { return this._configApi.get<Array<string>>( EConfigurationIds.commandLineArguments  )!; }
-protected get _multiInst             ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.multiInst             )!; }
-protected get _preserveCursor        ():boolean  { return this._configApi.get<boolean>      ( EConfigurationIds.preserveCursor        )!; }
-protected get _filesInFolderPattern  ():string   { return this._configApi.get<string>       ( EConfigurationIds.filesInFolderPattern  )!; }
-protected get _skipSessionHandling   ():string   { return this._configApi.get<string>       ( EConfigurationIds.skipSessionHandling   )!; }
-protected get _openFolderAsWorkspace ():string   { return this._configApi.get<string>       ( EConfigurationIds.openFolderAsWorkspace )!; }
+protected get _executable            ():string       { return this._configApi.get<string>       ( EConfigurationIds.executable            )!; }
+protected get _spawnOptions          ():SpawnOptions { return this._configApi.get<SpawnOptions> ( EConfigurationIds.spawnOptions          )!; }
+protected get _workingDirectory      ():string       { return this._configApi.get<string>       ( EConfigurationIds.workingDirectory      )!; }
+protected get _decoupledExecution    ():boolean      { return this._configApi.get<boolean>      ( EConfigurationIds.decoupledExecution    )!; }
+protected get _commandLineArguments  ():string[]     { return this._configApi.get<string[]>     ( EConfigurationIds.commandLineArguments  )!; }
+protected get _multiInst             ():boolean      { return this._configApi.get<boolean>      ( EConfigurationIds.multiInst             )!; }
+protected get _skipSessionHandling   ():string       { return this._configApi.get<string>       ( EConfigurationIds.skipSessionHandling   )!; }
+
+protected get _openFolderAsWorkspace ():string       { return this._configApi.get<string>       ( EConfigurationIds.openFolderAsWorkspace )!; }
+protected get _filesInFolderPattern  ():string       { return this._configApi.get<string>       ( EConfigurationIds.filesInFolderPattern  )!; }
+protected get _preserveCursor        ():boolean      { return this._configApi.get<boolean>      ( EConfigurationIds.preserveCursor        )!; }
 
 }
 
@@ -74,14 +82,15 @@ static async getCurrent( ü_update = false ):Promise<ConfigSnapshot> {
 }
   //
              executable            = expandEnvVariables( super._executable       );
-    readonly detachProcess         = super._detachProcess         ;
+    readonly spawnOptions          = super._spawnOptions          ;
     readonly workingDirectory      = expandEnvVariables( super._workingDirectory );
+    readonly decoupledExecution    = super._decoupledExecution    ;
     readonly commandLineArguments  = super._commandLineArguments  ;
     readonly multiInst             = super._multiInst             ;
-    readonly preserveCursor        = super._preserveCursor        ;
-    readonly filesInFolderPattern  = super._filesInFolderPattern  ;
     readonly skipSessionHandling   = super._skipSessionHandling   ;
     readonly openFolderAsWorkspace = super._openFolderAsWorkspace ;
+    readonly filesInFolderPattern  = super._filesInFolderPattern  ;
+    readonly preserveCursor        = super._preserveCursor        ;
   //
              lineNumber   = -1;
              columnNumber = -1;
@@ -110,3 +119,6 @@ export async function defaultNppExecutable():Promise<string> {
 }
 
 //------------------------------------------------------------------------------
+/*
+https://medium.com/@SylvainPV/type-safety-in-javascript-using-es6-proxies-eee8fbbbd600
+*/
