@@ -9,6 +9,9 @@
       "-loadingTime"
     ],
     "openInNpp.filesInFolderPattern": "*.*"
-  , "openInNpp.spawnOptions": { "a": true }
+  ,
+  "openInNpp.spawnOptions": {
+    "a": true
+  }
   },
 }

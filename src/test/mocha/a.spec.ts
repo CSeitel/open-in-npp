@@ -2,32 +2,29 @@
 */
 import * as ßß_assert from "assert";
 import * as ßß_path   from 'path';
-import * as ßß_impl from '../../implementation';
+import { isExe
+       } from '../../lib/any';
 
 describe( 'Test', () => {
 
 it( 'it', async () => {
-//return;
-  const Executable = ''//await ßß_impl.defaultNppExecutable();
-  const detached = false;
-  const lineNumber = 0;
-  const ü_pid = 1; //await ßß_impl.spawnProcess( {executable: Executable, detached, lineNumber, preserveCursor:false, multiInst:false }, __filename );
-  console.log( ü_pid );
-  ßß_assert.notEqual( ü_pid, -1 );
-  ßß_assert.notEqual( ü_pid, +0 );
-  await ß_kill( ü_pid );
 });
 
 it( 'isExe', async () => {
 //await ßß_impl.isExe( Executable );
   await ß_isExe( __filename                                          , false );
+  await ß_isExe( __dirname                                           , false );
+  await ß_isExe( '_dir ame &'                                        , false );
   await ß_isExe( 'C:\\zzz_Dev\\node_modules\\open-in-npp\\.gitignore', false );
 //await ß_isExe( await ßß_impl.defaultNppExecutable()                , true  );
 });
 
 });
 
-async function ß_isExe( ü_fileName:string, ü_isExe:boolean ) {
+async function ß_isExe( ü_path:string, ü_expected:boolean ) {
+    console.log( ü_path );
+    const ü_act = await isExe( ü_path );
+    ßß_assert.equal( ü_act, ü_expected );
 }
 
 async function ß_kill( ü_pid:number ):Promise<void> {

@@ -15,6 +15,7 @@ export async function isExe( ü_path:string ):Promise<boolean> {
   try {
     ü_stats = await ßß_fs.stat( ü_path );
   } catch ( eX ) {
+    console.log( eX.code );
     return false;
   }
 //

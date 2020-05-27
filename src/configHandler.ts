@@ -29,10 +29,11 @@ export const enum EConfigurationIds
     , preserveCursor            = 'openInNpp.preserveCursorPosition'
     };
   const enum EExecutables
-    { x64_64bit  = "%ProgramFiles%\\Notepad++\\notepad++.exe"
-    , x64_64bit_ = "C:\\Program Files\\Notepad++\\notepad++.exe"
-    , x86_32bit = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
-    , path_env  = "notepad++.exe"
+    { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"
+    , x64_64bit_ =       "C:\\Program Files\\Notepad++\\notepad++.exe"
+    , x86_32bit  =      "%PrograFiles(x86)%\\Notepad++\\notepad++.exe"
+    , x86_32bit_ = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
+    , path_env   =                                     "notepad++.exe"
     };
 //==============================================================================
 
@@ -74,7 +75,7 @@ static modificationSignalled( ü_executable:boolean ) {
     if ( ü_executable ) { console.log( 'Bla' );
     }
 }
-static async getCurrent( ü_update = false ):Promise<ConfigSnapshot> {
+static async getCurrent():Promise<ConfigSnapshot> {
     if ( this._parsed === null ) {
          this._parsed = await ( new ConfigSnapshot() )._parse();
     }
@@ -97,7 +98,7 @@ static async getCurrent( ü_update = false ):Promise<ConfigSnapshot> {
 //
 private async _parse():Promise<ConfigSnapshot> {
     if ( this.executable.length === 0 ) { // default
-         this.executable = await defaultNppExecutable();
+         this.executable = await ß_defaultNppExe();
     } else {
   //    if ( ! await isExe( ü_config.executable ) ) {
   //  throw new Error( ßß_i18n( ßß_text.exe_not_found, ü_exeName ) );
@@ -109,13 +110,18 @@ private async _parse():Promise<ConfigSnapshot> {
 
 //==============================================================================
 
-export async function defaultNppExecutable():Promise<string> {
+async function ß_defaultNppExe():Promise<string> {
+/*
+    const ü_a = process.env.ProgramFiles;
+    const ü_b = process.env.aaaa;
+    console.log( ü_a, ü_b );
+*/
     let ü_exe:string
-    if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x64_64bit ) ) ) { return ü_exe; }
-  //if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x64_64bit ) ) ) { return ü_exe; }
-    if ( await isExe( EExecutables.x64_64bit_ ) ) { return EExecutables.x64_64bit_; }
-    if ( await isExe( EExecutables.x86_32bit  ) ) { return EExecutables.x86_32bit ; }
-                                                    return EExecutables.path_env  ;
+    if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x64_64bit  ) ) ) { return ü_exe; }
+    if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x86_32bit  ) ) ) { return ü_exe; }
+    if ( await isExe(                             EExecutables.x64_64bit_   ) ) { return EExecutables.x64_64bit_; }
+    if ( await isExe(                             EExecutables.x86_32bit    ) ) { return EExecutables.x86_32bit ; }
+                                                                                  return EExecutables.path_env  ;
 }
 
 //------------------------------------------------------------------------------

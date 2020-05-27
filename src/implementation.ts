@@ -8,6 +8,8 @@
          , textIds as ßß_text
          } from './i18n';
 //------------------------------------------------------------------------------
+  import { ESystemErrorCodes
+         } from './lib/types';
   import { isDirectory , exists , findFiles
          } from './lib/vsc';
   import { EConfigurationIds
@@ -20,12 +22,6 @@
   import ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage    ;
   import ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage      ;
 //------------------------------------------------------------------------------
-  const enum ESystemErrorCodes
-    { ENOENT    = 'ENOENT'
-    , ENOTDIR   = 'ENOTDIR'
-    , EPERM     = 'EPERM'
-    , ENOTEMPTY = 'ENOTEMPTY'
-    }
   const enum ECLIParameters
     { multipleInstances      = '-multiInst'
     , openFoldersAsWorkspace = '-openFoldersAsWorkspace'
