@@ -68,20 +68,20 @@
     , "properties": {
         "openInNpp.Executable":
         { "type"   : "string"
-        , "markdownDescription": "Specifies the path of the _Notepad++_ executable; in case the empty default is not overwritten the path is provisioned as explained ([here](https://github.com/CSeitel/open-in-npp#extension-settings))"
+        , "markdownDescription": "Specifies the path of the _Notepad++_ executable; in case the empty default is not overwritten the path is provisioned as explained [here](https://github.com/CSeitel/open-in-npp#extension-settings)"
         }
       , "openInNpp.spawnOptions":
         { "type"   : "object"
-        , "markdownDescription": "Expert mode [here](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options)"
+        , "markdownDescription": "Expert mode: Details are available [here &#128712;](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options)"
         }
       , "openInNpp.workingDirectory":
         { "type"   : "string"
-        , "markdownDescription": "Specifies the path of the folder used as [working directory](https://en.wikipedia.org/wiki/Working_directory) during the execution of _Notepad++_; ([empty default](https://github.com/CSeitel/open-in-npp#extension-settings))"
+        , "markdownDescription": "Specifies the path of the folder used as [working directory](https://en.wikipedia.org/wiki/Working_directory) during the execution of _Notepad++_; in case the empty default is not overwritten the working directory is enforced as explained [here](https://github.com/CSeitel/open-in-npp#extension-settings)"
         }
       , "openInNpp.decoupledExecution":
         { "type"   : "boolean"
         , "default": true
-        , "markdownDescription": "Run _Notepad++_ independently of _VS-Code_, in particular, do not close _Notepad++_ upon exit of _VS-Code_ ([&#128712;](https://nodejs.org/api/child_process.html#child_process_options_detached))"
+        , "markdownDescription": "Run _Notepad++_ independently of _VS-Code_, in particular, do not close _Notepad++_ upon exit of _VS-Code_; corresponds to option [detached](https://nodejs.org/api/child_process.html#child_process_options_detached) of _NodeJs_"
         }
       , "openInNpp.commandLineArguments":
         { "type"   : "array"

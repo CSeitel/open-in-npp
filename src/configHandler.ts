@@ -10,7 +10,6 @@
   import {
          } from './implementation';
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
 export const enum EConfigurationIds
     { prefix                    = 'openInNpp'
     , extendEditorContextMenu   = 'openInNpp.extendEditorContextMenu'
@@ -28,6 +27,7 @@ export const enum EConfigurationIds
     , filesInFolderPattern      = 'openInNpp.filesInFolderPattern'
     , preserveCursor            = 'openInNpp.preserveCursorPosition'
     };
+//------------------------------------------------------------------------------
   const enum EExecutables
     { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"
     , x64_64bit_ =       "C:\\Program Files\\Notepad++\\notepad++.exe"
@@ -72,9 +72,11 @@ export class ConfigSnapshot extends ConfigProxy {
 static modificationSignalled( ü_executable:boolean ) {
     if ( this._parsed === null ) { return; }
          this._parsed  =  null;
-    if ( ü_executable ) { console.log( 'Bla' );
+    if ( ü_executable ) {
+      console.log( 'Bla' );
     }
 }
+//
 static async getCurrent():Promise<ConfigSnapshot> {
     if ( this._parsed === null ) {
          this._parsed = await ( new ConfigSnapshot() )._parse();
@@ -126,5 +128,4 @@ async function ß_defaultNppExe():Promise<string> {
 
 //------------------------------------------------------------------------------
 /*
-https://medium.com/@SylvainPV/type-safety-in-javascript-using-es6-proxies-eee8fbbbd600
 */
