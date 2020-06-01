@@ -2,6 +2,9 @@
 */
   import * as ßß_vsCode from 'vscode';
   import ßß_fs = ßß_vsCode.workspace.fs;
+  import { runtime
+         } from '../extension';
+  const ß_trc = runtime.trace;
 //==============================================================================
 
 export async function isDirectory( ü_fileUri:ßß_vsCode.Uri ):Promise<boolean> {
@@ -23,7 +26,7 @@ export async function exists( ü_path:string, ü_andIsDirectory?:boolean ):Promi
              : ü_stat.type !== ßß_vsCode.FileType.Directory
            ;
     } catch ( ü_eX ) {
-      console.log( ü_eX );
+      if(ß_trc){ß_trc( ü_eX.message );}
       return false;
     }
 }
@@ -36,3 +39,5 @@ export async function findFiles( ü_folder:string, ü_pattern:string ):Promise<s
   //
     return ü_hits.map( ü_fileUri => ü_fileUri.fsPath );
 }
+
+//==============================================================================

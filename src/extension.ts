@@ -1,10 +1,11 @@
 /*
 */
   import * as ßß_vsCode from 'vscode';
+  import { ConfigSnapshot
+         } from './configHandler';
 //------------------------------------------------------------------------------
 class ExtensionRuntime {
     readonly extensionApi = ßß_vsCode.extensions.getExtension( EExtensionIds.fullName )!;
-    readonly configApi    = ßß_vsCode.workspace.getConfiguration();
     readonly trace:false|typeof console.log = console.log;
 }
 export const runtime = new ExtensionRuntime();

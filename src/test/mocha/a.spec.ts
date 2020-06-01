@@ -22,7 +22,6 @@ it( 'isExe', async () => {
 });
 
 async function ß_isExe( ü_path:string, ü_expected:boolean ) {
-    console.log( ü_path );
     const ü_act = await isExe( ü_path );
     ßß_assert.equal( ü_act, ü_expected );
 }

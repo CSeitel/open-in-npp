@@ -53,22 +53,27 @@ export function handleModification( ü_change:ßß_vsCode.ConfigurationChangeEve
 //==============================================================================
 
 class ConfigProxy {
-    private readonly _configApi = ßß_vsCode.workspace.getConfiguration();
+constructor(
+    private readonly _wsConfig : ßß_vsCode.WorkspaceConfiguration
+) {}
 
-protected get _executable            ():string       { return this._configApi.get<string>       ( EConfigurationIds.executable            )!; }
-protected get _spawnOptions          ():SpawnOptions { return this._configApi.get<SpawnOptions> ( EConfigurationIds.spawnOptions          )!; }
-protected get _workingDirectory      ():string       { return this._configApi.get<string>       ( EConfigurationIds.workingDirectory      )!; }
-protected get _decoupledExecution    ():boolean      { return this._configApi.get<boolean>      ( EConfigurationIds.decoupledExecution    )!; }
-protected get _commandLineArguments  ():string[]     { return this._configApi.get<string[]>     ( EConfigurationIds.commandLineArguments  )!; }
-protected get _multiInst             ():boolean      { return this._configApi.get<boolean>      ( EConfigurationIds.multiInst             )!; }
-protected get _skipSessionHandling   ():string       { return this._configApi.get<string>       ( EConfigurationIds.skipSessionHandling   )!; }
-protected get _openFolderAsWorkspace ():string       { return this._configApi.get<string>       ( EConfigurationIds.openFolderAsWorkspace )!; }
-protected get _filesInFolderPattern  ():string       { return this._configApi.get<string>       ( EConfigurationIds.filesInFolderPattern  )!; }
-protected get _preserveCursor        ():boolean      { return this._configApi.get<boolean>      ( EConfigurationIds.preserveCursor        )!; }
+protected get _executable            () { return this._wsConfig.get<string>       ( EConfigurationIds.executable            )!; }
+protected get _spawnOptions          () { return this._wsConfig.get<SpawnOptions> ( EConfigurationIds.spawnOptions          )!; }
+protected get _workingDirectory      () { return this._wsConfig.get<string>       ( EConfigurationIds.workingDirectory      )!; }
+protected get _decoupledExecution    () { return this._wsConfig.get<boolean>      ( EConfigurationIds.decoupledExecution    )!; }
+protected get _commandLineArguments  () { return this._wsConfig.get<string[]>     ( EConfigurationIds.commandLineArguments  )!; }
+protected get _multiInst             () { return this._wsConfig.get<boolean>      ( EConfigurationIds.multiInst             )!; }
+protected get _skipSessionHandling   () { return this._wsConfig.get<string>       ( EConfigurationIds.skipSessionHandling   )!; }
+protected get _openFolderAsWorkspace () { return this._wsConfig.get<string>       ( EConfigurationIds.openFolderAsWorkspace )!; }
+protected get _filesInFolderPattern  () { return this._wsConfig.get<string>       ( EConfigurationIds.filesInFolderPattern  )!; }
+protected get _preserveCursor        () { return this._wsConfig.get<boolean>      ( EConfigurationIds.preserveCursor        )!; }
 
 }
 
+//==============================================================================
+
 export class ConfigSnapshot extends ConfigProxy {
+//
     private static _parsed:ConfigSnapshot | null = null;
 //
 static modificationSignalled( ü_executable:boolean ) {
@@ -79,13 +84,14 @@ static modificationSignalled( ü_executable:boolean ) {
     }
 }
 //
-static async getCurrent():Promise<ConfigSnapshot> {
+static async whenPrepared():Promise<ConfigSnapshot> {
     if ( this._parsed === null ) {
-         this._parsed = await ( new ConfigSnapshot() )._parse();
+         this._parsed = new ConfigSnapshot( ßß_vsCode.workspace.getConfiguration() );
+      await this._parsed._whenPrepared();
     }
     return this._parsed;
 }
-  //
+//
              executable            = expandEnvVariables( super._executable       );
     readonly spawnOptions          = super._spawnOptions          ;
     readonly workingDirectory      = expandEnvVariables( super._workingDirectory );
@@ -98,7 +104,7 @@ static async getCurrent():Promise<ConfigSnapshot> {
     readonly preserveCursor        = super._preserveCursor        ;
   //
 //
-private async _parse():Promise<ConfigSnapshot> {
+private async _whenPrepared():Promise<ConfigSnapshot> {
     if ( this.executable.length === 0 ) { // default
          this.executable = await ß_defaultNppExe();
     } else {
@@ -116,7 +122,7 @@ async function ß_defaultNppExe():Promise<string> {
 /*
     const ü_a = process.env.ProgramFiles;
     const ü_b = process.env.aaaa;
-    console.log( ü_a, ü_b );
+    ( ü_a, ü_b );
 */
     let ü_exe:string
     if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x64_64bit  ) ) ) { return ü_exe; }

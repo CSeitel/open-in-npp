@@ -46,7 +46,7 @@ export async function ß_openSettings() {
 }
 
 export async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promise<number> {
-    const ü_config:ConfigSnapshot = await ConfigSnapshot.getCurrent();
+    const ü_config:ConfigSnapshot = await ConfigSnapshot.whenPrepared();
     const ü_cmdInfo = Object.assign( Object.create( ü_config ), CCursorPosition ) as TCmdInfo;
     const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
   //
@@ -112,20 +112,20 @@ export async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined 
 async function ß_spawnProcess( ü_cmdInfo:TCmdInfo, ü_fileName:string, ü_files:string[] | undefined ):Promise<number> {
     const ü_isFolder = ü_files !== undefined;
   //
-                                           const ü_args = [ ... ü_cmdInfo.commandLineArguments ];
+                                            const ü_args = [ ... ü_cmdInfo.commandLineArguments ];
     if ( ü_cmdInfo.multiInst
     || ( ü_isFolder
-      && ü_cmdInfo.openFolderAsWorkspace    ) ) { ü_args.push( ECLIParameters.multipleInstances                    ); }
-    if ( ü_cmdInfo.skipSessionHandling        ) { ü_args.push( ECLIParameters.skipSessionHandling                  ); }
+      && ü_cmdInfo.openFolderAsWorkspace    ) ) { ü_args.push( ECLIParameters.multipleInstances                     ); }
+    if ( ü_cmdInfo.skipSessionHandling        ) { ü_args.push( ECLIParameters.skipSessionHandling                   ); }
   //
     if ( ü_cmdInfo.lineNumber > CNaLineNumber ) { ü_args.push( ECLIParameters.  lineNumber + ü_cmdInfo.  lineNumber );
-                                                 ü_args.push( ECLIParameters.columnNumber + ü_cmdInfo.columnNumber ); }
+                                                  ü_args.push( ECLIParameters.columnNumber + ü_cmdInfo.columnNumber ); }
   //
-    if ( ü_isFolder                          ) {
-    if ( ü_cmdInfo.openFolderAsWorkspace      ) { ü_args.push( ECLIParameters.openFoldersAsWorkspace               );
-                                                 ü_args.push(     ü_fileName ); }
-                                                 ü_args.push( ... ü_files!   ); }
-    else                                       { ü_args.push(     ü_fileName ); }
+    if ( ü_isFolder                           ) {
+    if ( ü_cmdInfo.openFolderAsWorkspace      ) { ü_args.push( ECLIParameters.openFoldersAsWorkspace                );
+                                                  ü_args.push(     ü_fileName ); }
+                                                  ü_args.push( ... ü_files!   ); }
+    else                                        { ü_args.push(     ü_fileName ); }
   //
     const ü_opts:ßß_cp.SpawnOptions =
       { stdio   : 'ignore'
@@ -154,7 +154,6 @@ async function ß_spawnProcess( ü_cmdInfo:TCmdInfo, ü_fileName:string, ü_file
   //
     return new Promise<number>( (ü_resolve,ü_reject) => {
       ö_proc.on( 'error', ü_eX => {
-      //console.error( ü_eX );
         ü_reject( ü_eX );
       });
       if ( ö_proc.pid !== undefined ) {

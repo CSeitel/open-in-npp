@@ -1,6 +1,4 @@
 /*
-C:\zzz_Dev\node_modules\open-in-npp\src\test\runTest.ts
-C:\zzz_Dev\node_modules\open-in-npp\out\test\runTest.js
 */
 import * as ßß_path from 'path';
 import { runTests  } from 'vscode-test';
