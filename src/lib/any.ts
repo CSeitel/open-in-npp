@@ -6,6 +6,9 @@
          , PathLike
          } from 'fs';
 //------------------------------------------------------------------------------
+  import { runtime } from '../extension';
+  const ß_trc = runtime.trace;
+//------------------------------------------------------------------------------
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 //==============================================================================
 
@@ -15,7 +18,7 @@ export async function isExe( ü_path:string ):Promise<boolean> {
   try {
     ü_stats = await ßß_fs.stat( ü_path );
   } catch ( eX ) {
-    console.log( eX.code );
+    if(ß_trc){ß_trc( eX.message );}
     return false;
   }
 //

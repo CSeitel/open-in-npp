@@ -6,7 +6,7 @@
   ],
   "settings": {
     "openInNpp.filesInFolderPattern": "*.txt",
-    "openInNpp.workingDirectory": "%Tep%",
-    "openInNpp.Executable": "nnn.exe"
+    "openInNpp.workingDirectory": "%Temp%",
+    "openInNpp.Executable": "%Cwd%"
   }
 }

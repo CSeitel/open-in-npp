@@ -11,6 +11,9 @@
         "--extensionDevelopmentPath=${workspaceFolder}"
       , "${workspaceFolder}/src/test/suite/cliArguments/workspaces/Some.code-workspace"
       ],
+      "env": {
+          "CwdNotFound": "aaaa"
+      },
       "outFiles": [
         "${workspaceFolder}/out/**/*.js"
       ],

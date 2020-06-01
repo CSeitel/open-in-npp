@@ -4,11 +4,14 @@
          } from 'child_process';
   import * as ßß_vsCode from 'vscode';
 //------------------------------------------------------------------------------
+  import { runtime
+         } from './extension';
   import { expandEnvVariables
          , isExe
          } from "./lib/any";
   import {
          } from './implementation';
+  const ß_trc = runtime.trace;
 //------------------------------------------------------------------------------
 export const enum EConfigurationIds
     { prefix                    = 'openInNpp'
@@ -59,7 +62,6 @@ protected get _decoupledExecution    ():boolean      { return this._configApi.ge
 protected get _commandLineArguments  ():string[]     { return this._configApi.get<string[]>     ( EConfigurationIds.commandLineArguments  )!; }
 protected get _multiInst             ():boolean      { return this._configApi.get<boolean>      ( EConfigurationIds.multiInst             )!; }
 protected get _skipSessionHandling   ():string       { return this._configApi.get<string>       ( EConfigurationIds.skipSessionHandling   )!; }
-
 protected get _openFolderAsWorkspace ():string       { return this._configApi.get<string>       ( EConfigurationIds.openFolderAsWorkspace )!; }
 protected get _filesInFolderPattern  ():string       { return this._configApi.get<string>       ( EConfigurationIds.filesInFolderPattern  )!; }
 protected get _preserveCursor        ():boolean      { return this._configApi.get<boolean>      ( EConfigurationIds.preserveCursor        )!; }
@@ -73,7 +75,7 @@ static modificationSignalled( ü_executable:boolean ) {
     if ( this._parsed === null ) { return; }
          this._parsed  =  null;
     if ( ü_executable ) {
-      console.log( 'Bla' );
+      if(ß_trc){ß_trc( EConfigurationIds.executable );}
     }
 }
 //
@@ -95,8 +97,6 @@ static async getCurrent():Promise<ConfigSnapshot> {
     readonly filesInFolderPattern  = super._filesInFolderPattern  ;
     readonly preserveCursor        = super._preserveCursor        ;
   //
-             lineNumber   = -1;
-             columnNumber = -1;
 //
 private async _parse():Promise<ConfigSnapshot> {
     if ( this.executable.length === 0 ) { // default

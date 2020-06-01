@@ -2,6 +2,13 @@
 */
   import * as ßß_vsCode from 'vscode';
 //------------------------------------------------------------------------------
+class ExtensionRuntime {
+    readonly extensionApi = ßß_vsCode.extensions.getExtension( EExtensionIds.fullName )!;
+    readonly configApi    = ßß_vsCode.workspace.getConfiguration();
+    readonly trace:false|typeof console.log = console.log;
+}
+export const runtime = new ExtensionRuntime();
+//------------------------------------------------------------------------------
   import { ß_executeCommand
          , ß_openSettings
          } from './implementation';
@@ -10,15 +17,16 @@
 //------------------------------------------------------------------------------
 export const enum EExtensionIds
     { fullName         = 'CSeitel.open-in-npp'
+  //
     , openInNppActive  = 'extension.openInNpp'
     , openInNppContext = 'extension.openInNppX'
     , openNppSettings  =           'openInNpp.openSettings'
+  //
     , openWbSettings   = 'workbench.action.openSettings'
     };
 //==============================================================================
 
 export function activate( ü_extContext: ßß_vsCode.ExtensionContext ):void {
-    const ü_ext = ßß_vsCode.extensions.getExtension( EExtensionIds.fullName )!;
   //
     ü_extContext.subscriptions.push(
       ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppActive , ß_executeCommand )

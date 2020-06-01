@@ -12,13 +12,15 @@ export async function isDirectory( ü_fileUri:ßß_vsCode.Uri ):Promise<boolean>
 
 //------------------------------------------------------------------------------
 
-export async function exists( ü_path:string, ü_andIsDirectory = false ):Promise<boolean> {
+export async function exists( ü_path:string, ü_andIsDirectory?:boolean ):Promise<boolean> {
   //
     try {
       const ü_stat = await ßß_fs.stat( ßß_vsCode.Uri.file( ü_path ) );
-      return ü_andIsDirectory
-           ? ü_stat.type === ßß_vsCode.FileType.Directory
-           : true
+      return ü_andIsDirectory === undefined
+           ? true
+           : ü_andIsDirectory
+             ? ü_stat.type === ßß_vsCode.FileType.Directory
+             : ü_stat.type !== ßß_vsCode.FileType.Directory
            ;
     } catch ( ü_eX ) {
       console.log( ü_eX );
