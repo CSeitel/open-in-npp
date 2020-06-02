@@ -1,5 +1,6 @@
 {
   "treeTemplate": {
+    "excludeBaseFolders": [".git",".vscode-test","node_modules"]
   }
 , "trees": [
     { "label": "Source-Code"
@@ -10,9 +11,29 @@
     , "associatedFolder"  : "out"
     , "fileExtensionMappings": "ts:js"
     }
-  , { "label": "Test-Code"
+  , { "prependHeader": true
+    , "label": "Test-Code"
     , "baseFolder": "src/test"
     , "associatedFolder": "out/test/"
+    }
+
+  , { "prependHeader": true
+    , "label": "Config-Files"
+    , "baseFolderPattern": ".vscode"
+    , "filePattern": "*.json"
+    , "excludeFiles": "package-lock.json"
+    , "associatedFolder": "../any-tree"
+    }
+  , { "prependHeader": false
+    , "label": "Markdown"
+    , "baseFolder": "./"
+    , "filePattern": "*.md"
+    }
+
+  , { "prependHeader": true
+    , "label": "Test-Workspace"
+    , "baseFolder": "src/test/suite/cliArguments"
+    , "filePattern_": "*.code-workspace"
     }
 
   , { "prependHeader": true
@@ -23,18 +44,6 @@
     , "associatedFolder"  : "src"
     , "fileExtensionMappings": "ts:js"
     , "excludeFiles": "*.map"
-    }
-
-  , { "prependHeader": true
-    , "label": "Config-Files"
-    , "baseFolderPattern": ".vscode"
-    , "filePattern": "*.json"
-    , "excludeFiles": "package-lock.json"
-    , "associatedFolder": "../any-tree"
-    }
-  , { "label": "Test-Workspace"
-    , "baseFolder": "src/test/suite/cliArguments"
-    , "filePattern_": "*.code-workspace"
     }
 
   , { "prependHeader": true
