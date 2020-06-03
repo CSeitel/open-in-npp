@@ -53,8 +53,9 @@ export function handleModification( ü_change:ßß_vsCode.ConfigurationChangeEve
 //==============================================================================
 
 class ConfigProxy {
+//
 constructor(
-    private readonly _wsConfig : ßß_vsCode.WorkspaceConfiguration
+    private readonly _wsConfig:ßß_vsCode.WorkspaceConfiguration
 ) {}
 
 protected get _executable            () { return this._wsConfig.get<string>       ( EConfigurationIds.executable            )!; }
@@ -74,25 +75,25 @@ protected get _preserveCursor        () { return this._wsConfig.get<boolean>    
 
 export class ConfigSnapshot extends ConfigProxy {
 //
-    private static _parsed:ConfigSnapshot | null = null;
+    private static _current:ConfigSnapshot | null = null;
 //
 static modificationSignalled( ü_executable:boolean ) {
-    if ( this._parsed === null ) { return; }
-         this._parsed  =  null;
+    if ( this._current === null ) { return; }
+         this._current  =  null;
     if ( ü_executable ) {
       if(ß_trc){ß_trc( EConfigurationIds.executable );}
     }
 }
 //
-static async whenPrepared():Promise<ConfigSnapshot> {
-    if ( this._parsed === null ) {
-         this._parsed = new ConfigSnapshot( ßß_vsCode.workspace.getConfiguration() );
-      await this._parsed._whenPrepared();
+static get current():ConfigSnapshot {
+    if ( this._current === null ) {
+         this._current = new ConfigSnapshot( ßß_vsCode.workspace.getConfiguration() );
     }
-    return this._parsed;
+    return this._current;
 }
 //
-             executable            = expandEnvVariables( super._executable       );
+             executable?:string
+    readonly whenExecutable        = this._whenPrepared( expandEnvVariables( super._executable ) );
     readonly spawnOptions          = super._spawnOptions          ;
     readonly workingDirectory      = expandEnvVariables( super._workingDirectory );
     readonly decoupledExecution    = super._decoupledExecution    ;
@@ -102,16 +103,13 @@ static async whenPrepared():Promise<ConfigSnapshot> {
     readonly openFolderAsWorkspace = super._openFolderAsWorkspace ;
     readonly filesInFolderPattern  = super._filesInFolderPattern  ;
     readonly preserveCursor        = super._preserveCursor        ;
-  //
 //
-private async _whenPrepared():Promise<ConfigSnapshot> {
-    if ( this.executable.length === 0 ) { // default
-         this.executable = await ß_defaultNppExe();
-    } else {
-  //    if ( ! await isExe( ü_config.executable ) ) {
-  //  throw new Error( ßß_i18n( ßß_text.exe_not_found, ü_exeName ) );
-    }
-    return this;
+private async _whenPrepared( ü_exe:string ):Promise<string> {
+    this.executable = ü_exe.length === 0 // default
+                    ? await ß_defaultNppExe()
+                    : ü_exe
+                    ;
+    return this.executable;
 }
 //
 }

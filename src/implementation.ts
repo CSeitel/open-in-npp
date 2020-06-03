@@ -46,7 +46,7 @@ export async function ß_openSettings() {
 }
 
 export async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined ):Promise<number> {
-    const ü_config:ConfigSnapshot = await ConfigSnapshot.whenPrepared();
+    const ü_config = ConfigSnapshot.current;
     const ü_cmdInfo = Object.assign( Object.create( ü_config ), CCursorPosition ) as TCmdInfo;
     const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
   //
@@ -99,7 +99,7 @@ export async function ß_executeCommand( ü_fileUri:ßß_vsCode.Uri | undefined 
 
       case ESystemErrorCodes.ENOENT:
         if ( ! await exists( ü_cmdInfo.workingDirectory, true  ) ) { ß_showErrorMessage( ßß_i18n( ßß_text.cwd_not_found, ü_cmdInfo.workingDirectory ) ); }
-        if ( ! await exists( ü_cmdInfo.executable      , false ) ) { ß_showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ü_cmdInfo.executable       ) ); }
+        if ( ! await exists( ü_cmdInfo.executable!     , false ) ) { ß_showErrorMessage( ßß_i18n( ßß_text.exe_not_found, ü_cmdInfo.executable       ) ); }
       //break;
       case 'UNKNOWN':
       default       :                                                ß_showErrorMessage( ßß_i18n( ßß_text.cmd_error    , ü_eX.message ) );
@@ -149,8 +149,9 @@ async function ß_spawnProcess( ü_cmdInfo:TCmdInfo, ü_fileName:string, ü_file
     }
     Object.assign( ü_opts, ü_cmdInfo.spawnOptions );
   //
-    console.info( `${ EExtensionIds.fullName }`, ü_opts, [ ü_cmdInfo.executable, ... ü_args ] );
-    const ö_proc = ßß_cp.spawn( ü_cmdInfo.executable, ü_args, ü_opts );
+    const ü_exe = await ü_cmdInfo.whenExecutable;
+    console.info( `${ EExtensionIds.fullName }`, ü_opts, [ ü_exe, ... ü_args ] );
+    const ö_proc = ßß_cp.spawn( ü_exe, ü_args, ü_opts );
   //
     return new Promise<number>( (ü_resolve,ü_reject) => {
       ö_proc.on( 'error', ü_eX => {
