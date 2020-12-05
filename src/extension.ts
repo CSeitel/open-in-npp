@@ -1,41 +1,62 @@
 /*
 */
   import * as ßß_vsCode from 'vscode';
-  import { ConfigSnapshot
-         } from './configHandler';
 //------------------------------------------------------------------------------
-class ExtensionRuntime {
-    readonly extensionApi = ßß_vsCode.extensions.getExtension( EExtensionIds.fullName )!;
-    readonly trace:false|typeof console.log = console.log;
-}
-export const runtime = new ExtensionRuntime();
-//------------------------------------------------------------------------------
-  import { ß_executeCommand
-         , ß_openSettings
-         } from './implementation';
-  import { handleModification
-         } from './configHandler';
+type TOpenInNpp =
+  {
+  }
+export type TExtension = ßß_vsCode.Extension<TOpenInNpp>
 //------------------------------------------------------------------------------
 export const enum EExtensionIds
-    { fullName         = 'CSeitel.open-in-npp'
+    { extensionFullName = 'CSeitel.open-in-npp'
   //
-    , openInNppActive  = 'extension.openInNpp'
-    , openInNppContext = 'extension.openInNppX'
-    , openNppSettings  =           'openInNpp.openSettings'
+    , openInNppActive   = 'extension.openInNpp'
+    , openInNppEditor  = 'extension.openInNppX'
+    , openInNppExplorer = 'extension.openInNppY'
+    , openNppSettings   =           'openInNpp.openSettings'
   //
-    , openWbSettings   = 'workbench.action.openSettings'
     };
 //==============================================================================
 
-export function activate( ü_extContext: ßß_vsCode.ExtensionContext ):void {
+export default class ExtensionRuntime {
+    static readonly developerTrace :false|typeof console.log = console.log;
+    static          activeInstance :ExtensionRuntime //|null = null;
   //
-    ü_extContext.subscriptions.push(
-      ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppActive , ß_executeCommand )
-    , ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppContext, ß_executeCommand )
-    , ßß_vsCode.commands.registerCommand( EExtensionIds.openNppSettings , ß_openSettings   )
+    readonly GSDataApi    :ßß_vsCode.Memento
+    readonly WSDataApi    :ßß_vsCode.Memento
+    readonly extensionApi :TExtension
+
+constructor(
+    readonly context      :ßß_vsCode.ExtensionContext
+){
+    this.GSDataApi    = this.context.globalState    ;
+    this.WSDataApi    = this.context.workspaceState ;
+    this.extensionApi = ßß_vsCode.extensions.getExtension( EExtensionIds.extensionFullName )!;
+  //
+    ExtensionRuntime.activeInstance = this;
+}
+
+}
+
+//------------------------------------------------------------------------------
+  import { ß_executeCommand
+         , CommandHandler
+         } from './implementation';
+  import { ConfigSnapshot
+         } from './configHandler';
+//==============================================================================
+
+export function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):void {
+    new ExtensionRuntime( ü_extnContext );
+  //
+    ü_extnContext.subscriptions.push(
+      ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppActive  , CommandHandler.openInNppActive )
+    , ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppEditor  , CommandHandler.openInNppEditor )
+    , ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppExplorer,              ß_executeCommand  )
+    , ßß_vsCode.commands.registerCommand( EExtensionIds.openNppSettings  , CommandHandler.openSettings    )
     );
   //
-    ßß_vsCode.workspace.onDidChangeConfiguration( handleModification );
+    ßß_vsCode.workspace.onDidChangeConfiguration( ConfigSnapshot.modificationSignalled );
 }
 
 export function deactivate():void {}

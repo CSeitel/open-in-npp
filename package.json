@@ -36,6 +36,9 @@
     , { "command": "extension.openInNppX"
       , "title"  : "Open in Notepad++"
       }
+    , { "command": "extension.openInNppY"
+      , "title"  : "Open in Notepad++"
+      }
     ]
 
   , "menus":
@@ -51,9 +54,10 @@
         }
       ]
     , "explorer/context":
-      [ { "command": "extension.openInNppX"
+      [ { "command": "extension.openInNppY"
         , "when"   : "config.openInNpp.extendExplorerContextMenu"
         , "group"  : "openInNpp@1"
+        , "enablement": "listMultiSelection && !explorerResourceIsRoot && sideBarFocus && activeViewlet == 'workbench.view.explorer'"
         }
       ]
     }

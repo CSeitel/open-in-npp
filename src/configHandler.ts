@@ -4,14 +4,15 @@
          } from 'child_process';
   import * as ßß_vsCode from 'vscode';
 //------------------------------------------------------------------------------
-  import { runtime
-         } from './extension';
+  import   ExtensionRuntime
+           from './extension';
+  const ß_trc = ExtensionRuntime.developerTrace;
+//------------------------------------------------------------------------------
   import { expandEnvVariables
          , isExe
          } from "./lib/any";
   import {
          } from './implementation';
-  const ß_trc = runtime.trace;
 //------------------------------------------------------------------------------
 export const enum EConfigurationIds
     { prefix                    = 'openInNpp'
@@ -40,34 +41,22 @@ export const enum EConfigurationIds
     };
 //==============================================================================
 
-export function handleModification( ü_change:ßß_vsCode.ConfigurationChangeEvent ):void {
-    if (   ü_change.affectsConfiguration( EConfigurationIds.prefix                    ) ) {
-      if ( ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
-        || ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
-         ) { return; }
-      const ü_exe = ü_change.affectsConfiguration( EConfigurationIds.executable )
-      ConfigSnapshot.modificationSignalled( ü_exe );
-    }
-}
-
-//==============================================================================
-
 class ConfigProxy {
 //
 constructor(
     private readonly _wsConfig:ßß_vsCode.WorkspaceConfiguration
-) {}
+){}
 
-protected get _executable            () { return this._wsConfig.get<string>       ( EConfigurationIds.executable            )!; }
-protected get _spawnOptions          () { return this._wsConfig.get<SpawnOptions> ( EConfigurationIds.spawnOptions          )!; }
-protected get _workingDirectory      () { return this._wsConfig.get<string>       ( EConfigurationIds.workingDirectory      )!; }
-protected get _decoupledExecution    () { return this._wsConfig.get<boolean>      ( EConfigurationIds.decoupledExecution    )!; }
-protected get _commandLineArguments  () { return this._wsConfig.get<string[]>     ( EConfigurationIds.commandLineArguments  )!; }
-protected get _multiInst             () { return this._wsConfig.get<boolean>      ( EConfigurationIds.multiInst             )!; }
-protected get _skipSessionHandling   () { return this._wsConfig.get<string>       ( EConfigurationIds.skipSessionHandling   )!; }
-protected get _openFolderAsWorkspace () { return this._wsConfig.get<string>       ( EConfigurationIds.openFolderAsWorkspace )!; }
-protected get _filesInFolderPattern  () { return this._wsConfig.get<string>       ( EConfigurationIds.filesInFolderPattern  )!; }
-protected get _preserveCursor        () { return this._wsConfig.get<boolean>      ( EConfigurationIds.preserveCursor        )!; }
+  get _executable            ():string       { return this._wsConfig.get( EConfigurationIds.executable            ) as any; }
+  get  spawnOptions          ():SpawnOptions { return this._wsConfig.get( EConfigurationIds.spawnOptions          ) as any; }
+  get _workingDirectory      ():string       { return this._wsConfig.get( EConfigurationIds.workingDirectory      ) as any; }
+  get  decoupledExecution    ():boolean      { return this._wsConfig.get( EConfigurationIds.decoupledExecution    ) as any; }
+  get  commandLineArguments  ():string[]     { return this._wsConfig.get( EConfigurationIds.commandLineArguments  ) as any; }
+  get  multiInst             ():boolean      { return this._wsConfig.get( EConfigurationIds.multiInst             ) as any; }
+  get  skipSessionHandling   ():string       { return this._wsConfig.get( EConfigurationIds.skipSessionHandling   ) as any; }
+  get  openFolderAsWorkspace ():string       { return this._wsConfig.get( EConfigurationIds.openFolderAsWorkspace ) as any; }
+  get  filesInFolderPattern  ():string       { return this._wsConfig.get( EConfigurationIds.filesInFolderPattern  ) as any; }
+  get  preserveCursor        ():boolean      { return this._wsConfig.get( EConfigurationIds.preserveCursor        ) as any; }
 
 }
 
@@ -77,11 +66,18 @@ export class ConfigSnapshot extends ConfigProxy {
 //
     private static _current:ConfigSnapshot | null = null;
 //
-static modificationSignalled( ü_executable:boolean ) {
-    if ( this._current === null ) { return; }
-         this._current  =  null;
-    if ( ü_executable ) {
-      if(ß_trc){ß_trc( EConfigurationIds.executable );}
+static modificationSignalled( this:undefined, ü_change:ßß_vsCode.ConfigurationChangeEvent ):void {
+    if ( ConfigSnapshot._current === null ) { return; }
+    if (   ü_change.affectsConfiguration( EConfigurationIds.prefix                    ) ) {
+      if ( ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
+        || ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
+         ) { return; }
+      const ü_exe
+         = ü_change.affectsConfiguration( EConfigurationIds.executable )
+         ConfigSnapshot._current  =  null;
+      if ( ü_exe ) {
+        if(ß_trc){ß_trc( EConfigurationIds.executable );}
+      }
     }
 }
 //
@@ -94,15 +90,7 @@ static get current():ConfigSnapshot {
 //
              executable?:string
     readonly whenExecutable        = this._whenPrepared( expandEnvVariables( super._executable ) );
-    readonly spawnOptions          = super._spawnOptions          ;
     readonly workingDirectory      = expandEnvVariables( super._workingDirectory );
-    readonly decoupledExecution    = super._decoupledExecution    ;
-    readonly commandLineArguments  = super._commandLineArguments  ;
-    readonly multiInst             = super._multiInst             ;
-    readonly skipSessionHandling   = super._skipSessionHandling   ;
-    readonly openFolderAsWorkspace = super._openFolderAsWorkspace ;
-    readonly filesInFolderPattern  = super._filesInFolderPattern  ;
-    readonly preserveCursor        = super._preserveCursor        ;
 //
 private async _whenPrepared( ü_exe:string ):Promise<string> {
     this.executable = ü_exe.length === 0 // default

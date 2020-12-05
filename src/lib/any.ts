@@ -1,13 +1,17 @@
 /*
 */
   import * as ßß_path from 'path';
+  import { SpawnOptions
+                    } from 'child_process';
+  import * as ßß_cp   from 'child_process';
   import { promises as ßß_fs
          , Stats
          , PathLike
          } from 'fs';
 //------------------------------------------------------------------------------
-  import { runtime } from '../extension';
-  const ß_trc = runtime.trace;
+  import   ExtensionRuntime
+           from '../extension';
+  const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 //==============================================================================
@@ -46,6 +50,36 @@ function ö_win32( ü_original:string, ü_name:string ):string {
 }
 //
 }
+
+//==============================================================================
+
+export async function whenChildProcessSpawned( ü_exe:string, ü_args:readonly string[], ü_opts?:SpawnOptions ):Promise<number> {
+  //
+    if ( ü_opts === undefined )
+       { ü_opts = {};
+       }
+  //
+    let ö_resolve:(ü_value:number) => void
+    let ö_reject :(ü_error:Error ) => void
+    const ü_whenPid = new Promise<number>( (ü_resolve,ü_reject) => {
+      ö_resolve = ü_resolve;
+      ö_reject  = ü_reject ;
+    //ö_reject  = ( ü_eX ) => { ü_reject( ü_eX ); }; _showError( ü_eX, [ ü_exe, ... ü_args ] );
+    });
+  //
+    try {
+    //
+      const ö_proc = ßß_cp.spawn( ü_exe, ü_args, ü_opts );
+      if ( ö_proc.pid === undefined ) { ö_proc.on( 'error', ö_reject !             ); }
+      else                            {                     ö_resolve!( ö_proc.pid ); }
+    //
+    } catch ( ü_eX ) {
+      ö_reject!( ü_eX );
+    }
+  //
+    return ü_whenPid;
+}
+
 
 //==============================================================================
 /*

@@ -6,7 +6,6 @@
   ],
   "settings": {
     "openInNpp.filesInFolderPattern": "*.txt",
-    "openInNpp.workingDirectory": "%Temp%",
-    "openInNpp.Executable": "%Cwd%"
+    "openInNpp.workingDirectory": "%Temp%"
   }
 }

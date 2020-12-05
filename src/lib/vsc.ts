@@ -2,9 +2,14 @@
 */
   import * as ßß_vsCode from 'vscode';
   import ßß_fs = ßß_vsCode.workspace.fs;
-  import { runtime
-         } from '../extension';
-  const ß_trc = runtime.trace;
+//------------------------------------------------------------------------------
+  import   ExtensionRuntime
+           from '../extension';
+  const ß_trc = ExtensionRuntime.developerTrace;
+//------------------------------------------------------------------------------
+export const enum EVscConstants {
+      openWbSettings    = 'workbench.action.openSettings'
+}
 //==============================================================================
 
 export async function isDirectory( ü_fileUri:ßß_vsCode.Uri ):Promise<boolean> {
