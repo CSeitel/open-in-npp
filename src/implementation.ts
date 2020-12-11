@@ -19,9 +19,13 @@
   import { ESystemErrorCodes
          } from './lib/types';
   import { EVscConstants
-         , isDirectory , exists , findFiles
+         , isDirectory
+         , exists
+         , findFiles
          } from './lib/vsc';
-  import { whenChildProcessSpawned
+  import { putFirst
+         , putFirstIndex
+         , whenChildProcessSpawned
          } from './lib/any';
   import { EConfigurationIds
          , ConfigSnapshot
@@ -39,6 +43,11 @@
     , skipSessionHandling    = '-nosession'
     ,   lineNumber           = '-n'
     , columnNumber           = '-c'
+    };
+  const enum EFileTypes
+    { UNKNOWN = 0
+    , FILE
+    , FOLDER
     };
 //------------------------------------------------------------------------------
   const CNaLineNumber = 0;
@@ -70,11 +79,17 @@ static async openInNppEditor( this:null, ü_fileUri:ßß_vsCode.Uri ):Promise<nu
 static async openInNppExplorer( this:null, ö_fileUri:ßß_vsCode.Uri, ü_fileUris:ßß_vsCode.Uri[] ):Promise<number> {
     if(ß_trc){ß_trc( 'Explorer Context' );}
   //
-    let ü_otherFiles:string[] = ü_fileUris.map( ü_fileUri => ü_fileUri.fsPath )
-                                          .filter( ü_file => ü_file !== ö_fileUri.fsPath );
+    const ü_all = Promise.all( ü_fileUris.map( ü_fileUri => isDirectory( ü_fileUri ) ) );
+    const ü_isFolder = await ü_all;
+  //
+    const ü_mainFile   = ö_fileUri.fsPath;
+    const ü_otherFiles = ü_fileUris.map( ü_fileUri => ü_fileUri.fsPath );
+  //
+    const ü_indx = putFirst     ( ü_otherFiles, ü_mainFile );
+                   putFirstIndex( ü_isFolder  , ü_indx     );
   //
     const ü_config = ConfigSnapshot.current;
-    const ü_args = new CLIArgs( ü_config, ö_fileUri.fsPath, ü_otherFiles );
+    const ü_args = new CLIArgs( ü_config, ü_otherFiles );
     return ü_args.submit();
 }
 
@@ -83,43 +98,146 @@ static async openInNppExplorer( this:null, ö_fileUri:ßß_vsCode.Uri, ü_fileUr
 //==============================================================================
 
 class CLIArgs {
-    private _selection        :ßß_vsCode.Selection|null = null;
-    private _noMainFile       :boolean
-    private          _mainFileIsFolder :boolean   = false
+    private          _mainFileType :EFileTypes = EFileTypes.UNKNOWN;
+    private          _mainFile     :string     = '';
+    private          _others       :string[]   = [];
+    private          _asWorkspace  :boolean    = false;
+    private          _cursorArgs   :string[]   = [];
 
-constructor( _config:ConfigSnapshot                                         );
-constructor( _config:ConfigSnapshot, _mainFile:string                       );
-constructor( _config:ConfigSnapshot, _mainFile:string, _otherFiles:string[] );
+constructor( _config:ConfigSnapshot                     );
+constructor( _config:ConfigSnapshot, _mainFile:string   );
+constructor( _config:ConfigSnapshot, _others  :string[] );
 constructor(
     private readonly _config           :ConfigSnapshot
-  , private          _mainFile         :string    = ''
-  , private          _otherFiles       :string[]  = []
+  ,                 ü_mainFile        ?:string | string[]
 ){
-    if(ß_trc){ß_trc( 'Arguments', arguments.length );}
-
-    this._noMainFile = this._mainFile.length === 0;
+  //
     const ü_activeEditor = ßß_vsCode.window.activeTextEditor;
+  //
+    if ( Array.isArray( ü_mainFile ) ) {
+    // Explorer
+      this._mainFile = ü_mainFile[0];
+      this._others   = ü_mainFile   ;
+      if ( this._others.length < 2 ) {
+      // One File
+        if ( ü_activeEditor                   !== undefined      ) {
+        if ( ü_activeEditor.document.fileName === this._mainFile ) {
+          this._compileCursorArgs( ü_activeEditor );
+        } else {
+        }
+        }
 
-    if ( this._noMainFile ) {
-      if ( ü_activeEditor === undefined ) {
-        ß_showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
-        return;
+      } else {
+      // Multiple Files
       }
-      this._mainFile = ü_activeEditor.document.fileName;
+
+    } else if ( ü_mainFile !== undefined ) {
+    // Editor
+      this._mainFile = ü_mainFile;
+        if ( ü_activeEditor                   !== undefined
+          && ü_activeEditor.document.fileName === this._mainFile ) {
+          this._compileCursorArgs( ü_activeEditor );
+        } else {
+          this._mainFileType = EFileTypes.FILE;
+          console.log( ü_mainFile ); // Trigger always active ?
+        }
+
     } else {
-      if ( ü_activeEditor                   === undefined
-        || ü_activeEditor.document.fileName !== this._mainFile
-         ) {
-        return; // Trigger always active ?
-      }
+    // Palette
+        if ( ü_activeEditor !== undefined ) {
+          this._mainFile = ü_activeEditor.document.fileName;
+          this._compileCursorArgs( ü_activeEditor );
+        } else {
+          ß_showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
+        }
     }
   //
-    if ( this._config.preserveCursor ) { this._selection = ü_activeEditor.selection; }
+}
+
+private _compileCursorArgs( ü_activeEditor:ßß_vsCode.TextEditor ):void {
+    this._mainFileType = EFileTypes.FILE;
+    if ( ! this._config.preserveCursor ) { return; }
+  //
+    const ü_selection = ü_activeEditor.selection;
+    if ( ü_selection !== null
+      && ü_selection.isEmpty
+       ) {
+      this._cursorArgs.push( ECLIParameters.  lineNumber + ( 1 + ü_selection.active.line      ) );
+      this._cursorArgs.push( ECLIParameters.columnNumber + ( 1 + ü_selection.active.character ) );
+    }
+}
+
+private async _whenFilesFound( ö_pattern:string ):Promise<string[]> {
+  //
+     switch( this._others.length ) {
+       case 1:
+         return await this._whenFileisFolder()
+              ? await findFiles( this._mainFile, ö_pattern )
+              :                  this._others
+              ;
+    }
+  //
+    const ö_isFolder = await Promise.all( this._others.map(  ü_file         =>                      isDirectory( ü_file ) ) );
+    const ü_subsets  = await Promise.all( this._others.map( (ü_file,ü_indx) => ö_isFolder[ ü_indx ] ? findFiles( ü_file, ö_pattern )
+                                                                                                    :          [ ü_file ] ) );
+                                    const ö_files:string[] = [];
+    for ( const ü_subset of ü_subsets ) { ö_files.push( ... ü_subset ); }
+                                   return ö_files;
+}
+
+private async _cwd():Promise<string> {
+    let ü_cwd = this._config.workingDirectory;
+  //
+    if ( ü_cwd.length > 0 ) {
+      if ( ! ßß_path.isAbsolute( ü_cwd ) ) {
+       ü_cwd = ßß_path.join(
+                          await this._whenFileisFolder()
+             ?                  this._mainFile
+             : ßß_path.dirname( this._mainFile )
+             ,                      ü_cwd )
+             ;
+      }
+    } else {
+       ü_cwd =            await this._whenFileisFolder()
+             ?                  this._mainFile
+             : ßß_path.dirname( this._mainFile )
+             ;
+    }
+  //
+    return ü_cwd;
+//
+}
+
+private async _whenFileisFolder():Promise<boolean> {
+      if ( this._mainFileType === EFileTypes.UNKNOWN )
+         { this._mainFileType  =  await isDirectory( this._mainFile )
+                               ?  EFileTypes.FOLDER
+                               :  EFileTypes.FILE
+                               ;
+         }
+    return this._mainFileType === EFileTypes.FOLDER;
 }
 
 async submit():Promise<number> {
+  //ß_showInformationMessage( ßß_i18n( ßß_text.file_hits,  ü_files.length , ü_pattern , ü_fileName ) );
+  //
+    if ( this._others.length > 0 ) { // folders possible
+      if ( this._config.filesInFolderPattern.length > 0 ) {
+        this._others = await this._whenFilesFound( this._config.filesInFolderPattern );
+        if ( this._config.openFolderAsWorkspace ) {
+          // ignored
+        }
+      } else {
+        if (       this._config.openFolderAsWorkspace
+          && await this._whenFileisFolder() ) {
+                   this._asWorkspace = true;
+        }
+      }
+    }
+    const ü_cwd = await this._cwd();
+  //
     const ü_exe  = await this._config.whenExecutable;
-    const ü_opts = this._options();
+    const ü_opts = this._options( ü_cwd );
     const ü_args = this._arguments();
   //
     if(ß_trc){ß_trc( 'ChildProcess', ü_exe, ü_args, ü_opts );}
@@ -127,61 +245,35 @@ async submit():Promise<number> {
 }
 
 private _arguments():string[] {
+  //
   //const ü_args = [ ... this._config.commandLineArguments ];
     const ü_args =       this._config.commandLineArguments  ;
   //
     if ( this._config.multiInst
-    || ( this._mainFileIsFolder
-      && this._config.openFolderAsWorkspace    ) ) { ü_args.push( ECLIParameters.multipleInstances                     ); }
+      || this._asWorkspace                ) { ü_args.push( ECLIParameters.multipleInstances      ); }
   //
-    if ( this._config.skipSessionHandling        ) { ü_args.push( ECLIParameters.skipSessionHandling                   ); }
+    if ( this._config.skipSessionHandling ) { ü_args.push( ECLIParameters.skipSessionHandling    ); }
   //
-    if ( this._selection !== null
-      && this._selection.isEmpty                 ) { ü_args.push( ECLIParameters.  lineNumber + ( 1 + this._selection.active.line      ) );
-                                                     ü_args.push( ECLIParameters.columnNumber + ( 1 + this._selection.active.character ) ); }
+    if ( this._asWorkspace                ) { ü_args.push( ECLIParameters.openFoldersAsWorkspace ); }
+                                              ü_args.push( ... this._cursorArgs                  );
   //
-    if ( this._mainFileIsFolder                           ) {
-    if ( this._config.openFolderAsWorkspace   ) { ü_args.push( ECLIParameters.openFoldersAsWorkspace                );
-                                                  ü_args.push(     this._mainFile   ); }
-                                                  ü_args.push( ... this._otherFiles ); }
-    else                                        { ü_args.push(     this._mainFile   ); }
+    if ( this._others.length > 0          ) { ü_args.push( ... this._others                      ); }
+    else                                    { ü_args.push(     this._mainFile                    ); }
   //
     return ü_args;
 }
 
-private _options():SpawnOptions {
+private _options( ü_cwd:string ):SpawnOptions {
   //
     const ü_opts:SpawnOptions =
       { stdio   : 'ignore'
       , detached: this._config.decoupledExecution
-      , cwd     : this._cwd()
+      , cwd     : ü_cwd
       };
   //
     Object.assign( ü_opts, this._config.spawnOptions );
   //
     return ü_opts;
-}
-
-private _cwd():string {
-    const ü_cfgWd = this._config.workingDirectory;
-  //
-    if ( ü_cfgWd.length > 0 ) {
-
-      if ( ßß_path.isAbsolute( ü_cfgWd ) ) {
-        return ü_cfgWd;
-      }
-
-      return ßß_path.join(    this._mainFileIsFolder
-           ?                  this._mainFile
-           : ßß_path.dirname( this._mainFile )
-           ,                  ü_cfgWd )
-           ;
-    }
-  //
-      return                  this._mainFileIsFolder
-           ?                  this._mainFile
-           : ßß_path.dirname( this._mainFile )
-           ;
 }
 
 }

@@ -12,9 +12,10 @@ export const enum EVscConstants {
 }
 //==============================================================================
 
-export async function isDirectory( ü_fileUri:ßß_vsCode.Uri ):Promise<boolean> {
+export async function isDirectory( ü_fileUri:ßß_vsCode.Uri|string ):Promise<boolean> {
   //
-    const ü_stat = await ßß_fs.stat( ü_fileUri );
+    const ü_stat = await ßß_fs.stat( typeof( ü_fileUri ) === 'string' ? ßß_vsCode.Uri.parse( ü_fileUri )
+                                                                      :                      ü_fileUri );
     return ü_stat.type === ßß_vsCode.FileType.Directory;
 }
 
