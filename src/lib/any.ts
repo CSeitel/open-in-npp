@@ -1,9 +1,9 @@
 /*
 */
   import * as ßß_path from 'path';
+  import * as ßß_cp   from 'child_process';
   import { SpawnOptions
                     } from 'child_process';
-  import * as ßß_cp   from 'child_process';
   import { promises as ßß_fs
          , Stats
          , PathLike
@@ -90,20 +90,23 @@ export async function whenChildProcessSpawned( ü_exe:string, ü_args:readonly s
     try {
     //
       const ö_proc = ßß_cp.spawn( ü_exe, ü_args, ü_opts );
-      if ( ö_proc.pid === undefined ) { ö_proc.on( 'error', ö_reject !             ); }
+      if ( ö_proc.pid === undefined ) { ö_proc.on( 'error', ö_rejectError          ); }
       else                            {                     ö_resolve!( ö_proc.pid ); }
     //
     } catch ( ü_eX ) {
-      ö_reject!( ü_eX );
+      ö_rejectError( ü_eX );
     }
   //
     return ü_whenPid;
+//
+function ö_rejectError( ü_eX:Error ) {
+    console.error( ü_eX );
+    ö_reject( ü_eX );
+}
+//
 }
 
 
 //==============================================================================
 /*
-https://www.linux.com/tutorials/understanding-linux-file-permissions/
-//ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
-//ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
 */

@@ -5,7 +5,20 @@
     }
   ],
   "settings": {
-    "openInNpp.preserveCursorPosition": false,
-    "openInNpp.Executable": "notepad.exe"
+    "openInNpp.preserveCursorPosition": true,
+    "openInNpp.Executable": "C:/PROGRA~1/Notepad++/notepad++.exe"
+  , "openInNpp.Executable_": "notepad++.exe"
+  , "openInNpp.Executable__": "C:/zzz_Dev/node_modules/Wsf-Bin/tmp/WsfEchoArgs.wsf"
+  , "openInNpp.Executable___": "C:/zzz_Dev/node_modules/Wsf-Bin/ahk/Echo Arguments.exe"
+  , "openInNpp.commandLineArguments_": [ "\"a  b\"" ]
+  , "openInNpp.spawnOptions": {
+      "windowsVerbatimArguments": true
+    , "cwd": "%TEMP%"
+    , "cwd__": "C:/PROGRA~1/Notepad++"
+    , "cwd_": "C:/Program Files/Notepad++"
+    , "env": {
+        "TEMP": "C:\\%HOMEPATH%\\"
+      }
+  }
   }
 }

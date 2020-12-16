@@ -1,5 +1,6 @@
 /*
 */
+  import * as ßß_path   from 'path';
   import { SpawnOptions
          } from 'child_process';
   import * as ßß_vsCode from 'vscode';
@@ -95,7 +96,7 @@ static get current():ConfigSnapshot {
 private async _whenPrepared( ü_exe:string ):Promise<string> {
     this.executable = ü_exe.length === 0 // default
                     ? await ß_defaultNppExe()
-                    : ü_exe
+                    : ßß_path.normalize( ü_exe )
                     ;
     return this.executable;
 }

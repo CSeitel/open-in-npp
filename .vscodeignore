@@ -1,9 +1,12 @@
 .vscode/**
 .vscode-test/**
+etc/**
+images/VSC.PNG
 out/test/**
 src/**
 .gitignore
-vsc-extension-quickstart.md
+.vscodeignore
+anyTreeConfig.json
 **/tsconfig.json
 **/tslint.json
 **/*.map

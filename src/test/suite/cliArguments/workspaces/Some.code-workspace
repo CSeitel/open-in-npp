@@ -4,8 +4,15 @@
       "path": "../"
     }
   ],
-  "settings": {
-    "openInNpp.filesInFolderPattern": "*.txt",
-    "openInNpp.workingDirectory": "%Temp%"
+  "settings":
+  {
+    "openInNpp.filesInFolderPattern": ""
+  , "openInNpp.openFolderAsWorkspace": true
+  , "openInNpp.spawnOptions": {
+      "windowsVerbatimArguments": true
+    , "env": {
+        "TEMP": "C:\\${HOME}\\"
+      }
+  }
   }
 }

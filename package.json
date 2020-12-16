@@ -23,6 +23,7 @@
   [ "onCommand:openInNpp.openSettings"
   , "onCommand:extension.openInNpp"
   , "onCommand:extension.openInNppX"
+  , "onCommand:extension.openInNppY"
   ]
 , "main": "./out/extension.js"
 , "contributes":
@@ -53,11 +54,22 @@
         , "group"  : "openInNpp@1"
         }
       ]
+    , "editor/title/context":
+      [ { "command": "extension.openInNppX"
+        , "when"   : "config.openInNpp.extendEditorContextMenu"
+        , "group"  : "openInNpp@1"
+        }
+      ]
+    , "editor/title":
+      [ { "command": "extension.openInNppX"
+        , "when"   : "config.openInNpp.extendEditorContextMenu"
+        , "group"  : "openInNpp@1"
+        }
+      ]
     , "explorer/context":
       [ { "command": "extension.openInNppY"
         , "when"   : "config.openInNpp.extendExplorerContextMenu"
         , "group"  : "openInNpp@1"
-        , "enablement": "listMultiSelection && !explorerResourceIsRoot && sideBarFocus && activeViewlet == 'workbench.view.explorer'"
         }
       ]
     }

@@ -11,7 +11,7 @@ export const enum EExtensionIds
     { extensionFullName = 'CSeitel.open-in-npp'
   //
     , openInNppActive   = 'extension.openInNpp'
-    , openInNppEditor  = 'extension.openInNppX'
+    , openInNppEditor   = 'extension.openInNppX'
     , openInNppExplorer = 'extension.openInNppY'
     , openNppSettings   =           'openInNpp.openSettings'
   //
@@ -39,8 +39,7 @@ constructor(
 }
 
 //------------------------------------------------------------------------------
-  import { ß_executeCommand
-         , CommandHandler
+  import { CommandHandler
          } from './implementation';
   import { ConfigSnapshot
          } from './configHandler';
@@ -50,10 +49,10 @@ export function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):void {
     new ExtensionRuntime( ü_extnContext );
   //
     ü_extnContext.subscriptions.push(
-      ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppActive  , CommandHandler.openInNppActive )
-    , ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppEditor  , CommandHandler.openInNppEditor )
-    , ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppExplorer,              ß_executeCommand  )
-    , ßß_vsCode.commands.registerCommand( EExtensionIds.openNppSettings  , CommandHandler.openSettings    )
+      ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppActive  , CommandHandler.openInNppActive   )
+    , ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppEditor  , CommandHandler.openInNppEditor   )
+    , ßß_vsCode.commands.registerCommand( EExtensionIds.openInNppExplorer, CommandHandler.openInNppExplorer )
+    , ßß_vsCode.commands.registerCommand( EExtensionIds.openNppSettings  , CommandHandler.openSettings      )
     );
   //
     ßß_vsCode.workspace.onDidChangeConfiguration( ConfigSnapshot.modificationSignalled );

@@ -7,5 +7,13 @@
   "settings": {
     "openInNpp.preserveCursorPosition": false,
     "openInNpp.Executable": "%ProgramFiles(x86)%\\Vim\\vim82\\gvim.exe"
+  , "openInNpp.spawnOptions": {
+      "env": {
+        "VIMHOME" : "C:/zzz_AppData/vim"
+      , "VIMINIT" : "source C:/zzz_AppData/vim/src/vimrc.vim"
+      , "VIMINIT2" : "source %VIMHOME%/src/vimrc.vim"
+      , "GVIMINIT": "call GVIMInit()"
+      }
+    }
   }
 }
