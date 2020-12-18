@@ -9,24 +9,20 @@
            from './extension';
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
-  import { i18n    as ßß_i18n
-         , textIds as ßß_text
+  import   ßß_i18n
+           from './i18n';
+  import { EButtons as EButtons
          } from './i18n';
 //------------------------------------------------------------------------------
-  import { EExtensionIds
-         } from './extension';
-  import { ESystemErrorCodes
-         } from './lib/types';
+  import { expandEnvVariables
+         , whenChildProcessSpawned
+         } from './lib/any';
   import { EVscConstants
          , isDirectory
          , findFiles
          } from './lib/vsc';
-  import { putFirst
-         , putFirstIndex
-         , whenChildProcessSpawned
-         } from './lib/any';
-  import { EConfigurationIds
-         , ConfigSnapshot
+  import {
+           ConfigSnapshot
          } from './configHandler';
 //------------------------------------------------------------------------------
   import ß_showInformationMessage = ßß_vsCode.window.showInformationMessage;
@@ -56,17 +52,13 @@
                  | EModes.EDITOR
                  | EModes.PALETTE
 //------------------------------------------------------------------------------
-  const CNaLineNumber = 0;
-  const CCursorPosition =
-    { lineNumber   : CNaLineNumber
-    , columnNumber : CNaLineNumber
-    }
+  const CNotAPid = -1;
 //==============================================================================
 
 export class CommandHandler {
 
 static async openSettings( this:null ):Promise<void> {
-    await ßß_vsCode.commands.executeCommand( EVscConstants.openWbSettings, EConfigurationIds.prefix );
+    await ßß_vsCode.commands.executeCommand( EVscConstants.openWbSettings, ConfigSnapshot.prefix );
 }
 
 static async openInNppActive( this:null ):Promise<number> {
@@ -79,16 +71,16 @@ static async openInNppActive( this:null ):Promise<number> {
 static async openInNppEditor( this:null, ü_fileUri:ßß_vsCode.Uri, ...ü_more:any[] ):Promise<number> {
     if(ß_trc){ß_trc( `Editor Context: ${ arguments.length }`, ü_more );}
   //
-    const ü_args = new CLIArgs( EModes.EDITOR, ü_fileUri.fsPath );
+    const ü_args = new CLIArgs( EModes.EDITOR, ü_fileUri );
     return ü_args.submit();
 }
 
-static async openInNppExplorer( this:null, ö_fileUri:ßß_vsCode.Uri, ü_fileUris:ßß_vsCode.Uri[] ):Promise<number> {
+static async openInNppExplorer( this:null, ü_fileUri:ßß_vsCode.Uri, ü_fileUris:ßß_vsCode.Uri[] ):Promise<number> {
     if(ß_trc){ß_trc( 'Explorer Context' );}
   //
     const ü_others = ü_fileUris.map( ü_fileUri => ü_fileUri.fsPath );
   //
-    const ü_args = new CLIArgs( EModes.EXPLORER, ö_fileUri.fsPath, ü_others );
+    const ü_args = new CLIArgs( EModes.EXPLORER, ü_fileUri, ü_others );
     return ü_args.submit();
 }
 
@@ -105,23 +97,23 @@ class CLIArgs {
     private          _others       :string[]   = [];
     private          _asWorkspace  :boolean    = false;
 
-constructor( ü_mode:TAllModes                                         );
-constructor( ü_mode:TAllModes, ü_mainPath :string                     );
-constructor( ü_mode:TAllModes, ü_mainPath :string, ü_others :string[] );
-constructor( ü_mode:TAllModes, ü_mainPath?:string, ü_others?:string[]
+constructor( ü_mode:TAllModes                                               );
+constructor( ü_mode:TAllModes, ü_mainUri :ßß_vsCode.Uri                     );
+constructor( ü_mode:TAllModes, ü_mainUri :ßß_vsCode.Uri, ü_others :string[] );
+constructor( ü_mode:TAllModes, ü_mainUri?:ßß_vsCode.Uri, ü_others?:string[]
 ){
     if(ß_trc){ß_trc( `ActiveEditor: ${ this._activeEditor !== undefined }` );}
   //
     switch ( this._mode = ü_mode ) {
 
       case EModes.EXPLORER:
-        this._others   = ü_others  !;
-        this._mainPath = ü_mainPath!;
+        this._others   = ü_others !       ;
+        this._mainPath = ü_mainUri!.fsPath;
         break;
 
       case EModes.EDITOR:
         this._mainFileType = EFileTypes.FILE;
-        this._mainPath     = ü_mainPath!;
+        this._mainPath     = CLIArgs._fsPath( ü_mainUri! );
         break;
 
       case EModes.PALETTE:
@@ -137,21 +129,31 @@ constructor( ü_mode:TAllModes, ü_mainPath?:string, ü_others?:string[]
     }
 }
 
+static _fsPath( ü_fileUri:ßß_vsCode.Uri ):string {
+    switch ( ü_fileUri.scheme ) {
+        case 'file':
+          return ü_fileUri.fsPath;
+        case 'vscode-settings':
+          return expandEnvVariables( '%APPDATA%/Code/User/settings.json' );
+    }
+    return '';
+}
+
 async submit():Promise<number> {
   //
     switch ( this._mode ) {
 
       case EModes.NOFILE:
-        ß_showInformationMessage( ßß_i18n( ßß_text.no_active_file ) );
-        return -1;
+        ß_showInformationMessage( ßß_i18n.no_active_file() );
+        return CNotAPid;
 
       case EModes.EXPLORER: // folders possible
         const ü_pattern = this._config.filesInFolderPattern;
         if ( ü_pattern.length > 0 ) {
           this._others = await this._whenPatternMatched( ü_pattern );
-          ß_showInformationMessage( ßß_i18n( ßß_text.file_hits, this._others.length , ü_pattern , this._mainPath ) );
+          ß_showInformationMessage( ßß_i18n.file_hits( this._others.length , ü_pattern , this._mainPath ) );
           if ( this._others.length === 0 ) {
-            return -1;
+            return CNotAPid;
           }
           if ( this._config.openFolderAsWorkspace ) {
             // ignored
@@ -173,16 +175,17 @@ async submit():Promise<number> {
     if ( ü_verbatim ) {
       if(ß_trc){ß_trc( `windowsVerbatimArguments: ${ ü_opts.windowsVerbatimArguments }` );}
     }
-    const ü_args =       this._arguments( ü_verbatim );
+    const ü_args = await this._arguments( ü_verbatim );
+    if ( ü_args.length === 0 ) { return CNotAPid; }
   //
     if(ß_trc){ß_trc( 'ChildProcess', ü_exe, ü_args, ü_opts );}
     try {
       const ü_pid =  await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
       return ü_pid;
     } catch ( ü_eX ) {
-      ß_showErrorMessage( ( ü_eX as Error ).message );
+      ß_showErrorMessage( ßß_i18n.spawn_error( ( ü_eX as Error ).message ) );
     //ß_showInformationMessage( ( ü_eX as Error ).message );
-      return -1;
+      return CNotAPid;
     }
 }
 
@@ -216,12 +219,7 @@ private _compileCursorPosition( ü_args:string[] ):void {
     ü_args.push( ECLIParameters.columnNumber + ( 1 + ü_selection.active.character ) );
 }
 
-private _quote( ...ü_args:string[] ):string[] {
-           ü_args.forEach( (ü_arg,ü_indx) => { ü_args[ ü_indx ] = `"${ ü_arg }"`; } );
-    return ü_args;
-}
-
-private _arguments( ü_verbatim:boolean ):string[] {
+private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
   //
     const ü_args = [];
   //
@@ -235,10 +233,31 @@ private _arguments( ü_verbatim:boolean ):string[] {
   //
                                               ü_args.push( ... this._config.commandLineArguments );
   //
-    if ( this._others.length > 0          ) { ü_args.push( ... ( ü_verbatim ? this._quote( ... this._others   )
-                                                                            :                  this._others   ) ); }
-    else                                    { ü_args.push(       ü_verbatim ? this._quote(     this._mainPath )[0]
-                                                                            :                  this._mainPath   ); }
+    if ( this._others.length > 0          ) {
+      if ( this._others.length > 5 ) {
+        const ü_todo = await ß_showInformationMessage( ßß_i18n.max_items( 5, this._others.length )
+                           , { title: EButtons.OK    () , id: EButtons.OK     }
+                           , { title: EButtons.ALL   () , id: EButtons.ALL    }
+                           , { title: EButtons.CANCEL() , id: EButtons.CANCEL }
+                           );
+        if(ß_trc){ß_trc( ü_todo );}
+        switch ( ü_todo?.id ) {
+        //case EButtons.ALL:
+        //  break;
+          case EButtons.OK:
+            this._others.splice( 5 );
+          case EButtons.CANCEL:
+          case undefined :
+        //default        :
+                   ü_args.length = 0;
+            return ü_args;
+        }
+      }
+                                              ü_args.push( ... ( ü_verbatim ? ß_quote( ... this._others   )
+                                                                            :              this._others   ) );
+    } else                                  { ü_args.push(       ü_verbatim ? ß_quote(     this._mainPath )[0]
+                                                                            :              this._mainPath   );
+    }
   //
     return ü_args;
 }
@@ -302,6 +321,13 @@ private async _whenPatternMatched( ö_pattern:string ):Promise<string[]> {
                                    return ö_files;
 }
 
+}
+
+//==============================================================================
+
+function ß_quote( ...ü_args:string[] ):string[] {
+           ü_args.forEach( (ü_arg,ü_indx) => { ü_args[ ü_indx ] = `"${ ü_arg }"`; } );
+    return ü_args;
 }
 
 //==============================================================================

@@ -1,9 +1,9 @@
 /*
 */
+  import * as ßß_vsCode from 'vscode';
   import * as ßß_path   from 'path';
   import { SpawnOptions
          } from 'child_process';
-  import * as ßß_vsCode from 'vscode';
 //------------------------------------------------------------------------------
   import   ExtensionRuntime
            from './extension';
@@ -12,13 +12,12 @@
   import { expandEnvVariables
          , isExe
          } from "./lib/any";
-  import {
-         } from './implementation';
 //------------------------------------------------------------------------------
-export const enum EConfigurationIds
-    { prefix                    = 'openInNpp'
+  const enum EConfigurationIds
+    {
+      extendExplorerContextMenu = 'openInNpp.extendExplorerContextMenu'
     , extendEditorContextMenu   = 'openInNpp.extendEditorContextMenu'
-    , extendExplorerContextMenu = 'openInNpp.extendExplorerContextMenu'
+    , extendEditorTitleMenu     = 'openInNpp.extendEditorTitleMenu'
   //
     , executable                = 'openInNpp.Executable'
     , spawnOptions              = 'openInNpp.spawnOptions'
@@ -65,13 +64,16 @@ constructor(
 
 export class ConfigSnapshot extends ConfigProxy {
 //
+    static readonly prefix                    = 'openInNpp'
     private static _current:ConfigSnapshot | null = null;
 //
 static modificationSignalled( this:undefined, ü_change:ßß_vsCode.ConfigurationChangeEvent ):void {
     if ( ConfigSnapshot._current === null ) { return; }
-    if (   ü_change.affectsConfiguration( EConfigurationIds.prefix                    ) ) {
-      if ( ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
-        || ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
+  //
+    if (   ü_change.affectsConfiguration( ConfigSnapshot   .prefix                    ) ) {
+      if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
+        || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
+        || ü_change.affectsConfiguration( EConfigurationIds.extendEditorTitleMenu     )
          ) { return; }
       const ü_exe
          = ü_change.affectsConfiguration( EConfigurationIds.executable )

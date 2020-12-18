@@ -23,3 +23,23 @@ https://nodejs.org/api/child_process.html#child_process_event_error
 https://www.linux.com/tutorials/understanding-linux-file-permissions/
 //ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
 //ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
+
+  //ü_disposable.dispose();
+  //const ü_nls = process.env.VSCODE_NLS_CONFIG || '{}'; const ü_config = JSON.parse( ü_nls );
+  //const ü_disposabl_ = ßß_vsCode.commands.registerTextEditorCommand( ß_IDs.openInNppActive, ß_a );
+async function ß_a( ü_editor: ßß_vsCode.TextEditor, ü_edit: ßß_vsCode.TextEditorEdit ) {
+  const ü_selection = (() => {
+  if ( ü_editor.selection.end.isAfter( ü_editor.selection.start ) ) {
+                return ü_editor.selection;
+  } else {
+    const ü_lastLine = ü_editor.document.lineAt(ü_editor.document.lineCount - 1);
+    return new ßß_vsCode.Selection(
+             new ßß_vsCode.Position( 0, 0 )
+           , new ßß_vsCode.Position( ü_lastLine.lineNumber, ü_lastLine.text.length )
+                );
+  }
+        })();
+  return ü_editor.edit( (builder) => {
+            builder.replace(ü_selection, ü_editor.document.getText(ü_selection));
+        });
+}

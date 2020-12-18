@@ -11,9 +11,10 @@
   , "openInNpp.Executable__": "C:/zzz_Dev/node_modules/Wsf-Bin/tmp/WsfEchoArgs.wsf"
   , "openInNpp.Executable___": "C:/zzz_Dev/node_modules/Wsf-Bin/ahk/Echo Arguments.exe"
   , "openInNpp.commandLineArguments_": [ "\"a  b\"" ]
+  , "openInNpp.filesInFolderPattern": "**/*.*"
   , "openInNpp.spawnOptions": {
       "windowsVerbatimArguments": true
-    , "cwd": "%TEMP%"
+    , "cwdx": "%TEMP%"
     , "cwd__": "C:/PROGRA~1/Notepad++"
     , "cwd_": "C:/Program Files/Notepad++"
     , "env": {
