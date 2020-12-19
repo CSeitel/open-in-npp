@@ -16,18 +16,27 @@
 //------------------------------------------------------------------------------
   import { expandEnvVariables
          , whenChildProcessSpawned
+         , isExe
          } from './lib/any';
   import { EVscConstants
          , isDirectory
          , findFiles
          } from './lib/vsc';
-  import {
-           ConfigSnapshot
-         } from './configHandler';
+  import { ConfigSnapshot
+         , History
+         } from './extension';
 //------------------------------------------------------------------------------
   import ß_showInformationMessage = ßß_vsCode.window.showInformationMessage;
   import ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage    ;
   import ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage      ;
+//------------------------------------------------------------------------------
+  const enum EExecutables
+    { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"
+    , x64_64bit_ =       "C:\\Program Files\\Notepad++\\notepad++.exe"
+    , x86_32bit  =      "%PrograFiles(x86)%\\Notepad++\\notepad++.exe"
+    , x86_32bit_ = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
+    , path_env   =                                     "notepad++.exe"
+    };
 //------------------------------------------------------------------------------
   const enum ECLIParameters
     { multipleInstances      = '-multiInst'
@@ -55,11 +64,40 @@
   const CNotAPid = -1;
 //==============================================================================
 
-export class CommandHandler {
+export class ConfigHandler {
 
-static async openSettings( this:null ):Promise<void> {
-    await ßß_vsCode.commands.executeCommand( EVscConstants.openWbSettings, ConfigSnapshot.prefix );
+static async whenSettingsOpened( this:null ):Promise<void> {
+    const ü_globalHistory = ExtensionRuntime.activeInstance.globalHistory;
+    const ü_dummy0 = ü_globalHistory.dummy;
+          ü_dummy0.push( 2 );
+                     ü_globalHistory.dummy = ü_dummy0;
+  //const ü_done = await ü_globalHistory.whenIdle();
+    const ü_hist2 = new History( ExtensionRuntime.activeInstance.context.globalState );
+    const ü_dummy1 = ü_hist2.dummy;
+  //
+    await ßß_vsCode.commands.executeCommand( EVscConstants.openWbSettings, ConfigSnapshot.CPrefix );
 }
+
+static async whenExecutable( ü_exe:string ):Promise<string> {
+    if ( ü_exe.length > 0 ) {
+      return ßß_path.normalize( expandEnvVariables( ü_exe ) );
+    }
+    if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x64_64bit  ) ) ) { return ü_exe; }
+    if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x86_32bit  ) ) ) { return ü_exe; }
+    if ( await isExe(                             EExecutables.x64_64bit_   ) ) { return EExecutables.x64_64bit_; }
+    if ( await isExe(                             EExecutables.x86_32bit    ) ) { return EExecutables.x86_32bit ; }
+                                                                                  return EExecutables.path_env  ;
+}
+
+static async whenWorkingDir( ü_dir:string ):Promise<string> {
+    return expandEnvVariables( ü_dir );
+}
+
+}
+
+//==============================================================================
+
+export class CommandHandler {
 
 static async openInNppActive( this:null ):Promise<number> {
     if(ß_trc){ß_trc( 'Palette Context' );}
@@ -268,7 +306,7 @@ private async _options():Promise<SpawnOptions> {
     const ü_opts:SpawnOptions =
       { stdio   : 'ignore'
       , detached: this._config.decoupledExecution
-      , cwd     : await this._cwd( ü_more.cwd !== undefined )
+      , cwd     : await this._cwd( ü_more.cwd )
       };
   //
     Object.assign( ü_opts, ü_more );
@@ -276,10 +314,10 @@ private async _options():Promise<SpawnOptions> {
     return ü_opts;
 }
 
-private async _cwd( ü_skip:boolean ):Promise<string> {
-    if ( ü_skip ) { return ''; }
+private async _cwd( ü_skip:string|undefined ):Promise<string> {
+    if ( ü_skip !== undefined ) { return ''; }
   //
-    let ü_cwd = this._config.workingDirectory;
+    let ü_cwd = await this._config.whenWorkingDir;
   //
     if ( ü_cwd.length > 0 ) {
       if ( ! ßß_path.isAbsolute( ü_cwd ) ) {
@@ -329,6 +367,8 @@ function ß_quote( ...ü_args:string[] ):string[] {
            ü_args.forEach( (ü_arg,ü_indx) => { ü_args[ ü_indx ] = `"${ ü_arg }"`; } );
     return ü_args;
 }
+
+//------------------------------------------------------------------------------
 
 //==============================================================================
 /*
