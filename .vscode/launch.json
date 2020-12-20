@@ -2,8 +2,8 @@
   "version": "0.2.0",
   "configurations": [
 
-    {
-      "name": "Some",
+    { "name"                   : "Some"
+    , "presentation": { "group": "Launch", "order": 10, "hidden": false },
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -22,8 +22,9 @@
       ],
       "preLaunchTask": "npm: watch"
     }
-  , {
-      "name": "CLI",
+
+  , { "name"                   : "CLI"
+    , "presentation": { "group": "Launch", "order": 10, "hidden": false },
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -43,8 +44,9 @@
       },
       "preLaunchTask": "npm: watch"
     }
-  , {
-      "name": "Notepad",
+
+  , { "name"                   : "Notepad"
+    , "presentation": { "group": "Launch", "order": 10, "hidden": false },
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -57,8 +59,9 @@
       ],
       "preLaunchTask": "npm: watch"
     }
-  , {
-      "name": "GVim",
+
+  , { "name"                   : "GVim"
+    , "presentation": { "group": "Launch", "order": 10, "hidden": false },
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -72,25 +75,26 @@
       "preLaunchTask": "npm: watch"
     }
 
-  , {
-      "name": "Extension Tests",
+  , { "name"                   : "Vsc Test Suite"
+    , "presentation": { "group": "Test", "order": 10, "hidden": false },
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}"
-      , "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
-      , "${workspaceFolder}/src/test/suite/cliArguments/Some.code-workspace"
-      , "${workspaceFolder}/src/test/suite/cliArguments/Some.json"
-      , "--disable-extensions"
-      ],
-      "outFiles": [
+      "args":
+        [ "--extensionDevelopmentPath=${workspaceFolder}"
+        , "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+        , "${workspaceFolder}/src/test/suite/cliArguments/workspaces/Some.code-workspace"
+        , "${workspaceFolder}/src/test/suite/cliArguments/Has Blank.txt"
+        , "--disable-extensions"
+        ]
+    , "outFiles": [
         "${workspaceFolder}/out/test/**/*.js"
       ],
       "preLaunchTask": "npm: watch"
     }
-  , {
-      "name": "Mocha Tests",
+
+  , { "name"                   : "Mocha Tests"
+    , "presentation": { "group": "Test", "order": 10, "hidden": false },
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",

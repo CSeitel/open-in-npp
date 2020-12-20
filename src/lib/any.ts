@@ -16,6 +16,19 @@
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 //==============================================================================
 
+export async function whenDelay( ü_delay:number ):Promise<number> {
+        const ü_start = process.hrtime.bigint();
+    return new Promise( ü_resolve => {
+      setTimeout( () => {
+        const ü_end   = process.hrtime.bigint();
+        const ü_delta = ( ü_end - ü_start ) / BigInt( 1000000 );
+        ü_resolve( Number( ü_delta ) );
+      }, ü_delay );
+    });
+}
+
+//==============================================================================
+
 export function putFirst<T,P extends keyof T>( ü_list:T[], ö_item:T|T[P], ü_prop?:P ):number {
     const ü_indx = ü_prop === undefined
                  ? ü_list.findIndex( ü_item => ü_item           === ö_item )

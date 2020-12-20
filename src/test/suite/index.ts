@@ -1,42 +1,57 @@
-import * as ßß_path from 'path';
-import * as Mocha from 'mocha';
-import * as ßß_glob from 'glob';
+/*
+*/
+  import * as    Mocha from 'mocha';
+  import * as ßß_path  from 'path';
+  import * as ßß_glob  from 'glob';
+//------------------------------------------------------------------------------
+//==============================================================================
 
-export function run(): Promise<void> {
-// Create the mocha test
-  const ü_mocha = new Mocha({
-    ui: 'tdd',
-    timeout: 7000
-  });
-  ü_mocha.useColors( true );
-
-  const ü_testsRoot = ßß_path.resolve( __dirname, '..' );
-
-  return new Promise( (resolve,reject) => {
-    ßß_glob( '**/**.test.js', { cwd: ü_testsRoot }, (err, files) => {
-      if (err) { return reject(err); }
-
-// Add files to the test suite
-  files.forEach( fileName => ü_mocha.addFile( ßß_path.resolve( ü_testsRoot, fileName ) ) );
-
-  try {
-// Run the mocha test
-    ü_mocha.run(
-failures => {
-  if (failures > 0) {
-    reject(new Error(`${failures} tests failed.`));
-  } else {
-    resolve();
-  }
-} // run
-    );
-  } catch (err) {
-    reject(err);
-  }
-} // glob
-  );
-
-} // promise
-  );
-
+export async function run():Promise<void> {
+    console.log( `--extensionTestsPath="${ __filename }"` );
+    const ü_specs = await ß_whenSpecsFound();
+    const ü_done  = await ß_whenSpecsRun( ü_specs );
 }
+
+//==============================================================================
+
+async function ß_whenSpecsFound():Promise<string[]> {
+  //
+    const ö_where = ßß_path.join( __dirname, '.' );
+    const ü_what  = '**/**.spec.js';
+    console.log( `Collecting Specs: "${ ü_what }" @ "${ ö_where }"` );
+  //
+    return new Promise( (ü_resolve,ü_reject) => {
+      ßß_glob( ü_what
+        , { cwd: ö_where }
+        , (ü_eX,ü_files) => {
+          if ( ü_eX != null ) { ü_reject ( ü_eX                                                     ); }
+          else                { ü_resolve( ü_files.map( ü_file => ßß_path.join( ö_where, ü_file ) ) ); }
+        })
+    });
+}
+
+async function ß_whenSpecsRun( ü_specs:string[] ):Promise<void> {
+  //
+    const ü_opts:Mocha.MochaOptions =
+      { ui: 'tdd'
+      , timeout: 7000
+      };
+    const ü_mocha = new Mocha( ü_opts );
+          ü_mocha.useColors( true );
+    for ( const ü_spec of ü_specs ) { ü_mocha.addFile( ü_spec ); }
+  //
+    return new Promise( (ü_resolve,ü_reject) => {
+      try {
+        ü_mocha.run( ü_errorCount => {
+          if ( ü_errorCount === 0 ) { ü_resolve(); }
+          else                      { ü_reject( new Error( `${ ü_errorCount } tests failed.` ) ); }
+        });
+      } catch ( ü_eX ) {
+        ü_reject( ü_eX );
+      }
+    });
+}
+
+//==============================================================================
+/*
+*/
