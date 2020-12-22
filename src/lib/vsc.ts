@@ -12,6 +12,23 @@ export const enum EVscConstants {
 }
 //==============================================================================
 
+export async function whenTextEditorOpened( ü_fileUri:ßß_vsCode.Uri | string, ü_preview = false, ü_languageId?:string ):Promise<ßß_vsCode.TextEditor> {
+    if ( typeof( ü_fileUri ) === 'string' )
+               { ü_fileUri = ßß_vsCode.Uri.file( ü_fileUri ); }
+  //
+    const ü_opts:ßß_vsCode.TextDocumentShowOptions =
+      { preview: ü_preview
+      };
+  //
+    const ü_doc = await ßß_vsCode.workspace.openTextDocument( ü_fileUri );
+  //const ü_edt = await ßß_vsCode.window.showTextDocument( ü_doc, ßß_vsCode.ViewColumn.One, true );
+    const ü_edt = await ßß_vsCode.window.showTextDocument( ü_doc, ü_opts );
+  //
+    return ü_edt;
+}
+
+//==============================================================================
+
 export async function isDirectory( ü_fileUri:ßß_vsCode.Uri|string ):Promise<boolean> {
   //
     ü_fileUri =             typeof( ü_fileUri ) === 'string'
@@ -46,7 +63,7 @@ export async function exists( ü_path:string, ü_andIsDirectory?:boolean ):Promi
     }
 }
 
-//------------------------------------------------------------------------------
+//==============================================================================
 
 export async function findFiles( ü_folder:string, ü_pattern:string ):Promise<string[]> {
     const ü_glob = new ßß_vsCode.RelativePattern( ü_folder, ü_pattern );

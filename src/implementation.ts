@@ -22,7 +22,8 @@
          , isDirectory
          , findFiles
          } from './lib/vsc';
-  import { ConfigSnapshot
+  import { TExtension
+         , ConfigSnapshot
          , History
          } from './extension';
 //------------------------------------------------------------------------------
@@ -67,15 +68,9 @@
 export class ConfigHandler {
 
 static async whenSettingsOpened( this:null ):Promise<void> {
-    const ü_globalHistory = ExtensionRuntime.activeInstance.globalHistory;
-    const ü_dummy0 = ü_globalHistory.dummy;
-          ü_dummy0.push( 2 );
-                     ü_globalHistory.dummy = ü_dummy0;
-  //const ü_done = await ü_globalHistory.whenIdle();
-    const ü_hist2 = new History( ExtensionRuntime.activeInstance.context.globalState );
-    const ü_dummy1 = ü_hist2.dummy;
   //
     await ßß_vsCode.commands.executeCommand( EVscConstants.openWbSettings, ConfigSnapshot.CPrefix );
+  //
 }
 
 static async whenExecutable( ü_exe:string ):Promise<string> {

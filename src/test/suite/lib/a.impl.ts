@@ -3,23 +3,69 @@
   import * as ßß_vsCode from 'vscode';
   import * as ßß_assert from 'assert';
   import * as ßß_path   from 'path';
-// import * as myExtension from '../extension';
+//------------------------------------------------------------------------------
+/*
+*/
+  import   ExtensionRuntime
+           from '../../../extension';
+  import { History
+         } from '../../../extension';
+  import   TestRuntime
+           from '../index';
+  const ß_trc = TestRuntime.developerTrace;
+//------------------------------------------------------------------------------
+  import { whenTextEditorOpened
+         } from '../../../lib/vsc';
   import { expandEnvVariables
          , whenDelay
          } from '../../../lib/any';
-//------------------------------------------------------------------------------
 //==============================================================================
 
 class VscTestSpec {
 
 static async test_0():Promise<void> {
-    const ü_folders = ßß_vsCode.workspace.workspaceFolders;
-    console.log( __dirname, ü_folders );
+  //
+    const ü_wsFolders = ßß_vsCode.workspace.workspaceFolders;
+    const ü_folders   = ü_wsFolders?.map( ü_folder => ü_folder.uri.fsPath );
+    await ßß_vsCode.commands.executeCommand<unknown>( 'openInNpp.openSettings' );
+    const ü_file = ßß_path.join( ü_folders![0], 'Has Blank ß.txt' );
+    if(ß_trc){ß_trc( `Test: "${ __filename }"` );}
+    if(ß_trc){ß_trc( `Workspace: "${ ü_file }"` );}
+    await whenTextEditorOpened( ü_file );
+  //
+    const ü_activeInstance = ExtensionRuntime.activeInstance;
+    if(ß_trc){ß_trc( `Extension: "${ ü_activeInstance.extensionApi.id }"` );}
+    const ü_hist = ü_activeInstance.globalHistory;
+  //
+    let   ü_dummy1 = ü_hist.dummy;
+                          ü_dummy1.shift();
+    let   ü_dummy2 = ü_hist.dummy;
+    let   ü_count  = await ü_hist.whenIdle();
+    ßß_assert.strictEqual( ü_count , 0        );
+    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
+  //
+                     ü_hist.dummy = ü_dummy1;
+          ü_count  = await ü_hist.whenIdle();
+          ü_dummy2 = ü_hist.dummy;
+    ßß_assert.strictEqual    ( ü_count , 1        );
+    ßß_assert.notStrictEqual ( ü_dummy1, ü_dummy2 );
+    ßß_assert.deepStrictEqual( ü_dummy1, ü_dummy2 );
+  //
+          ü_dummy2 = ü_hist.dummy = ü_dummy1 = [3,4,5];
+    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
+                          ü_dummy1.shift();
+          ü_dummy2 = ü_hist.dummy;
+    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
+          ü_count  = await ü_hist.whenIdle();
+          ü_dummy2 = ü_hist.dummy;
+    ßß_assert.strictEqual    ( ü_count , 1        );
+    ßß_assert.notStrictEqual ( ü_dummy1, ü_dummy2 );
+    ßß_assert.deepStrictEqual( ü_dummy1, ü_dummy2 );
+  //
 }
 
 static async test_2():Promise<void> {
-    const ü_delay = await whenDelay( 4000 );
-    console.log( ü_delay );
+  //const ü_delay = await whenDelay( 4000 );
     const ü_act = expandEnvVariables( '%TEMP%' );
     const ü_exp = process.env.TEMP;
     ßß_assert.strictEqual( ü_act, ü_exp );

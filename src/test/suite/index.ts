@@ -4,10 +4,14 @@
   import * as ßß_path  from 'path';
   import * as ßß_glob  from 'glob';
 //------------------------------------------------------------------------------
+export default class TestRuntime {
+    static readonly developerTrace :false|typeof console.log = console.log;
+}
+  const ß_trc = TestRuntime.developerTrace;
 //==============================================================================
 
 export async function run():Promise<void> {
-    console.log( `--extensionTestsPath="${ __filename }"` );
+    if(ß_trc){ß_trc( `--extensionTestsPath="${ __filename }"` );}
     const ü_specs = await ß_whenSpecsFound();
     const ü_done  = await ß_whenSpecsRun( ü_specs );
 }
@@ -18,7 +22,7 @@ async function ß_whenSpecsFound():Promise<string[]> {
   //
     const ö_where = ßß_path.join( __dirname, '.' );
     const ü_what  = '**/**.spec.js';
-    console.log( `Collecting Specs: "${ ü_what }" @ "${ ö_where }"` );
+    if(ß_trc){ß_trc( `Collecting Specs: "${ ü_what }" @ "${ ö_where }"` );}
   //
     return new Promise( (ü_resolve,ü_reject) => {
       ßß_glob( ü_what
@@ -34,7 +38,7 @@ async function ß_whenSpecsRun( ü_specs:string[] ):Promise<void> {
   //
     const ü_opts:Mocha.MochaOptions =
       { ui: 'tdd'
-      , timeout: 7000
+      , timeout: 70000
       };
     const ü_mocha = new Mocha( ü_opts );
           ü_mocha.useColors( true );

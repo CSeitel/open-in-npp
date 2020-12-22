@@ -11,7 +11,7 @@
   type TOpenInNpp =
     {
     }
-  type TExtension = ßß_vsCode.Extension<TOpenInNpp>
+export type TExtension = ßß_vsCode.Extension<TOpenInNpp>
 
 export default class ExtensionRuntime {
     static readonly CExtensionId                             = 'CSeitel.open-in-npp';
@@ -33,8 +33,8 @@ constructor(
     if(ß_trc){ß_trc( ExtensionRuntime.activeInstance === undefined ? 'Initial Activation' : 'Re-Activation' );}
                      ExtensionRuntime.activeInstance = this;
   //
-    this.GSDataApi    = this.context.globalState    ;
-    this.globalHistory = new History( this.WSDataApi    = this.context.globalState );
+                                      this.WSDataApi    = this.context.workspaceState  ;
+    this.globalHistory = new History( this.GSDataApi    = this.context.globalState    );
     this.extensionApi = ßß_vsCode.extensions.getExtension( ExtensionRuntime.CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
