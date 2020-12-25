@@ -18,8 +18,6 @@ export default class ExtensionRuntime {
     static readonly developerTrace :false|typeof console.log = console.log;
     static          activeInstance :ExtensionRuntime //|undefined = undefined;
   //
-    readonly GSDataApi    :ßß_vsCode.Memento
-    readonly WSDataApi    :ßß_vsCode.Memento
     readonly globalHistory:History
     readonly extensionApi :TExtension
   //
@@ -33,8 +31,7 @@ constructor(
     if(ß_trc){ß_trc( ExtensionRuntime.activeInstance === undefined ? 'Initial Activation' : 'Re-Activation' );}
                      ExtensionRuntime.activeInstance = this;
   //
-                                      this.WSDataApi    = this.context.workspaceState  ;
-    this.globalHistory = new History( this.GSDataApi    = this.context.globalState    );
+    this.globalHistory = new History();
     this.extensionApi = ßß_vsCode.extensions.getExtension( ExtensionRuntime.CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
@@ -48,6 +45,8 @@ constructor(
 //------------------------------------------------------------------------------
   const ß_trc = ExtensionRuntime.developerTrace;
 //==============================================================================
+  import { createPromise
+         } from './lib/any';
   import { CommandHandler
          , ConfigHandler
          } from './implementation';
@@ -84,18 +83,9 @@ constructor(
     }
 //==============================================================================
 
-export function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):void {
+export async function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):Promise<void> {
   //
     const ü_activeInstance = new ExtensionRuntime( ü_extnContext );
-  //
-  //if ( )
-    const ü_globalHistory = new History( ü_activeInstance.GSDataApi );
-    const ü_old = ü_globalHistory.version;
-    const ü_new = parseInt( ü_activeInstance.version.replace( /\./g, '' ) );
-    if ( ü_new > ü_old ) {
-      if(ß_trc){ß_trc( ü_new );}
-    //ü_activeInstance.GSDataApi.update( 'version', ü_new );
-    }
   //
     for ( const ü_cmd of ü_activeInstance.commands ) {
       const ü_cmdId = ü_cmd.command;
@@ -115,9 +105,16 @@ export function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):void {
     }
   //
     ßß_vsCode.workspace.onDidChangeConfiguration( ConfigSnapshot.modificationSignalled );
+  //
+    await CommandHandler.whenActivationFinalized( ü_activeInstance );
 }
 
-export function deactivate():void {}
+export async function deactivate( this:null ):Promise<void> {
+    const ü_hist = ExtensionRuntime.activeInstance.globalHistory;
+    ü_hist.dummy = [ Date.now() ];
+    await ü_hist.whenCommitted();
+    if(ß_trc){ß_trc( `Deactivation` );}
+}
 
 //==============================================================================
 
@@ -182,48 +179,150 @@ private async _whenExecutable():Promise<string> {
 }
 
 //==============================================================================
+  type TResolve<T> = (value:T) => void
+
+class LockHandler<T> {
+    private          _pending   = false;
+    private readonly _queue     :TResolve<T>[] = [];
+    private readonly _getter    :() => T
+//
+constructor(        ü_getter    :() => T
+                  , ü_that      :any
+){
+    this._getter = ü_getter.bind( ü_that );
+}
+//
+async whenLocked():Promise<T> {
+      if ( this._pending     ) { return new Promise(  (ü_resolve) => { this._queue.push( ü_resolve ); }  ); }
+    else { this._pending = true; return this._getter()                                                    ; }
+  //
+}
+//
+release():void {
+    if ( this._queue.length > 0 )
+       { this._queue.shift()! ( this._getter() ); }
+    else { this._pending = false; }
+}
+
+}
+
+//==============================================================================
   const SINITIAL = Symbol();
-export class History {
-    private _version   :number | typeof SINITIAL = SINITIAL;
-    private _allUpdates:Thenable<void>[] = [];
+  const enum EHistStates {
+    IDLE = 0
+  , LOCKED
+  , DIRTY
+  }
+//------------------------------------------------------------------------------
+  type TINITIAL = typeof SINITIAL
+  type THistInitials<T> = {
+    [P in keyof T] :() => T[P]
+  }
+  type THistBuffer<T> = {
+    [P in keyof T] :T[P] | TINITIAL
+  }
+  type THistBufferState<T> = {
+    [P in keyof T] :EHistStates
+  }
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+  type THistFolders = string[]
+interface IHistoryData {
+    dummy   :number[]
+    admin   :
+      { version :number
+      }
+    folders :THistFolders
+}
+export class History implements IHistoryData {
+//
+//static get():History { return new History(); }
+//
+    private readonly _initials:THistInitials<IHistoryData> =
+      { dummy  : () => []
+      , admin  : () => { return { version: 0 }; }
+      , folders: () => []
+      };
+    private readonly _buffer :THistBuffer<IHistoryData> =
+      { dummy  : SINITIAL
+      , admin  : SINITIAL
+      , folders: SINITIAL
+      };
+    private readonly _state  :THistBufferState<IHistoryData> =
+      { dummy  : EHistStates.IDLE
+      , admin  : EHistStates.IDLE
+      , folders: EHistStates.IDLE
+      };
+    private readonly _dataApi:ßß_vsCode.Memento
 constructor(
-    private readonly _dataStore:ßß_vsCode.Memento
-){}
+    ü_global = true
+){
+    this._dataApi = ü_global
+                  ? ExtensionRuntime.activeInstance.context.globalState
+                  : ExtensionRuntime.activeInstance.context.workspaceState
+                  ;
+}
 
-async whenIdle():Promise<number> {
-    let ü_count = 0;
-    while ( this._allUpdates.length > 0 ) {
-      const ü_all = this._allUpdates.slice(0);
-            this._allUpdates.length = 0;
-
-      ü_count += ( await Promise.all( ü_all ) ).length;
+async whenCommitted( ...ü_mKeys:( keyof IHistoryData )[] ):Promise<number> {
+  //
+    for ( const ü_mKey of ü_mKeys ) {
+      this._state[ ü_mKey ] = EHistStates.DIRTY;
     }
-    if(ß_trc){ß_trc( `History updates ${ ü_count }` );}
-    return ü_count;
-}
-
-get version():number {
-    if ( this._version === SINITIAL ) {
-         this._version = this._dataStore.get<number>( 'version' ) || 0;
+  //
+    const ü_all:Thenable<void>[] = [];
+    let ü_mKey:keyof THistBufferState<IHistoryData>
+    for ( ü_mKey in this._state ) {
+      switch ( this._state[ ü_mKey ] ) {
+        case EHistStates.DIRTY:
+          this._state[ ü_mKey ] = EHistStates.IDLE;
+          ü_all.push( this._dataApi.update( ü_mKey, this._buffer[ ü_mKey ] ) );
+      }
     }
-    return this._version;
+    if ( ü_all.length > 0 ) {
+      await Promise.all( ü_all );
+    }
+    if(ß_trc){ß_trc( `History updates ${ ü_all.length }` );}
+      return ü_all.length;
 }
 
-set version( ü_version:number ) {
-    this._version = ü_version;
-    this._dataStore.update( 'version', ü_version );
+private _getter<P extends keyof IHistoryData>( ü_mKey:P ):IHistoryData[P] {
+    if ( this._buffer[ ü_mKey ] === SINITIAL ) {
+                         const ü_data = this._dataApi.get<IHistoryData[P]>( ü_mKey );
+      this._buffer[ ü_mKey ] = ü_data === undefined
+                             ? this._initials[ ü_mKey ]() as IHistoryData[P]
+                             : ü_data
+                             ;
+    }
+      return this._buffer[ ü_mKey ] as IHistoryData[P];
+  //
 }
 
-get dummy():number[] {
-    return this._dataStore.get<number[]>( 'dummy' ) || [ 0 ];
+private _setter<P extends keyof IHistoryData>( ü_mKey:P, ü_data:IHistoryData[P] | TINITIAL ) {
+    this._buffer[ ü_mKey ] = ü_data === SINITIAL
+                           ? this._initials[ ü_mKey ]() as IHistoryData[P]
+                           : ü_data
+                           ;
+    this._state[ ü_mKey ] = EHistStates.DIRTY;
 }
 
-set dummy( ü_dummy:number[] ) {
-    this._allUpdates.push(
-    this._dataStore.update( 'dummy', ü_dummy )
-
-    );
+private async _lock<P extends keyof IHistoryData>( ü_mKey:P ):Promise<IHistoryData[P]> {
+    switch ( this._state[ ü_mKey ] ) {
+      case EHistStates.IDLE:
+             this._state[ ü_mKey ] = EHistStates.LOCKED;
+        return this._getter( ü_mKey );
+    }
+    const ü_oref = createPromise<IHistoryData[P]>();
+    return ü_oref.promise;
 }
+
+get folders()         :IHistoryData['folders']   { return this._getter( 'folders'             ); }
+get admin  ()         :IHistoryData['admin']     { return this._getter( 'admin'               ); }
+get dummy  ()         :IHistoryData['dummy']     { return this._getter( 'dummy'               ); }
+set folders( ü_folders:IHistoryData['folders'] ) {        this._setter( 'folders' , ü_folders ); }
+set admin  ( ü_admin  :IHistoryData['admin']   ) {        this._setter( 'admin'   , ü_admin   ); }
+set dummy  ( ü_dummy  :IHistoryData['dummy']   ) {        this._setter( 'dummy'   , ü_dummy   ); }
+
+async getAdmin  ()    :Promise<IHistoryData['admin']>     { return this._getter( 'admin'               ); }
 
 }
 

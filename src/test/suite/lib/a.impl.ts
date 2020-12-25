@@ -35,16 +35,30 @@ static async test_0():Promise<void> {
   //
     const ü_activeInstance = ExtensionRuntime.activeInstance;
     if(ß_trc){ß_trc( `Extension: "${ ü_activeInstance.extensionApi.id }"` );}
-    const ü_hist = ü_activeInstance.globalHistory;
   //
+    const ü_hist = ü_activeInstance.globalHistory;
     let   ü_dummy1 = ü_hist.dummy;
-                          ü_dummy1.shift();
+          ü_dummy1.push( 9 );
+    let   ü_count  = await ü_hist.whenCommitted();
     let   ü_dummy2 = ü_hist.dummy;
-    let   ü_count  = await ü_hist.whenIdle();
+    ßß_assert.strictEqual( ü_count , 0        );
+    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
+                     ü_hist.dummy = ü_dummy1;
+          ü_count  = await ü_hist.whenCommitted();
+          ü_dummy2 = ü_hist.dummy;
+    ßß_assert.strictEqual( ü_count , 1        );
+    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
+  /*
+                          ü_dummy1.push( 6 );
     ßß_assert.strictEqual( ü_count , 0        );
     ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
   //
                      ü_hist.dummy = ü_dummy1;
+                     await whenDelay( 1 );
+          ü_dummy2 = ü_hist.dummy;
+    ßß_assert.notStrictEqual ( ü_dummy1, ü_dummy2 );
+    ßß_assert.deepStrictEqual( ü_dummy1, ü_dummy2 );
+  //
           ü_count  = await ü_hist.whenIdle();
           ü_dummy2 = ü_hist.dummy;
     ßß_assert.strictEqual    ( ü_count , 1        );
@@ -61,7 +75,7 @@ static async test_0():Promise<void> {
     ßß_assert.strictEqual    ( ü_count , 1        );
     ßß_assert.notStrictEqual ( ü_dummy1, ü_dummy2 );
     ßß_assert.deepStrictEqual( ü_dummy1, ü_dummy2 );
-  //
+  */
 }
 
 static async test_2():Promise<void> {

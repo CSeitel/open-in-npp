@@ -94,6 +94,19 @@ static async whenWorkingDir( ü_dir:string ):Promise<string> {
 
 export class CommandHandler {
 
+static async whenActivationFinalized( ü_activeInstance:ExtensionRuntime ):Promise<void> {
+    const ü_globalHistory = new History();
+    const ü_admin = ü_globalHistory.admin;
+    const ü_new = parseInt( ü_activeInstance.version.replace( /\./g, '' ) );
+    if ( ü_new > ü_admin.version ) {
+      if(ß_trc){ß_trc( `"${ ü_new }"` );}
+      ü_admin.version = ü_new;
+      ßß_vsCode.window.showInformationMessage( `Welcome to ${ ü_activeInstance.version }` );
+    }
+  //
+    const ü_count = await ü_globalHistory.whenCommitted( 'admin' );
+}
+
 static async openInNppActive( this:null ):Promise<number> {
     if(ß_trc){ß_trc( 'Palette Context' );}
   //

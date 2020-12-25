@@ -14,17 +14,39 @@
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
+//------------------------------------------------------------------------------
+export type TPromise<T> =
+  { promise: Promise<T>
+  , resolve:(value :T    ) => void
+  , reject :(reason:Error) => void
+  }
 //==============================================================================
 
 export async function whenDelay( ü_delay:number ):Promise<number> {
-        const ü_start = process.hrtime.bigint();
-    return new Promise( ü_resolve => {
-      setTimeout( () => {
-        const ü_end   = process.hrtime.bigint();
-        const ü_delta = ( ü_end - ü_start ) / BigInt( 1000000 );
-        ü_resolve( Number( ü_delta ) );
-      }, ü_delay );
-    });
+  //
+    const ö_oref  = createPromise<number>();
+    const ö_start = process.hrtime.bigint();
+    setTimeout( ö_later, ü_delay );
+  //
+    return ö_oref.promise;
+//
+function ö_later():void {
+                      const ü_end   = process.hrtime.bigint();
+                      const ü_delta = ( ü_end - ö_start ) / BigInt( 1000000 );
+    ö_oref.resolve( Number( ü_delta ) );
+}
+
+}
+
+//------------------------------------------------------------------------------
+
+export function createPromise<T>():TPromise<T> {
+    const ö_oref = {} as TPromise<T>;
+                                                ö_oref.promise
+    = new Promise<T>( (ü_resolve,ü_reject) => { ö_oref.resolve = ü_resolve;
+                                                ö_oref.reject  = ü_reject ; }
+                    );
+    return ö_oref;
 }
 
 //==============================================================================
