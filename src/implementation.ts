@@ -74,14 +74,32 @@ static async whenSettingsOpened( this:null ):Promise<void> {
 }
 
 static async whenExecutable( ü_exe:string ):Promise<string> {
+    const ü_hist   = ExtensionRuntime.activeInstance.globalHistory;
+    const ü_config = ü_hist.config; 
+    if(ß_trc){ß_trc( `Config-History`, ü_config );}
+  //
     if ( ü_exe.length > 0 ) {
+      ü_hist.config.executable = '';
       return ßß_path.normalize( expandEnvVariables( ü_exe ) );
     }
-    if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x64_64bit  ) ) ) { return ü_exe; }
-    if ( await isExe( ü_exe = expandEnvVariables( EExecutables.x86_32bit  ) ) ) { return ü_exe; }
-    if ( await isExe(                             EExecutables.x64_64bit_   ) ) { return EExecutables.x64_64bit_; }
-    if ( await isExe(                             EExecutables.x86_32bit    ) ) { return EExecutables.x86_32bit ; }
-                                                                                  return EExecutables.path_env  ;
+    const ü_old = ü_hist.config.executable;
+    if ( ü_old.length > 0 ) {
+      return ü_old;
+    }
+  //
+  //     if (                                                        '' !== ü_old && await isExe( ü_old ) ) { return ü_old; }
+         if ( ( ü_exe = expandEnvVariables( EExecutables.x64_64bit  ) ) !== ü_old && await isExe( ü_exe ) ) {}
+    else if ( ( ü_exe = expandEnvVariables( EExecutables.x86_32bit  ) ) !== ü_old && await isExe( ü_exe ) ) {}
+    else if ( ( ü_exe =                     EExecutables.x64_64bit_   ) !== ü_old && await isExe( ü_exe ) ) {}
+    else if ( ( ü_exe =                     EExecutables.x86_32bit    ) !== ü_old && await isExe( ü_exe ) ) {}
+    else      { ü_exe =                     EExecutables.path_env   ; }
+  //
+    const ü_when = ü_hist.whenConfig( {executable: ü_exe} );
+  //if ( ü_exe !== ü_old ) {
+  //  const ü_count = ExtensionRuntime.activeInstance.globalHistory.whenCommitted( 'admin' );
+  //}
+  //
+    return ü_exe;
 }
 
 static async whenWorkingDir( ü_dir:string ):Promise<string> {
@@ -95,16 +113,17 @@ static async whenWorkingDir( ü_dir:string ):Promise<string> {
 export class CommandHandler {
 
 static async whenActivationFinalized( ü_activeInstance:ExtensionRuntime ):Promise<void> {
+    const ü_versionToNumber = /\./g;
+  //
+    const ü_current = parseInt( ü_activeInstance.version.replace( ü_versionToNumber, '' ) );
     const ü_globalHistory = new History();
     const ü_admin = ü_globalHistory.admin;
-    const ü_new = parseInt( ü_activeInstance.version.replace( /\./g, '' ) );
-    if ( ü_new > ü_admin.version ) {
-      if(ß_trc){ß_trc( `"${ ü_new }"` );}
-      ü_admin.version = ü_new;
+    if(ß_trc){ß_trc( `Admin-History`, ü_admin );}
+    if ( ü_current > ü_admin.version ) {
+      const ü_when = ü_globalHistory.whenAdmin( { version: ü_current } );
       ßß_vsCode.window.showInformationMessage( `Welcome to ${ ü_activeInstance.version }` );
     }
   //
-    const ü_count = await ü_globalHistory.whenCommitted( 'admin' );
 }
 
 static async openInNppActive( this:null ):Promise<number> {

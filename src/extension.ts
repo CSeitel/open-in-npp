@@ -28,7 +28,7 @@ export default class ExtensionRuntime {
 constructor(
     readonly context      :ßß_vsCode.ExtensionContext
 ){
-    if(ß_trc){ß_trc( ExtensionRuntime.activeInstance === undefined ? 'Initial Activation' : 'Re-Activation' );}
+    if(ß_trc){ß_trc( ExtensionRuntime.activeInstance === undefined ? 'Activation' : 'Re-Activation' );}
                      ExtensionRuntime.activeInstance = this;
   //
     this.globalHistory = new History();
@@ -46,6 +46,7 @@ constructor(
   const ß_trc = ExtensionRuntime.developerTrace;
 //==============================================================================
   import { createPromise
+         , LockHandler
          } from './lib/any';
   import { CommandHandler
          , ConfigHandler
@@ -110,10 +111,12 @@ export async function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):P
 }
 
 export async function deactivate( this:null ):Promise<void> {
+  /*
     const ü_hist = ExtensionRuntime.activeInstance.globalHistory;
     ü_hist.dummy = [ Date.now() ];
     await ü_hist.whenCommitted();
     if(ß_trc){ß_trc( `Deactivation` );}
+  */
 }
 
 //==============================================================================
@@ -145,19 +148,20 @@ export class ConfigSnapshot extends ConfigProxy {
     private static         _current:ConfigSnapshot | null = null;
 //
 static modificationSignalled( this:undefined, ü_change:ßß_vsCode.ConfigurationChangeEvent ):void {
-    if ( ConfigSnapshot._current === null ) { return; }
+    if (   ü_change.affectsConfiguration( ConfigSnapshot   .CPrefix                   ) ) {
+      if(ß_trc){ß_trc( `Configuration modified: "${ ü_change }"` );}
+      if ( ConfigSnapshot._current === null ) { return; }
   //
-    if (   ü_change.affectsConfiguration( ConfigSnapshot   .CPrefix                    ) ) {
       if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
         || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
         || ü_change.affectsConfiguration( EConfigurationIds.extendEditorTitleMenu     )
          ) { return; }
-      const ü_exe
-         = ü_change.affectsConfiguration( EConfigurationIds.executable )
-         ConfigSnapshot._current  =  null;
-      if ( ü_exe ) {
-        if(ß_trc){ß_trc( EConfigurationIds.executable );}
-      }
+        
+        ConfigSnapshot._current  =  null;
+       const ü_exe = ü_change.affectsConfiguration( EConfigurationIds.executable );
+        if ( ü_exe ) {
+          if(ß_trc){ß_trc( EConfigurationIds.executable );}
+        }
     }
 }
 //
@@ -179,34 +183,6 @@ private async _whenExecutable():Promise<string> {
 }
 
 //==============================================================================
-  type TResolve<T> = (value:T) => void
-
-class LockHandler<T> {
-    private          _pending   = false;
-    private readonly _queue     :TResolve<T>[] = [];
-    private readonly _getter    :() => T
-//
-constructor(        ü_getter    :() => T
-                  , ü_that      :any
-){
-    this._getter = ü_getter.bind( ü_that );
-}
-//
-async whenLocked():Promise<T> {
-      if ( this._pending     ) { return new Promise(  (ü_resolve) => { this._queue.push( ü_resolve ); }  ); }
-    else { this._pending = true; return this._getter()                                                    ; }
-  //
-}
-//
-release():void {
-    if ( this._queue.length > 0 )
-       { this._queue.shift()! ( this._getter() ); }
-    else { this._pending = false; }
-}
-
-}
-
-//==============================================================================
   const SINITIAL = Symbol();
   const enum EHistStates {
     IDLE = 0
@@ -225,33 +201,43 @@ release():void {
     [P in keyof T] :EHistStates
   }
 //------------------------------------------------------------------------------
+  type THistBufferLocks<T> = {
+    [P in keyof T] ?:LockHandler<T,P>
+  }
 //------------------------------------------------------------------------------
-  type THistFolders = string[]
 interface IHistoryData {
-    dummy   :number[]
-    admin   :
-      { version :number
+    dummy :number[]
+    admin :
+      { version    :number
       }
-    folders :THistFolders
+    config:
+      { executable :string
+      }
 }
+
+  type TAdmin = Partial<IHistoryData['admin']>
+//------------------------------------------------------------------------------
 export class History implements IHistoryData {
 //
 //static get():History { return new History(); }
 //
     private readonly _initials:THistInitials<IHistoryData> =
       { dummy  : () => []
-      , admin  : () => { return { version: 0 }; }
-      , folders: () => []
+      , admin  : () => { return { version   : 0  }; }
+      , config : () => { return { executable: '' }; }
       };
-    private readonly _buffer :THistBuffer<IHistoryData> =
+    private readonly _buffer  :THistBuffer<IHistoryData> =
       { dummy  : SINITIAL
       , admin  : SINITIAL
-      , folders: SINITIAL
+      , config : SINITIAL
       };
-    private readonly _state  :THistBufferState<IHistoryData> =
+    private readonly _state   :THistBufferState<IHistoryData> =
       { dummy  : EHistStates.IDLE
       , admin  : EHistStates.IDLE
-      , folders: EHistStates.IDLE
+      , config : EHistStates.IDLE
+      };
+    private          _locks   :THistBufferLocks<IHistoryData> =
+      {
       };
     private readonly _dataApi:ßß_vsCode.Memento
 constructor(
@@ -263,26 +249,31 @@ constructor(
                   ;
 }
 
-async whenCommitted( ...ü_mKeys:( keyof IHistoryData )[] ):Promise<number> {
+async whenCommitted( ü_mKey:keyof IHistoryData, ü_lazy = true ):Promise<boolean> {
+    let ü_dirty = false;
   //
-    for ( const ü_mKey of ü_mKeys ) {
-      this._state[ ü_mKey ] = EHistStates.DIRTY;
+    switch ( this._state[ ü_mKey ] ) {
+
+      case EHistStates.DIRTY:
+        ü_dirty = true;
+        this._state[ ü_mKey ] = EHistStates.IDLE;
+        const ü_then = this._dataApi.update( ü_mKey, this._buffer[ ü_mKey ] );
+        if ( ! ü_lazy ) { await ü_then; }
+        if(ß_trc){ß_trc( `History updates committed for "${ ü_mKey }"` );}
+
+      case EHistStates.LOCKED:
+       const ü_lock = this._locks[ ü_mKey ];
+        if ( ü_lock !== undefined ) {
+             ü_lock.release();
+        }
+        if ( ü_dirty ) {
+          return true ;
+        }
+
+      case EHistStates.IDLE:
+          return false;
+
     }
-  //
-    const ü_all:Thenable<void>[] = [];
-    let ü_mKey:keyof THistBufferState<IHistoryData>
-    for ( ü_mKey in this._state ) {
-      switch ( this._state[ ü_mKey ] ) {
-        case EHistStates.DIRTY:
-          this._state[ ü_mKey ] = EHistStates.IDLE;
-          ü_all.push( this._dataApi.update( ü_mKey, this._buffer[ ü_mKey ] ) );
-      }
-    }
-    if ( ü_all.length > 0 ) {
-      await Promise.all( ü_all );
-    }
-    if(ß_trc){ß_trc( `History updates ${ ü_all.length }` );}
-      return ü_all.length;
 }
 
 private _getter<P extends keyof IHistoryData>( ü_mKey:P ):IHistoryData[P] {
@@ -305,24 +296,77 @@ private _setter<P extends keyof IHistoryData>( ü_mKey:P, ü_data:IHistoryData[P
     this._state[ ü_mKey ] = EHistStates.DIRTY;
 }
 
-private async _lock<P extends keyof IHistoryData>( ü_mKey:P ):Promise<IHistoryData[P]> {
-    switch ( this._state[ ü_mKey ] ) {
+private async _whenLocked<P extends keyof IHistoryData>( ü_mKey:P ):Promise<IHistoryData[P]> {
+  //
+    switch ( this._state[ ü_mKey ] as EHistStates ) {
+
       case EHistStates.IDLE:
              this._state[ ü_mKey ] = EHistStates.LOCKED;
-        return this._getter( ü_mKey );
+
+      case EHistStates.DIRTY:
+       const ü_old = this._locks[ ü_mKey ];
+        if ( ü_old === undefined ) {
+                            const ü_new = new LockHandler( ü_mKey, <IHistoryData> this );
+          this._locks[ ü_mKey ] = ü_new as unknown as THistBufferLocks<IHistoryData>[P];
+          return await   ü_new                                            .whenLocked();
+        } else {
+          return await ( ü_old as unknown as LockHandler<IHistoryData,P> ).whenLocked();
+        }
+
+      case EHistStates.LOCKED:
+        {
+                   const ü_old = this._locks[ ü_mKey ];
+          return await ( ü_old as unknown as LockHandler<IHistoryData,P> ).whenLocked();
+        }
+
     }
-    const ü_oref = createPromise<IHistoryData[P]>();
-    return ü_oref.promise;
 }
 
-get folders()         :IHistoryData['folders']   { return this._getter( 'folders'             ); }
-get admin  ()         :IHistoryData['admin']     { return this._getter( 'admin'               ); }
-get dummy  ()         :IHistoryData['dummy']     { return this._getter( 'dummy'               ); }
-set folders( ü_folders:IHistoryData['folders'] ) {        this._setter( 'folders' , ü_folders ); }
-set admin  ( ü_admin  :IHistoryData['admin']   ) {        this._setter( 'admin'   , ü_admin   ); }
-set dummy  ( ü_dummy  :IHistoryData['dummy']   ) {        this._setter( 'dummy'   , ü_dummy   ); }
+private async _whenObject<P extends keyof IHistoryData>( ü_mKey:P, ü_newData:Partial<IHistoryData[P]> | undefined, ü_noLock:boolean ):Promise<IHistoryData[P]> {
+  //
+    if ( ü_newData === undefined ) {
+      if ( ü_noLock ) {
+        console.error( `Wrong invocation` );
+             return       this._getter    ( ü_mKey ); }
+      else { return await this._whenLocked( ü_mKey ); }
+    }
+  //
+    const ü_dataRef = ü_noLock
+                    ?       this._getter    ( ü_mKey )
+                    : await this._whenLocked( ü_mKey )
+                    ;
+  //
+    for ( const ü_pKey in ü_newData ) {
+    //const ü_a = ü_oldData[ ü_pKey as keyof IHistoryData[P] ]
+    //const ü_b = ü_newData[ ü_pKey as keyof IHistoryData[P] ]
+      if ( ( ü_dataRef[ ü_pKey as keyof IHistoryData[P] ] =
+             ü_newData[ ü_pKey as keyof IHistoryData[P] ]! ) === undefined ) {
+      delete ü_dataRef[ ü_pKey as keyof IHistoryData[P] ] ;
 
-async getAdmin  ()    :Promise<IHistoryData['admin']>     { return this._getter( 'admin'               ); }
+      }
+    }
+    //Object.assign( ü_oldData, ü_newData );
+  //
+      this._state[ ü_mKey ] = EHistStates.DIRTY;
+  //
+    const ü_done = await this.whenCommitted( ü_mKey );
+  //
+    return ü_dataRef
+
+}
+
+private _unlock<P extends keyof IHistoryData>( ü_mKey:P ):void { }
+
+get       config ()          :        IHistoryData['config']   { return this._getter    ( 'config'           ); }
+async whenConfig ( ü_config ?:Partial<IHistoryData['config']>  , ü_noLock = false )
+                             :Promise<IHistoryData['config']>  { return this._whenObject( 'config', ü_config , ü_noLock ); }
+get       admin  ()          :        IHistoryData['admin' ]   { return this._getter    ( 'admin'            ); }
+async whenAdmin  ( ü_admin  ?:Partial<IHistoryData['admin' ]>  , ü_noLock = true  )
+                             :Promise<IHistoryData['admin' ]>  { return this._whenObject( 'admin' , ü_admin  , ü_noLock ); }
+get       dummy  ()          :        IHistoryData['dummy' ]   { return this._getter    ( 'dummy'            ); }
+set       config ( ü_config  :        IHistoryData['config'] ) {        this._setter    ( 'config', ü_config ); }
+set       admin  ( ü_admin   :        IHistoryData['admin' ] ) {        this._setter    ( 'admin' , ü_admin  ); }
+set       dummy  ( ü_dummy   :        IHistoryData['dummy' ] ) {        this._setter    ( 'dummy' , ü_dummy  ); }
 
 }
 

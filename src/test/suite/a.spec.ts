@@ -6,8 +6,9 @@
 
 suite( 'Group A', () => {
 
-  test( 'INIT'           , VscTestSpec.test_0    );
+  test( 'RECTIFY'           , VscTestSpec.rectify   );
 /*
+  test( 'INIT'           , VscTestSpec.test_0    );
   test( 'Execute Command', VscTestSpec.openInNpp );
   test( 'Env'            , VscTestSpec.test_2    );
 */

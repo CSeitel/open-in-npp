@@ -9,7 +9,7 @@
     "openInNpp.filesInFolderPattern": ""
   , "openInNpp.openFolderAsWorkspace": true
   , "openInNpp.spawnOptions": {
-      "windowsVerbatimArguments": true
+      "windowsVerbatimArguments": false
     , "env": {
         "TEMP": "C:\\${HOME}\\"
       }

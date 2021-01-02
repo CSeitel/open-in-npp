@@ -23,6 +23,17 @@
 
 class VscTestSpec {
 
+static async rectify():Promise<void> {
+  //
+    await VscTestSpec._whenActive();
+  //
+    const ü_hist = ExtensionRuntime.activeInstance.globalHistory;
+    const ü_admin  = await ü_hist.whenAdmin ( { version: 0 } );
+    ßß_assert.strictEqual( ü_admin .version   , 0 );
+    const ü_config = await ü_hist.whenConfig( { executable: '' } );
+    ßß_assert.strictEqual( ü_config.executable, '' );
+}
+
 static async test_0():Promise<void> {
   //
     const ü_wsFolders = ßß_vsCode.workspace.workspaceFolders;
@@ -39,12 +50,12 @@ static async test_0():Promise<void> {
     const ü_hist = ü_activeInstance.globalHistory;
     let   ü_dummy1 = ü_hist.dummy;
           ü_dummy1.push( 9 );
-    let   ü_count  = await ü_hist.whenCommitted();
+    let   ü_count  = await ü_hist.whenCommitted( 'dummy' );
     let   ü_dummy2 = ü_hist.dummy;
     ßß_assert.strictEqual( ü_count , 0        );
     ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
                      ü_hist.dummy = ü_dummy1;
-          ü_count  = await ü_hist.whenCommitted();
+          ü_count  = await ü_hist.whenCommitted( 'dummy' );
           ü_dummy2 = ü_hist.dummy;
     ßß_assert.strictEqual( ü_count , 1        );
     ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
@@ -92,6 +103,10 @@ static async openInNpp():Promise<void> {
     else {
       ßß_assert.fail( 'pid <= 0' );
     }
+}
+
+private static async _whenActive():Promise<void> {
+    await ßß_vsCode.commands.executeCommand<unknown>( 'openInNpp.openSettings' );
 }
 
 }

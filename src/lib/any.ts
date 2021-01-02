@@ -49,6 +49,34 @@ export function createPromise<T>():TPromise<T> {
     return ö_oref;
 }
 
+//------------------------------------------------------------------------------
+
+export class LockHandler<T,P extends keyof T> {
+    private          _pending                             = false;
+    private readonly _queue :(  (value:T[P]) => void  )[] = [];
+//
+constructor(
+    private readonly _mKey :P
+  , private readonly _that :T
+){
+}
+//
+async whenLocked():Promise<T[P]> {
+    if(ß_trc){ß_trc( `Locking: "${ this._mKey }"` );}
+  //
+      if ( this._pending     ) { return new Promise(  (ü_resolve) => { this._queue.push( ü_resolve ); }  ); }
+    else { this._pending = true; return this._that[ this._mKey ]                                          ; }
+}
+//
+release():void {
+    if(ß_trc){ß_trc( `Releasing: "${ this._mKey }"` );}
+    if ( this._queue.length > 0 )
+       { this._queue.shift()! ( this._that[ this._mKey ] ); }
+    else { this._pending = false; }
+}
+
+}
+
 //==============================================================================
 
 export function putFirst<T,P extends keyof T>( ü_list:T[], ö_item:T|T[P], ü_prop?:P ):number {
@@ -72,24 +100,26 @@ export function putFirstIndex<T>( ü_list:T[], ü_indx:number ):void {
 //==============================================================================
 
 export async function isExe( ü_path:string ):Promise<boolean> {
-//
-  let ü_stats:Stats;
-  try {
-    ü_stats = await ßß_fs.stat( ü_path );
-  } catch ( eX ) {
-    if(ß_trc){ß_trc( eX.message );}
-    return false;
-  }
-//
-  if ( ü_stats.isDirectory() ) { return false; }
-//
-  const ü_ext = ßß_path.extname( ü_path ).toLowerCase();
-  if ( ! ß_exe_exts.includes( ü_ext ) ) { return false; }
-//
-//ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
-//ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
-  return true;
+  //
+    let ü_stats:Stats;
+    try {
+      ü_stats = await ßß_fs.stat( ü_path );
+    } catch ( eX ) {
+      if(ß_trc){ß_trc( eX.message );}
+      return false;
+    }
+  //
+    if ( ü_stats.isDirectory() ) { return false; }
+  //
+    const ü_ext = ßß_path.extname( ü_path ).toLowerCase();
+    if ( ! ß_exe_exts.includes( ü_ext ) ) { return false; }
+  //
+  //ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
+  //ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
+    return true;
 }
+
+//------------------------------------------------------------------------------
 
 export function expandEnvVariables( ü_path:string ):string {
   //
