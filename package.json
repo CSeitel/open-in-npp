@@ -141,9 +141,8 @@
       }
     }
   }
-  , "scripts": {
-    "vscode:prepublish": "npm run compile"
-  , "precompile": "rimraf ./out/test"
+  , "scripts":
+  { "precompile": "rimraf ./out/test"
   , "compile": "tsc -p ./"
   , "watch": "tsc -watch -p ./"
   , "pretest": "npm run compile"
@@ -151,7 +150,7 @@
   , "mocha": "mocha ./out/test/mocha/**/*.spec.js"
   , "vscode:package": "vsce package"
   , "vscode:install": "code --install-extension open-in-npp-0.1.5.vsix"
-
+  , "vscode:prepublish": "npm run compile"
   },
   "devDependencies": {
     "@types/glob"  : "^7.1.1"

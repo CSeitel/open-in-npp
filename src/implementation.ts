@@ -73,33 +73,44 @@ static async whenSettingsOpened( this:null ):Promise<void> {
   //
 }
 
-static async whenExecutable( ü_exe:string ):Promise<string> {
+static async whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise<string> {
+  //
+    if ( ü_explicit.length > 0 ) {
+      return ßß_path.normalize( expandEnvVariables( ü_explicit ) );
+    }
+  //
     const ü_hist   = ExtensionRuntime.activeInstance.globalHistory;
-    const ü_config = ü_hist.config; 
+    const ü_config = await ü_hist.whenConfig();
     if(ß_trc){ß_trc( `Config-History`, ü_config );}
-  //
-    if ( ü_exe.length > 0 ) {
-      ü_hist.config.executable = '';
-      return ßß_path.normalize( expandEnvVariables( ü_exe ) );
+    try {
+    //
+      if ( ü_useHistory ) {
+        const ü_previous = ü_config.executable;
+        if ( ü_previous.length > 0 ) {
+          const ü_done = ü_hist.release( 'config' );
+          if(ß_trc){ß_trc( `Executable stored: "${ ü_previous }"` );}
+          return ü_previous;
+        }
+      }
+    //
+                         let ü_current:string
+           if ( await isExe( ü_current = expandEnvVariables( EExecutables.x64_64bit  ) ) ) {}
+      else if ( await isExe( ü_current = expandEnvVariables( EExecutables.x86_32bit  ) ) ) {}
+      else if ( await isExe( ü_current =                     EExecutables.x64_64bit_   ) ) {}
+      else if ( await isExe( ü_current =                     EExecutables.x86_32bit    ) ) {}
+      else                 { ü_current =                     EExecutables.path_env         ;}
+    //
+      if(ß_trc){ß_trc( `Executable found: "${ ü_current }"` );}
+                     ü_config.executable = ü_current;
+      const ü_when = ü_hist.whenCommitted( 'config' );
+    //
+      return ü_current;
+
+    } catch ( ü_eX ) {
+      console.error( ü_eX );
+      ü_hist.release( 'config' );
+      throw ü_eX;
     }
-    const ü_old = ü_hist.config.executable;
-    if ( ü_old.length > 0 ) {
-      return ü_old;
-    }
-  //
-  //     if (                                                        '' !== ü_old && await isExe( ü_old ) ) { return ü_old; }
-         if ( ( ü_exe = expandEnvVariables( EExecutables.x64_64bit  ) ) !== ü_old && await isExe( ü_exe ) ) {}
-    else if ( ( ü_exe = expandEnvVariables( EExecutables.x86_32bit  ) ) !== ü_old && await isExe( ü_exe ) ) {}
-    else if ( ( ü_exe =                     EExecutables.x64_64bit_   ) !== ü_old && await isExe( ü_exe ) ) {}
-    else if ( ( ü_exe =                     EExecutables.x86_32bit    ) !== ü_old && await isExe( ü_exe ) ) {}
-    else      { ü_exe =                     EExecutables.path_env   ; }
-  //
-    const ü_when = ü_hist.whenConfig( {executable: ü_exe} );
-  //if ( ü_exe !== ü_old ) {
-  //  const ü_count = ExtensionRuntime.activeInstance.globalHistory.whenCommitted( 'admin' );
-  //}
-  //
-    return ü_exe;
 }
 
 static async whenWorkingDir( ü_dir:string ):Promise<string> {
@@ -233,7 +244,7 @@ async submit():Promise<number> {
 
     }
   //
-      let ü_exe  = await this._config.whenExecutable;
+      let ü_exe  = await this._config.whenExecutable();
     const ü_opts = await this._options();
   //
     const ü_verbatim = !!ü_opts.windowsVerbatimArguments === true;

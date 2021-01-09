@@ -10,7 +10,7 @@ export default class TestRuntime {
   const ß_trc = TestRuntime.developerTrace;
 //------------------------------------------------------------------------------
 //const ß_what = '**/**.spec.js';
-  const ß_what    = '**/a.spec.js';
+  const ß_what    = '**/any.spec.js';
   const ß_timeout = 1000 * 99;
 //==============================================================================
 

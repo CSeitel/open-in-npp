@@ -82,6 +82,9 @@ constructor(
     {
   [P in EConfigurationIds] :{ type:string }
     }
+//------------------------------------------------------------------------------
+  const SINITIAL = Symbol();
+  type  TINITIAL = typeof SINITIAL
 //==============================================================================
 
 export async function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):Promise<void> {
@@ -122,14 +125,11 @@ export async function deactivate( this:null ):Promise<void> {
 //==============================================================================
 
 class ConfigProxy {
+    private readonly _wsConfig = ßß_vsCode.workspace.getConfiguration();
 //
-constructor(
-    private readonly _wsConfig:ßß_vsCode.WorkspaceConfiguration
-){}
-
-  get _executable            ():string       { return this._wsConfig.get( EConfigurationIds.executable            ) as any; }
+  get  executable            ():string       { return this._wsConfig.get( EConfigurationIds.executable            ) as any; }
   get  spawnOptions          ():SpawnOptions { return this._wsConfig.get( EConfigurationIds.spawnOptions          ) as any; }
-  get _workingDirectory      ():string       { return this._wsConfig.get( EConfigurationIds.workingDirectory      ) as any; }
+  get  workingDirectory      ():string       { return this._wsConfig.get( EConfigurationIds.workingDirectory      ) as any; }
   get  decoupledExecution    ():boolean      { return this._wsConfig.get( EConfigurationIds.decoupledExecution    ) as any; }
   get  commandLineArguments  ():string[]     { return this._wsConfig.get( EConfigurationIds.commandLineArguments  ) as any; }
   get  multiInst             ():boolean      { return this._wsConfig.get( EConfigurationIds.multiInst             ) as any; }
@@ -137,60 +137,78 @@ constructor(
   get  openFolderAsWorkspace ():string       { return this._wsConfig.get( EConfigurationIds.openFolderAsWorkspace ) as any; }
   get  filesInFolderPattern  ():string       { return this._wsConfig.get( EConfigurationIds.filesInFolderPattern  ) as any; }
   get  preserveCursor        ():boolean      { return this._wsConfig.get( EConfigurationIds.preserveCursor        ) as any; }
-
 }
 
-//==============================================================================
+//------------------------------------------------------------------------------
 
 export class ConfigSnapshot extends ConfigProxy {
 //
-            static readonly CPrefix                        = 'openInNpp'
-    private static         _current:ConfigSnapshot | null = null;
+            static readonly CPrefix                   = 'openInNpp';
+    private static         _current   :ConfigSnapshot
+    private static         _touched                   = -1;
+    private static         _executableTouched         = 0;
 //
 static modificationSignalled( this:undefined, ü_change:ßß_vsCode.ConfigurationChangeEvent ):void {
-    if (   ü_change.affectsConfiguration( ConfigSnapshot   .CPrefix                   ) ) {
-      if(ß_trc){ß_trc( `Configuration modified: "${ ü_change }"` );}
-      if ( ConfigSnapshot._current === null ) { return; }
+    const ü_that = ConfigSnapshot;
   //
-      if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
-        || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
-        || ü_change.affectsConfiguration( EConfigurationIds.extendEditorTitleMenu     )
-         ) { return; }
-        
-        ConfigSnapshot._current  =  null;
-       const ü_exe = ü_change.affectsConfiguration( EConfigurationIds.executable );
-        if ( ü_exe ) {
-          if(ß_trc){ß_trc( EConfigurationIds.executable );}
-        }
-    }
+    if ( ! ü_change.affectsConfiguration( ü_that.CPrefix ) ) { return; }
+    if(ß_trc){ß_trc( `Configuration modified: "${ ü_that._touched }"` );}
+    if ( ü_that._touched === -1 ) { return; }
+  //
+    if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
+      || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
+      || ü_change.affectsConfiguration( EConfigurationIds.extendEditorTitleMenu     )
+       ) { return; }
+  //
+                                                                           ü_that._touched           ++ ;
+    if ( ü_change.affectsConfiguration( EConfigurationIds.executable ) ) { ü_that._executableTouched ++ ; }
+  //
 }
 //
 static get current():ConfigSnapshot {
-    if ( this._current === null ) {
-         this._current = new ConfigSnapshot( ßß_vsCode.workspace.getConfiguration() );
+    if ( this._touched !== 0 ) {
+      if ( this._touched !== -1 ) {
+      }
+      this._current = new ConfigSnapshot( this._current, this._executableTouched > 0 );
+      this._touched = 0;
     }
     return this._current;
 }
 //
-                 executable?:string
-    readonly whenExecutable = this._whenExecutable();
-    readonly whenWorkingDir = ConfigHandler.whenWorkingDir( super._workingDirectory );
+    private          _whenWorkingDir :Promise<string> | TINITIAL = SINITIAL;
+    private          _whenExecutable :Promise<string> | TINITIAL = SINITIAL;
+    private          _executable     :        string  | TINITIAL = SINITIAL;
+constructor(
+    private readonly _previous       :ConfigSnapshot | undefined
+  , private readonly _ignoreHistory  :boolean
+){
+    super();
+  //if ( this._ignoreHistory && this.executable.length )
+}
 //
-private async _whenExecutable():Promise<string> {
-    return this.executable = await ConfigHandler.whenExecutable( super._executable );
+async whenExecutable():Promise<string> {
+      if ( this._executable === SINITIAL )
+         { this._executable = await ConfigHandler.whenExecutable( super.executable, ! this._ignoreHistory );
+         //this._whenExecutable.then( ü_executable => { this.executable = ü_executable; } );
+         }
+    return this._executable;
+}
+
+get whenWorkingDir():Promise<string> {
+      if ( this._whenWorkingDir === SINITIAL )
+         { this._whenWorkingDir = ConfigHandler.whenWorkingDir( super.workingDirectory ); }
+    return this._whenWorkingDir;
 }
 //
 }
 
 //==============================================================================
-  const SINITIAL = Symbol();
   const enum EHistStates {
     IDLE = 0
   , LOCKED
   , DIRTY
   }
 //------------------------------------------------------------------------------
-  type TINITIAL = typeof SINITIAL
   type THistInitials<T> = {
     [P in keyof T] :() => T[P]
   }
@@ -214,8 +232,6 @@ interface IHistoryData {
       { executable :string
       }
 }
-
-  type TAdmin = Partial<IHistoryData['admin']>
 //------------------------------------------------------------------------------
 export class History implements IHistoryData {
 //
@@ -263,15 +279,27 @@ async whenCommitted( ü_mKey:keyof IHistoryData, ü_lazy = true ):Promise<boolea
 
       case EHistStates.LOCKED:
        const ü_lock = this._locks[ ü_mKey ];
-        if ( ü_lock !== undefined ) {
-             ü_lock.release();
-        }
+             ü_lock!.release();
         if ( ü_dirty ) {
           return true ;
         }
 
       case EHistStates.IDLE:
           return false;
+
+    }
+}
+
+release( ü_mKey:keyof IHistoryData ):boolean {
+    switch ( this._state[ ü_mKey ] ) {
+
+      case EHistStates.LOCKED:
+        const ü_lock = this._locks[ ü_mKey ];
+              ü_lock!.release();
+        return true ;
+
+      default:
+        return false;
 
     }
 }
@@ -336,26 +364,29 @@ private async _whenObject<P extends keyof IHistoryData>( ü_mKey:P, ü_newData:P
                     : await this._whenLocked( ü_mKey )
                     ;
   //
-    for ( const ü_pKey in ü_newData ) {
-    //const ü_a = ü_oldData[ ü_pKey as keyof IHistoryData[P] ]
-    //const ü_b = ü_newData[ ü_pKey as keyof IHistoryData[P] ]
-      if ( ( ü_dataRef[ ü_pKey as keyof IHistoryData[P] ] =
-             ü_newData[ ü_pKey as keyof IHistoryData[P] ]! ) === undefined ) {
-      delete ü_dataRef[ ü_pKey as keyof IHistoryData[P] ] ;
-
+    try {
+      for ( const ü_pKey in ü_newData ) {
+      //const ü_a = ü_oldData[ ü_pKey as keyof IHistoryData[P] ]
+      //const ü_b = ü_newData[ ü_pKey as keyof IHistoryData[P] ]
+        if ( ( ü_dataRef[ ü_pKey as keyof IHistoryData[P] ] =
+               ü_newData[ ü_pKey as keyof IHistoryData[P] ]! ) === undefined ) {
+        delete ü_dataRef[ ü_pKey as keyof IHistoryData[P] ] ;
+    
+        }
       }
-    }
-    //Object.assign( ü_oldData, ü_newData );
-  //
+      //Object.assign( ü_oldData, ü_newData );
+    //
       this._state[ ü_mKey ] = EHistStates.DIRTY;
+      const ü_done = await this.whenCommitted( ü_mKey );
+    //
+    } catch ( ü_eX ) {
+      console.error( ü_eX );
+      if ( ! ü_noLock ) { this.release( ü_mKey ); }
+      throw ü_eX;
+    }
   //
-    const ü_done = await this.whenCommitted( ü_mKey );
-  //
-    return ü_dataRef
-
+    return ü_dataRef;
 }
-
-private _unlock<P extends keyof IHistoryData>( ü_mKey:P ):void { }
 
 get       config ()          :        IHistoryData['config']   { return this._getter    ( 'config'           ); }
 async whenConfig ( ü_config ?:Partial<IHistoryData['config']>  , ü_noLock = false )

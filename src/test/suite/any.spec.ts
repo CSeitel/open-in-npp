@@ -7,6 +7,7 @@
            from '../../extension';
   import { whenDelay
          , LockHandler
+         , isExe
          } from '../../lib/any';
   import   TestRuntime
            from './index';
@@ -18,6 +19,7 @@ class VscTestSpec {
 static get some():number {
     return 1;
 }
+
 
 static async test_0():Promise<void> {
     const ö_lock = new LockHandler( 'some', VscTestSpec );
@@ -33,13 +35,20 @@ async function ö_cycle( ü_secs:number ):Promise<void> {
 
 }
 
+
+static async whenExe():Promise<void> {
+    await isExe( ' ' );
+}
+
+
+
 }
 
 //==============================================================================
 
 suite( 'Library ANY', () => {
 
-  test( 'INIT'           , VscTestSpec.test_0    );
+  test( 'INIT'           , VscTestSpec.whenExe    );
 /*
   test( 'Execute Command', VscTestSpec.openInNpp );
   test( 'Env'            , VscTestSpec.test_2    );

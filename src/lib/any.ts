@@ -13,6 +13,10 @@
            from '../extension';
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
+  import { TFSError
+         , ESystemErrorCodes
+         } from './types';
+//------------------------------------------------------------------------------
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 //------------------------------------------------------------------------------
 export type TPromise<T> =
@@ -101,12 +105,23 @@ export function putFirstIndex<T>( ü_list:T[], ü_indx:number ):void {
 
 export async function isExe( ü_path:string ):Promise<boolean> {
   //
+    if ( ! ßß_path.isAbsolute( ü_path ) ) {
+
+    }
+  //
     let ü_stats:Stats;
     try {
       ü_stats = await ßß_fs.stat( ü_path );
-    } catch ( eX ) {
-      if(ß_trc){ß_trc( eX.message );}
-      return false;
+    } catch ( ü_eX ) {
+      if ( ü_eX instanceof Error ) {
+        switch ( ( ü_eX as TFSError ).code ) {
+          case ESystemErrorCodes.ENOENT:
+            if(ß_trc){ß_trc( ü_eX.message );}
+            return false;
+        }
+      }
+      console.error( ü_eX );
+      throw ü_eX;
     }
   //
     if ( ü_stats.isDirectory() ) { return false; }
