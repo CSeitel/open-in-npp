@@ -1,18 +1,16 @@
 /*
 */
-//------------------------------------------------------------------------------
+//==============================================================================
   export type TFSError = Error &
-    { code   : ESystemErrorCodes
+    { code   : EFSErrorCodes
     , errno  : number
     , syscall: string
     }
-//==============================================================================
-
-  export const enum ESystemErrorCodes
+//------------------------------------------------------------------------------
+  export const enum EFSErrorCodes
     { ENOENT    = 'ENOENT'
     , ENOTDIR   = 'ENOTDIR'
     , EPERM     = 'EPERM'
     , ENOTEMPTY = 'ENOTEMPTY'
     }
-
 //==============================================================================

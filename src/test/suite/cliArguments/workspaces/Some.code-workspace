@@ -6,13 +6,12 @@
   ],
   "settings":
   {
-    "openInNpp.filesInFolderPattern": ""
-  , "openInNpp.openFolderAsWorkspace": true
-  , "openInNpp.spawnOptions": {
+    "openInNpp.spawnOptions": {
       "windowsVerbatimArguments": false
     , "env": {
         "TEMP": "C:\\${HOME}\\"
       }
-  }
+  },
+  "openInNpp.filesInFolderPattern": "**/*.*"
   }
 }

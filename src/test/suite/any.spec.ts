@@ -1,6 +1,7 @@
 /*
 */
 //------------------------------------------------------------------------------
+  import * as ßß_assert from 'assert';
 /*
 */
   import   ExtensionRuntime
@@ -37,7 +38,13 @@ async function ö_cycle( ü_secs:number ):Promise<void> {
 
 
 static async whenExe():Promise<void> {
-    await isExe( ' ' );
+    ßß_assert.strictEqual( await isExe( '*'       , false ), false );
+    ßß_assert.strictEqual( await isExe( ''        , false ), false );
+    ßß_assert.strictEqual( await isExe( ' '       , false ), false );
+    ßß_assert.strictEqual( await isExe( '.'       , false ), false );
+    ßß_assert.strictEqual( await isExe( '..'      , false ), false );
+    ßß_assert.strictEqual( await isExe( '../..'   , false ), false );
+    ßß_assert.strictEqual( await isExe( '../../..', false ), false );
 }
 
 

@@ -14,7 +14,7 @@
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
   import { TFSError
-         , ESystemErrorCodes
+         , EFSErrorCodes
          } from './types';
 //------------------------------------------------------------------------------
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
@@ -103,10 +103,11 @@ export function putFirstIndex<T>( ü_list:T[], ü_indx:number ):void {
 
 //==============================================================================
 
-export async function isExe( ü_path:string ):Promise<boolean> {
+export async function isExe( ü_path:string, ü_enforceAbsolute = false ):Promise<boolean> {
   //
-    if ( ! ßß_path.isAbsolute( ü_path ) ) {
-
+    if ( ü_enforceAbsolute
+      && ! ßß_path.isAbsolute( ü_path ) ) {
+      return false;
     }
   //
     let ü_stats:Stats;
@@ -115,7 +116,7 @@ export async function isExe( ü_path:string ):Promise<boolean> {
     } catch ( ü_eX ) {
       if ( ü_eX instanceof Error ) {
         switch ( ( ü_eX as TFSError ).code ) {
-          case ESystemErrorCodes.ENOENT:
+          case EFSErrorCodes.ENOENT:
             if(ß_trc){ß_trc( ü_eX.message );}
             return false;
         }

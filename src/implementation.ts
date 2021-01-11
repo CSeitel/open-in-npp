@@ -76,7 +76,11 @@ static async whenSettingsOpened( this:null ):Promise<void> {
 static async whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise<string> {
   //
     if ( ü_explicit.length > 0 ) {
-      return ßß_path.normalize( expandEnvVariables( ü_explicit ) );
+      const ü_current = ßß_path.normalize( expandEnvVariables( ü_explicit ) );
+      if ( ! ßß_path.isAbsolute( ü_current ) ) {
+        console.warn( `Not a absolute Path: "${ ü_current }"` );
+      }
+      return ü_current;
     }
   //
     const ü_hist   = ExtensionRuntime.activeInstance.globalHistory;
@@ -315,11 +319,21 @@ private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
                            , { title: EButtons.OK    () , id: EButtons.OK     }
                            , { title: EButtons.ALL   () , id: EButtons.ALL    }
                            , { title: EButtons.CANCEL() , id: EButtons.CANCEL }
+                           , { title: EButtons.SELECT() , id: EButtons.SELECT }
                            );
         if(ß_trc){ß_trc( ü_todo );}
         switch ( ü_todo?.id ) {
         //case EButtons.ALL:
         //  break;
+          case EButtons.SELECT:
+            const ü_done = await ßß_vsCode.window.showQuickPick( this._others, { canPickMany: true } );
+            if ( ü_done        === undefined
+              || ü_done.length === 0 ) {
+                     ü_args.length = 0;
+              return ü_args;
+            }
+            this._others = ü_done;
+            break;
           case EButtons.OK:
             this._others.splice( 5 );
           case EButtons.CANCEL:
