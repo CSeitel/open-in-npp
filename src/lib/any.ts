@@ -152,6 +152,20 @@ function ö_win32( ü_original:string, ü_name:string ):string {
 //
 }
 
+//------------------------------------------------------------------------------
+
+export function shortenText( ü_path:string, ü_length:number ):string {
+  if ( ü_path.length <= ü_length ) { return ü_path; }
+//const ü_tooMuch = 3 + ü_path.length - ü_length;
+  const ü_tooMuch = ü_length - 5;
+  const ü_remainder = ü_tooMuch % 2;
+  const ü_even = ( ü_tooMuch - ü_remainder ) / 2;
+  return ü_path.slice( 0      , ü_even +ü_remainder )
+       + ' ... '
+       + ü_path.slice( -ü_even, ü_path.length       )
+       ;
+}
+
 //==============================================================================
 
 export async function whenChildProcessSpawned( ü_exe:string, ü_args:readonly string[], ü_opts?:SpawnOptions ):Promise<number> {

@@ -15,6 +15,7 @@
          } from './i18n';
 //------------------------------------------------------------------------------
   import { expandEnvVariables
+         , shortenText
          , whenChildProcessSpawned
          , isExe
          } from './lib/any';
@@ -230,8 +231,7 @@ async submit():Promise<number> {
       case EModes.EXPLORER: // folders possible
         const ü_pattern = this._config.filesInFolderPattern;
         if ( ü_pattern.length > 0 ) {
-          this._others = await this._whenPatternMatched( ü_pattern );
-          ß_showInformationMessage( ßß_i18n.file_hits( this._others.length , ü_pattern , this._mainPath ) );
+          this._others = await this._whenPatternMatched( ü_pattern, this._config.limit );
           if ( this._others.length === 0 ) {
             return CNotAPid;
           }
@@ -313,36 +313,7 @@ private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
   //
                                               ü_args.push( ... this._config.commandLineArguments );
   //
-    if ( this._others.length > 0          ) {
-      if ( this._others.length > 5 ) {
-        const ü_todo = await ß_showInformationMessage( ßß_i18n.max_items( 5, this._others.length )
-                           , { title: EButtons.OK    () , id: EButtons.OK     }
-                           , { title: EButtons.ALL   () , id: EButtons.ALL    }
-                           , { title: EButtons.CANCEL() , id: EButtons.CANCEL }
-                           , { title: EButtons.SELECT() , id: EButtons.SELECT }
-                           );
-        if(ß_trc){ß_trc( ü_todo );}
-        switch ( ü_todo?.id ) {
-        //case EButtons.ALL:
-        //  break;
-          case EButtons.SELECT:
-            const ü_done = await ßß_vsCode.window.showQuickPick( this._others, { canPickMany: true } );
-            if ( ü_done        === undefined
-              || ü_done.length === 0 ) {
-                     ü_args.length = 0;
-              return ü_args;
-            }
-            this._others = ü_done;
-            break;
-          case EButtons.OK:
-            this._others.splice( 5 );
-          case EButtons.CANCEL:
-          case undefined :
-        //default        :
-                   ü_args.length = 0;
-            return ü_args;
-        }
-      }
+    if (   this._others.length > 0       ) {
                                               ü_args.push( ... ( ü_verbatim ? ß_quote( ... this._others   )
                                                                             :              this._others   ) );
     } else                                  { ü_args.push(       ü_verbatim ? ß_quote(     this._mainPath )[0]
@@ -400,15 +371,60 @@ private async _whenMainIsFolder():Promise<boolean> {
     return this._mainFileType === EFileTypes.FOLDER;
 }
 
-private async _whenPatternMatched( ö_pattern:string ):Promise<string[]> {
+private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<string[]> {
   //
-    const ö_isFolder = await Promise.all( this._others.map(  ü_file         => ü_file === this._mainPath ? this._whenMainIsFolder()
+    const ö_isFolder = await Promise.all( this._others.map( (ü_file       ) => ü_file === this._mainPath ? this._whenMainIsFolder()
                                                                                                          : isDirectory( ü_file )     ) );
     const ü_subsets  = await Promise.all( this._others.map( (ü_file,ü_indx) => ö_isFolder[ ü_indx ] ? findFiles( ü_file, ö_pattern )
                                                                                                     :          [ ü_file ]            ) );
-                                    const ö_files:string[] = [];
-    for ( const ü_subset of ü_subsets ) { ö_files.push( ... ü_subset ); }
-                                   return ö_files;
+                                    const ü_files:string[] = [];
+    for ( const ü_subset of ü_subsets ) { ü_files.push( ... ü_subset ); }
+  //
+    if ( ü_files.length > ü_limit ) {
+      await this._whenSelected( ü_files, ü_limit );
+    } else {
+      ß_showInformationMessage( ßß_i18n.file_hits( this._others.length, ö_pattern, this._mainPath ) );
+    }
+  //
+    return ü_files;
+}
+
+private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolean> {
+  //
+    const ü_todo = await ß_showInformationMessage( ßß_i18n.max_items( ü_limit, ü_files.length )
+                       , { title: EButtons.OK    () , id: EButtons.OK     }
+                       , { title: EButtons.ALL   () , id: EButtons.ALL    }
+                       , { title: EButtons.CANCEL() , id: EButtons.CANCEL }
+                       , { title: EButtons.SELECT() , id: EButtons.SELECT }
+                       );
+    if(ß_trc){ß_trc( `Button: ${ ü_todo }` );}
+  //
+    switch ( ü_todo?.id ) {
+
+      case EButtons.SELECT:
+        const ü_opts:ßß_vsCode.QuickPickOptions = {};
+        const ü_list = ü_files.map( ü_file => ({ label: shortenText( ü_file, 86 ), path: ü_file }) );
+        const ü_pick = await ßß_vsCode.window.showQuickPick( ü_list, { canPickMany: true } );
+        if ( ü_pick        === undefined
+          || ü_pick.length === 0 ) {
+          ü_files.length = 0;
+          return false;
+        }
+                                         ü_files.length = 0;
+        for ( const ü_item of ü_pick ) { ü_files.push( ü_item.path ); }
+        return true;
+
+      case EButtons.OK:
+        ü_files.splice( ü_limit );
+        return true;
+      case EButtons.ALL:
+        return true;
+      case EButtons.CANCEL:
+      case undefined :
+      default        :
+          ü_files.length = 0;
+          return false;
+    }
 }
 
 }

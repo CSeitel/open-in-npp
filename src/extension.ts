@@ -75,6 +75,7 @@ constructor(
   //
     , openFolderAsWorkspace     = 'openInNpp.openFolderAsWorkspace'
     , filesInFolderPattern      = 'openInNpp.filesInFolderPattern'
+    , limit                     = 'openInNpp.limit'
     , preserveCursor            = 'openInNpp.preserveCursorPosition'
     };
 //------------------------------------------------------------------------------
@@ -136,6 +137,7 @@ class ConfigProxy {
   get  skipSessionHandling   ():string       { return this._wsConfig.get( EConfigurationIds.skipSessionHandling   ) as any; }
   get  openFolderAsWorkspace ():string       { return this._wsConfig.get( EConfigurationIds.openFolderAsWorkspace ) as any; }
   get  filesInFolderPattern  ():string       { return this._wsConfig.get( EConfigurationIds.filesInFolderPattern  ) as any; }
+  get  limit                 ():number       { return this._wsConfig.get( EConfigurationIds.limit                 ) as any; }
   get  preserveCursor        ():boolean      { return this._wsConfig.get( EConfigurationIds.preserveCursor        ) as any; }
 }
 
