@@ -23,6 +23,9 @@
          , isDirectory
          , findFiles
          } from './lib/vsc';
+  import { DropDownList
+         , ListItem
+         } from './lib/ui';
   import { TExtension
          , ConfigSnapshot
          , History
@@ -231,7 +234,7 @@ async submit():Promise<number> {
       case EModes.EXPLORER: // folders possible
         const ü_pattern = this._config.filesInFolderPattern;
         if ( ü_pattern.length > 0 ) {
-          this._others = await this._whenPatternMatched( ü_pattern, this._config.limit );
+          this._others = await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit );
           if ( this._others.length === 0 ) {
             return CNotAPid;
           }
@@ -379,11 +382,12 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
                                                                                                     :          [ ü_file ]            ) );
                                     const ü_files:string[] = [];
     for ( const ü_subset of ü_subsets ) { ü_files.push( ... ü_subset ); }
+                                          ü_files.sort();
   //
     if ( ü_files.length > ü_limit ) {
       await this._whenSelected( ü_files, ü_limit );
     } else {
-      ß_showInformationMessage( ßß_i18n.file_hits( this._others.length, ö_pattern, this._mainPath ) );
+      ß_showInformationMessage( ßß_i18n.file_hits( this._others.length, ö_pattern ) );
     }
   //
     return ü_files;
@@ -391,27 +395,45 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
 
 private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolean> {
   //
-    const ü_todo = await ß_showInformationMessage( ßß_i18n.max_items( ü_limit, ü_files.length )
+    const ü_todo = ü_limit > 0
+                 ? await ß_showInformationMessage( ßß_i18n.max_items( ü_limit, ü_files.length )
                        , { title: EButtons.OK    () , id: EButtons.OK     }
-                       , { title: EButtons.ALL   () , id: EButtons.ALL    }
-                       , { title: EButtons.CANCEL() , id: EButtons.CANCEL }
                        , { title: EButtons.SELECT() , id: EButtons.SELECT }
-                       );
+                       , { title: EButtons.ALL   () , id: EButtons.ALL    }
+                       )
+                 : { id: EButtons.SELECT }
+                 ;
     if(ß_trc){ß_trc( `Button: ${ ü_todo }` );}
   //
     switch ( ü_todo?.id ) {
 
       case EButtons.SELECT:
+        const ü_list = ü_files.map( ü_file => new ListItem(              ßß_path.basename( ü_file )
+                                                          , shortenText( ßß_path.dirname ( ü_file ), 72 )
+                                                          ,                                ü_file
+                                                          ) );
+      /*
+                                               { label      :              ßß_path.basename( ü_file )
+                                               , description: shortenText( ßß_path.dirname ( ü_file ), 72 )
+                                             //, detail     : ü_file
+                                               , path       : ü_file
+                                               }
         const ü_opts:ßß_vsCode.QuickPickOptions = {};
-        const ü_list = ü_files.map( ü_file => ({ label: shortenText( ü_file, 86 ), path: ü_file }) );
-        const ü_pick = await ßß_vsCode.window.showQuickPick( ü_list, { canPickMany: true } );
-        if ( ü_pick        === undefined
-          || ü_pick.length === 0 ) {
+        const ü_pick = ßß_vsCode.window.createQuickPick()
+              ü_pick.canSelectMany      = true;
+              ü_pick.matchOnDescription = true;
+              ü_pick.items              = ü_list;
+        const ü_items = ü_pick.show();
+      */
+        const ü_items = await DropDownList.whenItemPicked( ü_list, { header: 'Files found', canPickMany: true } ) as string[];
+      //const ü_items = await ßß_vsCode.window.showQuickPick( ü_list, { canPickMany: true } );
+        if ( ! Array.isArray( ü_items )
+          || ü_items.length === 0 ) {
           ü_files.length = 0;
           return false;
         }
-                                         ü_files.length = 0;
-        for ( const ü_item of ü_pick ) { ü_files.push( ü_item.path ); }
+                                          ü_files.length = 0;
+        for ( const ü_item of ü_items ) { ü_files.push( ü_item ); }
         return true;
 
       case EButtons.OK:

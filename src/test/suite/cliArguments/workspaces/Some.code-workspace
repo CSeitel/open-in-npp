@@ -13,6 +13,7 @@
       }
   },
   "openInNpp.filesInFolderPattern": "**/*.*",
-  "openInNpp.limit": 3
+  "openInNpp.limit": 0,
+  "openInNpp.matchingFilesLimit": 1
   }
 }

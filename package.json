@@ -117,10 +117,10 @@
         { "type"   : "string"
         , "markdownDescription": "Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_ [more &#128712;](https://github.com/CSeitel/open-in-npp#extension-settings)"
         }
-      , "openInNpp.limit":
+      , "openInNpp.matchingFilesLimit":
         { "type"   : "number"
         , "default": 10
-        , "markdownDescription": "Instead of passing a folder path along to _Notepad++_ find al"
+        , "markdownDescription": "When the setting _files-In-Folder-Pattern_ is applied and more files than the specified number are found a dialog box will provide [options](https://github.com/CSeitel/open-in-npp)"
         }
       , "openInNpp.preserveCursorPosition":
         { "type"   : "boolean"
