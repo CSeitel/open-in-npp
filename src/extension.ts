@@ -15,6 +15,8 @@ export type TExtension = ßß_vsCode.Extension<TOpenInNpp>
 
 export default class ExtensionRuntime {
     static readonly CExtensionId                             = 'CSeitel.open-in-npp';
+  //static readonly CExtensionUrl                            = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
+    static readonly CExtensionUrl                            = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
     static readonly developerTrace :false|typeof console.log = console.log;
     static          activeInstance :ExtensionRuntime //|undefined = undefined;
   //
@@ -290,7 +292,8 @@ async whenCommitted( ü_mKey:keyof IHistoryData, ü_lazy = true ):Promise<boolea
 
       case EHistStates.LOCKED:
        const ü_lock = this._locks[ ü_mKey ];
-             ü_lock!.release();
+       if ( ü_lock !== undefined )
+          { ü_lock.release(); }
         if ( ü_dirty ) {
           return true ;
         }

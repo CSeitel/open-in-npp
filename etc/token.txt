@@ -1,6 +1,8 @@
 code --install-extension .\open-in-npp-0.0.1.vsix
 
 https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp
+#extension-settings
+https://github.com/CSeitel/open-in-npp
 https://code.visualstudio.com/docs/languages/markdown
 https://code.visualstudio.com/api/working-with-extensions/publishing-extension
 https://help.github.com/articles/markdown-basics/

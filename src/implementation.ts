@@ -22,9 +22,13 @@
   import { EVscConstants
          , isDirectory
          , findFiles
+         , whenUriOpened
          } from './lib/vsc';
-  import { DropDownList
+  import { TButtons
+         , TDropDownListOptions
+         , SCancelButtonId
          , ListItem
+         , DropDownList
          } from './lib/ui';
   import { TExtension
          , ConfigSnapshot
@@ -140,7 +144,12 @@ static async whenActivationFinalized( ü_activeInstance:ExtensionRuntime ):Promi
     if(ß_trc){ß_trc( `Admin-History`, ü_admin );}
     if ( ü_current > ü_admin.version ) {
       const ü_when = ü_globalHistory.whenAdmin( { version: ü_current } );
-      ßß_vsCode.window.showInformationMessage( `Welcome to ${ ü_activeInstance.version }` );
+      const ü_show = await ßß_vsCode.window.showInformationMessage( `Welcome to \`Open-In-Notepad++\` Version ${ ü_activeInstance.version }`, `What's new ?` );
+      switch ( ü_show ) {
+        case undefined: break;
+        default:
+          whenUriOpened( ExtensionRuntime.CExtensionUrl + '/changelog' );
+      }
     }
   //
 }
@@ -408,33 +417,22 @@ private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolea
     switch ( ü_todo?.id ) {
 
       case EButtons.SELECT:
-        const ü_list = ü_files.map( ü_file => new ListItem(              ßß_path.basename( ü_file )
+        const ü_list = ü_files.map( (ü_file,ü_indx) => new ListItem(              ßß_path.basename( ü_file )
                                                           , shortenText( ßß_path.dirname ( ü_file ), 72 )
                                                           ,                                ü_file
-                                                          ) );
-      /*
-                                               { label      :              ßß_path.basename( ü_file )
-                                               , description: shortenText( ßß_path.dirname ( ü_file ), 72 )
-                                             //, detail     : ü_file
-                                               , path       : ü_file
-                                               }
-        const ü_opts:ßß_vsCode.QuickPickOptions = {};
-        const ü_pick = ßß_vsCode.window.createQuickPick()
-              ü_pick.canSelectMany      = true;
-              ü_pick.matchOnDescription = true;
-              ü_pick.items              = ü_list;
-        const ü_items = ü_pick.show();
-      */
-        const ü_items = await DropDownList.whenItemPicked( ü_list, { header: 'Files found', canPickMany: true } ) as string[];
-      //const ü_items = await ßß_vsCode.window.showQuickPick( ü_list, { canPickMany: true } );
-        if ( ! Array.isArray( ü_items )
-          || ü_items.length === 0 ) {
-          ü_files.length = 0;
-          return false;
+                                                          ).setPicked( ü_indx < ü_limit ) );
+        ü_files.length = 0;
+        const ü_opts:TDropDownListOptions<never> =
+          { header: `${ ü_list.length } Files found`
+          };
+           const ü_items = await DropDownList.whenItemsPicked( ü_list, ü_opts );
+        switch ( ü_items ) {
+          case SCancelButtonId:
+            break;
+          default:
+            for ( const ü_item of ü_items ) { ü_files.push( ü_item ); }
         }
-                                          ü_files.length = 0;
-        for ( const ü_item of ü_items ) { ü_files.push( ü_item ); }
-        return true;
+        return ü_files.length > 0;
 
       case EButtons.OK:
         ü_files.splice( ü_limit );

@@ -8,9 +8,14 @@
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
 export const enum EVscConstants {
-      openWbSettings    = 'workbench.action.openSettings'
-}
+    openWbSettings  = 'workbench.action.openSettings'
+  , vsCodeOpen      = 'vscode.open'
+  }
 //==============================================================================
+
+export async function whenUriOpened( ü_url:string ):Promise<void> {
+    await ßß_vsCode.commands.executeCommand( EVscConstants.vsCodeOpen, ßß_vsCode.Uri.parse( ü_url ) );
+}
 
 export async function whenTextEditorOpened( ü_fileUri:ßß_vsCode.Uri | string, ü_preview = false, ü_languageId?:string ):Promise<ßß_vsCode.TextEditor> {
     if ( typeof( ü_fileUri ) === 'string' )

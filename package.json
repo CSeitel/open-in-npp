@@ -78,7 +78,7 @@
     , "properties": {
         "openInNpp.Executable":
         { "type"   : "string"
-        , "markdownDescription": "Specifies the path of the _Notepad++_ executable; in case the empty default is not overwritten the path is provisioned as explained [here](https://github.com/CSeitel/open-in-npp#extension-settings)"
+        , "markdownDescription": "Specifies the path of the _Notepad++_ executable; in case the empty default is not overwritten the path is provisioned as explained [here](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
         }
       , "openInNpp.spawnOptions":
         { "type"   : "object"
@@ -86,7 +86,7 @@
         }
       , "openInNpp.workingDirectory":
         { "type"   : "string"
-        , "markdownDescription": "Specifies the path of the folder used as [working directory](https://en.wikipedia.org/wiki/Working_directory) during the execution of _Notepad++_; in case the empty default is not overwritten the working directory is enforced as explained [here](https://github.com/CSeitel/open-in-npp#extension-settings)"
+        , "markdownDescription": "Specifies the path of the folder used as [working directory](https://en.wikipedia.org/wiki/Working_directory) during the execution of _Notepad++_; in case the empty default is not overwritten the working directory is enforced as explained [here](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
         }
       , "openInNpp.decoupledExecution":
         { "type"   : "boolean"
@@ -115,12 +115,12 @@
         }
       , "openInNpp.filesInFolderPattern":
         { "type"   : "string"
-        , "markdownDescription": "Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_ [more &#128712;](https://github.com/CSeitel/open-in-npp#extension-settings)"
+        , "markdownDescription": "Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_ [more &#128712;](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
         }
       , "openInNpp.matchingFilesLimit":
         { "type"   : "number"
         , "default": 10
-        , "markdownDescription": "When the setting _files-In-Folder-Pattern_ is applied and more files than the specified number are found a dialog box will provide [options](https://github.com/CSeitel/open-in-npp)"
+        , "markdownDescription": "When the setting _files-In-Folder-Pattern_ is applied and more files than the specified number are found a dialog box will provide [options](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp)"
         }
       , "openInNpp.preserveCursorPosition":
         { "type"   : "boolean"
