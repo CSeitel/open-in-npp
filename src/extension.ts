@@ -1,8 +1,6 @@
 /*
 */
   import * as ßß_vsCode from 'vscode';
-  import { SpawnOptions
-         } from 'child_process';
 //==============================================================================
   type TExtensionCommand =
     { command :keyof typeof CCommandHandlerMap
@@ -47,7 +45,8 @@ constructor(
 //------------------------------------------------------------------------------
   const ß_trc = ExtensionRuntime.developerTrace;
 //==============================================================================
-  import { createPromise
+  import { SpawnOptions
+         , createPromise
          , LockHandler
          } from './lib/any';
   import { CommandHandler
@@ -88,8 +87,9 @@ constructor(
 //------------------------------------------------------------------------------
   const SINITIAL = Symbol();
   type  TINITIAL = typeof SINITIAL
-//==============================================================================
-
+//ß0
+//ß0============================================================================
+//ß0
 export async function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):Promise<void> {
   //
     const ü_activeInstance = new ExtensionRuntime( ü_extnContext );
@@ -116,7 +116,7 @@ export async function activate( ü_extnContext: ßß_vsCode.ExtensionContext ):P
     await CommandHandler.whenActivationFinalized( ü_activeInstance );
 }
 
-export async function deactivate( this:null ):Promise<void> {
+export async function deactivate():Promise<void> {
   /*
     const ü_hist = ExtensionRuntime.activeInstance.globalHistory;
     ü_hist.dummy = [ Date.now() ];
@@ -124,9 +124,9 @@ export async function deactivate( this:null ):Promise<void> {
     if(ß_trc){ß_trc( `Deactivation` );}
   */
 }
-
-//==============================================================================
-
+//ß1
+//ß1============================================================================
+//ß1
 class ConfigProxy {
     private readonly _wsConfig = ßß_vsCode.workspace.getConfiguration();
 //
@@ -214,8 +214,9 @@ get whenWorkingDir():Promise<string> {
 }
 //
 }
-
-//==============================================================================
+//ß2
+//ß2============================================================================
+//ß2
   const enum EHistStates {
     IDLE = 0
   , LOCKED

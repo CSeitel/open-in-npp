@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "path": "C:\\zzz_Dev\\node_modules\\open-in-npp"
+    }
+  ],
+  "settings": {
+    "anyTree.a.compositionSource.externalJsonFile": "anyTreeConfig.json"
+  ,
+  "openInNpp.commandLineArguments_": [
+    "-nosession"
+  ],
+  "openInNpp.globPattern": " ",
+  "openInNpp.filesInFolderPattern": "**/*.json"
+},
+}

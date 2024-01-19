@@ -4,7 +4,7 @@
   }
 , "trees": [
     { "label": "Source-Code"
-    , "expandBaseFolder": "true"
+    , "expandBaseFolder": true
     , "autoReveal": 9
     , "baseFolder"        : "src"
     , "excludeBaseFolders": "test"
@@ -13,7 +13,7 @@
     }
   , { "prependHeader": true
     , "label": "Test-Code"
-    , "baseFolder": "src/test"
+    , "baseFolder"      : "src/test"
     , "associatedFolder": "out/test/"
     }
 

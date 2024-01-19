@@ -2,15 +2,19 @@
 */
 //==============================================================================
   export type TFSError = Error &
-    { code   : EFSErrorCodes
+  ( { code   : TNodeFSErrorCodes
     , errno  : number
     , syscall: string
     }
-//------------------------------------------------------------------------------
-  export const enum EFSErrorCodes
-    { ENOENT    = 'ENOENT'
-    , ENOTDIR   = 'ENOTDIR'
-    , EPERM     = 'EPERM'
-    , ENOTEMPTY = 'ENOTEMPTY'
+  | { code   : TVscFSErrorCodes
     }
+  )
+//------------------------------------------------------------------------------
+  export type TNodeFSErrorCodes = 'ENOENT'
+                                | 'ENOTDIR'
+                                | 'EPERM'
+                                | 'ENOTEMPTY'
+  export type TVscFSErrorCodes  = 'FileNotFound'
 //==============================================================================
+/*
+*/
