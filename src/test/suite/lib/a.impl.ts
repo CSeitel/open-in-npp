@@ -26,9 +26,10 @@
 
 class VscTestSpec {
 
-static async rectify( done:TMochaDone ):Promise<void> {
+static async rectify():Promise<void> {
   //
     await VscTestSpec._whenActive();
+	  ßß_vsCode.window.showInformationMessage(' all tests.');
   //
     const ü_hist = ExtensionRuntime.activeInstance.globalHistory;
     const ü_admin  = await ü_hist.whenAdmin ( { version: 0 } );
@@ -36,11 +37,9 @@ static async rectify( done:TMochaDone ):Promise<void> {
     const ü_config = await ü_hist.whenConfig( { executable: '' } );
     ßß_assert.strictEqual( ü_config.executable, '' );
   //
-	  await ßß_vsCode.window.showInformationMessage('Start all tests.');
+	  ßß_vsCode.window.showInformationMessage('Start all tests.');
     console.log( 'Hello World' );
   //
-    done();
-    return Promise.resolve();
     
 }
 

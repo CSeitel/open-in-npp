@@ -19,9 +19,9 @@ suite('Extension Test Suite', async function (){
   vscode.window.showInformationMessage('Start all tests.');
 //vscode.window.
 
-test('Sample test', async (  ) => {
+test('YYY', async (  ) => {
     await whenDelay( 1000 );
-    await vscode.window.showInformationMessage('Done');
+    vscode.window.showInformationMessage('1');
   //assert.strictEqual(-1, [1, 2, 3].indexOf(5));
   //assert.strictEqual(-1, [1, 2, 3].indexOf(0));
     assert.strictEqual( 1, 1 );
@@ -29,12 +29,24 @@ test('Sample test', async (  ) => {
   //return Promise.resolve( true );
 });
 
-after(()=>{
-  vscode.window.showInformationMessage('All Done');
+test('ZZZ', async (  ) => {
+    vscode.window.showInformationMessage('2');
+    assert.strictEqual( 1, 1 );
+  //process.exit();
 });
+
 
 });
 
 //====================================================================
 /*
+  this.afterAll = function(){
+    vscode.window.showInformationMessage('All-Done');
+    vscode.commands.executeCommand( 'vscode.close' )
+    return this;
+  }
+after(async ()=>{
+     vscode.window.showInformationMessage('All Done');
+    await whenDelay( 300 );
+});
 */

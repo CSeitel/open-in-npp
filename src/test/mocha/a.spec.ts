@@ -12,21 +12,29 @@
     { 1: 'YYY'
     , 2: 'ZZZ'
     };
+//const ß_testLock = new LockHandler( 1, ß_tests );
+  const ß_testLock = new LockHandler( 1, {1:'Suite'} );
 //====================================================================
 
 suite( basename( __filename ), ()=>{
-setup(function() {
+
+setup(async function() {
+    await ß_testLock.whenLocked();
+    console.log( 'ready' );
 });
 
 teardown(function() {
+    ß_testLock.release();
     console.log( 'done' );
 });
 
 test( ß_tests[1], async ()=>{
-    new LockHandler<typeof ß_tests,keyof typeof ß_tests>( 1, ß_tests )
-    const a = new LockHandler( 1, ß_tests )
-    await whenDelay( 1000 );
-    ßß_assert.strictEqual( 1, 1 );
+      await whenDelay( 1000 );
+      ßß_assert.strictEqual( 1, 1 );
+
+  try {
+  } finally {
+  }
 });
 
 test( ß_tests[2], async ()=>{
