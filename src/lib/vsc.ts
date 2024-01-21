@@ -12,8 +12,8 @@
            from '../extension';
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
-  import { TFSError
-         } from './types';
+  import { type TFSError
+         } from '../types/error.d';
   import { ßß_fs_p
          , whenKnownAsFolder as whenKnownAsFolderFS
          } from './any';
@@ -186,7 +186,7 @@ export async function whenOpenedInOSDefaultApp( ü_fileUri:TFileUri ):Promise<bo
     try {
       return ßß_vsCode.env.openExternal( ü_fileUri );
     } catch ( ü_eX ) {
-      console.error( ü_eX.message );
+      console.error( (ü_eX as Error).message );
       return false;
     }
 }
@@ -237,7 +237,7 @@ export async function exists( ü_path:string, ü_andIsDirectory?:boolean ):Promi
              : ü_stat.type !== ßß_vsCode.FileType.Directory
            ;
     } catch ( ü_eX ) {
-      if(ß_trc){ß_trc( ü_eX.message );}
+      if(ß_trc){ß_trc( (ü_eX as Error).message );}
       return false;
     }
 }

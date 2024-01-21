@@ -45,7 +45,7 @@ async function ß_whenSpecsRun( ü_specs:string[] ):Promise<void> {
       , timeout: ß_timeout
       };
     const ü_mocha = new Mocha( ü_opts );
-          ü_mocha.useColors( true );
+        //ü_mocha.useColors( true );
     for ( const ü_spec of ü_specs ) { ü_mocha.addFile( ü_spec ); }
   //
     return new Promise( (ü_resolve,ü_reject) => {

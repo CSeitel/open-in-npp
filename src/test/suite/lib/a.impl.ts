@@ -1,11 +1,12 @@
 /*
 */
+  import { TMochaDone
+         } from '../../../types/test.d';
+//--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_assert from 'assert';
   import * as ßß_path   from 'path';
-//------------------------------------------------------------------------------
-/*
-*/
+//--------------------------------------------------------------------
   import   ExtensionRuntime
            from '../../../extension';
   import { History
@@ -13,17 +14,19 @@
   import   TestRuntime
            from '../index';
   const ß_trc = TestRuntime.developerTrace;
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
   import { whenTextEditorOpened
          } from '../../../lib/vsc';
+  import {
+          whenDelay
+         } from '../../../lib/asyncUtil';
   import { expandEnvVariables
-         , whenDelay
-         } from '../../../lib/any';
-//==============================================================================
+         } from '../../../lib/textUtil';
+//====================================================================
 
 class VscTestSpec {
 
-static async rectify():Promise<void> {
+static async rectify( done:TMochaDone ):Promise<void> {
   //
     await VscTestSpec._whenActive();
   //
@@ -32,6 +35,13 @@ static async rectify():Promise<void> {
     ßß_assert.strictEqual( ü_admin .version   , 0 );
     const ü_config = await ü_hist.whenConfig( { executable: '' } );
     ßß_assert.strictEqual( ü_config.executable, '' );
+  //
+	  await ßß_vsCode.window.showInformationMessage('Start all tests.');
+    console.log( 'Hello World' );
+  //
+    done();
+    return Promise.resolve();
+    
 }
 
 static async test_0():Promise<void> {

@@ -6,10 +6,11 @@
 */
   import   ExtensionRuntime
            from '../../extension';
+  import { isExe
+         } from '../../lib/any';
   import { whenDelay
          , LockHandler
-         , isExe
-         } from '../../lib/any';
+         } from '../../lib/asyncUtil';
   import   TestRuntime
            from './index';
   const ß_trc = TestRuntime.developerTrace;

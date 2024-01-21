@@ -1,42 +1,37 @@
 /*
 */
-import * as ßß_assert from "assert";
-import * as ßß_path   from 'path';
-import { isExe
-       } from '../../lib/any';
+  import { basename
+         } from 'path';
+  import * as ßß_assert from 'assert';
+//--------------------------------------------------------------------
+  import { whenDelay
+         , LockHandler
+         } from '../../lib/asyncUtil';
+//--------------------------------------------------------------------
+  const ß_tests =
+    { 1: 'YYY'
+    , 2: 'ZZZ'
+    };
+//====================================================================
 
-describe( 'Test', () => {
-
-it( 'it', async () => {
+suite( basename( __filename ), ()=>{
+setup(function() {
 });
 
-it( 'isExe', async () => {
-//await ßß_impl.isExe( Executable );
-  await ß_isExe( __filename                                          , false );
-  await ß_isExe( __dirname                                           , false );
-  await ß_isExe( '_dir ame &'                                        , false );
-  await ß_isExe( 'C:\\zzz_Dev\\node_modules\\open-in-npp\\.gitignore', false );
-//await ß_isExe( await ßß_impl.defaultNppExecutable()                , true  );
+teardown(function() {
+    console.log( 'done' );
+});
+
+test( ß_tests[1], async ()=>{
+    new LockHandler<typeof ß_tests,keyof typeof ß_tests>( 1, ß_tests )
+    const a = new LockHandler( 1, ß_tests )
+    await whenDelay( 1000 );
+    ßß_assert.strictEqual( 1, 1 );
+});
+
+test( ß_tests[2], async ()=>{
+    await whenDelay( 1000 );
+    ßß_assert.strictEqual( 1, 1 );
 });
 
 });
-
-async function ß_isExe( ü_path:string, ü_expected:boolean ) {
-    const ü_act = await isExe( ü_path );
-    ßß_assert.strictEqual( ü_act, ü_expected );
-}
-
-async function ß_kill( ü_pid:number ):Promise<void> {
-  return new Promise( (ü_resolve,ü_reject) => {
-    setTimeout( () => {
-      process.kill( ü_pid );
-      ü_resolve();
-    }, 1000 );
-  });
-}
-
-//==============================================================================
-/*
-  const ü_actual = await ßß_impl.isExe( ü_fileName );
-  ßß_assert.equal( ü_actual, ü_isExe );
-*/

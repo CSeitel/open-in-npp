@@ -1,0 +1,3 @@
+npm link typescript
+
+rm -recurse C:\zzz_Dev\node_modules\open-in-npp\out\test\mocha\

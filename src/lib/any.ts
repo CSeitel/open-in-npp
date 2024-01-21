@@ -1,5 +1,8 @@
 /*
 */
+  import { type TFSError
+         } from '../types/error.d';
+//------------------------------------------------------------------------------
   import * as ßß_path   from 'path';
   import * as ßß_fs     from 'fs';
   import * as ßß_cp     from 'child_process';
@@ -23,45 +26,8 @@
            from '../extension';
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
-  import { TFSError
-         } from './types';
-//------------------------------------------------------------------------------
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 //------------------------------------------------------------------------------
-export type TPromise<T> =
-  { promise: Promise<T>
-  , resolve:(value :T    ) => void
-  , reject :(reason:Error) => void
-  }
-//==============================================================================
-
-export function createPromise<T>():TPromise<T> {
-    const ö_oref = {} as TPromise<T>;
-                                                ö_oref.promise
-    = new Promise<T>( (ü_resolve,ü_reject) => { ö_oref.resolve = ü_resolve;
-                                                ö_oref.reject  = ü_reject ; }
-                    );
-    return ö_oref;
-}
-
-//------------------------------------------------------------------------------
-
-export async function whenDelay( ü_delay:number ):Promise<number> {
-  //
-    const ö_oref  = createPromise<number>();
-    const ö_start = process.hrtime.bigint();
-    setTimeout( ö_later, ü_delay );
-  //
-    return ö_oref.promise;
-//
-function ö_later():void {
-                      const ü_end   = process.hrtime.bigint();
-                      const ü_delta = ( ü_end - ö_start ) / BigInt( 1000000 );
-    ö_oref.resolve( Number( ü_delta ) );
-}
-
-}
-
 //==============================================================================
 
 export class BufferedMap<K,T> extends Map<K,T> {
@@ -114,33 +80,6 @@ dispose():void {
 
 //==============================================================================
 
-export class LockHandler<T,P extends keyof T> {
-    private          _pending                             = false;
-    private readonly _queue :(  (value:T[P]) => void  )[] = [];
-//
-constructor(
-    private readonly _mKey :P
-  , private readonly _that :T
-){}
-//
-async whenLocked():Promise<T[P]> {
-    if(ß_trc){ß_trc( `Locking: "${ this._mKey }"` );}
-  //
-      if ( this._pending     ) { return new Promise(  (ü_resolve) => { this._queue.push( ü_resolve ); }  ); }
-    else { this._pending = true; return this._that[ this._mKey ]                                          ; }
-}
-//
-release():void {
-    if(ß_trc){ß_trc( `Releasing: "${ this._mKey }"` );}
-    if ( this._queue.length > 0 )
-       { this._queue.shift()! ( this._that[ this._mKey ] ); }
-    else { this._pending = false; }
-}
-
-}
-
-//==============================================================================
-
 export async function whenFileInfoRead( ü_path:PathLike                        ):Promise<Stats|null>
 export async function whenFileInfoRead( ü_path:PathLike, ü_fileExists :false   ):Promise<Stats|null>
 export async function whenFileInfoRead( ü_path:PathLike, ü_fileExists :true    ):Promise<Stats     >
@@ -175,23 +114,6 @@ export async function whenKnownAsFolder( ü_path:ßß_fs.PathLike ):Promise<bool
     return false;
 }
 
-//------------------------------------------------------------------------------
-
-export function expandEnvVariables( ü_path:string ):string {
-  //
-    const ü_rgXp = /%([^%]+)%/g;
-    return ü_path.replace( ü_rgXp, ö_win32 );
-//
-function ö_win32( ü_original:string, ü_name:string ):string {
-    const ü_resolved = process.env[ ü_name ];
-    return ü_resolved === undefined
-         ? ü_original
-         : ü_resolved
-         ;
-}
-//
-}
-
 //==============================================================================
 
 export async function whenChildProcessSpawned( ü_exe:string, ü_args:readonly string[], ü_opts?:SpawnOptions ):Promise<number> {
@@ -215,7 +137,7 @@ export async function whenChildProcessSpawned( ü_exe:string, ü_args:readonly s
       else                            {                     ö_resolve!( ö_proc.pid ); }
     //
     } catch ( ü_eX ) {
-      ö_rejectError( ü_eX );
+      ö_rejectError( ü_eX as Error );
     }
   //
     return ü_whenPid;
@@ -302,20 +224,6 @@ export async function isExe( ü_path:string, ü_enforceAbsolute = false ):Promis
   //ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
   //ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
     return true;
-}
-
-//------------------------------------------------------------------------------
-
-export function shortenText( ü_path:string, ü_length:number ):string {
-  if ( ü_path.length <= ü_length ) { return ü_path; }
-//const ü_tooMuch = 3 + ü_path.length - ü_length;
-  const ü_tooMuch = ü_length - 5;
-  const ü_remainder = ü_tooMuch % 2;
-  const ü_even = ( ü_tooMuch - ü_remainder ) / 2;
-  return ü_path.slice( 0      , ü_even +ü_remainder )
-       + ' ... '
-       + ü_path.slice( -ü_even, ü_path.length       )
-       ;
 }
 
 

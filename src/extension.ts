@@ -46,9 +46,10 @@ constructor(
   const ß_trc = ExtensionRuntime.developerTrace;
 //==============================================================================
   import { SpawnOptions
-         , createPromise
-         , LockHandler
          } from './lib/any';
+  import { createPromise
+         , LockHandler
+         } from './lib/asyncUtil';
   import { CommandHandler
          , ConfigHandler
          } from './implementation';

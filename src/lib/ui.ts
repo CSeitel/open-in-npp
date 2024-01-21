@@ -100,7 +100,7 @@ static async whenItemsPicked<T,B>( ü_items:TListItems<T>
     private readonly _pick          = ßß_vsCode.window.createQuickPick< ListItem<T> >();
     private readonly _disposables    :ßß_vsCode.Disposable[] = [];
     private readonly _hint          ?:string
-    private          _selection      :       ListItem<T>[]|TNULL          = CNULL;
+    private          _selection      :readonly ListItem<T>[]|TNULL          = CNULL;
     private          _resolveItem    :( ü_value :TMULTIPLEVALUES<T>|B|T ) => void    = () => {};
     private          _multiple                                                     = true;
     private          _onButton      ?:( ü_button:          B, ü_self: DropDownList<T,B> ) => boolean
@@ -145,7 +145,7 @@ constructor(
 private _onDidChangeValue( ü_value:string ):any {
     if(ß_trc){ß_trc( `onDidChangeValue: "${ ü_value }"` );}
 }
-private _onDidChangeSelection( ü_items:ListItem<T>[] ):any {
+private _onDidChangeSelection( ü_items:readonly ListItem<T>[] ):any {
     if(ß_trc){ß_trc( `onDidChangeSelection: "${ ü_items.length } items"` );}
     this._selection = ü_items;
 }

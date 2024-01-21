@@ -14,11 +14,13 @@
   import { EButtons as EButtons
          } from './i18n';
 //------------------------------------------------------------------------------
-  import { expandEnvVariables
-         , shortenText
-         , whenChildProcessSpawned
+  import {
+          whenChildProcessSpawned
          , isExe
          } from './lib/any';
+  import { shortenText
+         , expandEnvVariables
+         } from './lib/textUtil';
   import { EVscConstants
          , isDirectory
          , findFiles
@@ -341,7 +343,7 @@ private async _options():Promise<SpawnOptions> {
     const ü_opts:SpawnOptions =
       { stdio   : 'ignore'
       , detached: this._config.decoupledExecution
-      , cwd     : await this._cwd( ü_more.cwd )
+      , cwd     : await this._cwd( ü_more.cwd as string )
       };
   //
     Object.assign( ü_opts, ü_more );

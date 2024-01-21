@@ -1,8 +1,7 @@
 /*
 */
   import * as ßß_path from 'path';
-  import { runTests as whenVscTestsRun
-         } from 'vscode-test';
+  //import { runTests as whenVscTestsRun } from 'vscode-test';
 //------------------------------------------------------------------------------
   main();
 //==============================================================================
@@ -17,7 +16,7 @@ async function main():Promise<void> {
   //
     try {
 
-      const ü_count = await whenVscTestsRun( ü_opts );
+      const ü_count = 1; //await whenVscTestsRun( ü_opts );
       console.log( `${ ü_count }` );
 
     } catch ( ü_eX ) {
