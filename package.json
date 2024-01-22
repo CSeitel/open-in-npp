@@ -1,169 +1,169 @@
 {
-  "name"       : "open-in-npp"
-, "displayName": "Open in Notepad++"
-, "description": "Open the active file in Notepad++"
-, "version": "0.1.5"
-, "publisher": "CSeitel"
-, "repository":
-  { "type": "git"
-  , "url": "https://github.com/CSeitel/open-in-npp"
-  }
-, "bugs":
-  { "url": "https://github.com/CSeitel/open-in-npp/issues"
-  }
-, "engines": {
+  "name": "open-in-npp",
+  "displayName": "Open in Notepad++",
+  "description": "Open the active file in Notepad++",
+  "version": "0.1.5",
+  "publisher": "CSeitel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CSeitel/open-in-npp"
+  },
+  "bugs": {
+    "url": "https://github.com/CSeitel/open-in-npp/issues"
+  },
+  "engines": {
     "vscode": "^1.52.0"
-  }
-, "license": "MIT"
-, "icon": "images/icons8-notepad++-144.png"
-, "categories":
-  [ "Other"
-  ]
-, "activationEvents":
-  [ "onCommand:openInNpp.openSettings"
-  , "onCommand:extension.openInNpp"
-  , "onCommand:extension.openInNppX"
-  , "onCommand:extension.openInNppY"
-  ]
-, "main": "./out/extension.js"
-, "contributes":
-
-  { "commands":
-    [ { "command": "openInNpp.openSettings"
-      , "title"  : "Open Settings for `Open in Notepad++`"
+  },
+  "license": "MIT",
+  "icon": "images/icons8-notepad++-144.png",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:openInNpp.openSettings",
+    "onCommand:extension.openInNpp",
+    "onCommand:extension.openInNppX",
+    "onCommand:extension.openInNppY"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "openInNpp.openSettings",
+        "title": "Open Settings for `Open in Notepad++`"
+      },
+      {
+        "command": "extension.openInNpp",
+        "title": "Open Active File in Notepad++"
+      },
+      {
+        "command": "extension.openInNppX",
+        "title": "Open in Notepad++"
+      },
+      {
+        "command": "extension.openInNppY",
+        "title": "Open in Notepad++"
       }
-    , { "command": "extension.openInNpp"
-      , "title"  : "Open Active File in Notepad++"
-      }
-    , { "command": "extension.openInNppX"
-      , "title"  : "Open in Notepad++"
-      }
-    , { "command": "extension.openInNppY"
-      , "title"  : "Open in Notepad++"
-      }
-    ]
-
-  , "menus":
-    { "commandPalette":
-      [ { "command": "extension.openInNppX"
-        , "when"   : "false"
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "extension.openInNppX",
+          "when": "false"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "extension.openInNppX",
+          "when": "config.openInNpp.extendEditorContextMenu",
+          "group": "openInNpp@1"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "extension.openInNppX",
+          "when": "config.openInNpp.extendEditorTitleMenu",
+          "group": "openInNpp@1"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "extension.openInNppY",
+          "when": "config.openInNpp.extendExplorerContextMenu",
+          "group": "openInNpp@1"
         }
       ]
-    , "editor/context":
-      [ { "command": "extension.openInNppX"
-        , "when"   : "config.openInNpp.extendEditorContextMenu"
-        , "group"  : "openInNpp@1"
+    },
+    "keybindings": [
+      {
+        "command": "extension.openInNpp",
+        "key": "ctrl+k ctrl+n"
+      }
+    ],
+    "configuration": {
+      "title": "Open in Notepad++",
+      "properties": {
+        "openInNpp.Executable": {
+          "type": "string",
+          "markdownDescription": "Specifies the path of the _Notepad++_ executable; in case the empty default is not overwritten the path is provisioned as explained [here](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
+        },
+        "openInNpp.spawnOptions": {
+          "type": "object",
+          "markdownDescription": "Expert mode: Specifies additional options for child process creation; details are available [here](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options)"
+        },
+        "openInNpp.workingDirectory": {
+          "type": "string",
+          "markdownDescription": "Specifies the path of the folder used as [working directory](https://en.wikipedia.org/wiki/Working_directory) during the execution of _Notepad++_; in case the empty default is not overwritten the working directory is enforced as explained [here](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
+        },
+        "openInNpp.decoupledExecution": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Run _Notepad++_ independently of _VS-Code_, in particular, do not close _Notepad++_ upon exit of _VS-Code_; corresponds to option [detached](https://nodejs.org/api/child_process.html#child_process_options_detached) of child process creation"
+        },
+        "openInNpp.commandLineArguments": {
+          "type": "array",
+          "markdownDescription": "Specifies additional arguments to be passed along to _Notepad++_; a comprehensive overview of the command line parameters of _Notepad++_ is available [here](https://npp-user-manual.org/docs/command-prompt/)"
+        },
+        "openInNpp.multiInst": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Open a separate [instance](https://npp-user-manual.org/docs/preferences/#multi-instance) of _Notepad++_ for each command execution; corresponds to command line parameter [-multiInst](https://npp-user-manual.org/docs/command-prompt/)"
+        },
+        "openInNpp.skipSessionHandling": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Prevent _Notepad++_ from loading the [previous session](https://npp-user-manual.org/docs/preferences/#backup) and changing its state; corresponds to command line parameter [-nosession](https://npp-user-manual.org/docs/command-prompt/)"
+        },
+        "openInNpp.openFolderAsWorkspace": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "When passing a folder path along to _Notepad++_ let this folder be handled as a _workspace_; corresponds to command line parameter [-openFoldersAsWorkspace](https://npp-user-manual.org/docs/command-prompt/)"
+        },
+        "openInNpp.filesInFolderPattern": {
+          "type": "string",
+          "markdownDescription": "Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_ [more &#128712;](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
+        },
+        "openInNpp.matchingFilesLimit": {
+          "type": "number",
+          "default": 10,
+          "markdownDescription": "When the setting _files-In-Folder-Pattern_ is applied and more files than the specified number are found a dialog box will provide [options](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp)"
+        },
+        "openInNpp.preserveCursorPosition": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Let _Notepad++_ preserve the cursor position of the _VS-Code_ editor; corresponds to command line parameters [-n / -c](https://npp-user-manual.org/docs/command-prompt/)"
+        },
+        "openInNpp.extendExplorerContextMenu": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS-Code_ explorer"
+        },
+        "openInNpp.extendEditorContextMenu": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS-Code_ editor"
+        },
+        "openInNpp.extendEditorTitleMenu": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Add _Open in Notepad++_ to the title menu of the _VS-Code_ editor"
         }
-      ]
-    , "editor/title/context":
-      [ { "command": "extension.openInNppX"
-        , "when"   : "config.openInNpp.extendEditorTitleMenu"
-        , "group"  : "openInNpp@1"
-        }
-      ]
-    , "explorer/context":
-      [ { "command": "extension.openInNppY"
-        , "when"   : "config.openInNpp.extendExplorerContextMenu"
-        , "group"  : "openInNpp@1"
-        }
-      ]
+      }
     }
-
-  , "keybindings":
-    [ { "command": "extension.openInNpp"
-      , "key"    : "ctrl+k ctrl+n"
-      }
-    ]
-
-  , "configuration":
-    { "title": "Open in Notepad++"
-    , "properties":
-      { "openInNpp.Executable":
-        { "type"   : "string"
-        , "markdownDescription": "Specifies the path of the _Notepad++_ executable; in case the empty default is not overwritten the path is provisioned as explained [here](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
-        }
-      , "openInNpp.spawnOptions":
-        { "type"   : "object"
-        , "markdownDescription": "Expert mode: Specifies additional options for child process creation; details are available [here](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options)"
-        }
-      , "openInNpp.workingDirectory":
-        { "type"   : "string"
-        , "markdownDescription": "Specifies the path of the folder used as [working directory](https://en.wikipedia.org/wiki/Working_directory) during the execution of _Notepad++_; in case the empty default is not overwritten the working directory is enforced as explained [here](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
-        }
-      , "openInNpp.decoupledExecution":
-        { "type"   : "boolean"
-        , "default": true
-        , "markdownDescription": "Run _Notepad++_ independently of _VS-Code_, in particular, do not close _Notepad++_ upon exit of _VS-Code_; corresponds to option [detached](https://nodejs.org/api/child_process.html#child_process_options_detached) of child process creation"
-        }
-      , "openInNpp.commandLineArguments":
-        { "type"   : "array"
-        , "markdownDescription": "Specifies additional arguments to be passed along to _Notepad++_; a comprehensive overview of the command line parameters of _Notepad++_ is available [here](https://npp-user-manual.org/docs/command-prompt/)"
-        }
-
-      , "openInNpp.multiInst":
-        { "type"   : "boolean"
-        , "default": false
-        , "markdownDescription": "Open a separate [instance](https://npp-user-manual.org/docs/preferences/#multi-instance) of _Notepad++_ for each command execution; corresponds to command line parameter [-multiInst](https://npp-user-manual.org/docs/command-prompt/)"
-        }
-      , "openInNpp.skipSessionHandling":
-        { "type"   : "boolean"
-        , "default": false
-        , "markdownDescription": "Prevent _Notepad++_ from loading the [previous session](https://npp-user-manual.org/docs/preferences/#backup) and changing its state; corresponds to command line parameter [-nosession](https://npp-user-manual.org/docs/command-prompt/)"
-        }
-      , "openInNpp.openFolderAsWorkspace":
-        { "type"   : "boolean"
-        , "default": false
-        , "markdownDescription": "When passing a folder path along to _Notepad++_ let this folder be handled as a _workspace_; corresponds to command line parameter [-openFoldersAsWorkspace](https://npp-user-manual.org/docs/command-prompt/)"
-        }
-      , "openInNpp.filesInFolderPattern":
-        { "type"   : "string"
-        , "markdownDescription": "Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_ [more &#128712;](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp#extension-settings)"
-        }
-      , "openInNpp.matchingFilesLimit":
-        { "type"   : "number"
-        , "default": 10
-        , "markdownDescription": "When the setting _files-In-Folder-Pattern_ is applied and more files than the specified number are found a dialog box will provide [options](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp)"
-        }
-      , "openInNpp.preserveCursorPosition":
-        { "type"   : "boolean"
-        , "default": true
-        , "markdownDescription": "Let _Notepad++_ preserve the cursor position of the _VS-Code_ editor; corresponds to command line parameters [-n / -c](https://npp-user-manual.org/docs/command-prompt/)"
-        }
-
-      , "openInNpp.extendExplorerContextMenu":
-        { "type"   : "boolean"
-        , "default": true
-        , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS-Code_ explorer"
-        }
-      , "openInNpp.extendEditorContextMenu":
-        { "type"   : "boolean"
-        , "default": true
-        , "markdownDescription": "Add _Open in Notepad++_ to the context menu of the _VS-Code_ editor"
-        }
-      , "openInNpp.extendEditorTitleMenu":
-        { "type"   : "boolean"
-        , "default": true
-        , "markdownDescription": "Add _Open in Notepad++_ to the title menu of the _VS-Code_ editor"
-        }
-      }
-
-    }
-  }
-  , "scripts":
-  { "watch": "tsc -watch -p ./src/"
-  , "compile": "tsc -p ./src/"
-  , "pre_compile": "rimraf ./out/test"
-  , "pre_test": "npm run compile"
-  ,     "test_": "node  ./out/test/suite/npmRunVscTests.js"
-  , "test": "vscode-test"
-  , "mocha": "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/**/*.spec.js"
-  , "vscode:package": "vsce package"
-  , "vscode:install": "code --install-extension open-in-npp-0.1.5.vsix"
-  , "vscode:prepublish": "npm run compile"
-  }
-
-, "devDependencies":
-  { 
+  },
+  "scripts": {
+    "watch": "tsc -watch -p ./src/",
+    "compile": "tsc -p ./src/",
+    "pre_compile": "rimraf ./out/test",
+    "pre_test": "npm run compile",
+    "test_": "node  ./out/test/suite/npmRunVscTests.js",
+    "test": "vscode-test",
+    "mocha": "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/**/*.spec.js",
+    "vscode:package": "vsce package",
+    "vscode:install": "code --install-extension open-in-npp-0.1.5.vsix",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
     "@types/glob": "^7.1.3",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
@@ -173,5 +173,8 @@
     "glob": "^7.1.6",
     "mocha": "^10.2.0",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.2"
   }
 }

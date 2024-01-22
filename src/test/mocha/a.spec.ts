@@ -7,7 +7,10 @@
   import { whenDelay
          , LockHandler
          } from '../../lib/asyncUtil';
+  import { class_a
+         } from './lib/class_a';
 //--------------------------------------------------------------------
+  new class_a();
   const ß_tests =
     { 1: 'YYY'
     , 2: 'ZZZ'
@@ -17,6 +20,8 @@
 //====================================================================
 
 suite( basename( __filename ), ()=>{
+  const a = 0;
+  console.log(a);
 
 setup(async function() {
     await ß_testLock.whenLocked();

@@ -1,5 +1,10 @@
 /*
 */
+  import { type TExtensionConfig
+         , type TINITIAL
+         } from './constants/extension';
+  import { SINITIAL
+         } from './constants/extension';
   import * as ßß_vsCode from 'vscode';
 //==============================================================================
   type TExtensionCommand =
@@ -45,6 +50,8 @@ constructor(
 //------------------------------------------------------------------------------
   const ß_trc = ExtensionRuntime.developerTrace;
 //==============================================================================
+  import { EConfigurationIds
+         } from './constants/extension';
   import { SpawnOptions
          } from './lib/any';
   import { createPromise
@@ -61,33 +68,6 @@ constructor(
     , 'extension.openInNppY'            : CommandHandler.openInNppExplorer
     };
 //------------------------------------------------------------------------------
-   enum EConfigurationIds
-    {
-      extendExplorerContextMenu = 'openInNpp.extendExplorerContextMenu'
-    , extendEditorContextMenu   = 'openInNpp.extendEditorContextMenu'
-    , extendEditorTitleMenu     = 'openInNpp.extendEditorTitleMenu'
-  //
-    , executable                = 'openInNpp.Executable'
-    , spawnOptions              = 'openInNpp.spawnOptions'
-    , workingDirectory          = 'openInNpp.workingDirectory'
-    , decoupledExecution        = 'openInNpp.decoupledExecution'
-    , commandLineArguments      = 'openInNpp.commandLineArguments'
-    , multiInst                 = 'openInNpp.multiInst'
-    , skipSessionHandling       = 'openInNpp.skipSessionHandling'
-  //
-    , openFolderAsWorkspace     = 'openInNpp.openFolderAsWorkspace'
-    , filesInFolderPattern      = 'openInNpp.filesInFolderPattern'
-    , matchingFilesLimit        = 'openInNpp.matchingFilesLimit'
-    , preserveCursor            = 'openInNpp.preserveCursorPosition'
-    };
-//------------------------------------------------------------------------------
-  type TExtensionConfig =
-    {
-  [P in EConfigurationIds] :{ type:string }
-    }
-//------------------------------------------------------------------------------
-  const SINITIAL = Symbol();
-  type  TINITIAL = typeof SINITIAL
 //ß0
 //ß0============================================================================
 //ß0
