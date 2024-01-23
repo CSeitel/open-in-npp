@@ -1,12 +1,16 @@
+  import { type Memento
+         } from 'vscode';
   import { type TINITIAL
          } from '../constants/extension';
+//------------------------------------------------------------------------------
   import { SINITIAL
          } from '../constants/extension';
+  import { ß_RuntimeContext
+         , ß_trc
+         } from '../extension';
   import { LockHandler
          } from '../lib/asyncUtil';
-//ß2
-//ß2============================================================================
-//ß2
+//==============================================================================
   const enum EHistStates {
     IDLE = 0
   , LOCKED
@@ -59,13 +63,13 @@ export class History implements IHistoryData {
     private          _locks   :THistBufferLocks<IHistoryData> =
       {
       };
-    private readonly _dataApi:ßß_vsCode.Memento
+    private readonly _dataApi:Memento
 constructor(
     ü_global = true
 ){
     this._dataApi = ü_global
-                  ? ExtensionRuntime.activeInstance.context.globalState
-                  : ExtensionRuntime.activeInstance.context.workspaceState
+                  ? ß_RuntimeContext.activeInstance.context.globalState
+                  : ß_RuntimeContext.activeInstance.context.workspaceState
                   ;
 }
 

@@ -10,7 +10,7 @@
   import   ExtensionRuntime
            from '../../../extension';
   import { History
-         } from '../../../extension';
+         } from '../../../core/history';
   import   TestRuntime
            from '../index';
   const ß_trc = TestRuntime.developerTrace;

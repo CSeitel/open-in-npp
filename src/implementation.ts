@@ -34,8 +34,9 @@
          } from './lib/ui';
   import { TExtension
          , ConfigSnapshot
-         , History
          } from './extension';
+  import { History
+         } from './core/history';
 //------------------------------------------------------------------------------
   import ß_showInformationMessage = ßß_vsCode.window.showInformationMessage;
   import ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage    ;

@@ -48,7 +48,8 @@ constructor(
 
 }
 //------------------------------------------------------------------------------
-  const ß_trc = ExtensionRuntime.developerTrace;
+  export const ß_RuntimeContext = ExtensionRuntime;
+  export const ß_trc            = ExtensionRuntime.developerTrace;
 //==============================================================================
   import { EConfigurationIds
          } from './constants/extension';
@@ -198,6 +199,11 @@ get whenWorkingDir():Promise<string> {
 //ß2
 //ß2============================================================================
 //ß2
+//------------------------------------------------------------------------------
+  import { History
+         } from './core/history';
+//==============================================================================
+/*
   const enum EHistStates {
     IDLE = 0
   , LOCKED
@@ -227,8 +233,7 @@ interface IHistoryData {
       { executable :string
       }
 }
-//------------------------------------------------------------------------------
-export class History implements IHistoryData {
+export class History_ implements IHistoryData {
 //
 //static get():History { return new History(); }
 //
@@ -397,6 +402,4 @@ set       dummy  ( ü_dummy   :        IHistoryData['dummy' ] ) {        this._s
 
 }
 
-//==============================================================================
-/*
 */
