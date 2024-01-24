@@ -16,14 +16,12 @@
          } from 'vscode';
 //------------------------------------------------------------------------------
   export const ßß_fs_p = ßß_fs.promises;
-  export { SpawnOptions
-         } from 'child_process';
   export const child_process =
     { execFile: ßß_util.promisify( ßß_cp.execFile )
     };
 //------------------------------------------------------------------------------
   import   ExtensionRuntime
-           from '../extension';
+           from '../core/runtime';
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];

@@ -5,7 +5,7 @@
          } from 'vscode';
 //------------------------------------------------------------------------------
   import   ExtensionRuntime
-           from '../extension';
+           from '../core/runtime';
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
   type TIcons = 'close'

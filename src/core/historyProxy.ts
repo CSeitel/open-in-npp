@@ -7,7 +7,7 @@
          } from '../constants/extension';
   import { ß_RuntimeContext
          , ß_trc
-         } from '../extension';
+         } from '../core/runtime';
   import { LockHandler
          } from '../lib/asyncUtil';
 //==============================================================================

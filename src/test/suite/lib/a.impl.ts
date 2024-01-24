@@ -8,9 +8,7 @@
   import * as ßß_path   from 'path';
 //--------------------------------------------------------------------
   import   ExtensionRuntime
-           from '../../../extension';
-  import { History
-         } from '../../../core/history';
+           from '../../../core/runtime';
   import   TestRuntime
            from '../index';
   const ß_trc = TestRuntime.developerTrace;

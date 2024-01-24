@@ -3,7 +3,7 @@
 import * as ßß_assert from 'assert';
 import * as ßß_path   from 'path';
 import { isExe
-       } from 'open-in-npp/src/lib/any';
+       } from '../../lib/any';
 
 describe( 'Test', () => {
 

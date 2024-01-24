@@ -5,7 +5,7 @@
 /*
 */
   import   ExtensionRuntime
-           from '../../extension';
+           from '../../core/runtime';
   import { isExe
          } from '../../lib/any';
   import { whenDelay

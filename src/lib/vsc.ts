@@ -9,7 +9,7 @@
   const ßß_fs = ßß_vsCode.workspace.fs;
 //------------------------------------------------------------------------------
   import   ExtensionRuntime
-           from '../extension';
+           from '../core/runtime';
   const ß_trc = ExtensionRuntime.developerTrace;
 //------------------------------------------------------------------------------
   import { type TFSError

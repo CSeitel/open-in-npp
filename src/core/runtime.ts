@@ -2,8 +2,10 @@
 */
   import { type TExtensionConfig
          } from '../constants/extension';
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
-//==============================================================================
+//====================================================================
   type TExtensionCommand =
     { command :keyof typeof CCommandHandlerMap
     , title   :string
@@ -45,5 +47,19 @@ constructor(
 
 }
 //------------------------------------------------------------------------------
-  const ß_trc = ExtensionRuntime.developerTrace;
+  export const ß_RuntimeContext = ExtensionRuntime;
+  export const ß_trc            = ExtensionRuntime.developerTrace;
 //==============================================================================
+  import { CommandHandler
+         , ConfigHandler
+         } from '../core/implementation';
+  import { History
+         } from '../core/historyProxy';
+//------------------------------------------------------------------------------
+  export const CCommandHandlerMap =
+    {           'openInNpp.openSettings': ConfigHandler .whenSettingsOpened
+    , 'extension.openInNpp'             : CommandHandler.openInNppActive 
+    , 'extension.openInNppX'            : CommandHandler.openInNppEditor
+    , 'extension.openInNppY'            : CommandHandler.openInNppExplorer
+    };
+//------------------------------------------------------------------------------
