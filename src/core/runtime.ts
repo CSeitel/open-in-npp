@@ -1,8 +1,13 @@
 /*
 */
+  import { type ExtensionContext
+         , type Extension
+         } from 'vscode';
   import { type TExtensionConfig
          } from '../constants/extension';
 //--------------------------------------------------------------------
+  import { CExtensionId
+         } from '../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
 //====================================================================
@@ -13,14 +18,17 @@
   type TOpenInNpp =
     {
     }
-export type TExtension = ßß_vsCode.Extension<TOpenInNpp>
+export type TExtension      = Extension<TOpenInNpp>
+export type TRuntimeContext = ExtensionRuntime
 
-export default class ExtensionRuntime {
-    static readonly CExtensionId                             = 'CSeitel.open-in-npp';
-  //static readonly CExtensionUrl                            = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
-    static readonly CExtensionUrl                            = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
+class ExtensionRuntime {
     static readonly developerTrace :false|typeof console.log = console.log;
     static          activeInstance :ExtensionRuntime //|undefined = undefined;
+  //
+static activate( ü_extnContext:ExtensionContext ):ExtensionRuntime {
+    if(ß_trc){ß_trc( ExtensionRuntime.activeInstance === undefined ? 'Activation' : 'Re-Activation' );}
+    return new ExtensionRuntime( ü_extnContext );
+}
   //
     readonly globalHistory:History
     readonly extensionApi :TExtension
@@ -29,14 +37,13 @@ export default class ExtensionRuntime {
     readonly commands     :TExtensionCommand[]
     readonly settings     :TExtensionConfig
 
-constructor(
-    readonly context      :ßß_vsCode.ExtensionContext
+private constructor(
+    readonly context      :ExtensionContext
 ){
-    if(ß_trc){ß_trc( ExtensionRuntime.activeInstance === undefined ? 'Activation' : 'Re-Activation' );}
-                     ExtensionRuntime.activeInstance = this;
   //
+    ExtensionRuntime.activeInstance = this;
     this.globalHistory = new History();
-    this.extensionApi = ßß_vsCode.extensions.getExtension( ExtensionRuntime.CExtensionId )!;
+    this.extensionApi = ßß_vsCode.extensions.getExtension( CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
     this.version     = ü_json.version;

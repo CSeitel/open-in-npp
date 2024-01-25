@@ -11,9 +11,8 @@
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
-  import { ß_RuntimeContext
-         , ß_trc
-         } from './runtime';
+  import { ß_trc
+         } from '../core/runtime';
   import { CommandHandler
          , ConfigHandler
          } from './implementation';

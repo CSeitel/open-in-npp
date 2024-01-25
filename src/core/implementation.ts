@@ -1,14 +1,19 @@
 /*
 */
+  import { type SpawnOptions
+         } from 'child_process';
+  import { type TRuntimeContext
+         } from '../core/runtime';
+  import { CExtensionUrl
+         } from '../constants/extension';
+//--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_path   from 'path';
-  import { SpawnOptions
-         } from 'child_process';
-//------------------------------------------------------------------------------
-  import   ExtensionRuntime
-           from '../core/runtime';
-  const ß_trc = ExtensionRuntime.developerTrace;
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
+  import { ß_RuntimeContext
+         , ß_trc
+         } from '../core/runtime';
+//--------------------------------------------------------------------
   import   ßß_i18n
            from '../i18n';
   import { EButtons as EButtons
@@ -37,9 +42,9 @@
   import { History
          } from '../core/historyProxy';
 //------------------------------------------------------------------------------
-  import ß_showInformationMessage = ßß_vsCode.window.showInformationMessage;
-  import ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage    ;
-  import ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage      ;
+  import ß_showInformationMessage = ßß_vsCode.window.showInformationMessage ;
+  import ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage     ;
+  import ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage       ;
 //------------------------------------------------------------------------------
   const enum EExecutables
     { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"
@@ -93,7 +98,7 @@ static async whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise
       return ü_current;
     }
   //
-    const ü_hist   = ExtensionRuntime.activeInstance.globalHistory;
+    const ü_hist   = ß_RuntimeContext.activeInstance.globalHistory;
     const ü_config = await ü_hist.whenConfig();
     if(ß_trc){ß_trc( `Config-History`, ü_config );}
     try {
@@ -137,7 +142,7 @@ static async whenWorkingDir( ü_dir:string ):Promise<string> {
 
 export class CommandHandler {
 
-static async whenActivationFinalized( ü_activeInstance:ExtensionRuntime ):Promise<void> {
+static async whenActivationFinalized( ü_activeInstance:TRuntimeContext ):Promise<void> {
     const ü_versionToNumber = /\./g;
   //
     const ü_current = parseInt( ü_activeInstance.version.replace( ü_versionToNumber, '' ) );
@@ -150,7 +155,7 @@ static async whenActivationFinalized( ü_activeInstance:ExtensionRuntime ):Promi
       switch ( ü_show ) {
         case undefined: break;
         default:
-          whenUriOpened( ExtensionRuntime.CExtensionUrl + '/changelog' );
+          whenUriOpened( CExtensionUrl + '/changelog' );
       }
     }
   //

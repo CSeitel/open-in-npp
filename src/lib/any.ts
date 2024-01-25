@@ -1,5 +1,7 @@
 /*
 */
+  import { type SpawnOptions
+         } from 'child_process';
   import { type TFSError
          } from '../types/error.d';
 //------------------------------------------------------------------------------
@@ -10,8 +12,6 @@
   import { Stats
          , PathLike
          } from 'fs';
-  import { SpawnOptions
-         } from 'child_process';
   import { Disposable
          } from 'vscode';
 //------------------------------------------------------------------------------
@@ -20,9 +20,9 @@
     { execFile: ßß_util.promisify( ßß_cp.execFile )
     };
 //------------------------------------------------------------------------------
-  import   ExtensionRuntime
-           from '../core/runtime';
-  const ß_trc = ExtensionRuntime.developerTrace;
+  import { ß_RuntimeContext
+         , ß_trc
+         } from '../core/runtime';
 //------------------------------------------------------------------------------
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 //------------------------------------------------------------------------------

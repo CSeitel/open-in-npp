@@ -7,8 +7,8 @@
   import * as ßß_assert from 'assert';
   import * as ßß_path   from 'path';
 //--------------------------------------------------------------------
-  import   ExtensionRuntime
-           from '../../../core/runtime';
+  import { ß_RuntimeContext
+         } from '../../../core/runtime';
   import   TestRuntime
            from '../index';
   const ß_trc = TestRuntime.developerTrace;
@@ -29,7 +29,7 @@ static async rectify():Promise<void> {
     await VscTestSpec._whenActive();
 	  ßß_vsCode.window.showInformationMessage(' all tests.');
   //
-    const ü_hist = ExtensionRuntime.activeInstance.globalHistory;
+    const ü_hist = ß_RuntimeContext.activeInstance.globalHistory;
     const ü_admin  = await ü_hist.whenAdmin ( { version: 0 } );
     ßß_assert.strictEqual( ü_admin .version   , 0 );
     const ü_config = await ü_hist.whenConfig( { executable: '' } );
@@ -51,7 +51,7 @@ static async test_0():Promise<void> {
     if(ß_trc){ß_trc( `Workspace: "${ ü_file }"` );}
     await whenTextEditorOpened( ü_file );
   //
-    const ü_activeInstance = ExtensionRuntime.activeInstance;
+    const ü_activeInstance = ß_RuntimeContext.activeInstance;
     if(ß_trc){ß_trc( `Extension: "${ ü_activeInstance.extensionApi.id }"` );}
   //
     const ü_hist = ü_activeInstance.globalHistory;

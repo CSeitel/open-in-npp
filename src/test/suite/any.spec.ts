@@ -4,8 +4,6 @@
   import * as ßß_assert from 'assert';
 /*
 */
-  import   ExtensionRuntime
-           from '../../core/runtime';
   import { isExe
          } from '../../lib/any';
   import { whenDelay

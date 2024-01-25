@@ -5,6 +5,9 @@
   export type TExtensionConfig = {
       [P in EConfigurationIds] :{ type:string }
     }
+  export const CExtensionId  = 'CSeitel.open-in-npp';
+//export const CExtensionUrl = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
+  export const CExtensionUrl = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
 //------------------------------------------------------------------------------
   export enum EConfigurationIds
     {

@@ -4,9 +4,8 @@
   import {
          } from 'vscode';
 //------------------------------------------------------------------------------
-  import   ExtensionRuntime
-           from '../core/runtime';
-  const ß_trc = ExtensionRuntime.developerTrace;
+  import { ß_trc
+         } from '../core/runtime';
 //------------------------------------------------------------------------------
   type TIcons = 'close'
 //==============================================================================
