@@ -1,21 +1,22 @@
 /*
 */
+  import { type TFSError
+         } from '../types/error.d';
   import * as ßß_vsCode from 'vscode';
   import * as ßß_util   from 'util';
   import { FileType
          , Uri
          } from 'vscode';
+  import { promises as ßß_fs_p } from 'fs';
 //------------------------------------------------------------------------------
   const ßß_fs = ßß_vsCode.workspace.fs;
 //------------------------------------------------------------------------------
   import { ß_trc
          } from '../core/runtime';
 //------------------------------------------------------------------------------
-  import { type TFSError
-         } from '../types/error.d';
-  import { ßß_fs_p
-         , whenKnownAsFolder as whenKnownAsFolderFS
-         } from './any';
+  import {
+          whenKnownAsFolder as whenKnownAsFolderFS
+         } from './fsUtil';
 //------------------------------------------------------------------------------
 export const enum EVscConstants {
     openWbSettings  = 'workbench.action.openSettings'
@@ -63,7 +64,7 @@ export async function whenFileInfoRead( ü_fileUri:TFileUri, ü_fileExists?:bool
 //------------------------------------------------------------------------------
 
 export async function whenFileTypeKnown( ü_fileUri:TFileUri, ü_fileExists?:boolean ):Promise<FileType.Directory|FileType.File|FileType.Unknown> {
-    if (!( ü_fileUri instanceof ßß_vsCode.Uri ) ) { ü_fileUri = ß_fileUri( ü_fileUri ); }
+    if (!( ü_fileUri instanceof Uri ) ) { ü_fileUri = ß_fileUri( ü_fileUri ); }
   //
     const ü_stat = await whenFileInfoRead( ü_fileUri, ü_fileExists );
     if ( ü_stat === null ) {
@@ -207,11 +208,11 @@ export async function whenTextEditorOpened( ü_fileUri:ßß_vsCode.Uri | string,
 
 //==============================================================================
 
-export async function isDirectory( ü_fileUri:ßß_vsCode.Uri|string ):Promise<boolean> {
+export async function isDirectory( ü_fileUri:Uri|string ):Promise<boolean> {
   //
-    ü_fileUri =             typeof( ü_fileUri ) === 'string'
-              ? ßß_vsCode.Uri.file( ü_fileUri )
-              :                     ü_fileUri
+    ü_fileUri =   typeof( ü_fileUri ) === 'string'
+              ? Uri.file( ü_fileUri )
+              :           ü_fileUri
               ;
   //
     try {
@@ -228,12 +229,12 @@ export async function isDirectory( ü_fileUri:ßß_vsCode.Uri|string ):Promise<b
 export async function exists( ü_path:string, ü_andIsDirectory?:boolean ):Promise<boolean> {
   //
     try {
-      const ü_stat = await ßß_fs.stat( ßß_vsCode.Uri.file( ü_path ) );
+      const ü_stat = await ßß_fs.stat( Uri.file( ü_path ) );
       return ü_andIsDirectory === undefined
            ? true
            : ü_andIsDirectory
-             ? ü_stat.type === ßß_vsCode.FileType.Directory
-             : ü_stat.type !== ßß_vsCode.FileType.Directory
+             ? ü_stat.type === FileType.Directory
+             : ü_stat.type !== FileType.Directory
            ;
     } catch ( ü_eX ) {
       if(ß_trc){ß_trc( (ü_eX as Error).message );}

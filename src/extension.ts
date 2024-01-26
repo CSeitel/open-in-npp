@@ -8,13 +8,20 @@
   import * as ßß_vsCode from 'vscode';
   import { ß_RuntimeContext
          } from './core/runtime';
-  import { CCommandHandlerMap
-         } from './core/runtime';
   import { ConfigSnapshot
          } from './core/configProxy';
   import { CommandHandler
+         , ConfigHandler
          } from './core/implementation';
+//--------------------------------------------------------------------
+  const CCommandHandlerMap =
+    {           'openInNpp.openSettings': ConfigHandler .whenSettingsOpened
+    , 'extension.openInNpp'             : CommandHandler.openInNppActive 
+    , 'extension.openInNppX'            : CommandHandler.openInNppEditor
+    , 'extension.openInNppY'            : CommandHandler.openInNppExplorer
+    };
 //====================================================================
+  export type TExtensionCommands = keyof typeof CCommandHandlerMap
 
 export async function activate( ü_extnContext:ExtensionContext ):Promise<void> {
   //
@@ -51,7 +58,6 @@ export async function deactivate():Promise<void> {
   */
 }
 
-//--------------------------------------------------------------------
 //--------------------------------------------------------------------
 /*
 */

@@ -1,17 +1,9 @@
 /*
 */
-  import { TMochaDone
-         } from '../../../types/test.d';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_assert from 'assert';
   import * as ßß_path   from 'path';
-//--------------------------------------------------------------------
-  import { ß_RuntimeContext
-         } from '../../../core/runtime';
-  import   TestRuntime
-           from '../index';
-  const ß_trc = TestRuntime.developerTrace;
 //--------------------------------------------------------------------
   import { whenTextEditorOpened
          } from '../../../lib/vsc';
@@ -20,13 +12,20 @@
          } from '../../../lib/asyncUtil';
   import { expandEnvVariables
          } from '../../../lib/textUtil';
+//--------------------------------------------------------------------
+  import { ß_RuntimeContext
+         , ß_trc
+         } from '../../../core/runtime';
+  //let ß_trc           :TRuntimeContext['developerTrace']
 //====================================================================
 
 class VscTestSpec {
 
 static async rectify():Promise<void> {
   //
-    await VscTestSpec._whenActive();
+  //ß_RuntimeContext =
+    await ß_RuntimeContext.whenActive();
+  //ß_trc            = ß_RuntimeContext.developerTrace;
 	  ßß_vsCode.window.showInformationMessage(' all tests.');
   //
     const ü_hist = ß_RuntimeContext.activeInstance.globalHistory;
@@ -110,10 +109,6 @@ static async openInNpp():Promise<void> {
     else {
       ßß_assert.fail( 'pid <= 0' );
     }
-}
-
-private static async _whenActive():Promise<void> {
-    await ßß_vsCode.commands.executeCommand<unknown>( 'openInNpp.openSettings' );
 }
 
 }

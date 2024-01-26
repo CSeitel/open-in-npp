@@ -7,10 +7,7 @@
   import { whenDelay
          , LockHandler
          } from '../../lib/asyncUtil';
-  import { class_a
-         } from './lib/class_a';
 //--------------------------------------------------------------------
-  new class_a();
   const ß_tests =
     { 1: 'YYY'
     , 2: 'ZZZ'

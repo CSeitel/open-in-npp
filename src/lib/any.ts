@@ -78,42 +78,6 @@ dispose():void {
 
 //==============================================================================
 
-export async function whenFileInfoRead( ü_path:PathLike                        ):Promise<Stats|null>
-export async function whenFileInfoRead( ü_path:PathLike, ü_fileExists :false   ):Promise<Stats|null>
-export async function whenFileInfoRead( ü_path:PathLike, ü_fileExists :true    ):Promise<Stats     >
-export async function whenFileInfoRead( ü_path:PathLike, ü_fileExists?:boolean ):Promise<Stats|null> {
-  //
-    if ( ü_fileExists === true ) {
-      return ßß_fs_p.stat( ü_path );
-    }
-  //
-    try {
-      const ü_stat = await ßß_fs_p.stat( ü_path );
-      return ü_stat;
-    } catch ( ü_eX ) {
-
-      switch ( ( ü_eX as TFSError ).code ) {
-        case 'ENOENT':
-          return null;
-      }
-
-      console.error( ü_eX );
-      throw ü_eX;
-    }
-}
-
-export async function whenKnownAsFolder( ü_path:ßß_fs.PathLike ):Promise<boolean> {
-    const ü_info = await whenFileInfoRead( ü_path );
-    if ( ü_info === null      ) { return false; }
-    if ( ü_info.isDirectory() ) { return true ; }
-    if ( ü_info.isSymbolicLink() ) {
-      const ü_real = await ßß_fs_p.realpath( ü_path );
-    }
-    return false;
-}
-
-//==============================================================================
-
 export async function whenChildProcessSpawned( ü_exe:string, ü_args:readonly string[], ü_opts?:SpawnOptions ):Promise<number> {
   //
     if ( ü_opts === undefined )
@@ -167,26 +131,6 @@ export async function whenShownInWindowsExplorer( ü_fileUri:string ):Promise<bo
     } catch ( ü_eX ) {
       console.error( ü_eX );
       return false;
-    }
-}
-
-//==============================================================================
-
-export function putFirst<T,P extends keyof T>( ü_list:T[], ö_item:T|T[P], ü_prop?:P ):number {
-    const ü_indx = ü_prop === undefined
-                 ? ü_list.findIndex( ü_item => ü_item           === ö_item )
-                 : ü_list.findIndex( ü_item => ü_item[ ü_prop ] === ö_item )
-                 ;
-    if ( ü_indx > 0 ) {
-      ü_list.unshift( ü_list.splice( ü_indx, 1 )[0] );
-    }
-    return ü_indx;
-}
-
-export function putFirstIndex<T>( ü_list:T[], ü_indx:number ):void {
-    if ( ü_indx > 0 ) {
-      const ü_item = ü_list.splice( ü_indx, 1 )[0];
-                     ü_list.unshift( ü_item );
     }
 }
 

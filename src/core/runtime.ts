@@ -5,6 +5,8 @@
          } from 'vscode';
   import { type TExtensionConfig
          } from '../constants/extension';
+  import { type TExtensionCommands
+         } from '../extension';
 //--------------------------------------------------------------------
   import { CExtensionId
          } from '../constants/extension';
@@ -12,22 +14,32 @@
   import * as ßß_vsCode from 'vscode';
 //====================================================================
   type TExtensionCommand =
-    { command :keyof typeof CCommandHandlerMap
+    { command :TExtensionCommands
     , title   :string
     }
   type TOpenInNpp =
     {
     }
-export type TExtension      = Extension<TOpenInNpp>
-export type TRuntimeContext = ExtensionRuntime
+  export type TExtension       = Extension<TOpenInNpp>
+  export type TActiveExtension = ExtensionRuntimeContext
 
-class ExtensionRuntime {
+//====================================================================
+
+class ExtensionRuntimeContext {
     static readonly developerTrace :false|typeof console.log = console.log;
-    static          activeInstance :ExtensionRuntime //|undefined = undefined;
+    static          activeInstance :TActiveExtension //|undefined = undefined;
   //
-static activate( ü_extnContext:ExtensionContext ):ExtensionRuntime {
-    if(ß_trc){ß_trc( ExtensionRuntime.activeInstance === undefined ? 'Activation' : 'Re-Activation' );}
-    return new ExtensionRuntime( ü_extnContext );
+static async whenActive():Promise<void> {
+    await ßß_vsCode.commands.executeCommand<unknown>( 'openInNpp.openSettings' );
+  //return ExtensionRuntime;
+}
+
+static activate( ü_extnContext:ExtensionContext ):TActiveExtension {
+    if ( ExtensionRuntimeContext.activeInstance === undefined ) {
+      return new ExtensionRuntimeContext( ü_extnContext );
+    }
+    if(ß_trc){ß_trc( 'Re-Activation' );}
+      return ExtensionRuntimeContext.activeInstance;
 }
   //
     readonly globalHistory:History
@@ -41,7 +53,7 @@ private constructor(
     readonly context      :ExtensionContext
 ){
   //
-    ExtensionRuntime.activeInstance = this;
+    ExtensionRuntimeContext.activeInstance = this;
     this.globalHistory = new History();
     this.extensionApi = ßß_vsCode.extensions.getExtension( CExtensionId )!;
   //
@@ -54,19 +66,9 @@ private constructor(
 
 }
 //------------------------------------------------------------------------------
-  export const ß_RuntimeContext = ExtensionRuntime;
-  export const ß_trc            = ExtensionRuntime.developerTrace;
-//==============================================================================
-  import { CommandHandler
-         , ConfigHandler
-         } from '../core/implementation';
+  export const ß_RuntimeContext = ExtensionRuntimeContext;
+  export const ß_trc            = ExtensionRuntimeContext.developerTrace;
+//------------------------------------------------------------------------------
   import { History
          } from '../core/historyProxy';
-//------------------------------------------------------------------------------
-  export const CCommandHandlerMap =
-    {           'openInNpp.openSettings': ConfigHandler .whenSettingsOpened
-    , 'extension.openInNpp'             : CommandHandler.openInNppActive 
-    , 'extension.openInNppX'            : CommandHandler.openInNppEditor
-    , 'extension.openInNppY'            : CommandHandler.openInNppExplorer
-    };
-//------------------------------------------------------------------------------
+//==============================================================================

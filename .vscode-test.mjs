@@ -1,4 +1,5 @@
 /*
+https://code.visualstudio.com/api/working-with-extensions/testing-extension
 */
 import { defineConfig } from '@vscode/test-cli';
 //--------------------------------------------------------------------
@@ -10,7 +11,8 @@ import { defineConfig } from '@vscode/test-cli';
     { label: 'unitTests'
     , files: ß_files
   //, version: 'insiders'
-  //, workspaceFolder: './sampleWorkspace'
+    , workspaceFolder: './etc/test/workspaceFolder'
+  //, extensionDevelopmentPath: './src'
     , mocha:
 	      { ui: 'tdd'
 	      , timeout: 10 * 1000

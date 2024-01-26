@@ -2,7 +2,7 @@
 */
   import { type SpawnOptions
          } from 'child_process';
-  import { type TRuntimeContext
+  import { type TActiveExtension
          } from '../core/runtime';
   import { CExtensionUrl
          } from '../constants/extension';
@@ -139,10 +139,18 @@ static async whenWorkingDir( ü_dir:string ):Promise<string> {
 }
 
 //==============================================================================
+async function ö_info( ü_newVersion:string ):Promise<void> {
+      const ü_show = await ßß_vsCode.window.showInformationMessage( `Welcome to \`Open-In-Notepad++\` Version ${ ü_newVersion }`, `What's new ?` );
+      switch ( ü_show ) {
+        case undefined: break;
+        default:
+          whenUriOpened( CExtensionUrl + '/changelog' );
+      }
+}
 
 export class CommandHandler {
 
-static async whenActivationFinalized( ü_activeInstance:TRuntimeContext ):Promise<void> {
+static async whenActivationFinalized( ü_activeInstance:TActiveExtension ):Promise<void> {
     const ü_versionToNumber = /\./g;
   //
     const ü_current = parseInt( ü_activeInstance.version.replace( ü_versionToNumber, '' ) );
@@ -151,12 +159,7 @@ static async whenActivationFinalized( ü_activeInstance:TRuntimeContext ):Promis
     if(ß_trc){ß_trc( `Admin-History`, ü_admin );}
     if ( ü_current > ü_admin.version ) {
       const ü_when = ü_globalHistory.whenAdmin( { version: ü_current } );
-      const ü_show = await ßß_vsCode.window.showInformationMessage( `Welcome to \`Open-In-Notepad++\` Version ${ ü_activeInstance.version }`, `What's new ?` );
-      switch ( ü_show ) {
-        case undefined: break;
-        default:
-          whenUriOpened( CExtensionUrl + '/changelog' );
-      }
+      ö_info( ü_activeInstance.version )
     }
   //
 }
