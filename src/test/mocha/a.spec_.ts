@@ -2,8 +2,6 @@
 */
 import * as ßß_assert from 'assert';
 import * as ßß_path   from 'path';
-import { isExe
-       } from '../../lib/any';
 
 describe( 'Test', () => {
 
@@ -22,8 +20,6 @@ it( 'isExe', async () => {
 });
 
 async function ß_isExe( ü_path:string, ü_expected:boolean ) {
-    const ü_act = await isExe( ü_path );
-    ßß_assert.strictEqual( ü_act, ü_expected );
 }
 
 async function ß_kill( ü_pid:number ):Promise<void> {

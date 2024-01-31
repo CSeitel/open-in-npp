@@ -5,7 +5,7 @@
 /*
 */
   import { isExe
-         } from '../../lib/any';
+         } from '../../lib/fsUtil';
   import { whenDelay
          , LockHandler
          } from '../../lib/asyncUtil';

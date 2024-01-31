@@ -21,8 +21,10 @@
 //------------------------------------------------------------------------------
   import {
           whenChildProcessSpawned
-         , isExe
          } from '../lib/any';
+  import {
+           isExe
+         } from '../lib/fsUtil';
   import { shortenText
          , expandEnvVariables
          } from '../lib/textUtil';

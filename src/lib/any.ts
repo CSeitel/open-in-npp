@@ -2,16 +2,10 @@
 */
   import { type SpawnOptions
          } from 'child_process';
-  import { type TFSError
-         } from '../types/error.d';
 //------------------------------------------------------------------------------
-  import * as ßß_path   from 'path';
   import * as ßß_fs     from 'fs';
   import * as ßß_cp     from 'child_process';
   import * as ßß_util   from 'util';
-  import { Stats
-         , PathLike
-         } from 'fs';
   import { Disposable
          } from 'vscode';
 //------------------------------------------------------------------------------
@@ -24,7 +18,6 @@
          , ß_trc
          } from '../core/runtime';
 //------------------------------------------------------------------------------
-  const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 //------------------------------------------------------------------------------
 //==============================================================================
 
@@ -132,40 +125,6 @@ export async function whenShownInWindowsExplorer( ü_fileUri:string ):Promise<bo
       console.error( ü_eX );
       return false;
     }
-}
-
-//==============================================================================
-
-export async function isExe( ü_path:string, ü_enforceAbsolute = false ):Promise<boolean> {
-  //
-    if ( ü_enforceAbsolute
-      && ! ßß_path.isAbsolute( ü_path ) ) {
-      return false;
-    }
-  //
-    let ü_stats:Stats;
-    try {
-      ü_stats = await ßß_fs_p.stat( ü_path );
-    } catch ( ü_eX ) {
-      if ( ü_eX instanceof Error ) {
-        switch ( ( ü_eX as TFSError ).code ) {
-          case 'ENOENT':
-            if(ß_trc){ß_trc( ü_eX.message );}
-            return false;
-        }
-      }
-      console.error( ü_eX );
-      throw ü_eX;
-    }
-  //
-    if ( ü_stats.isDirectory() ) { return false; }
-  //
-    const ü_ext = ßß_path.extname( ü_path ).toLowerCase();
-    if ( ! ß_exe_exts.includes( ü_ext ) ) { return false; }
-  //
-  //ß_trc( (( ü_stats.mode >>9 ) <<9) + (ü_stats.mode & 0x1ff ), ü_stats.mode );
-  //ß_trc( ( ü_stats.mode >>9 ).toString(8) , (ü_stats.mode & 0x1ff ).toString(8), ü_stats.mode );
-    return true;
 }
 
 
