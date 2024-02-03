@@ -1,13 +1,10 @@
 /*
 */
-  import { type TFSError
-         , type TNodeFSErrorCodes
-         } from '../types/error.d';
 //====================================================================
 
-export function expect   ( ü_eX:any, ü_code:TNodeFSErrorCodes             ):void
-export function expect<T>( ü_eX:any, ü_code:TNodeFSErrorCodes, ü_value :T ):     T
-export function expect<T>( ü_eX:any, ü_code:TNodeFSErrorCodes, ü_value?:T ):void|T {
+export function expect<C extends string          >(   eX:any,   code:C             ):void
+export function expect<C extends string,T extends any       >(   eX:any,   code:C, ü_value :T ):     T
+export function expect<C extends string,T        >( ü_eX:any, ü_code:C, ü_value?:T ):void|T {
     if (   typeof( ü_eX ) === 'object'
       &&           ü_eX   !== null
       &&           ü_eX instanceof Error

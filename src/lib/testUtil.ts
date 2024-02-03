@@ -2,6 +2,10 @@
 */
   import { type TAssert
          , type TTestResult
+         , type TResultArray
+         , type TAnyFunction
+         , type TArgMap
+         , type TArgumentsInfo
          } from '../types/lib.testUtil.d';
 //--------------------------------------------------------------------
   import { inspect
@@ -19,9 +23,35 @@
          const failurePrefix = failureSymbol + ' ';
 //====================================================================
 
+export function testSuite( ü_name:string, ü_tests:(()=>any)[] ):void {
+    suite( ü_name, function(){
+        ü_tests.forEach(function( ü_testImpl ){
+            test( ü_testImpl.name, ü_testImpl );
+        });
+    });
+}
+
 export function echo( ü_oref:any, ü_length:number ):string {
     return shortenText( inspect( ü_oref ), ü_length );
 }
+
+//====================================================================
+
+export function bind<T>( ö_fref:TAnyFunction<T>, ö_map:TArgumentsInfo, ...ö_baseArgs:readonly any[] ):TAnyFunction<T> {
+    return ö_bound;
+//
+function ö_bound( ...ü_realArgs:any[] ):T {
+  //
+    const ü_args = ö_map.realFirst === true ? ü_realArgs.concat( ö_baseArgs )
+                                            : ö_baseArgs.concat( ü_realArgs );
+    if ( ö_map.arrangeBound !== undefined ) { ö_map.arrangeBound.forEach(function( ü_new, ü_old ){ ü_args[ ü_new ] = ö_baseArgs[ ü_old ]; }); }
+    if ( ö_map.arrangeReal  !== undefined ) { ö_map.arrangeReal .forEach(function( ü_new, ü_old ){ ü_args[ ü_new ] = ü_realArgs[ ü_old ]; }); }
+  //
+    return ö_fref.apply( ö_map.that, ü_args );
+}
+}
+
+//====================================================================
 
 export function testSummary( ü_results:readonly TTestResult[], ü_equals:TAssert):void {
     const ü_crlf = '\r\n';
@@ -34,74 +64,63 @@ export function testSummary( ü_results:readonly TTestResult[], ü_equals:TAsser
 }
 
 export function testEquals<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):TTestResult {
-    return ü_act === ü_exp
-         ? successPrefix + ( ü_message || `${ echo( ü_exp, 50 ) }`                                      )
-         : failurePrefix + ( ü_message || `${ echo( ü_exp, 50 ) } ${ notEqual } ${ echo( ü_act, 50 ) }` )
-         ;
+    const ü_test = ü_act === ü_exp
+                 ? successPrefix + `${ echo( ü_exp, 50 ) }`
+                 : failurePrefix + `${ echo( ü_exp, 50 ) } ${ notEqual } ${ echo( ü_act, 50 ) }`
+                 ;
+    return ü_message ? ü_test +' '+ ü_message
+                     : ü_test ;
 }
 
+//====================================================================
 
-export async function testAsyncFunction<Tx extends string|number,Ty>( ö_aFref  :(x:Tx)=>Promise<Ty>
-                                                                    , ö_expData:Record<Tx,Ty>
-                                                                               |   Map<Tx,Ty>
-                                                                               |      [Tx,Ty][]
-                                                                                ):Promise<TTestResult[]> {
-    const ü_tests:TTestResult[] = [];
+export async function testAsyncFunction<Tx,Ty>( ö_aFref  :(x:Tx)=>Promise<Ty>
+                                              , ö_expData:          Map<Tx,Ty>
+                                                         | TResultArray<Tx,Ty>
+                                              ):Promise<TTestResult[]> {
   //
-    if ( Array.isArray( ö_expData ) ) { ö_expData = new Map( ö_expData ); }
-    const ö_isMap = ö_expData instanceof Map;
+    if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
+    const ü_keys = Array.from( ö_expData.keys() );
   //
-    const ü_keys = ö_isMap ? Array.from( (ö_expData as Map<Tx,Ty>).keys() )
-                           : Object.keys( ö_expData );
     const ü_done = await Promise.allSettled( ü_keys.map(function( ü_x ){
-        return ö_aFref( ü_x as Tx );
+        return ö_aFref( ü_x );
       }) );
   //
+    const ü_tests:TTestResult[] = [];
     ü_keys.map(function( ü_x, ü_indx ){
         const ü_act_y = ü_done[ ü_indx ];
         if ( ü_act_y.status === 'fulfilled' ) {
-            const ü_exp_y = ö_isMap ? (ö_expData as Map   <Tx,Ty>).get( ü_x as Tx )
-                                    : (ö_expData as Record<Tx,Ty>)    [ ü_x as Tx ];
-            ü_tests.push(  testEquals( ü_act_y.value, ü_exp_y )  );
+            const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x );
+            ü_tests.push(  testEquals( ü_act_y.value, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  );
         } else {
             ü_tests.push(  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 100 )  );
         }
     });
   //
-    /*
-      let ü_mark :string
-      let ü_act_y:string|Ty
-      var ü_eX;
-      try {
-                             ü_act_y = ö_f( ü_x as Tx );
-        ü_mark = ü_exp_y === ü_act_y
-               ? successSymbol
-               : failureSymbol
-               ;
-        if ( true && ü_mark === failureSymbol ) { //if(ß_trc){ß_trc( failureSymbol + ` "debug"` );}
-        }
-      } catch ( ü_eX ) {
-          ü_act_y = ''+ü_eX;
-        if ( ü_onError === undefined ) {
-          ü_mark = failureSymbol;
-        } else {
-          ü_mark = ü_onError( ü_eX as Error, ü_exp_y, ü_x as Tx )
-                 ? successSymbol
-                 : failureSymbol
-                 ;
-        //if ( ü_mark === failureSymbol ) { ü_act_y = ''; }
-        }
-      }
-
-      ü_tests.push(   `${ ü_mark } ${ ü_x } => ${ ü_exp_y }`
-                  + ( ü_mark === failureSymbol
-                    ? ` ${ notEqual } ${ ü_act_y }`
-                    : `` )
-                  );
-    ü_tests.sort( (ü_a:string,ü_b:string) => ü_a.slice(1) <= ü_b.slice(1) ? 1 : -1
-                );
-    */
-  //
-  //
     return ü_tests;
 }
+
+//====================================================================
+
+export function testFunction<Tx,Ty>( ö_fref   :         (x:Tx)=>Ty
+                                         , ö_expData:          Map<Tx,Ty>
+                                                    | TResultArray<Tx,Ty>
+                                         ):TTestResult[] {
+  //
+    if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
+    const ü_keys = Array.from( ö_expData.keys() );
+  //
+    return ü_keys.map(function( ü_x, ü_indx ){
+        try {
+          const ü_act_y =                          ö_fref( ü_x );
+          const ü_exp_y = ( ö_expData as Map<Tx,Ty> ).get( ü_x );
+          return testEquals( ü_act_y, ü_exp_y );
+        } catch ( ü_eX ) {
+          return failurePrefix +'Function threw: '+ echo( ü_eX, 100 );
+        }
+    });
+}
+
+//====================================================================
+/*
+*/

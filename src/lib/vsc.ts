@@ -1,6 +1,6 @@
 /*
 */
-  import { type TFSError
+  import { type TVscFSErrorCodes
          } from '../types/error.d';
   import * as ßß_vsCode from 'vscode';
   import * as ßß_util   from 'util';
@@ -13,10 +13,8 @@
 //------------------------------------------------------------------------------
   import { ß_trc
          } from '../core/runtime';
-//------------------------------------------------------------------------------
-  import {
-          whenKnownAsFolder as whenKnownAsFolderFS
-         } from './fsUtil';
+  import { expect
+         } from './error';
 //------------------------------------------------------------------------------
 export const enum EVscConstants {
     openWbSettings  = 'workbench.action.openSettings'
@@ -47,17 +45,9 @@ export async function whenFileInfoRead( ü_fileUri:TFileUri, ü_fileExists?:bool
     }
   //
     try {
-      const ü_stat = await ßß_fs.stat( ü_fileUri );
-      return ü_stat;
+        return await ßß_fs.stat( ü_fileUri );
     } catch ( ü_eX ) {
-
-      switch ( ( ü_eX as TFSError ).code ) {
-        case 'FileNotFound':
-          return null;
-      }
-
-      console.error( ü_eX );
-      throw ü_eX;
+        return expect<TVscFSErrorCodes,null>( ü_eX, 'FileNotFound', null );
     }
 }
 

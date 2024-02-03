@@ -4,7 +4,11 @@ https://nodejs.org/api/fs.html#fslstatpath-options-callback
   import { type Stats
          , type PathLike
          } from 'fs';
-  import * as ßß_path   from 'path';
+  import { type TFSError
+         , type TNodeFSErrorCodes
+         } from '../types/error.d';
+//--------------------------------------------------------------------
+  import * as ßß_path from 'path';
   import { promises as ßß_fs_p
          } from 'fs';
   import { expect
@@ -17,7 +21,7 @@ export async function whenFileInfoRead( ü_path:PathLike, ü_slnk = false ):Prom
         return await ßß_fs_p[ ü_slnk ? 'lstat'
                                      :  'stat' ]( ü_path );
     } catch ( ü_eX ) {
-        return expect( ü_eX, 'ENOENT', null );
+        return expect<TNodeFSErrorCodes,null>( ü_eX, 'ENOENT', null );
     }
 }
 
