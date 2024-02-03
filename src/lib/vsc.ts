@@ -2,9 +2,12 @@
 */
   import { type TVscFSErrorCodes
          } from '../types/error.d';
+  import { type TFileUri
+         } from '../types/vsc.fsUtil.d';
   import * as ßß_vsCode from 'vscode';
   import * as ßß_util   from 'util';
   import { FileType
+         , FileStat
          , Uri
          } from 'vscode';
   import { promises as ßß_fs_p } from 'fs';
@@ -13,50 +16,32 @@
 //------------------------------------------------------------------------------
   import { ß_trc
          } from '../core/runtime';
-  import { expect
-         } from './error';
+  import { ß_fileToUri
+         , whenFileInfoRead
+         } from '../vsc/fsUtil';
 //------------------------------------------------------------------------------
 export const enum EVscConstants {
     openWbSettings  = 'workbench.action.openSettings'
   , vsCodeOpen      = 'vscode.open'
   }
 //------------------------------------------------------------------------------
-  type TFileUri = ßß_vsCode.Uri | string | { uri: ßß_vsCode.Uri }
 //==============================================================================
 
-function ß_fileUri( ü_file:string | { uri: ßß_vsCode.Uri } ):ßß_vsCode.Uri {
-    return             typeof( ü_file ) === 'string'
-         ? ßß_vsCode.Uri.file( ü_file )
-         :                     ü_file.uri
+function ß_fileUri( ü_file:string | { uri:Uri } ):Uri {
+    return   typeof( ü_file ) === 'string'
+         ? Uri.file( ü_file )
+         :           ü_file.uri
          ;
 }
 //ß0
 //ß0============================================================================
 //ß0
-//export async function whenFileInfoRead( ü_fileUri:TFileUri                        ):Promise<ßß_vsCode.FileStat|null>
-export async function whenFileInfoRead( ü_fileUri:TFileUri, ü_fileExists?:false   ):Promise<ßß_vsCode.FileStat|null>
-export async function whenFileInfoRead( ü_fileUri:TFileUri, ü_fileExists :true    ):Promise<ßß_vsCode.FileStat     >
-export async function whenFileInfoRead( ü_fileUri:TFileUri, ü_fileExists?:boolean ):Promise<ßß_vsCode.FileStat|null>
-export async function whenFileInfoRead( ü_fileUri:TFileUri, ü_fileExists?:boolean ):Promise<ßß_vsCode.FileStat|null> {
-    if (!( ü_fileUri instanceof ßß_vsCode.Uri ) ) { ü_fileUri = ß_fileUri( ü_fileUri ); }
-  //
-    if ( ü_fileExists === true ) {
-      return ßß_fs.stat( ü_fileUri );
-    }
-  //
-    try {
-        return await ßß_fs.stat( ü_fileUri );
-    } catch ( ü_eX ) {
-        return expect<TVscFSErrorCodes,null>( ü_eX, 'FileNotFound', null );
-    }
-}
-
 //------------------------------------------------------------------------------
 
-export async function whenFileTypeKnown( ü_fileUri:TFileUri, ü_fileExists?:boolean ):Promise<FileType.Directory|FileType.File|FileType.Unknown> {
+export async function whenFileTypeKnown( ü_fileUri:TFileUri ):Promise<FileType.Directory|FileType.File|FileType.Unknown> {
     if (!( ü_fileUri instanceof Uri ) ) { ü_fileUri = ß_fileUri( ü_fileUri ); }
   //
-    const ü_stat = await whenFileInfoRead( ü_fileUri, ü_fileExists );
+    const ü_stat = await whenFileInfoRead( ü_fileUri );
     if ( ü_stat === null ) {
       return FileType.Unknown;
     }
@@ -69,7 +54,7 @@ export async function whenFileTypeKnown( ü_fileUri:TFileUri, ü_fileExists?:boo
       default: {
         const ü_real = await ßß_fs_p.realpath( ü_fileUri.fsPath );
         if(ß_trc){ß_trc( `"${ ü_real }"` );}
-        const ü_next = await whenFileTypeKnown( ü_real, false );
+        const ü_next = await whenFileTypeKnown( ü_real );
         return ü_next;
       }
     }
@@ -78,7 +63,7 @@ export async function whenFileTypeKnown( ü_fileUri:TFileUri, ü_fileExists?:boo
 export async function whenKnownAsFolder( ü_fileUri:TFileUri, ü_fileExists?:boolean ):Promise<boolean> {
     if (!( ü_fileUri instanceof ßß_vsCode.Uri ) ) { ü_fileUri = ß_fileUri( ü_fileUri ); }
   //
-    const ü_stat = await whenFileInfoRead( ü_fileUri, ü_fileExists );
+    const ü_stat = await whenFileInfoRead( ü_fileUri );
     if ( ü_stat === null ) {
       return false;
     }

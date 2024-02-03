@@ -11,7 +11,9 @@
 /*
 */
   import { whenFileInfoRead
-         } from '../../lib/vsc';
+         , whenFileInfoRead_
+         , whenFileTypeKnown
+         } from '../../vsc/fsUtil';
   import { whenDelay
          , LockHandler
          } from '../../lib/asyncUtil';
@@ -61,22 +63,26 @@ testSuite( basename( __filename ),
 
 async function ß_whenFileInfoRead():Promise<void> {
     const ü_data =
-      [ [ __filename , true  ]
-      , [ __dirname  , false ]
-      , [ '*'        , false ]
-      , [ ''         , false ]
-      , [ ' '        , false ]
-      , [ '.'        , false ]
-      , [ '..'       , false ]
-      , [ '../..'    , false ]
-      ] as TResultArray<string,boolean>;
+      [ [ __filename , FileType.File      ]
+      , [ __dirname  , FileType.Directory ]
+      , [ '*'        , FileType.Unknown   ]
+      , [ ''         , FileType.Directory ]
+      , [ ' '        , FileType.Unknown ]
+      , [ '.'        , FileType.Directory ]
+      , [ '..'       , FileType.Directory ]
+      , [ '../..'    , FileType.Directory ]
+      , [ 'C:\\zzz_Office'           , FileType.SymbolicLink ]
+      , [ 'C:\\Users\\c_sei\\wsf-bin', FileType.SymbolicLink ]
+      ] as TResultArray<string,FileType>;
   //const ü_isExe = bind( isExe, {realFirst:true,arrangeBound:[1]}, false )
-    testSummary( await testAsyncFunction( ö_tst, ü_data ), strictEqual );
+    testSummary( await testAsyncFunction( ö_tst, ü_data )
+               , await testAsyncFunction( whenFileTypeKnown, ü_data )
+               , strictEqual );
   //
-async function ö_tst( ü_path:string ):Promise<boolean|null> {
-    const ü_info = await whenFileInfoRead( ü_path );
-    if ( ü_info === null ) { return null; }
-    return ü_info.type === FileType.File;
+async function ö_tst( ü_path:string ):Promise<FileType> {
+    const ü_info = await whenFileInfoRead_( ü_path );
+    if ( ü_info === null ) { return FileType.Unknown; }
+    return ü_info.type;
 }
 }
 

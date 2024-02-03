@@ -52,15 +52,23 @@ function ö_bound( ...ü_realArgs:any[] ):T {
 }
 
 //====================================================================
+  type TR = readonly TTestResult[]
 
-export function testSummary( ü_results:readonly TTestResult[], ü_equals:TAssert):void {
+export function testSummary(      result: TR      , ü_equals:TAssert ):void
+export function testSummary(      result: TR, b:TR, ü_equals:TAssert ):void
+export function testSummary( ...ü_result_:(TR|TAssert)[]             ):void {
+    const ü_equals:TAssert = ü_result_.pop  () as TAssert;
+      let ü_results        = ü_result_.shift() as TR;
+  //const ü_args = Array.prototype.slice.call( arguments, 1, -1 ) as TR;
+          ü_results =  ü_results.concat( ...ü_result_ as TR[] );
+  //
     const ü_crlf = '\r\n';
     const ü_success = ü_results.filter( ü_test=>{ return ü_test.startsWith( successSymbol ); } )
     const ü_all = ü_results.length;
     const ü_ok  = ü_success.length;
     const ü_ratio = Math.round( ü_ok / ü_all * 100 );
 
-    ü_equals( ü_ok, ü_all, `Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%`+ü_crlf+ ü_results.join(ü_crlf) )
+    ü_equals( ü_ok, ü_all, `Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%`+ü_crlf+ ü_results.join(ü_crlf) );
 }
 
 export function testEquals<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):TTestResult {
