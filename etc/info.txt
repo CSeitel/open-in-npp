@@ -2,3 +2,16 @@ npm link typescript
 
 rm -recurse C:\zzz_Dev\node_modules\open-in-npp\out\test\mocha\
 rm -recurse C:\zzz_Dev\node_modules\open-in-npp\out
+
+mkdir      ./.vscode-temp/real_1
+cd C:\zzz_Dev\node_modules\open-in-npp
+rm         .\.vscode-temp\virtual_1_d
+mklink /D  .\.vscode-temp\virtual_1_d  .\real_1
+mklink /J  .\.vscode-temp\virtual_1_j  .\.vscode-temp\real_1
+mklink /D  .\.vscode-temp\virtual_2_d  .\virtual_1_d
+mklink /D  .\.vscode-temp\virtual_3_d  .\virtual_4_d
+mklink /D  .\.vscode-temp\virtual_4_d  .\virtual_5_d
+mklink /D  .\.vscode-temp\virtual_5_d  .\virtual_3_d
+mklink /D  .\.vscode-temp\virtual_6_d  .\real_0
+
+await require('fs').promises.realpath('.\\.vscode-temp\\virtual_2_d' )

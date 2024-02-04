@@ -3,4 +3,4 @@
          , type FileType
          } from 'vscode';
   export type TFileUri = string | Uri | { uri:Uri }
-  export type TFileType = FileType | 66
+  export type TFileType = 0 | 1 | 2 | 65 | 66

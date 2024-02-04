@@ -101,7 +101,7 @@ export async function testAsyncFunction<Tx,Ty>( ö_aFref  :(x:Tx)=>Promise<Ty>
             const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x );
             ü_tests.push(  testEquals( ü_act_y.value, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  );
         } else {
-            ü_tests.push(  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 100 )  );
+            ü_tests.push(  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 200 )  );
         }
     });
   //

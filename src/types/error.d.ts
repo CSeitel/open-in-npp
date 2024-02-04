@@ -13,6 +13,7 @@
   export type TNodeFSErrorCodes = 'ENOENT'
                                 | 'ENOTDIR'
                                 | 'EPERM'
+                                | 'ELOOP'
                                 | 'ENOTEMPTY'
   export type TVscFSErrorCodes  = 'FileNotFound'
 //==============================================================================
