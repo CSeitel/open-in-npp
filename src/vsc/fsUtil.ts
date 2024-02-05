@@ -37,7 +37,7 @@ export async function whenFileInfoRead( ü_fileUri:TFileUri ):Promise<FileStat|n
     try {
         return await ßß_fs.stat(  ß_fileToUri( ü_fileUri ) );
     } catch ( ü_eX ) {
-        return expect<TVscFSErrorCodes,null>( ü_eX, 'FileNotFound', null );
+        return expect<TVscFSErrorCodes|TNodeFSErrorCodes,null>( ü_eX, 'FileNotFound', null );
     }
 }
 
@@ -49,7 +49,7 @@ export async function whenFileInfoRead_( ü_fileUri:TFileUri ):Promise<FileStat|
                                      const ü_real = await ßß_fs_p.realpath( ß_fileToUri( ü_fileUri ).fsPath );
             return await whenFileInfoRead( ü_real );
         } catch ( ü_eX ) {
-            return expect<TNodeFSErrorCodes,null>( ü_eX, 'ELOOP', null );
+            return expect<TNodeFSErrorCodes,null>( ü_eX, ['ELOOP','ENOENT'], null );
         }
     }
         return ü_info;

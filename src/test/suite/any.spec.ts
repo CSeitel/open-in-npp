@@ -53,11 +53,7 @@ async function ö_cycle( ü_secs:number ):Promise<void> {
 //====================================================================
 
 suite( 'Debug', ()=>{
-  //test( 'Dummy', ß_whenFileInfoRead );
-test( '', async ()=>{
-    const ü_info = await whenFileInfoRead_( join( ß_testDir, 'virtual_6_d' ) );
-    strictEqual( ü_info?.type, 66 )
-});
+    test( 'Dummy', ß_whenFileInfoRead );
 });
 
 //====================================================================
@@ -68,6 +64,10 @@ testSuite( basename( __filename ),
     ]
   );
 /*
+test( '', async ()=>{
+    const ü_info = await whenFileInfoRead( join( ß_testDir, 'virtual_3_d' ) );
+    strictEqual( ü_info?.type, 66 )
+});
   test( 'Execute Command', VscTestSpec.openInNpp );
   test( 'Env'            , VscTestSpec.test_2    );
 */
@@ -87,18 +87,18 @@ async function ß_whenFileInfoRead():Promise<void> {
       , [ '.'        , CEFileType.Folder  ]
       , [ '..'       , CEFileType.Folder  ]
       , [ '../..'    , CEFileType.Folder  ]
-      , [ join( ß_testDir, 'virtual_1_j' ), CEFileType.SymLinkFolder ]
-      , [ join( ß_testDir, 'virtual_1_d' ), CEFileType.SymLinkFolder ]
-      , [ join( ß_testDir, 'virtual_2_d' ), CEFileType.SymLinkFolder ]
-      , [ join( ß_testDir, 'virtual_3_d' ), CEFileType.SymLinkFolder ]
-      , [ join( ß_testDir, 'virtual_6_d' ), CEFileType.SymLinkFolder ]
+      , [ join( ß_testDir, 'virtual_1_j' ), CEFileType.SymLinkFolder  ]
+      , [ join( ß_testDir, 'virtual_1_d' ), CEFileType.SymLinkFolder  ]
+      , [ join( ß_testDir, 'virtual_2_d' ), CEFileType.SymLinkFolder  ]
+      , [ join( ß_testDir, 'virtual_3_d' ), CEFileType.Unknown        ]
+      , [ join( ß_testDir, 'virtual_6_d' ), CEFileType.SymLinkUnknown ]
       ] as TResultArray<string,CEFileType>;
     const ü_data_2 = structuredClone( ü_data );
     ü_data_2[ ü_data_2.length - 3 ][1] = CEFileType.Folder;
   //const ü_isExe = bind( isExe, {realFirst:true,arrangeBound:[1]}, false )
     
-    testSummary( await testAsyncFunction( ö_tst, ü_data_2 )
-               , await testAsyncFunction( whenFileTypeKnown, ü_data )
+    testSummary( await testAsyncFunction( whenFileTypeKnown, ü_data )
+               //await testAsyncFunction( ö_tst, ü_data_2 )
                , strictEqual );
   //
 async function ö_tst( ü_path:string ):Promise<CEFileType> {

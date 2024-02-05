@@ -16,6 +16,7 @@
                                 | 'ELOOP'
                                 | 'ENOTEMPTY'
   export type TVscFSErrorCodes  = 'FileNotFound'
+                                | 'Unknown'
 //==============================================================================
 /*
 */
