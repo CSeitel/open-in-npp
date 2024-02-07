@@ -8,10 +8,17 @@
          , type TArgumentsInfo
          } from '../types/lib.testUtil.d';
 //--------------------------------------------------------------------
+  import { join
+         } from 'path';
   import { inspect
          } from 'util';
   import { shortenText
          } from './textUtil';
+  import { straightenArray
+         } from './arrayUtil';
+//--------------------------------------------------------------------
+  export const CTestDirName = join( __dirname, '../../.vscode-temp' );
+//--------------------------------------------------------------------
   export const successSymbol = String.fromCharCode( 0x2705 ); // 0x221a
   export const failureSymbol = String.fromCharCode( 0x274c );
          const notEqual      = String.fromCharCode( 0x2260 );
@@ -23,16 +30,26 @@
          const failurePrefix = failureSymbol + ' ';
 //====================================================================
 
+export function testSrc( ...ü_segs:string[] ):string {
+    return join( CTestDirName, ...ü_segs );
+}
+
+export function identity<T>( ü_x:T ):T {
+    return ü_x;
+}
+
+export function echo( ü_oref:any, ü_length:number ):string {
+    return shortenText( inspect( ü_oref ), ü_length );
+}
+
+//====================================================================
+
 export function testSuite( ü_name:string, ü_tests:(()=>any)[] ):void {
     suite( ü_name, function(){
         ü_tests.forEach(function( ü_testImpl ){
             test( ü_testImpl.name, ü_testImpl );
         });
     });
-}
-
-export function echo( ü_oref:any, ü_length:number ):string {
-    return shortenText( inspect( ü_oref ), ü_length );
 }
 
 //====================================================================
@@ -52,15 +69,15 @@ function ö_bound( ...ü_realArgs:any[] ):T {
 }
 
 //====================================================================
-  type TR = readonly TTestResult[]
+  type TR = TTestResult|readonly TTestResult[]
 
-export function testSummary(      result: TR      , ü_equals:TAssert ):void
-export function testSummary(      result: TR, b:TR, ü_equals:TAssert ):void
-export function testSummary( ...ü_result_:(TR|TAssert)[]             ):void {
-    const ü_equals:TAssert = ü_result_.pop  () as TAssert;
-      let ü_results        = ü_result_.shift() as TR;
+export function testSummary(      result: TR,             ü_equals:TAssert ):void
+export function testSummary(      result: TR, b:TR,       ü_equals:TAssert ):void
+export function testSummary(      result: TR, b:TR, c:TR, ü_equals:TAssert ):void
+export function testSummary( ...ü_result_:(TR|TAssert)[]                   ):void {
+    const ü_equals:TAssert = ü_result_.pop() as TAssert;
   //const ü_args = Array.prototype.slice.call( arguments, 1, -1 ) as TR;
-          ü_results =  ü_results.concat( ...ü_result_ as TR[] );
+    const ü_results = straightenArray<TTestResult>(  ü_result_ as TR[]  );
   //
     const ü_crlf = '\r\n';
     const ü_success = ü_results.filter( ü_test=>{ return ü_test.startsWith( successSymbol ); } )
@@ -82,9 +99,10 @@ export function testEquals<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string 
 
 //====================================================================
 
-export async function testAsyncFunction<Tx,Ty>( ö_aFref  :(x:Tx)=>Promise<Ty>
-                                              , ö_expData:          Map<Tx,Ty>
-                                                         | TResultArray<Tx,Ty>
+export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<Ty>
+                                              , ö_expData:          Map<Tx,Ty|Tz>
+                                                         | TResultArray<Tx,Ty|Tz>
+                                              , ö_onError?:(x:Tx,reason:any)=>Tz
                                               ):Promise<TTestResult[]> {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
@@ -97,11 +115,14 @@ export async function testAsyncFunction<Tx,Ty>( ö_aFref  :(x:Tx)=>Promise<Ty>
     const ü_tests:TTestResult[] = [];
     ü_keys.map(function( ü_x, ü_indx ){
         const ü_act_y = ü_done[ ü_indx ];
+        const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x );
         if ( ü_act_y.status === 'fulfilled' ) {
-            const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x );
             ü_tests.push(  testEquals( ü_act_y.value, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  );
         } else {
-            ü_tests.push(  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 200 )  );
+            ü_tests.push(  ö_onError === undefined
+                        ?  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 200 )
+                        :  testEquals( ö_onError( ü_x, ü_act_y.reason ), ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  
+                        );
         }
     });
   //
