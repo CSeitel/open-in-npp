@@ -4,6 +4,7 @@
          , type TTestResult
          , type TResultArray
          , type TAnyFunction
+         , type TAsyncTestFunction
          , type TArgMap
          , type TArgumentsInfo
          } from '../types/lib.testUtil.d';
@@ -44,12 +45,21 @@ export function echo( ü_oref:any, ü_length:number ):string {
 
 //====================================================================
 
-export function testSuite( ü_name:string, ü_tests:(()=>any)[] ):void {
-    suite( ü_name, function(){
-        ü_tests.forEach(function( ü_testImpl ){
-            test( ü_testImpl.name, ü_testImpl );
-        });
-    });
+export function testSuite( ü_name:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):void {
+  //
+    const ü_suite = ü_skip
+                  ? ()=>{}
+                  : Array.isArray( ü_tests )
+                  ? function(){              ü_tests  .forEach(function( ü_testImpl ){  test( ü_testImpl.name, ü_testImpl            );  }) }
+                  : function(){ Object.keys( ü_tests ).forEach(function( ü_testName ){  test( ü_testName     , ü_tests[ ü_testName ] );  }) }
+                  ;
+    suite( ü_name, ü_suite );
+}
+
+export function testToggle( ü_testImpl:TAsyncTestFunction, ü_disable = false ):TAsyncTestFunction {
+    return ü_disable ? async ()=>{}
+                     : ü_testImpl
+                     ;
 }
 
 //====================================================================

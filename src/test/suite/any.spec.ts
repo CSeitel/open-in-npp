@@ -1,26 +1,22 @@
 /*
 */
-  import { type TResultArray
-         } from '../../types/lib.testUtil.d';
-//--------------------------------------------------------------------
   import { basename
-         , join
          } from 'path';
-  import { strictEqual
-         } from 'assert';
-/*
-*/
   import { whenDelay
          , LockHandler
          } from '../../lib/asyncUtil';
   import { testSuite
+         , testToggle
          } from '../../lib/testUtil';
-  import { tst_whenFileInfoRead
-         , tst_whenFileTypeKnown
-         } from './lib/any.impl';
+//--------------------------------------------------------------------
+  import * as ßß_suite from './lib/any.impl';
 //====================================================================
-  const ß_testDir = join( __dirname, '../../../.vscode-temp' );
-//const ß_testDir = join( process.cwd(), '../../.vscode-temp' );
+  const ü_single = !true;
+suite( 'Debug', ()=>{
+    test( 'Single', testToggle( ßß_suite.tst_whenFileInfoRead, !ü_single ) );
+});
+  testSuite( basename( __filename ), ßß_suite, ü_single );
+//====================================================================
 
 class VscTestSpec {
 
@@ -41,29 +37,6 @@ async function ö_cycle( ü_secs:number ):Promise<void> {
 
 }
 }
-
-//====================================================================
-  const ü_suite = 
-    [ tst_whenFileInfoRead
-    , tst_whenFileTypeKnown
-    ];
-  const ü_debug = 1 !== 1 ? (ü_suite.length=0,tst_whenFileInfoRead) : ()=>{};
-
-suite( 'Debug', ()=>{
-    test( 'Single', ü_debug );
-});
-testSuite( basename( __filename ), ü_suite );
-
-//====================================================================
-
-/*
-test( '', async ()=>{
-    const ü_info = await whenFileInfoRead( join( ß_testDir, 'virtual_3_d' ) );
-    strictEqual( ü_info?.type, 66 )
-});
-  test( 'Execute Command', VscTestSpec.openInNpp );
-  test( 'Env'            , VscTestSpec.test_2    );
-*/
 
 //====================================================================
 /*

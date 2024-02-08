@@ -13,4 +13,6 @@
     arrangeBound?: number[]
   }
 
-  export type TAnyFunction<T=any> = ( ...args:any[] )=>T
+  export type TAnyFunction  <T=any> = ( ...args:any[] )=>T
+  export type TAsyncFunction<T=any> = TAnyFunction<Promise<T>>
+  export type TAsyncTestFunction = ()=>Promise<void>

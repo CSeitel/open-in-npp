@@ -27,7 +27,6 @@
          , bind
          } from '../../../lib/testUtil';
 //====================================================================
-  type Duplet<T1,T2> = [T1,T2][]
 
 export async function tst_whenFileInfoRead():Promise<void> {
     const ö_info = ( await whenFileInfoRead( testSrc( 'real_1' ) ) )!;

@@ -31,5 +31,10 @@ export function straightenArray<T>( ü_mixed: (T|readonly T[])[] ):T[] {
 }
 
 //====================================================================
+
+
+//====================================================================
 /*
+export function forEach<T>( ü_oref:T[]|Record<PropertyKey,T> ):void {
+}
 */
