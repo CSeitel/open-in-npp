@@ -11,7 +11,7 @@
 //====================================================================
   const ü_single =  true;
 suite( 'Debug', ()=>{
-    test( 'Single', testToggle( ßß_suite.tst_whenFileInfoRead, !ü_single ) );
+    test( 'Single', testToggle( ßß_suite.tst_whenKnownAsFolder, !ü_single ) );
 });
   testSuite( basename( __filename ), ßß_suite, ü_single );
 //====================================================================

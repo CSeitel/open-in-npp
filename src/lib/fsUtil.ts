@@ -27,13 +27,9 @@ export async function whenFileInfoRead( ü_path:PathLike, ü_slnk = false ):Prom
 
 //--------------------------------------------------------------------
 
-export async function whenKnownAsFolder( ü_path:PathLike, ü_slnk = false ):Promise<boolean> {
-    const ü_info = await whenFileInfoRead( ü_path, ü_slnk );
-    if ( ü_info === null      ) { return false; }
-    if ( ü_info.isDirectory() ) { return true ; }
-                                  return false;
-  //if ( ü_info.isSymbolicLink() ) { const ü_real = await ßß_fs_p.realpath( ü_path ); }
-}
+export async function whenKnownAsFolder ( ü_path:PathLike, ü_slnk = false ):Promise<boolean> { const ü_info = await whenFileInfoRead( ü_path, ü_slnk ); return ü_info !== null && ü_info.isDirectory   (); }
+export async function whenKnownAsSymLink( ü_path:PathLike, ü_slnk = false ):Promise<boolean> { const ü_info = await whenFileInfoRead( ü_path, ü_slnk ); return ü_info !== null && ü_info.isSymbolicLink(); }
+export async function whenKnownAsFile   ( ü_path:PathLike, ü_slnk = false ):Promise<boolean> { const ü_info = await whenFileInfoRead( ü_path, ü_slnk ); return ü_info !== null && ü_info.isFile        (); }
 
 //====================================================================
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];

@@ -9,10 +9,16 @@
          } from 'assert';
   import * as ßß_assert from 'assert';
 //--------------------------------------------------------------------
+  import { expect
+         } from '../../../lib/error';
   import { whenDelay
          } from '../../../lib/asyncUtil';
+  import { projection
+         } from '../../../lib/arrayUtil';
   import { whenFileInfoRead
          , whenKnownAsFolder
+         , whenKnownAsSymLink
+         , whenKnownAsFile
          , isExe
          } from '../../../lib/fsUtil';
   import { testSrc
@@ -88,27 +94,44 @@ async function ö_whenCtime( ü_path:string ):Promise<string> {
 }
 
 export async function tst_whenKnownAsFolder():Promise<void> {
+    const ü_info = await whenFileInfoRead( '' );
+    console.log( ü_info );
+  //
     const ü_data =
       [
-        [ __filename , false    ]
-      , [ __dirname  , true     ]
-      , [ '*'        , false ]
-      , [ ''         , false ]
-      , [ ' '        , false ]
-      , [ '.'        , true  ]
-      , [ '..'       , true  ]
-      , [ '../..'    , true  ]
-      , [ testSrc( 'virtual_1_j' ), true  ]
-      , [ testSrc( 'virtual_1_d' ), true  ]
-      , [ testSrc( 'virtual_2_d' ), true  ]
-      , [ testSrc( 'virtual_3_d' ),         -1 ]
-      , [ testSrc( 'virtual_6_d' ), false ]
-      ] as TResultArray<string,boolean|-1>;
+        [ __filename              , false, false, false, false, true , true  ]
+      , [ __dirname               , true , true , false, false, false, false ]
+      , [ '*'                     , false, false, false, false, false, false ]
+      , [ ''                      , false, false, false, false, false, false ]
+      , [ ' '                     , false, false, false, false, false, false ]
+      , [ '.'                     , true , true , false, false, false, false ]
+      , [ '..'                    , true , true , false, false, false, false ]
+      , [ '../..'                 , true , true , false, false, false, false ]
+      , [ testSrc( 'virtual_1_j' ), true , false, false, true , false, false ]
+      , [ testSrc( 'virtual_1_d' ), true , false, false, true , false, false ]
+      , [ testSrc( 'virtual_2_d' ), true , false, false, true , false, false ]
+      , [ testSrc( 'virtual_3_d' ), null , false, null , true , null , false ]
+      , [ testSrc( 'virtual_6_d' ), false, false, false, true , false, false ]
+      ];
   //
-    testSummary( await testAsyncFunction( whenKnownAsFolder, ü_data,
-     (ü_x,ü_eX)=>{
-                                    return ü_x.endsWith( 'virtual_3_d' ) ? -1 : -2 as -1; }
-      ), strictEqual );
+    const ü_01 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 1 ) );
+    const ü_02 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 2 ) );
+    const ü_03 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 3 ) );
+    const ü_04 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 4 ) );
+    const ü_05 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 5 ) );
+    const ü_06 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 6 ) );
+  //
+    const ü_LFolder  = bind( whenKnownAsFolder , { realFirst:true }, true );
+    const ü_LSymLink = bind( whenKnownAsSymLink, { realFirst:true }, true );
+    const ü_LFile    = bind( whenKnownAsFile   , { realFirst:true }, true );
+  //
+    testSummary( await testAsyncFunction( whenKnownAsFolder , ü_01, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } )
+               , await testAsyncFunction( ü_LFolder         , ü_02  )
+               , await testAsyncFunction( whenKnownAsSymLink, ü_03, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } )
+               , await testAsyncFunction( ü_LSymLink        , ü_04  )
+               , await testAsyncFunction( whenKnownAsFile   , ü_05, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } )
+               , await testAsyncFunction( ü_LFile           , ü_06  )
+               , strictEqual );
 }
 
 export async function tst_isExe(){

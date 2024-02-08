@@ -65,8 +65,7 @@ export async function tst_whenFileTypeKnown():Promise<void> {
       , [ testSrc( 'virtual_6_d' ), CEFileType.SymLinkUnknown ]
       ] as TResultArray<string,CEFileType|-1>;
     
-    testSummary( await testAsyncFunction( whenFileTypeKnown, ü_data, (ü_x,ü_eX)=>{
-                                    return ü_x.endsWith( 'virtual_3_d' ) ? -1 : -2 as -1; } )
+    testSummary( await testAsyncFunction( whenFileTypeKnown, ü_data, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) ; } )
                //await testAsyncFunction( ö_tst, ü_data_2 )
                , strictEqual );
 }

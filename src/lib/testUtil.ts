@@ -81,10 +81,13 @@ function ö_bound( ...ü_realArgs:any[] ):T {
 //====================================================================
   type TR = TTestResult|readonly TTestResult[]
 
-export function testSummary(      result: TR,             ü_equals:TAssert ):void
-export function testSummary(      result: TR, b:TR,       ü_equals:TAssert ):void
-export function testSummary(      result: TR, b:TR, c:TR, ü_equals:TAssert ):void
-export function testSummary( ...ü_result_:(TR|TAssert)[]                   ):void {
+export function testSummary(      result: TR,                               ü_equals:TAssert ):void
+export function testSummary(      result: TR, b:TR,                         ü_equals:TAssert ):void
+export function testSummary(      result: TR, b:TR, c:TR,                   ü_equals:TAssert ):void
+export function testSummary(      result: TR, b:TR, c:TR, d:TR,             ü_equals:TAssert ):void
+export function testSummary(      result: TR, b:TR, c:TR, d:TR, e:TR,       ü_equals:TAssert ):void
+export function testSummary(      result: TR, b:TR, c:TR, d:TR, e:TR, f:TR, ü_equals:TAssert ):void
+export function testSummary( ...ü_result_:(TR|TAssert)[]                                     ):void {
     const ü_equals:TAssert = ü_result_.pop() as TAssert;
   //const ü_args = Array.prototype.slice.call( arguments, 1, -1 ) as TR;
     const ü_results = straightenArray<TTestResult>(  ü_result_ as TR[]  );
@@ -112,7 +115,7 @@ export function testEquals<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string 
 export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<Ty>
                                               , ö_expData:          Map<Tx,Ty|Tz>
                                                          | TResultArray<Tx,Ty|Tz>
-                                              , ö_onError?:(x:Tx,reason:any)=>Tz
+                                              , ö_expectError?:(x:Tx,reason:any)=>boolean
                                               ):Promise<TTestResult[]> {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
@@ -129,10 +132,16 @@ export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<T
         if ( ü_act_y.status === 'fulfilled' ) {
             ü_tests.push(  testEquals( ü_act_y.value, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  );
         } else {
-            ü_tests.push(  ö_onError === undefined
-                        ?  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 200 )
-                        :  testEquals( ö_onError( ü_x, ü_act_y.reason ), ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  
-                        );
+            if ( ö_expectError !== undefined ) {
+                try {
+                  if ( ö_expectError( ü_x, ü_act_y.reason ) === true ) {
+                    ü_tests.push( testEquals( ü_exp_y, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  );
+                    return;
+                  }
+                } catch ( ü_eX ) {
+                }
+            }
+            ü_tests.push(  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 200 )  );
         }
     });
   //

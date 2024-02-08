@@ -32,6 +32,11 @@ export function straightenArray<T>( ü_mixed: (T|readonly T[])[] ):T[] {
 
 //====================================================================
 
+export function projection<U,V>( ü_row:(U|V)[], colX1:number, colX2:number ):[U,V]
+export function projection<T>( ü_row:T[], ...ü_colXs:number[] ):T[]
+export function projection<T>( ü_row:T[], ...ü_colXs:number[] ):T[] {
+    return ü_colXs.map( ü_colX => ü_row[ ü_colX ] );
+}
 
 //====================================================================
 /*
