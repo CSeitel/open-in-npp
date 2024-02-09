@@ -9,7 +9,8 @@ https://nodejs.org/api/fs.html#fslstatpath-options-callback
          } from '../types/error.d';
 //--------------------------------------------------------------------
   import * as ßß_path from 'path';
-  import { promises as ßß_fs_p
+  import { promises  as ßß_fs_p
+         , constants as ßß_fs_c
          } from 'fs';
   import { expect
          } from '../lib/error';
@@ -31,6 +32,13 @@ export async function whenKnownAsFolder ( ü_path:PathLike, ü_slnk = false ):Pr
 export async function whenKnownAsSymLink( ü_path:PathLike, ü_slnk = false ):Promise<boolean> { const ü_info = await whenFileInfoRead( ü_path, ü_slnk ); return ü_info !== null && ü_info.isSymbolicLink(); }
 export async function whenKnownAsFile   ( ü_path:PathLike, ü_slnk = false ):Promise<boolean> { const ü_info = await whenFileInfoRead( ü_path, ü_slnk ); return ü_info !== null && ü_info.isFile        (); }
 
+//====================================================================
+export function isExecutable( mode:number ):boolean {
+    return ( mode & (ßß_fs_c.S_IXUSR
+                  |ßß_fs_c.S_IXGRP
+                  |ßß_fs_c.S_IXOTH) ) > 0
+  ;
+}
 //====================================================================
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 

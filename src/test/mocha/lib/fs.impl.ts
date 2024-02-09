@@ -13,13 +13,15 @@
          } from '../../../lib/error';
   import { whenDelay
          } from '../../../lib/asyncUtil';
-  import { projection
+  import { pickDuplet
+         , projection
          } from '../../../lib/arrayUtil';
   import { whenFileInfoRead
          , whenKnownAsFolder
          , whenKnownAsSymLink
          , whenKnownAsFile
          , isExe
+         , isExecutable
          } from '../../../lib/fsUtil';
   import { testSrc
          , testSummary
@@ -94,8 +96,9 @@ async function ö_whenCtime( ü_path:string ):Promise<string> {
 }
 
 export async function tst_whenKnownAsFolder():Promise<void> {
-    const ü_info = await whenFileInfoRead( '' );
-    console.log( ü_info );
+    const ü_file = testSrc( '../node_modules/.bin/flat.cmd' );
+    const ü_info = await whenFileInfoRead( 'C:\\zzz_ProgramFiles\\SDIO_1.12.9.749\\SDIO_R749.exe' );
+    console.log( ü_info?.mode, isExecutable( ü_info?.mode ?? 0 ), ü_info );
   //
     const ü_data =
       [
@@ -114,7 +117,7 @@ export async function tst_whenKnownAsFolder():Promise<void> {
       , [ testSrc( 'virtual_6_d' ), false, false, false, true , false, false ]
       ];
   //
-    const ü_01 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 1 ) );
+    const ü_01 = ü_data.map( pickDuplet<string,boolean|null>( 0, 1 ) );
     const ü_02 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 2 ) );
     const ü_03 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 3 ) );
     const ü_04 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 4 ) );

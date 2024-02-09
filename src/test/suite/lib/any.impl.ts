@@ -15,10 +15,12 @@
 */
   import { whenFileInfoRead
          , whenFileTypeKnown
+         , whenKnownAsFolder
          } from '../../../vsc/fsUtil';
-  import { whenDelay
-         , LockHandler
-         } from '../../../lib/asyncUtil';
+  import { expect
+         } from '../../../lib/error';
+  import { pickDuplet
+         } from '../../../lib/arrayUtil';
   import { testSrc
          , identity
          , testSummary
@@ -50,23 +52,25 @@ export async function tst_whenFileTypeKnown():Promise<void> {
     const ü_data =
       [
       //[ join( ß_testDir, 'virtual_6_d' ), CEFileType.SymLinkFolder ]
-        [ __filename , CEFileType.File    ]
-      , [ __dirname  , CEFileType.Folder  ]
-      , [ '*'        , CEFileType.Unknown ]
-      , [ ''         , CEFileType.Folder  ]
-      , [ ' '        , CEFileType.Unknown ]
-      , [ '.'        , CEFileType.Folder  ]
-      , [ '..'       , CEFileType.Folder  ]
-      , [ '../..'    , CEFileType.Folder  ]
-      , [ testSrc( 'virtual_1_j' ), CEFileType.SymLinkFolder  ]
-      , [ testSrc( 'virtual_1_d' ), CEFileType.SymLinkFolder  ]
-      , [ testSrc( 'virtual_2_d' ), CEFileType.SymLinkFolder  ]
-      , [ testSrc( 'virtual_3_d' ),         -1 ]
-      , [ testSrc( 'virtual_6_d' ), CEFileType.SymLinkUnknown ]
-      ] as TResultArray<string,CEFileType|-1>;
+        [ __filename              , CEFileType.File           , false ]
+      , [ __dirname               , CEFileType.Folder         , true  ]
+      , [ '*'                     , CEFileType.Unknown        , false ]
+      , [ ''                      , CEFileType.Folder         , true  ]
+      , [ ' '                     , CEFileType.Unknown        , false ]
+      , [ '.'                     , CEFileType.Folder         , true ]
+      , [ '..'                    , CEFileType.Folder         , true ]
+      , [ '../..'                 , CEFileType.Folder         , true ]
+      , [ testSrc( 'virtual_1_j' ), CEFileType.SymLinkFolder  , true ]
+      , [ testSrc( 'virtual_1_d' ), CEFileType.SymLinkFolder  , true ]
+      , [ testSrc( 'virtual_2_d' ), CEFileType.SymLinkFolder  , true ]
+      , [ testSrc( 'virtual_3_d' ), null                      , true ]
+      , [ testSrc( 'virtual_6_d' ), CEFileType.SymLinkUnknown , false ]
+      ];
+    const ü_01 = ü_data.map( pickDuplet<string,CEFileType|null,boolean>( 0, 1 ) );
+    const ü_02 = ü_data.map( pickDuplet<string,boolean,CEFileType|null>( 0, 2 ) );
     
-    testSummary( await testAsyncFunction( whenFileTypeKnown, ü_data, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) ; } )
-               //await testAsyncFunction( ö_tst, ü_data_2 )
+    testSummary( await testAsyncFunction( whenFileTypeKnown, ü_01, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'Unknown', true ); } )
+               , await testAsyncFunction( whenKnownAsFolder, ü_02 )
                , strictEqual );
 }
 
