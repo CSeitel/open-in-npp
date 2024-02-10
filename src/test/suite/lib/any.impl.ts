@@ -8,33 +8,37 @@
          } from 'path';
   import { strictEqual
          } from 'assert';
-  import { FileType } from 'vscode';
+  import { workspace
+         } from 'vscode';
   import { CEFileType
          } from '../../../constants/vsc';
 /*
 */
-  import { whenFileInfoRead
+  import { fileToUri
+         , whenFileInfoRead
          , whenFileTypeKnown
          , whenKnownAsFolder
          } from '../../../vsc/fsUtil';
+  import { isContainedInWorkspace
+         } from '../../../lib/vsc';
   import { expect
          } from '../../../lib/error';
   import { pickDuplet
          } from '../../../lib/arrayUtil';
   import { testSrc
-         , identity
          , testSummary
-         , testEquals
+         , testFunction
          , testAsyncFunction
          , bind
          } from '../../../lib/testUtil';
 //====================================================================
 
-export async function tst_whenFileInfoRead():Promise<void> {
+export async function tst_whenFileInfoRead(){
     const ö_info = ( await whenFileInfoRead( testSrc( 'real_1' ) ) )!;
     const ü_data = [ 'virtual_2_d'
-                   , 'virtual_1_d' ].map( ü_name => [testSrc( ü_name ), '0.1' ] as [string,string] )
-    testSummary( await testAsyncFunction( ö_whenCtime, ü_data ), strictEqual );
+                   , 'virtual_1_d' ].map( ü_name => [testSrc( ü_name ), '0.0' ] as [string,string] )
+    testSummary( await testAsyncFunction( ö_whenCtime, ü_data )
+               , strictEqual );
 
 async function ö_whenCtime( ü_path:string ):Promise<string> {
     const ü_info = ( await whenFileInfoRead( ü_path ) )!;
@@ -47,7 +51,7 @@ async function ö_whenCtime( ü_path:string ):Promise<string> {
 
 //====================================================================
 
-export async function tst_whenFileTypeKnown():Promise<void> {
+export async function tst_whenFileTypeKnown(){
   //
     const ü_data =
       [
@@ -57,20 +61,34 @@ export async function tst_whenFileTypeKnown():Promise<void> {
       , [ '*'                     , CEFileType.Unknown        , false ]
       , [ ''                      , CEFileType.Folder         , true  ]
       , [ ' '                     , CEFileType.Unknown        , false ]
-      , [ '.'                     , CEFileType.Folder         , true ]
-      , [ '..'                    , CEFileType.Folder         , true ]
-      , [ '../..'                 , CEFileType.Folder         , true ]
-      , [ testSrc( 'virtual_1_j' ), CEFileType.SymLinkFolder  , true ]
-      , [ testSrc( 'virtual_1_d' ), CEFileType.SymLinkFolder  , true ]
-      , [ testSrc( 'virtual_2_d' ), CEFileType.SymLinkFolder  , true ]
-      , [ testSrc( 'virtual_3_d' ), null                      , true ]
+      , [ '.'                     , CEFileType.Folder         , true  ]
+      , [ '..'                    , CEFileType.Folder         , true  ]
+      , [ '../..'                 , CEFileType.Folder         , true  ]
+      , [ testSrc( 'virtual_1_j' ), CEFileType.SymLinkFolder  , true  ]
+      , [ testSrc( 'virtual_1_d' ), CEFileType.SymLinkFolder  , true  ]
+      , [ testSrc( 'virtual_2_d' ), CEFileType.SymLinkFolder  , true  ]
+      , [ testSrc( 'virtual_3_d' ), null                      , true  ]
       , [ testSrc( 'virtual_6_d' ), CEFileType.SymLinkUnknown , false ]
       ];
     const ü_01 = ü_data.map( pickDuplet<string,CEFileType|null,boolean>( 0, 1 ) );
     const ü_02 = ü_data.map( pickDuplet<string,boolean,CEFileType|null>( 0, 2 ) );
     
-    testSummary( await testAsyncFunction( whenFileTypeKnown, ü_01, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'Unknown', true ); } )
-               , await testAsyncFunction( whenKnownAsFolder, ü_02 )
+    testSummary( await testAsyncFunction( whenFileTypeKnown, ü_01, ö_err )
+               , await testAsyncFunction( whenKnownAsFolder, ü_02, ö_err )
+               , strictEqual );
+function ö_err( ü_x:string, ü_eX:any ):boolean {
+    return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'Unknown', true );
+}
+}
+
+//====================================================================
+export async function tst_whenWS(){
+    const ü_data = [
+        [ __filename, true ]
+      , [ testSrc( '../etc/test/workspaceFolder/temp' ), true ]
+      , [ testSrc( 'virtual_6_d' ), false ]
+      ];
+    testSummary( await testFunction( bind( isContainedInWorkspace, { refine: {0:fileToUri} } ), ü_data as TResultArray<string,boolean> )
                , strictEqual );
 }
 

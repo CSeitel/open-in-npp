@@ -11,6 +11,7 @@
     realFirst ?:boolean
     arrangeReal ?: number[]
     arrangeBound?: number[]
+    refine      ?: Record<number,TAnyFunction>
   }
 
   export type TAnyFunction  <T=any> = ( ...args:any[] )=>T

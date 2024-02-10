@@ -74,6 +74,12 @@ function ö_bound( ...ü_realArgs:any[] ):T {
     if ( ö_map.arrangeBound !== undefined ) { ö_map.arrangeBound.forEach(function( ü_new, ü_old ){ ü_args[ ü_new ] = ö_baseArgs[ ü_old ]; }); }
     if ( ö_map.arrangeReal  !== undefined ) { ö_map.arrangeReal .forEach(function( ü_new, ü_old ){ ü_args[ ü_new ] = ü_realArgs[ ü_old ]; }); }
   //
+    if ( ö_map.refine !== undefined ) {
+        for ( const ü_indx in ö_map.refine ) {
+            ü_args[ ü_indx ] = ö_map.refine[ ü_indx ]( ü_args[ ü_indx ] );
+        }
+    }
+  //
     return ö_fref.apply( ö_map.that, ü_args );
 }
 }

@@ -1,6 +1,8 @@
 out/
 dist/
+etc/test/workspaceFolder/temp/
+.vscode-temp/
+
 node_modules/
 .vscode-test/
-.vscode-temp/
 *.vsix
