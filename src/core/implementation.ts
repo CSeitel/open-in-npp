@@ -29,10 +29,11 @@
          , expandEnvVariables
          } from '../lib/textUtil';
   import { EVscConstants
-         , isDirectory
-         , findFiles
          , whenUriOpened
          } from '../lib/vsc';
+  import { findFiles
+         , whenKnownAsFolder
+         } from '../vsc/fsUtil';
   import { TButtons
          , TDropDownListOptions
          , SCancelButtonId
@@ -387,7 +388,7 @@ private async _whenMainFolder():Promise<string> {
 
 private async _whenMainIsFolder():Promise<boolean> {
       if ( this._mainFileType === EFileTypes.UNKNOWN )
-         { this._mainFileType  =  await isDirectory( this._mainPath )
+         { this._mainFileType  =  await whenKnownAsFolder( this._mainPath )
                                ?  EFileTypes.FOLDER
                                :  EFileTypes.FILE
                                ;
@@ -398,7 +399,7 @@ private async _whenMainIsFolder():Promise<boolean> {
 private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<string[]> {
   //
     const ö_isFolder = await Promise.all( this._others.map( (ü_file       ) => ü_file === this._mainPath ? this._whenMainIsFolder()
-                                                                                                         : isDirectory( ü_file )     ) );
+                                                                                                         : whenKnownAsFolder( ü_file )     ) );
     const ü_subsets  = await Promise.all( this._others.map( (ü_file,ü_indx) => ö_isFolder[ ü_indx ] ? findFiles( ü_file, ö_pattern )
                                                                                                     :          [ ü_file ]            ) );
                                     const ü_files:string[] = [];

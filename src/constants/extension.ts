@@ -8,7 +8,11 @@
   export const CExtensionId  = 'CSeitel.open-in-npp';
 //export const CExtensionUrl = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
   export const CExtensionUrl = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
+//====================================================================
+  export const enum CECommands
+    { nppSettings = 'openInNpp.openSettings'
+    }
   export enum EConfigurationIds
     {
       extendExplorerContextMenu = 'openInNpp.extendExplorerContextMenu'
@@ -28,3 +32,4 @@
     , matchingFilesLimit        = 'openInNpp.matchingFilesLimit'
     , preserveCursor            = 'openInNpp.preserveCursorPosition'
     };
+//====================================================================

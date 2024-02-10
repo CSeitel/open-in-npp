@@ -5,8 +5,9 @@ import { defineConfig } from '@vscode/test-cli';
 //--------------------------------------------------------------------
 
   let ß_files = 'out/test/suite/**/vsc*.spec.js';
-      ß_files = 'out/test/suite/vsc.spec.js';
+      ß_files = 'out/test/suite/npp.spec.js';
       ß_files = 'out/test/suite/any.spec.js';
+      ß_files = 'out/test/suite/dbg.spec.js';
   const ß_cfg_1 =
     { label: 'unitTests'
     , files: ß_files

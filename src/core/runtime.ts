@@ -9,8 +9,11 @@
          } from '../extension';
 //--------------------------------------------------------------------
   import { CExtensionId
+         , CECommands
          } from '../constants/extension';
 //--------------------------------------------------------------------
+  import { commands
+         } from 'vscode';
   import * as ßß_vsCode from 'vscode';
 //====================================================================
   type TExtensionCommand =
@@ -30,8 +33,16 @@ class ExtensionRuntimeContext {
     static          activeInstance :TActiveExtension //|undefined = undefined;
   //
 static async whenActive():Promise<void> {
-    await ßß_vsCode.commands.executeCommand<unknown>( 'openInNpp.openSettings' );
+    await commands.executeCommand<unknown>( CECommands.nppSettings );
   //return ExtensionRuntime;
+    ß_trc && ß_trc( 'Active' );
+    try {
+      const a = ß_RuntimeContext.activeInstance.context.globalState.get( 'admin' )
+      console.log( a )
+    } catch (error) {
+      ß_trc && ß_trc( 'tttActive' );
+      console.trace( error );
+    }
 }
 
 static activate( ü_extnContext:ExtensionContext ):TActiveExtension {

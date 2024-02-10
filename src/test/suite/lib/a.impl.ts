@@ -5,6 +5,12 @@
   import * as ßß_assert from 'assert';
   import * as ßß_path   from 'path';
 //--------------------------------------------------------------------
+  import { strictEqual
+         } from 'assert';
+//--------------------------------------------------------------------
+  import { ß_RuntimeContext
+         , ß_trc
+         } from '../../../core/runtime';
   import { whenTextEditorOpened
          } from '../../../lib/vsc';
   import {
@@ -12,11 +18,27 @@
          } from '../../../lib/asyncUtil';
   import { expandEnvVariables
          } from '../../../lib/textUtil';
-//--------------------------------------------------------------------
-  import { ß_RuntimeContext
-         , ß_trc
-         } from '../../../core/runtime';
+  import { testSrc
+         , testSummary
+         , testEquals
+         } from '../../../lib/testUtil';
   //let ß_trc           :TRuntimeContext['developerTrace']
+//====================================================================
+
+export async function tst_(){
+    await ß_RuntimeContext.whenActive();
+       await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
+  //
+    const ü_hist = ß_RuntimeContext.activeInstance.globalHistory;
+    const ü_admin  = await ü_hist.whenAdmin ( { version: 0 } );
+    const ü_config = await ü_hist.whenConfig( { executable: '' } );
+    testSummary( testEquals( ü_admin .version   , 0  )
+               , testEquals( ü_config.executable, '' )
+               , strictEqual );
+  //
+       await whenDelay( 2000 );
+}
+
 //====================================================================
 
 class VscTestSpec {
@@ -27,12 +49,6 @@ static async rectify():Promise<void> {
     await ß_RuntimeContext.whenActive();
   //ß_trc            = ß_RuntimeContext.developerTrace;
 	  ßß_vsCode.window.showInformationMessage(' all tests.');
-  //
-    const ü_hist = ß_RuntimeContext.activeInstance.globalHistory;
-    const ü_admin  = await ü_hist.whenAdmin ( { version: 0 } );
-    ßß_assert.strictEqual( ü_admin .version   , 0 );
-    const ü_config = await ü_hist.whenConfig( { executable: '' } );
-    ßß_assert.strictEqual( ü_config.executable, '' );
   //
 	  ßß_vsCode.window.showInformationMessage('Start all tests.');
     console.log( 'Hello World' );
@@ -130,4 +146,3 @@ async function prepareWs( ö_ws:typeof ßß_vsCode.workspace ):Promise<void> {
 }
 
 //==============================================================================
-export default VscTestSpec;

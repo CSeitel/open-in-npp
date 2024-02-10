@@ -20,11 +20,14 @@
          , whenKnownAsFolder
          } from '../../../vsc/fsUtil';
   import { isContainedInWorkspace
+         , whenTextEditorOpened
          } from '../../../lib/vsc';
   import { expect
          } from '../../../lib/error';
   import { pickDuplet
          } from '../../../lib/arrayUtil';
+  import { whenDelay
+         } from '../../../lib/asyncUtil';
   import { testSrc
          , testSummary
          , testFunction
@@ -82,13 +85,15 @@ function ö_err( ü_x:string, ü_eX:any ):boolean {
 }
 
 //====================================================================
+
 export async function tst_whenWS(){
+  //
     const ü_data = [
         [ __filename, true ]
       , [ testSrc( '../etc/test/workspaceFolder/temp' ), true ]
       , [ testSrc( 'virtual_6_d' ), false ]
-      ];
-    testSummary( await testFunction( bind( isContainedInWorkspace, { refine: {0:fileToUri} } ), ü_data as TResultArray<string,boolean> )
+      ] as TResultArray<string,boolean>;
+    testSummary( testFunction( bind( isContainedInWorkspace, { refine: {0:fileToUri} } ), ü_data )
                , strictEqual );
 }
 
