@@ -5,6 +5,7 @@
   import { type TOpenInNpp
          } from '../../../types/runtime.d';
   import { CExtensionId
+         , CECommands
          } from '../../../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
@@ -49,13 +50,14 @@ export async function tst_(){
     ü_tests.push(  
        testEquals( ü_admin .version   , 0  )
                 );
+    await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
+    const ü_pid = ( await commands.executeCommand<number>( CECommands.oActive ) );
+    console.log( typeof( ü_pid), ü_pid );
     testSummary( ü_tests
                , strictEqual );
     return;
   //console.dir( ü_a );
   //ß_RuntimeContext.activeInstance.extensionApi.exports.dummy();
-    await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
-    const ü_pid = ( await commands.executeCommand<number>( 'extension.openInNpp' ) )!;
   //
     const ü_hist = ß_RuntimeContext.activeInstance.globalHistory;
   //const ü_admin  = await ü_hist.whenAdmin ( { version: -1 } );
@@ -79,19 +81,6 @@ export async function tst_(){
 //====================================================================
 
 class VscTestSpec {
-
-static async rectify():Promise<void> {
-  //
-  //ß_RuntimeContext =
-    await ß_RuntimeContext.whenActive();
-  //ß_trc            = ß_RuntimeContext.developerTrace;
-	  ßß_vsCode.window.showInformationMessage(' all tests.');
-  //
-	  ßß_vsCode.window.showInformationMessage('Start all tests.');
-    console.log( 'Hello World' );
-  //
-    
-}
 
 static async test_0():Promise<void> {
   //

@@ -2,6 +2,8 @@
 */
   import { type ExtensionContext
          } from 'vscode';
+  import { type TAnyFunction
+         } from '../types/generic.d';
   import { type TExtension
          , type TExtensionCommand
          } from '../types/runtime';
@@ -30,60 +32,23 @@
 //import { ß_RuntimeContext
 //       } from '../core/runtime';
 //--------------------------------------------------------------------
-  const CCommandHandlerMap =
-    {           'openInNpp.openSettings': ConfigHandler .whenSettingsOpened
-    , 'extension.openInNpp'             : CommandHandler.openInNppActive 
-    , 'extension.openInNppX'            : CommandHandler.openInNppEditor
-    , 'extension.openInNppY'            : CommandHandler.openInNppExplorer
-    };
 
 //====================================================================
 
 class ExtensionRuntimeContext {
     static readonly developerTrace :false|typeof console.log = console.log;
     static          activeInstance :ExtensionRuntimeContext //|undefined = undefined;
-  //
-static async whenActive():Promise<void> {
-    await commands.executeCommand<unknown>( CECommands.nppSettings );
-  //return ExtensionRuntime;
-    if ( ExtensionRuntimeContext.activeInstance === undefined) {
-        await whenDelay( 1000 );
-    ß_trc&& ß_trc( 'Ave uuu ????' );
-    }
-    
-    console.log( typeof( ExtensionRuntimeContext.activeInstance ) );
-  //console.dir( ß_RuntimeContext.activeInstance.context.globalState );
-    try {
-      const a = ß_RuntimeContext.activeInstance.context.globalState.get( 'admin' )
-      console.log( a )
-    } catch (error) {
-      ß_trc && ß_trc( 'tttActive' );
-      console.trace( error );
-    }
-}
 
 static async activate( ü_extnContext:ExtensionContext ):Promise<TActiveExtension> {
     if ( ExtensionRuntimeContext.activeInstance === undefined ) {
-       new ExtensionRuntimeContext( ü_extnContext );
+       await new ExtensionRuntimeContext( ü_extnContext )._whenActivationFinalized();
     } else {
       ß_trc&& ß_trc( 'Re-Activation' );
-      if ( ExtensionRuntimeContext.activeInstance.context === ü_extnContext ) { return ExtensionRuntimeContext.activeInstance; }
-    }
-    //return ExtensionRuntimeContext.activeInstance;
-  //
-    const ü_activeInstance = ExtensionRuntimeContext.activeInstance;
-    for ( const ü_cmd of ü_activeInstance.commands ) {
-      const ü_cmdId = ü_cmd.command;
-      if ( ü_cmdId in CCommandHandlerMap ) {
-        ü_extnContext.subscriptions.push(  commands.registerCommand( ü_cmdId, CCommandHandlerMap[ ü_cmdId ] ) );
-      } else {
-        console.error( `Command "${ ü_cmdId }" not implemented.` );
+      if ( ExtensionRuntimeContext.activeInstance.context !== ü_extnContext ) {
+          ß_trc&& ß_trc( 'Re-Activation: new Context' );
       }
     }
   //
-    ü_extnContext.subscriptions.push(  workspace.onDidChangeConfiguration( ConfigSnapshot.modificationSignalled )  );
-  //
-    await ü_activeInstance._whenActivationFinalized();
     return ExtensionRuntimeContext.activeInstance;
 }
 
@@ -109,6 +74,22 @@ private constructor(
     this.version     = ü_json.version;
     this.commands    = ü_json.contributes.commands;
     this.settings    = ü_json.contributes.configuration.properties;
+  //
+    for ( const ü_cmd of this.commands ) {
+        let ü_cmdImpl:TAnyFunction
+        const ü_cmdId = ü_cmd.command;
+        switch ( ü_cmdId ) {
+            case CECommands.oSettings : ü_cmdImpl = ConfigHandler .whenSettingsOpened; break;
+            case CECommands.oActive   : ü_cmdImpl =  CommandHandler.openInNppActive  ; break;
+            case CECommands.oEditor   : ü_cmdImpl = CommandHandler.openInNppEditor   ; break;
+            case CECommands.oExplorer : ü_cmdImpl = CommandHandler.openInNppExplorer ; break;
+            default:
+                console.error( `Command "${ ü_cmdId }" not implemented.` );
+                continue;
+        }
+        this.context.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
+    }
+        this.context.subscriptions.push(  workspace.onDidChangeConfiguration( ConfigSnapshot.modificationSignalled )  );
   //
 }
 
@@ -140,7 +121,6 @@ async function ö_info( ü_newVersion:string ):Promise<void> {
 //--------------------------------------------------------------------
   export const ß_RuntimeContext = ExtensionRuntimeContext;
   export const ß_trc            = ExtensionRuntimeContext.developerTrace;
-//--------------------------------------------------------------------
 //====================================================================
   import { History
          } from '../core/historyProxy';

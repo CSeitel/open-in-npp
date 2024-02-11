@@ -1,18 +1,22 @@
-
+/*
+*/
   export const SINITIAL = Symbol();
   export type  TINITIAL = typeof SINITIAL
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
   export type TExtensionConfig = {
       [P in EConfigurationIds] :{ type:string }
     }
   export const CExtensionId  = 'CSeitel.open-in-npp';
-//export const CExtensionUrl = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
   export const CExtensionUrl = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
-//--------------------------------------------------------------------
+//export const CExtensionUrl = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
 //====================================================================
   export const enum CECommands {
-      nppSettings = 'openInNpp.openSettings'
+      oSettings = 'openInNpp.openSettings'
+    , oActive   = 'extension.openInNpp'
+    , oEditor   = 'extension.openInNppX'
+    , oExplorer = 'extension.openInNppY'
     };
+//--------------------------------------------------------------------
   export const enum EConfigurationIds {
       extendExplorerContextMenu = 'openInNpp.extendExplorerContextMenu'
     , extendEditorContextMenu   = 'openInNpp.extendEditorContextMenu'
@@ -32,3 +36,5 @@
     , preserveCursor            = 'openInNpp.preserveCursorPosition'
     };
 //====================================================================
+/*
+*/

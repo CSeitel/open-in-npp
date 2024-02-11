@@ -1,0 +1,1 @@
+  export type TAnyFunction<T=any> = ( ...args:any[] )=>T

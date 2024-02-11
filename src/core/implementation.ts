@@ -5,6 +5,8 @@
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_path   from 'path';
+  import { window
+         } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_RuntimeContext
          , ß_trc
@@ -39,9 +41,9 @@
   import { ConfigSnapshot
          } from '../core/configProxy';
 //------------------------------------------------------------------------------
-  import ß_showInformationMessage = ßß_vsCode.window.showInformationMessage ;
-  import ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage     ;
-  import ß_showErrorMessage       = ßß_vsCode.window.showErrorMessage       ;
+  import ß_showInformationMessage = window.showInformationMessage ;
+  import ß_showWarningMessage     = window.showWarningMessage     ;
+  import ß_showErrorMessage       = window.showErrorMessage       ;
 //------------------------------------------------------------------------------
   const enum EExecutables
     { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"
