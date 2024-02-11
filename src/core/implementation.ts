@@ -2,10 +2,6 @@
 */
   import { type SpawnOptions
          } from 'child_process';
-  import { type TActiveExtension
-         } from '../core/runtime';
-  import { CExtensionUrl
-         } from '../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_path   from 'path';
@@ -42,8 +38,6 @@
          } from '../lib/ui';
   import { ConfigSnapshot
          } from '../core/configProxy';
-  import { History
-         } from '../core/historyProxy';
 //------------------------------------------------------------------------------
   import ß_showInformationMessage = ßß_vsCode.window.showInformationMessage ;
   import ß_showWarningMessage     = ßß_vsCode.window.showWarningMessage     ;
@@ -88,7 +82,7 @@ export class ConfigHandler {
 static async whenSettingsOpened( this:null ):Promise<void> {
   //
     await ßß_vsCode.commands.executeCommand( EVscConstants.openWbSettings, ConfigSnapshot.CPrefix );
-  //
+  // return 
 }
 
 static async whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise<string> {
@@ -142,30 +136,8 @@ static async whenWorkingDir( ü_dir:string ):Promise<string> {
 }
 
 //==============================================================================
-async function ö_info( ü_newVersion:string ):Promise<void> {
-      const ü_show = await ßß_vsCode.window.showInformationMessage( `Welcome to \`Open-In-Notepad++\` Version ${ ü_newVersion }`, `What's new ?` );
-      switch ( ü_show ) {
-        case undefined: break;
-        default:
-          whenUriOpened( CExtensionUrl + '/changelog' );
-      }
-}
 
 export class CommandHandler {
-
-static async whenActivationFinalized( ü_activeInstance:TActiveExtension ):Promise<void> {
-    const ü_versionToNumber = /\./g;
-  //
-    const ü_current = parseInt( ü_activeInstance.version.replace( ü_versionToNumber, '' ) );
-    const ü_globalHistory = new History();
-    const ü_admin = ü_globalHistory.admin;
-    if(ß_trc){ß_trc( `Admin-History`, ü_admin );}
-    if ( ü_current > ü_admin.version ) {
-      const ü_when = ü_globalHistory.whenAdmin( { version: ü_current } );
-      ö_info( ü_activeInstance.version )
-    }
-  //
-}
 
 static async openInNppActive( this:null ):Promise<number> {
     if(ß_trc){ß_trc( 'Palette Context' );}

@@ -1,5 +1,11 @@
 /*
 */
+  import { type TTestResult
+         } from '../../../types/lib.testUtil.d';
+  import { type TOpenInNpp
+         } from '../../../types/runtime.d';
+  import { CExtensionId
+         } from '../../../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_assert from 'assert';
@@ -7,6 +13,9 @@
 //--------------------------------------------------------------------
   import { strictEqual
          } from 'assert';
+  import { commands
+         , extensions
+         } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_RuntimeContext
          , ß_trc
@@ -26,17 +35,45 @@
 //====================================================================
 
 export async function tst_(){
-    await ß_RuntimeContext.whenActive();
-       await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
+    const ü_tests = [] as TTestResult[];
+    const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId );
+    ü_tests.push(  testEquals( ü_extn?.id      , CExtensionId )
+                ,  testEquals( ü_extn?.isActive, false        )
+                );
+    await ü_extn?.activate();
+    ü_tests.push(  testEquals( ü_extn?.isActive, true         )
+                );
+    //console.dir( ü_extn?.exports);
+    const ü_hist_ =            ü_extn?.exports.globalHistory
+    const ü_admin  = await ü_hist_!.whenAdmin ();
+    ü_tests.push(  
+       testEquals( ü_admin .version   , 0  )
+                );
+    testSummary( ü_tests
+               , strictEqual );
+    return;
+  //console.dir( ü_a );
+  //ß_RuntimeContext.activeInstance.extensionApi.exports.dummy();
+    await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
+    const ü_pid = ( await commands.executeCommand<number>( 'extension.openInNpp' ) )!;
   //
     const ü_hist = ß_RuntimeContext.activeInstance.globalHistory;
-    const ü_admin  = await ü_hist.whenAdmin ( { version: 0 } );
+  //const ü_admin  = await ü_hist.whenAdmin ( { version: -1 } );
+  //const ü_admin  = await ü_hist.whenAdmin ();
     const ü_config = await ü_hist.whenConfig( { executable: '' } );
-    testSummary( testEquals( ü_admin .version   , 0  )
+    testSummary(
+       testEquals( ü_admin .version   , 0  )
                , testEquals( ü_config.executable, '' )
                , strictEqual );
   //
-       await whenDelay( 2000 );
+    try {
+  //await ß_RuntimeContext.whenActive();
+  //await ß_RuntimeContext.whenActive();
+
+    } finally {
+    // await whenDelay( 5000 );
+    }
+  //
 }
 
 //====================================================================

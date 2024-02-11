@@ -10,11 +10,10 @@
   export const CExtensionUrl = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
 //--------------------------------------------------------------------
 //====================================================================
-  export const enum CECommands
-    { nppSettings = 'openInNpp.openSettings'
-    }
-  export enum EConfigurationIds
-    {
+  export const enum CECommands {
+      nppSettings = 'openInNpp.openSettings'
+    };
+  export const enum EConfigurationIds {
       extendExplorerContextMenu = 'openInNpp.extendExplorerContextMenu'
     , extendEditorContextMenu   = 'openInNpp.extendEditorContextMenu'
     , extendEditorTitleMenu     = 'openInNpp.extendEditorTitleMenu'

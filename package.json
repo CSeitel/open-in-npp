@@ -20,10 +20,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:openInNpp.openSettings",
-    "onCommand:extension.openInNpp",
-    "onCommand:extension.openInNppX",
-    "onCommand:extension.openInNppY"
   ],
   "main": "./out/extension.js",
   "contributes": {
