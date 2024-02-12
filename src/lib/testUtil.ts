@@ -88,7 +88,7 @@ function ö_bound( ...ü_realArgs:any[] ):T {
 //====================================================================
   type TR = TTestResult|readonly TTestResult[]
 
-export function testSummary( ü_assertEqual:TAssert ):void {
+export function testSummary( ü_assertEqual:TAssert, ü_series?:string ):string {
   //
     const ü_results = CSeriesOfTests;
     const ü_crlf = '\r\n';
@@ -96,39 +96,45 @@ export function testSummary( ü_assertEqual:TAssert ):void {
     const ü_all = ü_results.length;
     const ü_ok  = ü_success.length;
     const ü_ratio = Math.round( ü_ok / ü_all * 100 );
-    const ü_echo =  `Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%`+ü_crlf+ ü_results.join(ü_crlf);
+  //
+    const ü_head = ü_series === undefined ? ''
+                                          : ü_series + ': ';
+    ü_results.unshift(  `${ ü_head }Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%` );
+    const ü_echo = ü_results.join( ü_crlf );// + ü_crlf;
   //
     CSeriesOfTests.length = 0;
     ü_assertEqual( ü_ok, ü_all, ü_echo );
+    return ü_echo;
 }
 
-export function testEqual_<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):TTestResult {
-    const ü_test = ü_act === ü_exp
-                 ? successPrefix + `${ echo( ü_exp, 50 ) }`
-                 : failurePrefix + `${ echo( ü_exp, 50 ) } ${ notEqual } ${ echo( ü_act, 50 ) }`
-                 ;
-    return ü_message ? ü_test +' '+ ü_message
-                     : ü_test ;
+export function testFailed<T=any>( ü_reason:any, ü_message?:string ):false {
+                                                         const ü_echo = 'Exception caught: '+ echo( ü_reason, 200 );
+    CSeriesOfTests.push( failurePrefix
+                       + ( ü_message === undefined ?               ü_echo
+                                                 : ü_message +' '+ ü_echo ) );
+    return false;
 }
 
-export function testEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):boolean {
-    const ü_done = ü_act === ü_exp;
-    const ü_echo = ü_done
+export function testEqual   <T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):boolean { return testCondition<T>( ü_act === ü_exp, notEqual, ü_act, ü_exp, ü_message ); }
+export function testNotEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):boolean { return testCondition<T>( ü_act !== ü_exp, '='     , ü_act, ü_exp, ü_message ); }
+
+export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:unknown, ü_exp:T, ü_message?:string ):boolean {
+    const ü_echo = ü_cond
                  ? successPrefix + `${ echo( ü_exp, 50 ) }`
-                 : failurePrefix + `${ echo( ü_exp, 50 ) } ${ notEqual } ${ echo( ü_act, 50 ) }`
+                 : failurePrefix + `${ echo( ü_exp, 50 ) } ${ ü_icon } ${ echo( ü_act, 50 ) }`
                  ;
     CSeriesOfTests.push( ü_message ? ü_echo +' '+ ü_message
                                    : ü_echo );
-    return ü_done;
+    return ü_cond;
 }
 
 //====================================================================
 
 export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<Ty>
-                                              , ö_expData:          Map<Tx,Ty|Tz>
-                                                         | TResultArray<Tx,Ty|Tz>
-                                              , ö_expectError?:(x:Tx,reason:any)=>boolean
-                                              ):Promise<boolean> {
+                                                 , ö_expData:          Map<Tx,Ty|Tz>
+                                                            | TResultArray<Tx,Ty|Tz>
+                                                 , ö_expectError?:(x:Tx,reason:any)=>boolean
+                                                 ):Promise<boolean> {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
     const ü_keys = Array.from( ö_expData.keys() );
@@ -139,22 +145,22 @@ export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<T
   //
     let ü_all:boolean = true;
     ü_keys.forEach(function( ü_x, ü_indx ){
+        const ü_count = `[${ ü_indx }] ${ echo( ü_x, 50 ) }`;
         const ü_act_y = ü_done[ ü_indx ];
         const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x );
         if ( ü_act_y.status === 'fulfilled' ) {
-                    testEqual( ü_act_y.value, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )||( ü_all = false );
+                    testEqual( ü_act_y.value, ü_exp_y, ü_count )||( ü_all = false );
         } else {
             if ( ö_expectError !== undefined ) {
                 try {
                   if ( ö_expectError( ü_x, ü_act_y.reason ) === true ) {
-                    testEqual( ü_exp_y, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )||( ü_all = false );
+                    testEqual( ü_exp_y, ü_exp_y, ü_count )||( ü_all = false );
                     return;
                   }
                 } catch ( ü_eX ) {
                 }
             }
-            CSeriesOfTests.push(  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 200 )  );
-            ü_all = false;
+            testFailed( ü_act_y.reason, ü_count )||( ü_all = false );
         }
     });
   //
@@ -163,10 +169,10 @@ export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<T
 
 //====================================================================
 
-export function testFunction<Tx,Ty>( ö_fref   :         (x:Tx)=>Ty
-                                         , ö_expData:          Map<Tx,Ty>
-                                                    | TResultArray<Tx,Ty>
-                                         ):boolean {
+export function testFunction<Tx,Ty,Tz>( ö_fref   :        (x:Tx)=>Ty
+                                      , ö_expData:         Map<Tx,Ty|Tz>
+                                                 |TResultArray<Tx,Ty|Tz>
+                                      ):boolean {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
     const ü_keys = Array.from( ö_expData.keys() );

@@ -31,43 +31,36 @@
   import { testSrc
          , testSummary
          , testEqual
+         , testNotEqual
+         , testCondition
          } from '../../../lib/testUtil';
   //let ß_trc           :TRuntimeContext['developerTrace']
 //====================================================================
 
 export async function tst_(){
-    const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId );
-    testEqual( ü_extn?.id      , CExtensionId );
-    testEqual( ü_extn?.isActive, false        );
-    await ü_extn?.activate();
-    testEqual( ü_extn?.isActive, true         );
+    const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId )!;
+    if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
+    testEqual( ü_extn.id, CExtensionId );
+    testEqual( ü_extn.isActive, false, 'isActive' );
+    await ü_extn.activate();
+    testEqual( ü_extn.isActive, true , 'isActive' );
   //
-    //console.dir( ü_extn?.exports);
-    const ü_hist_ =            ü_extn?.exports.globalHistory
-    const ü_admin  = await ü_hist_!.whenAdmin ();
-    testEqual( ü_admin .version   , 0  );
+    const ü_hist = ü_extn.exports.globalHistory;
+    const ü_config = await ü_hist.whenConfig();
+    testEqual( ü_config .executable   , ''  );
+          const ü_done = ü_hist.release( 'config' );
+    testEqual( ü_done, true );
+  //
+    const ü_admin  = await ü_hist.whenAdmin ();
+    testEqual( ü_admin.version, 15 );
     await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
-    const ü_pid = ( await commands.executeCommand<number>( CECommands.oActive ) );
+    const ü_pid = await commands.executeCommand<number>( CECommands.oActive );
+    await whenDelay( 2000 );
+    testNotEqual( ü_pid, 0, 'pid' ) && testEqual( process.kill( ü_pid ), true, 'Killed' );
     console.log( typeof( ü_pid), ü_pid );
-    testSummary( strictEqual );
-    return;
-  //console.dir( ü_a );
-  //ß_RuntimeContext.activeInstance.extensionApi.exports.dummy();
   //
-    const ü_hist = ß_RuntimeContext.activeInstance.globalHistory;
-  //const ü_admin  = await ü_hist.whenAdmin ( { version: -1 } );
-  //const ü_admin  = await ü_hist.whenAdmin ();
-    const ü_config = await ü_hist.whenConfig( { executable: '' } );
-       testEqual( ü_admin .version   , 0  )
-        testEqual( ü_config.executable, '' )
   //
-    try {
-  //await ß_RuntimeContext.whenActive();
-  //await ß_RuntimeContext.whenActive();
-
-    } finally {
-    // await whenDelay( 5000 );
-    }
+    console.log( testSummary( strictEqual, 'tst_' ) );
   //
 }
 
