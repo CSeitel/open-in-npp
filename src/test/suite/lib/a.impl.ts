@@ -30,31 +30,26 @@
          } from '../../../lib/textUtil';
   import { testSrc
          , testSummary
-         , testEquals
+         , testEqual
          } from '../../../lib/testUtil';
   //let ß_trc           :TRuntimeContext['developerTrace']
 //====================================================================
 
 export async function tst_(){
-    const ü_tests = [] as TTestResult[];
     const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId );
-    ü_tests.push(  testEquals( ü_extn?.id      , CExtensionId )
-                ,  testEquals( ü_extn?.isActive, false        )
-                );
+    testEqual( ü_extn?.id      , CExtensionId );
+    testEqual( ü_extn?.isActive, false        );
     await ü_extn?.activate();
-    ü_tests.push(  testEquals( ü_extn?.isActive, true         )
-                );
+    testEqual( ü_extn?.isActive, true         );
+  //
     //console.dir( ü_extn?.exports);
     const ü_hist_ =            ü_extn?.exports.globalHistory
     const ü_admin  = await ü_hist_!.whenAdmin ();
-    ü_tests.push(  
-       testEquals( ü_admin .version   , 0  )
-                );
+    testEqual( ü_admin .version   , 0  );
     await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
     const ü_pid = ( await commands.executeCommand<number>( CECommands.oActive ) );
     console.log( typeof( ü_pid), ü_pid );
-    testSummary( ü_tests
-               , strictEqual );
+    testSummary( strictEqual );
     return;
   //console.dir( ü_a );
   //ß_RuntimeContext.activeInstance.extensionApi.exports.dummy();
@@ -63,10 +58,8 @@ export async function tst_(){
   //const ü_admin  = await ü_hist.whenAdmin ( { version: -1 } );
   //const ü_admin  = await ü_hist.whenAdmin ();
     const ü_config = await ü_hist.whenConfig( { executable: '' } );
-    testSummary(
-       testEquals( ü_admin .version   , 0  )
-               , testEquals( ü_config.executable, '' )
-               , strictEqual );
+       testEqual( ü_admin .version   , 0  )
+        testEqual( ü_config.executable, '' )
   //
     try {
   //await ß_RuntimeContext.whenActive();

@@ -40,8 +40,8 @@ export async function tst_whenFileInfoRead(){
     const ö_info = ( await whenFileInfoRead( testSrc( 'real_1' ) ) )!;
     const ü_data = [ 'virtual_2_d'
                    , 'virtual_1_d' ].map( ü_name => [testSrc( ü_name ), '0.0' ] as [string,string] )
-    testSummary( await testAsyncFunction( ö_whenCtime, ü_data )
-               , strictEqual );
+    await testAsyncFunction( ö_whenCtime, ü_data )
+    testSummary( strictEqual );
 
 async function ö_whenCtime( ü_path:string ):Promise<string> {
     const ü_info = ( await whenFileInfoRead( ü_path ) )!;
@@ -76,9 +76,9 @@ export async function tst_whenFileTypeKnown(){
     const ü_01 = ü_data.map( pickDuplet<string,CEFileType|null,boolean>( 0, 1 ) );
     const ü_02 = ü_data.map( pickDuplet<string,boolean,CEFileType|null>( 0, 2 ) );
     
-    testSummary( await testAsyncFunction( whenFileTypeKnown, ü_01, ö_err )
-               , await testAsyncFunction( whenKnownAsFolder, ü_02, ö_err )
-               , strictEqual );
+    await testAsyncFunction( whenFileTypeKnown, ü_01, ö_err );
+    await testAsyncFunction( whenKnownAsFolder, ü_02, ö_err );
+    testSummary( strictEqual );
 function ö_err( ü_x:string, ü_eX:any ):boolean {
     return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'Unknown', true );
 }
@@ -93,8 +93,8 @@ export async function tst_whenWS(){
       , [ testSrc( '../etc/test/workspaceFolder/temp' ), true ]
       , [ testSrc( 'virtual_6_d' ), false ]
       ] as TResultArray<string,boolean>;
-    testSummary( testFunction( bind( isContainedInWorkspace, { refine: {0:fileToUri} } ), ü_data )
-               , strictEqual );
+    testFunction( bind( isContainedInWorkspace, { refine: {0:fileToUri} } ), ü_data )
+    testSummary( strictEqual );
 }
 
 //====================================================================

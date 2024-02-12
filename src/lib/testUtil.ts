@@ -19,6 +19,7 @@
          } from './arrayUtil';
 //--------------------------------------------------------------------
   export const CTestDirName = join( __dirname, '../../.vscode-temp' );
+  const CSeriesOfTests = [] as TTestResult[];
 //--------------------------------------------------------------------
   export const successSymbol = String.fromCharCode( 0x2705 ); // 0x221a
   export const failureSymbol = String.fromCharCode( 0x274c );
@@ -87,27 +88,21 @@ function ö_bound( ...ü_realArgs:any[] ):T {
 //====================================================================
   type TR = TTestResult|readonly TTestResult[]
 
-export function testSummary(      result: TR,                               ü_equals:TAssert ):void
-export function testSummary(      result: TR, b:TR,                         ü_equals:TAssert ):void
-export function testSummary(      result: TR, b:TR, c:TR,                   ü_equals:TAssert ):void
-export function testSummary(      result: TR, b:TR, c:TR, d:TR,             ü_equals:TAssert ):void
-export function testSummary(      result: TR, b:TR, c:TR, d:TR, e:TR,       ü_equals:TAssert ):void
-export function testSummary(      result: TR, b:TR, c:TR, d:TR, e:TR, f:TR, ü_equals:TAssert ):void
-export function testSummary( ...ü_result_:(TR|TAssert)[]                                     ):void {
-    const ü_equals:TAssert = ü_result_.pop() as TAssert;
-  //const ü_args = Array.prototype.slice.call( arguments, 1, -1 ) as TR;
-    const ü_results = straightenArray<TTestResult>(  ü_result_ as TR[]  );
+export function testSummary( ü_assertEqual:TAssert ):void {
   //
+    const ü_results = CSeriesOfTests;
     const ü_crlf = '\r\n';
     const ü_success = ü_results.filter( ü_test=>{ return ü_test.startsWith( successSymbol ); } )
     const ü_all = ü_results.length;
     const ü_ok  = ü_success.length;
     const ü_ratio = Math.round( ü_ok / ü_all * 100 );
-
-    ü_equals( ü_ok, ü_all, `Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%`+ü_crlf+ ü_results.join(ü_crlf) );
+    const ü_echo =  `Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%`+ü_crlf+ ü_results.join(ü_crlf);
+  //
+    CSeriesOfTests.length = 0;
+    ü_assertEqual( ü_ok, ü_all, ü_echo );
 }
 
-export function testEquals<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):TTestResult {
+export function testEqual_<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):TTestResult {
     const ü_test = ü_act === ü_exp
                  ? successPrefix + `${ echo( ü_exp, 50 ) }`
                  : failurePrefix + `${ echo( ü_exp, 50 ) } ${ notEqual } ${ echo( ü_act, 50 ) }`
@@ -116,13 +111,24 @@ export function testEquals<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string 
                      : ü_test ;
 }
 
+export function testEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):boolean {
+    const ü_done = ü_act === ü_exp;
+    const ü_echo = ü_done
+                 ? successPrefix + `${ echo( ü_exp, 50 ) }`
+                 : failurePrefix + `${ echo( ü_exp, 50 ) } ${ notEqual } ${ echo( ü_act, 50 ) }`
+                 ;
+    CSeriesOfTests.push( ü_message ? ü_echo +' '+ ü_message
+                                   : ü_echo );
+    return ü_done;
+}
+
 //====================================================================
 
 export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<Ty>
                                               , ö_expData:          Map<Tx,Ty|Tz>
                                                          | TResultArray<Tx,Ty|Tz>
                                               , ö_expectError?:(x:Tx,reason:any)=>boolean
-                                              ):Promise<TTestResult[]> {
+                                              ):Promise<boolean> {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
     const ü_keys = Array.from( ö_expData.keys() );
@@ -131,27 +137,28 @@ export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<T
         return ö_aFref( ü_x );
       }) );
   //
-    const ü_tests:TTestResult[] = [];
-    ü_keys.map(function( ü_x, ü_indx ){
+    let ü_all:boolean = true;
+    ü_keys.forEach(function( ü_x, ü_indx ){
         const ü_act_y = ü_done[ ü_indx ];
         const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x );
         if ( ü_act_y.status === 'fulfilled' ) {
-            ü_tests.push(  testEquals( ü_act_y.value, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  );
+                    testEqual( ü_act_y.value, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )||( ü_all = false );
         } else {
             if ( ö_expectError !== undefined ) {
                 try {
                   if ( ö_expectError( ü_x, ü_act_y.reason ) === true ) {
-                    ü_tests.push( testEquals( ü_exp_y, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )  );
+                    testEqual( ü_exp_y, ü_exp_y, `(${ ü_indx }) ${ echo( ü_x, 50 ) }` )||( ü_all = false );
                     return;
                   }
                 } catch ( ü_eX ) {
                 }
             }
-            ü_tests.push(  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 200 )  );
+            CSeriesOfTests.push(  failurePrefix +'Function threw: '+ echo( ü_act_y.reason, 200 )  );
+            ü_all = false;
         }
     });
   //
-    return ü_tests;
+    return ü_all;
 }
 
 //====================================================================
@@ -159,20 +166,23 @@ export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<T
 export function testFunction<Tx,Ty>( ö_fref   :         (x:Tx)=>Ty
                                          , ö_expData:          Map<Tx,Ty>
                                                     | TResultArray<Tx,Ty>
-                                         ):TTestResult[] {
+                                         ):boolean {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
     const ü_keys = Array.from( ö_expData.keys() );
   //
-    return ü_keys.map(function( ü_x, ü_indx ){
+    let ü_all:boolean = true;
+    ü_keys.forEach(function( ü_x, ü_indx ){
         try {
           const ü_act_y =                          ö_fref( ü_x );
           const ü_exp_y = ( ö_expData as Map<Tx,Ty> ).get( ü_x );
-          return testEquals( ü_act_y, ü_exp_y );
+          testEqual( ü_act_y, ü_exp_y )||( ü_all = false );
         } catch ( ü_eX ) {
-          return failurePrefix +'Function threw: '+ echo( ü_eX, 100 );
+            CSeriesOfTests.push(  failurePrefix +'Function threw: '+ echo( ü_eX, 200 )  );
+            ü_all = false;
         }
     });
+    return ü_all;
 }
 
 //====================================================================

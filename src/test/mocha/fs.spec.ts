@@ -9,7 +9,7 @@
   import * as ßß_suite
           from './lib/fs.impl';
 //====================================================================
-  const ü_single =  true;
+  const ü_single = !true;
 suite( 'Debug', ()=>{
     test( 'Single', testToggle( ßß_suite.tst_whenKnownAsFolder, !ü_single ) );
 });
