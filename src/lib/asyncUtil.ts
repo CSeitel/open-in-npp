@@ -34,15 +34,21 @@ function ö_later():void {
 
 //====================================================================
 
-export class UniqueResource<T=void> {
+export class UniqueResource<T> {
 
     private readonly _birth_date = Date.now();
-    private readonly _consumers  = [] as [number,string][];
+    private readonly _consumers  = [] as [number,string,IReleaseResource<any>][];
     private          _cursor:Promise<T>
+    public  readonly locked = new Error( 'Resource is not available' );
 constructor(
     private readonly _resource:T
  ){
     this._cursor = Promise.resolve( this._resource );
+}
+
+getResource( ü_done:IReleaseResource<any> ):T {
+    if ( ü_done !== this._consumers[0][2] ) { throw this.locked; }
+    return this._resource;
 }
 
 isPending( ö_actionId:string ):boolean {
@@ -50,10 +56,9 @@ isPending( ö_actionId:string ):boolean {
   return ü_hit !== undefined;
 }
 
-async whenAvailable( ö_actionId?:string ):Promise<IReleaseResource<T>> {
+async whenAvailable<R>( ö_actionId?:string ):Promise<IReleaseResource<R>> {
   //
     const ö_when = Date.now() - this._birth_date;
-    this._consumers.push([ ö_when, ö_actionId ?? '' ]);
     console.log( `Queueing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
   //
     const ü_next = createPromise<T>();
@@ -61,19 +66,20 @@ async whenAvailable( ö_actionId?:string ):Promise<IReleaseResource<T>> {
                            this._cursor = ü_next.promise;
     const ö_releaseNext                 = ü_next.resolve;
   //
-    await ü_whenPrevious;
-
-  //const ü_done = ü_currentLock.then(function(){ return ö_release as IReleaseResource<T>; });
-    return (
-( ü_err?:any )=>{
+    const ü_done = ( ( ...ü_err:any[] )=>{
     this._consumers.shift();
     console.log( `Releasing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
     ö_releaseNext( this._resource );
   //
-    if ( arguments.length > 0 ) { return Promise.reject<T>( ü_err ); }
-                                  return;
-}
-           ) as IReleaseResource<T>;
+    if ( ü_err.length > 0 ) { return Promise.reject<R>( ü_err[0] ); }
+                            //return;
+} ) as IReleaseResource<R>;
+    this._consumers.push([ ö_when, ö_actionId ?? '', ü_done ]);
+  //
+    await ü_whenPrevious;
+
+  //const ü_done = ü_currentLock.then(function(){ return ö_release as IReleaseResource<T>; });
+    return ü_done;
 }
 
 }

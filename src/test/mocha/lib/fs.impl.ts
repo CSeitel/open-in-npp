@@ -68,16 +68,6 @@ async function ö_someAsync( ü_text:string ):Promise<boolean> {
 
 }
 
-export async function tst_whenFileInfoRead_(){
-    let ü_info = await whenFileInfoRead( __filename );
-    ßß_assert.strictEqual( true, ü_info?.isFile() );
-        ü_info = await whenFileInfoRead( __dirname , true );
-    ßß_assert.strictEqual( true, ü_info?.isDirectory() );
-    let ü_none = await whenFileInfoRead( '_' );
-    ßß_assert.strictEqual( null, ü_none );
-  //
-  //testSummary( await testAsyncFunction( whenFileInfoRead, ü_data ), strictEqual );
-}
 //====================================================================
 
 export async function tst_whenFileInfoRead(){

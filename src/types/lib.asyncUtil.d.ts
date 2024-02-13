@@ -10,9 +10,9 @@
 
 //====================================================================
 
-  export interface IReleaseResource<T> {
+  export interface IReleaseResource<R> {
       ():void
-      ( err:any ):Promise<T>
+      ( err:any ):Promise<R>
     }
 
 //--------------------------------------------------------------------
