@@ -1,33 +1,45 @@
 /*
 */
-  import { type TVscFSErrorCodes
-         } from '../types/error.d';
   import { type TFileUri
          } from '../types/vsc.fsUtil.d';
+  import { type TextEditor
+         , type TextDocumentShowOptions
+         } from 'vscode';
+  import { EVscConstants
+         } from '../constants/vsc';
 //------------------------------------------------------------------------------
   import { Uri
          , workspace
+         , window
          , commands
+         , env
          } from 'vscode';
-  import * as ßß_vsCode from 'vscode';
 //------------------------------------------------------------------------------
   import { ß_trc
          } from '../core/runtime';
   import { fileToUri
          } from '../vsc/fsUtil';
-//------------------------------------------------------------------------------
-export const enum EVscConstants {
-    openWbSettings  = 'workbench.action.openSettings'
-  , vsCodeOpen      = 'vscode.open'
-  }
-//==============================================================================
-//ß0
-//ß0============================================================================
-//ß0
+//====================================================================
 
-//ß1
-//ß1============================================================================
-//ß1
+export async function whenSettingsOpened( ü_prefix:string ):Promise<void> {
+  //
+    const ü_done = await commands.executeCommand<null>( EVscConstants.openWbSettings, ü_prefix );
+    try {
+      //console.log( typeof( ü_done ) );
+    } catch (error) {
+      console.error( error );
+    }
+    //ß_trc&& ß_trc( typeof( ü_done ) + 'ttt' );
+}
+
+export async function whenUriOpened( ü_realUri:Uri|string ):Promise<void> {
+    if (!( ü_realUri instanceof Uri ) ) { ü_realUri = Uri.parse( ü_realUri ); }
+  //
+    await commands.executeCommand( EVscConstants.vsCodeOpen, ü_realUri );
+}
+
+//====================================================================
+
 export function toggleAsWorkspaceFolder( ü_folderUri:TFileUri ):number {
   //
     const ü_indx = findWorkspaceFolder( ü_folderUri = fileToUri( ü_folderUri ) );
@@ -79,31 +91,25 @@ export async function whenShownInOSExplorer( ü_fileUri:TFileUri ):Promise<void>
     await commands.executeCommand( 'revealFileInOS', fileToUri( ü_fileUri ) );
 }
 
-export async function whenUriOpened( ü_realUri:Uri|string ):Promise<void> {
-    if (!( ü_realUri instanceof ßß_vsCode.Uri ) ) { ü_realUri = ßß_vsCode.Uri.parse( ü_realUri ); }
-  //
-    await commands.executeCommand( 'vscode.open', ü_realUri );
-}
-
 export async function whenOpenedInOSDefaultApp( ü_fileUri:TFileUri ):Promise<boolean> {
   //
     try {
-      return ßß_vsCode.env.openExternal( fileToUri( ü_fileUri ) );
+      return env.openExternal( fileToUri( ü_fileUri ) );
     } catch ( ü_eX ) {
       console.error( (ü_eX as Error).message );
       return false;
     }
 }
 
-export async function whenTextEditorOpened( ü_fileUri:TFileUri, ü_preview = false, ü_languageId?:string ):Promise<ßß_vsCode.TextEditor> {
+export async function whenTextEditorOpened( ü_fileUri:TFileUri, ü_preview = false, ü_languageId?:string ):Promise<TextEditor> {
   //
-    const ü_opts:ßß_vsCode.TextDocumentShowOptions =
+    const ü_opts:TextDocumentShowOptions =
       { preview: ü_preview
       };
   //
     const ü_doc = await workspace.openTextDocument( fileToUri( ü_fileUri ) );
   //const ü_edt = await ßß_vsCode.window.showTextDocument( ü_doc, ßß_vsCode.ViewColumn.One, true );
-    const ü_edt = await ßß_vsCode.window.showTextDocument( ü_doc, ü_opts );
+    const ü_edt = await window.showTextDocument( ü_doc, ü_opts );
   //
     return ü_edt;
 }

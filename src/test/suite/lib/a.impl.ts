@@ -74,19 +74,33 @@ export async function tst_b(){
 //====================================================================
 
 export async function tst_(){
+    await whenDelay( 30 * 1000 );
+}
+
+export async function tst_c(){
     const ü_extn = await ß_RuntimeContext.whenActive();
   //
     const ü_adminHist = ü_extn.globalHistory.admin;
     const ü_adminData = ü_adminHist.dataRef;
-    testEqual( ü_adminData.version, 15 );
+    testEqual( ü_adminData.version, 15, 'Version' );
+    const ü_cfgHist = ü_extn.globalHistory.config;
+    const ü_cfgData = ü_cfgHist.dataRef;
+    testEqual( ü_cfgData.executable, '', 'Executable' );
   //
-    await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
-    const ü_pid = await commands.executeCommand<number>( CECommands.oActive );
+  //
+    await commands.executeCommand<unknown>( CECommands.oSettings );
+    await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) );
+    const ü_pid_1 = await commands.executeCommand<number>( CECommands.oActive );
     await whenDelay( 2000 );
-    testNotEqual( ü_pid, 0, 'pid' ) && testEqual( process.kill( ü_pid ), true, 'Killed' );
-    console.log( typeof( ü_pid), ü_pid );
+    const ü_pid_2 = await commands.executeCommand<number>( CECommands.oActive );
+    await whenDelay( 2000 );
+    testEqual( ü_pid_1, ü_pid_2, 'Pid' );
+  //
+    testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
+    console.log( typeof( ü_pid_1), ü_pid_1 );
   //
     console.log( testSummary( strictEqual, 'tst_' ) );
+  //
 }
 
 //====================================================================
@@ -118,7 +132,6 @@ static async test_0():Promise<void> {
   //
     const ü_wsFolders = ßß_vsCode.workspace.workspaceFolders;
     const ü_folders   = ü_wsFolders?.map( ü_folder => ü_folder.uri.fsPath );
-    await ßß_vsCode.commands.executeCommand<unknown>( 'openInNpp.openSettings' );
     const ü_file = ßß_path.join( ü_folders![0], 'Has Blank ß.txt' );
     if(ß_trc){ß_trc( `Test: "${ __filename }"` );}
     if(ß_trc){ß_trc( `Workspace: "${ ü_file }"` );}

@@ -14,6 +14,7 @@
 //--------------------------------------------------------------------
   import { CExtensionId
          , CExtensionUrl
+         , CPrefix
          , CECommands
          } from '../constants/extension';
 //--------------------------------------------------------------------
@@ -22,22 +23,22 @@
          , extensions
          , window
          } from 'vscode';
-  import * as ßß_vsCode from 'vscode';
-  import { CommandHandler
-         , ConfigHandler
+  import { openInNppActive
+         , openInNppEditor
+         , openInNppExplorer
          } from '../core/implementation';
+  import { ConfigHandler
+         } from '../core/configHandler';
   import { ConfigSnapshot
          } from '../core/configProxy';
   import { whenDelay
          } from '../lib/asyncUtil';
   import { whenUriOpened
+         , whenSettingsOpened
          } from '../lib/vsc';
+//--------------------------------------------------------------------
   import { MementoFacade
          } from '../vsc/histUtil';
-//import { ß_RuntimeContext
-//       } from '../core/runtime';
-//--------------------------------------------------------------------
-
 //====================================================================
 
 class ExtensionRuntimeContext {
@@ -94,10 +95,10 @@ private constructor(
         let ü_cmdImpl:TAnyFunction
         const ü_cmdId = ü_cmd.command;
         switch ( ü_cmdId ) {
-            case CECommands.oSettings : ü_cmdImpl = ConfigHandler .whenSettingsOpened; break;
-            case CECommands.oActive   : ü_cmdImpl =  CommandHandler.openInNppActive  ; break;
-            case CECommands.oEditor   : ü_cmdImpl = CommandHandler.openInNppEditor   ; break;
-            case CECommands.oExplorer : ü_cmdImpl = CommandHandler.openInNppExplorer ; break;
+            case CECommands.oSettings : ü_cmdImpl = whenSettingsOpened.bind( null, CPrefix ); break;
+            case CECommands.oActive   : ü_cmdImpl = openInNppActive   ; break;
+            case CECommands.oEditor   : ü_cmdImpl = openInNppEditor   ; break;
+            case CECommands.oExplorer : ü_cmdImpl = openInNppExplorer ; break;
             default:
                 console.error( `Command "${ ü_cmdId }" not implemented.` );
                 continue;
@@ -138,5 +139,5 @@ async function ö_info( ü_newVersion:string ):Promise<void> {
   export const ß_RuntimeContext = ExtensionRuntimeContext;
   export const ß_trc            = ExtensionRuntimeContext.developerTrace;
 //====================================================================
-  import { History
-         } from '../core/historyProxy';
+/*
+*/

@@ -17,6 +17,7 @@
     , oExplorer = 'extension.openInNppY'
     };
 //--------------------------------------------------------------------
+  export const CPrefix = 'openInNpp';
   export const enum EConfigurationIds {
       extendExplorerContextMenu = 'openInNpp.extendExplorerContextMenu'
     , extendEditorContextMenu   = 'openInNpp.extendEditorContextMenu'
@@ -34,6 +35,14 @@
     , filesInFolderPattern      = 'openInNpp.filesInFolderPattern'
     , matchingFilesLimit        = 'openInNpp.matchingFilesLimit'
     , preserveCursor            = 'openInNpp.preserveCursorPosition'
+    };
+//--------------------------------------------------------------------
+  export const enum EExecutables
+    { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"
+    , x64_64bit_ =       "C:\\Program Files\\Notepad++\\notepad++.exe"
+    , x86_32bit  =      "%PrograFiles(x86)%\\Notepad++\\notepad++.exe"
+    , x86_32bit_ = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
+    , path_env   =                                     "notepad++.exe"
     };
 //====================================================================
 /*

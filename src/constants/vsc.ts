@@ -6,3 +6,7 @@
     , SymLinkFile    = 65
     , SymLinkFolder  = 66
     }
+  export const enum EVscConstants {
+      openWbSettings = 'workbench.action.openSettings'
+    , vsCodeOpen     = 'vscode.open'
+    }

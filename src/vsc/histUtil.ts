@@ -4,8 +4,6 @@
          } from 'vscode';
   import { type IReleaseResource
          } from '../types/lib.asyncUtil.d';
-  import { type TINITIAL
-         } from '../constants/extension';
   import { SINITIAL
          } from '../constants/extension';
 //--------------------------------------------------------------------

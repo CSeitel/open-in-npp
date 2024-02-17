@@ -5,7 +5,8 @@
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_path   from 'path';
-  import { window
+  import { Uri
+         , window
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_RuntimeContext
@@ -20,15 +21,9 @@
   import {
           whenChildProcessSpawned
          } from '../lib/any';
-  import {
-           isExe
-         } from '../lib/fsUtil';
   import { shortenText
          , expandEnvVariables
          } from '../lib/textUtil';
-  import { EVscConstants
-         , whenUriOpened
-         } from '../lib/vsc';
   import { findFiles
          , whenKnownAsFolder
          } from '../vsc/fsUtil';
@@ -44,14 +39,6 @@
   import ß_showInformationMessage = window.showInformationMessage ;
   import ß_showWarningMessage     = window.showWarningMessage     ;
   import ß_showErrorMessage       = window.showErrorMessage       ;
-//------------------------------------------------------------------------------
-  const enum EExecutables
-    { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"
-    , x64_64bit_ =       "C:\\Program Files\\Notepad++\\notepad++.exe"
-    , x86_32bit  =      "%PrograFiles(x86)%\\Notepad++\\notepad++.exe"
-    , x86_32bit_ = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
-    , path_env   =                                     "notepad++.exe"
-    };
 //------------------------------------------------------------------------------
   const enum ECLIParameters
     { multipleInstances      = '-multiInst'
@@ -79,85 +66,21 @@
   const CNotAPid = -1;
 //==============================================================================
 
-export class ConfigHandler {
-
-static async whenSettingsOpened( this:null ):Promise<void> {
-  //
-    await ßß_vsCode.commands.executeCommand( EVscConstants.openWbSettings, ConfigSnapshot.CPrefix );
-  // return 
-}
-
-static async whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise<string> {
-  //
-    if ( ü_explicit.length > 0 ) {
-      const ü_current = ßß_path.normalize( expandEnvVariables( ü_explicit ) );
-      if ( ! ßß_path.isAbsolute( ü_current ) ) {
-        console.warn( `Not a absolute Path: "${ ü_current }"` );
-      }
-      return ü_current;
-    }
-  //
-    const ü_cfgHst = ß_RuntimeContext.activeInstance.globalHistory.config;
-    const ü_done = await ü_cfgHst.whenDataRef<string>();
-    try {
-        const ü_cfgData = ü_cfgHst.dataRef;
-        if(ß_trc){ß_trc( `Config-History`, ü_cfgData );}
-      //
-        if ( ü_useHistory ) {
-            const ü_lastExe = ü_cfgData.executable;
-            if ( ü_lastExe.length > 0 ) {
-              ß_trc&& ß_trc( `Executable stored: "${ ü_lastExe }"` );
-              return ü_lastExe;
-            }
-        }
-      //
-                           let ü_current:string
-             if ( await isExe( ü_current = expandEnvVariables( EExecutables.x64_64bit  ) ) ) {}
-        else if ( await isExe( ü_current = expandEnvVariables( EExecutables.x86_32bit  ) ) ) {}
-        else if ( await isExe( ü_current =                     EExecutables.x64_64bit_   ) ) {}
-        else if ( await isExe( ü_current =                     EExecutables.x86_32bit    ) ) {}
-        else                 { ü_current =                     EExecutables.path_env         ;}
-      //
-        if(ß_trc){ß_trc( `Executable found: "${ ü_current }"` );}
-                           ü_cfgData.executable = ü_current;
-        ü_cfgHst.dataRef = ü_cfgData;
-      //
-        return ü_current;
-
-    } catch ( ü_eX ) {
-        console.error( ü_eX );
-      //return ü_done( ü_eX );
-        throw ü_eX;
-    } finally {
-        ü_done();
-    }
-}
-
-static async whenWorkingDir( ü_dir:string ):Promise<string> {
-    return expandEnvVariables( ü_dir );
-}
-
-}
-
-//==============================================================================
-
-export class CommandHandler {
-
-static async openInNppActive( this:null ):Promise<number> {
+export async function openInNppActive( this:null ):Promise<number> {
     if(ß_trc){ß_trc( 'Palette Context' );}
   //
     const ü_args = new CLIArgs( EModes.PALETTE );
     return ü_args.submit();
 }
 
-static async openInNppEditor( this:null, ü_fileUri:ßß_vsCode.Uri, ...ü_more:any[] ):Promise<number> {
+export async function openInNppEditor( this:null, ü_fileUri:Uri, ...ü_more:any[] ):Promise<number> {
     if(ß_trc){ß_trc( `Editor Context: ${ arguments.length }`, ü_more );}
   //
     const ü_args = new CLIArgs( EModes.EDITOR, ü_fileUri );
     return ü_args.submit();
 }
 
-static async openInNppExplorer( this:null, ü_fileUri:ßß_vsCode.Uri, ü_fileUris:ßß_vsCode.Uri[] ):Promise<number> {
+export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:Uri[] ):Promise<number> {
     if(ß_trc){ß_trc( 'Explorer Context' );}
   //
     const ü_others = ü_fileUris.map( ü_fileUri => ü_fileUri.fsPath );
@@ -166,13 +89,11 @@ static async openInNppExplorer( this:null, ü_fileUri:ßß_vsCode.Uri, ü_fileUr
     return ü_args.submit();
 }
 
-}
-
 //==============================================================================
 
 class CLIArgs {
     private readonly _config                   = ConfigSnapshot.current;
-    private readonly _activeEditor             = ßß_vsCode.window.activeTextEditor;
+    private readonly _activeEditor             = window.activeTextEditor;
     private readonly _mode         :EModes
     private readonly _mainPath     :string
     private          _mainFileType :EFileTypes = EFileTypes.UNKNOWN;
@@ -211,7 +132,7 @@ constructor( ü_mode:TAllModes, ü_mainUri?:ßß_vsCode.Uri, ü_others?:string[]
     }
 }
 
-static _fsPath( ü_fileUri:ßß_vsCode.Uri ):string {
+static _fsPath( ü_fileUri:Uri ):string {
     switch ( ü_fileUri.scheme ) {
         case 'file':
           return ü_fileUri.fsPath;
