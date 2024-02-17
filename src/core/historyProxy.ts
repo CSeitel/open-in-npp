@@ -1,5 +1,11 @@
+/*
+*/
   import { type Memento
          } from 'vscode';
+  import { type IHistoryData
+         } from '../types/runtime.d';
+  import { type IReleaseResource
+         } from '../types/lib.asyncUtil.d';
   import { type TINITIAL
          } from '../constants/extension';
 //------------------------------------------------------------------------------
@@ -8,14 +14,15 @@
   import { ß_RuntimeContext
          , ß_trc
          } from '../core/runtime';
-  import { LockHandler
+  import { UniqueResource
+         , LockHandler
          } from '../lib/asyncUtil';
 //==============================================================================
   const enum EHistStates {
-    IDLE = 0
-  , LOCKED
-  , DIRTY
-  }
+      IDLE = 0
+    , LOCKED
+    , DIRTY
+    }
 //------------------------------------------------------------------------------
   type THistInitials<T> = {
     [P in keyof T] :() => T[P]
@@ -30,16 +37,6 @@
   type THistBufferLocks<T> = {
     [P in keyof T] ?:LockHandler<T,P>
   }
-//------------------------------------------------------------------------------
-interface IHistoryData {
-    dummy :number[]
-    admin :
-      { version    :number
-      }
-    config:
-      { executable :string
-      }
-}
 //------------------------------------------------------------------------------
 export class History implements IHistoryData {
 //
@@ -67,10 +64,10 @@ export class History implements IHistoryData {
 constructor(
     ü_global = true
 ){
-    this._dataApi = ü_global
-                  ? ß_RuntimeContext.activeInstance.context.globalState
-                  : ß_RuntimeContext.activeInstance.context.workspaceState
-                  ;
+    this._dataApi = ß_RuntimeContext.activeInstance.context[
+                      ü_global ?    'globalState'
+                               : 'workspaceState'
+                    ];
 }
 
 async whenCommitted( ü_mKey:keyof IHistoryData, ü_lazy = true ):Promise<boolean> {
@@ -198,11 +195,11 @@ private async _whenObject<P extends keyof IHistoryData>( ü_mKey:P, ü_newData:P
 }
 
 get       config ()          :        IHistoryData['config']   { return this._getter    ( 'config'           ); }
-async whenConfig ( ü_config ?:Partial<IHistoryData['config']>  , ü_noLock = false )
-                             :Promise<IHistoryData['config']>  { return this._whenObject( 'config', ü_config , ü_noLock ); }
+async whenConfig ( ü_noLock = false )
+                             :Promise<IHistoryData['config']>  { return this._whenObject( 'config', {} , ü_noLock ); }
 get       admin  ()          :        IHistoryData['admin' ]   { return this._getter    ( 'admin'            ); }
-async whenAdmin  ( ü_admin  ?:Partial<IHistoryData['admin' ]>  , ü_noLock = true  )
-                             :Promise<IHistoryData['admin' ]>  { return this._whenObject( 'admin' , ü_admin  , ü_noLock ); }
+async whenAdmin  ( ü_noLock = true  )
+                             :Promise<IHistoryData['admin' ]>  { return this._whenObject( 'admin' , {} , ü_noLock ); }
 get       dummy  ()          :        IHistoryData['dummy' ]   { return this._getter    ( 'dummy'            ); }
 set       config ( ü_config  :        IHistoryData['config'] ) {        this._setter    ( 'config', ü_config ); }
 set       admin  ( ü_admin   :        IHistoryData['admin' ] ) {        this._setter    ( 'admin' , ü_admin  ); }
@@ -210,6 +207,6 @@ set       dummy  ( ü_dummy   :        IHistoryData['dummy' ] ) {        this._s
 
 }
 
-//==============================================================================
+//====================================================================
 /*
 */

@@ -33,13 +33,14 @@ function ö_later():void {
 }
 
 //====================================================================
+  type TAccessAttempt = [number,string,IReleaseResource<any>]
 
 export class UniqueResource<T> {
 
     private readonly _birth_date = Date.now();
-    private readonly _consumers  = [] as [number,string,IReleaseResource<any>][];
+    private readonly _consumers  = [] as TAccessAttempt[];
     private          _cursor:Promise<T>
-    public  readonly locked = new Error( 'Resource is not available' );
+    public  readonly  locked = new Error( 'Resource is not available' );
 constructor(
     private readonly _resource:T
  ){
@@ -52,7 +53,7 @@ getResource( ü_done:IReleaseResource<any> ):T {
 }
 
 isPending( ö_actionId:string ):boolean {
-  const ü_hit = this._consumers.find(function(ü_action){ ü_action[1] === ö_actionId });
+  const ü_hit = this._consumers.find(function(ü_action){ return ü_action[1] === ö_actionId; });
   return ü_hit !== undefined;
 }
 
@@ -65,21 +66,34 @@ async whenAvailable<R>( ö_actionId?:string ):Promise<IReleaseResource<R>> {
     const ü_whenPrevious = this._cursor;
                            this._cursor = ü_next.promise;
     const ö_releaseNext                 = ü_next.resolve;
-  //
-    const ü_done = ( ( ...ü_err:any[] )=>{
-    this._consumers.shift();
-    console.log( `Releasing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
-    ö_releaseNext( this._resource );
-  //
-    if ( ü_err.length > 0 ) { return Promise.reject<R>( ü_err[0] ); }
-                            //return;
-} ) as IReleaseResource<R>;
-    this._consumers.push([ ö_when, ö_actionId ?? '', ü_done ]);
+    const ö_done = ö_doneImpl.bind( this );
+    this._consumers.push(
+      [ ö_when
+      , ö_actionId ?? ''
+      , ö_done
+      ]
+    );
   //
     await ü_whenPrevious;
-
   //const ü_done = ü_currentLock.then(function(){ return ö_release as IReleaseResource<T>; });
-    return ü_done;
+    return ö_done;
+
+function ö_doneImpl( this:UniqueResource<T>                 ):void
+function ö_doneImpl( this:UniqueResource<T>, ...  err:any[] ):     Promise<R>
+function ö_doneImpl( this:UniqueResource<T>, ...ü_err:any[] ):void|Promise<R> {
+    //
+      if ( this._consumers.length > 0
+        && this._consumers[0][2] === ö_done
+         ) {
+          this._consumers.shift();
+          console.log( `Releasing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
+          ö_releaseNext( this._resource );
+      } else {
+          console.log( 'Second Invocation' );
+      }
+    //
+      if ( ü_err.length > 0 ) { return Promise.reject<R>( ü_err[0] ); }
+}
 }
 
 }

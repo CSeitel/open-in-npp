@@ -14,8 +14,11 @@
 
 export async function tst_UR(){
     const ö_usrc = new UniqueResource( {a:1} );
+    const ü_id = 'init';
+    const ü_when = ö_usrc.whenAvailable( 'init' );
+    testEqual( ö_usrc.isPending( ü_id ), true );
   //
-    const ü_done = await ö_usrc.whenAvailable( 'init' );
+    const ü_done = await ü_when;
     testEqual( ö_usrc.getResource( ü_done ).a, 1 );
     try {
         ö_usrc.getResource( async()=>{} )
@@ -40,6 +43,7 @@ export async function tst_UR(){
     let ö_some = 0;
     ö_access( 3 )
     ö_access( 1 )
+    await whenDelay( 0 );
     await whenDelay( 5 * 100 );
     testEqual( ö_some, 1  );
   //
@@ -49,6 +53,7 @@ export async function tst_UR(){
 async function ö_access( ü_secs:number ):Promise<void> {
     const ü_done = await ö_usrc.whenAvailable( ''+ü_secs );
     await whenDelay( ü_secs * 100 );
+    ü_done();
     ü_done();
     ö_some = ü_secs;
 }

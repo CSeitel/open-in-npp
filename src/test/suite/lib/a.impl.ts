@@ -3,6 +3,7 @@
   import { type TTestResult
          } from '../../../types/lib.testUtil.d';
   import { type TOpenInNpp
+         , type IHistoryData
          } from '../../../types/runtime.d';
   import { CExtensionId
          , CECommands
@@ -21,6 +22,8 @@
   import { ß_RuntimeContext
          , ß_trc
          } from '../../../core/runtime';
+  import { MementoFacade
+         } from '../../../vsc/histUtil';
   import { whenTextEditorOpened
          } from '../../../lib/vsc';
   import {
@@ -37,28 +40,71 @@
   //let ß_trc           :TRuntimeContext['developerTrace']
 //====================================================================
 
+export async function tst_b(){
+    const ü_extn = await ß_RuntimeContext.whenActive();
+  //
+    const ü_dummyHist = ü_extn.globalHistory.dummy;
+    const ü_dummyData = ü_dummyHist.dataRef;
+    console.log( 'rrr' + ü_dummyData );
+    testNotEqual( ü_dummyData.length, 0 );
+                  ü_dummyData.length = 0;
+                  ü_dummyData.push( 6 );
+                  ü_dummyHist.triggerCommit();
+    console.log( 'rrr' + ü_dummyData );
+    console.log( testSummary( strictEqual, 'tst_' ) );
+    return;
+  //
+  //
+    const ü_dummy_1 = new MementoFacade<'dummy',IHistoryData>( 'dummy', []    );
+    const ü_dummy_2 = new MementoFacade<'dummy',IHistoryData>( 'dummy', [0,8] );
+    const ü_r1 = ü_dummy_1.dataRef;
+    const ü_r2 = ü_dummy_2.dataRef;
+    testEqual( ü_r1, ü_r2 );
+    testEqual( ü_r1.length, 2 , 'Dummy 1' );
+    testEqual( ü_r2.length, 2 , 'Dummy 2' );
+    ü_dummy_1.dataRef[0] = 35 ;
+    const ü_when = ü_dummy_1.whenCommitted();
+  //ü_dummy_2.reset();
+    testEqual( ü_r2.length             , 2 , 'Dummy 2' ) && testEqual( ü_r2             [1],  8 );
+    testEqual( ü_dummy_2.dataRef.length, 2 , 'Dummy 2' ) && testEqual( ü_dummy_2.dataRef[0], 33 );
+    await ü_when;
+    testEqual( ü_dummy_1.dataRef.length, 1 , 'Dummy 1' ) && testEqual( ü_dummy_1.dataRef[0], 33 );
+}
+
+//====================================================================
+
 export async function tst_(){
-    const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId )!;
-    if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
-    testEqual( ü_extn.id, CExtensionId );
-    testEqual( ü_extn.isActive, false, 'isActive' );
-    await ü_extn.activate();
-    testEqual( ü_extn.isActive, true , 'isActive' );
+    const ü_extn = await ß_RuntimeContext.whenActive();
   //
-    const ü_hist = ü_extn.exports.globalHistory;
-    const ü_config = await ü_hist.whenConfig();
-    testEqual( ü_config .executable   , ''  );
-          const ü_done = ü_hist.release( 'config' );
-    testEqual( ü_done, true );
+    const ü_adminHist = ü_extn.globalHistory.admin;
+    const ü_adminData = ü_adminHist.dataRef;
+    testEqual( ü_adminData.version, 15 );
   //
-    const ü_admin  = await ü_hist.whenAdmin ();
-    testEqual( ü_admin.version, 15 );
     await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) )
     const ü_pid = await commands.executeCommand<number>( CECommands.oActive );
     await whenDelay( 2000 );
     testNotEqual( ü_pid, 0, 'pid' ) && testEqual( process.kill( ü_pid ), true, 'Killed' );
     console.log( typeof( ü_pid), ü_pid );
   //
+    console.log( testSummary( strictEqual, 'tst_' ) );
+}
+
+//====================================================================
+
+export async function tst_a(){
+    const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId )!;
+    if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
+    testEqual( ü_extn.id, CExtensionId );
+    testEqual( ü_extn.isActive, false, 'isActive' );
+    await ü_extn.activate();
+    testEqual( ü_extn.isActive, true , 'isActive' );
+  /*
+    const ü_hist = ü_extn.exports.globalHistory;
+    const ü_config = await ü_hist.whenConfig();
+    testEqual( ü_config .executable   , ''  );
+          const ü_done = ü_hist.release( 'config' );
+    testEqual( ü_done, true );
+  */
   //
     console.log( testSummary( strictEqual, 'tst_' ) );
   //
@@ -81,18 +127,6 @@ static async test_0():Promise<void> {
     const ü_activeInstance = ß_RuntimeContext.activeInstance;
     if(ß_trc){ß_trc( `Extension: "${ ü_activeInstance.extensionApi.id }"` );}
   //
-    const ü_hist = ü_activeInstance.globalHistory;
-    let   ü_dummy1 = ü_hist.dummy;
-          ü_dummy1.push( 9 );
-    let   ü_count  = await ü_hist.whenCommitted( 'dummy' );
-    let   ü_dummy2 = ü_hist.dummy;
-    ßß_assert.strictEqual( ü_count , 0        );
-    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
-                     ü_hist.dummy = ü_dummy1;
-          ü_count  = await ü_hist.whenCommitted( 'dummy' );
-          ü_dummy2 = ü_hist.dummy;
-    ßß_assert.strictEqual( ü_count , 1        );
-    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
   /*
                           ü_dummy1.push( 6 );
     ßß_assert.strictEqual( ü_count , 0        );

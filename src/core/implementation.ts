@@ -97,37 +97,39 @@ static async whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise
       return ü_current;
     }
   //
-    const ü_hist   = ß_RuntimeContext.activeInstance.globalHistory;
-    const ü_config = await ü_hist.whenConfig();
-    if(ß_trc){ß_trc( `Config-History`, ü_config );}
+    const ü_cfgHst = ß_RuntimeContext.activeInstance.globalHistory.config;
+    const ü_done = await ü_cfgHst.whenDataRef<string>();
     try {
-    //
-      if ( ü_useHistory ) {
-        const ü_previous = ü_config.executable;
-        if ( ü_previous.length > 0 ) {
-          const ü_done = ü_hist.release( 'config' );
-          if(ß_trc){ß_trc( `Executable stored: "${ ü_previous }"` );}
-          return ü_previous;
+        const ü_cfgData = ü_cfgHst.dataRef;
+        if(ß_trc){ß_trc( `Config-History`, ü_cfgData );}
+      //
+        if ( ü_useHistory ) {
+            const ü_lastExe = ü_cfgData.executable;
+            if ( ü_lastExe.length > 0 ) {
+              ß_trc&& ß_trc( `Executable stored: "${ ü_lastExe }"` );
+              return ü_lastExe;
+            }
         }
-      }
-    //
-                         let ü_current:string
-           if ( await isExe( ü_current = expandEnvVariables( EExecutables.x64_64bit  ) ) ) {}
-      else if ( await isExe( ü_current = expandEnvVariables( EExecutables.x86_32bit  ) ) ) {}
-      else if ( await isExe( ü_current =                     EExecutables.x64_64bit_   ) ) {}
-      else if ( await isExe( ü_current =                     EExecutables.x86_32bit    ) ) {}
-      else                 { ü_current =                     EExecutables.path_env         ;}
-    //
-      if(ß_trc){ß_trc( `Executable found: "${ ü_current }"` );}
-                     ü_config.executable = ü_current;
-      const ü_when = ü_hist.whenCommitted( 'config' );
-    //
-      return ü_current;
+      //
+                           let ü_current:string
+             if ( await isExe( ü_current = expandEnvVariables( EExecutables.x64_64bit  ) ) ) {}
+        else if ( await isExe( ü_current = expandEnvVariables( EExecutables.x86_32bit  ) ) ) {}
+        else if ( await isExe( ü_current =                     EExecutables.x64_64bit_   ) ) {}
+        else if ( await isExe( ü_current =                     EExecutables.x86_32bit    ) ) {}
+        else                 { ü_current =                     EExecutables.path_env         ;}
+      //
+        if(ß_trc){ß_trc( `Executable found: "${ ü_current }"` );}
+                           ü_cfgData.executable = ü_current;
+        ü_cfgHst.dataRef = ü_cfgData;
+      //
+        return ü_current;
 
     } catch ( ü_eX ) {
-      console.error( ü_eX );
-      ü_hist.release( 'config' );
-      throw ü_eX;
+        console.error( ü_eX );
+      //return ü_done( ü_eX );
+        throw ü_eX;
+    } finally {
+        ü_done();
     }
 }
 

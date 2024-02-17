@@ -6,6 +6,8 @@
          } from '../types/generic.d';
   import { type TExtension
          , type TExtensionCommand
+         , type TOpenInNpp
+         , type THistoryProxy
          } from '../types/runtime';
   import { type TExtensionConfig
          } from '../constants/extension';
@@ -16,8 +18,9 @@
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { workspace
-         , window
          , commands
+         , extensions
+         , window
          } from 'vscode';
   import * as ßß_vsCode from 'vscode';
   import { CommandHandler
@@ -29,6 +32,8 @@
          } from '../lib/asyncUtil';
   import { whenUriOpened
          } from '../lib/vsc';
+  import { MementoFacade
+         } from '../vsc/histUtil';
 //import { ß_RuntimeContext
 //       } from '../core/runtime';
 //--------------------------------------------------------------------
@@ -38,6 +43,12 @@
 class ExtensionRuntimeContext {
     static readonly developerTrace :false|typeof console.log = console.log;
     static          activeInstance :ExtensionRuntimeContext //|undefined = undefined;
+
+static async whenActive():Promise<TActiveExtension> {
+    const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId )!;
+    if ( ! ü_extn.isActive ) { await ü_extn.activate(); }
+    return ü_extn.exports;
+}
 
 static async activate( ü_extnContext:ExtensionContext ):Promise<TActiveExtension> {
     if ( ExtensionRuntimeContext.activeInstance === undefined ) {
@@ -53,7 +64,7 @@ static async activate( ü_extnContext:ExtensionContext ):Promise<TActiveExtensio
 }
 
   //----------
-    readonly globalHistory:History
+    readonly globalHistory:THistoryProxy
     readonly extensionApi :TExtension
   //
     readonly version      :string
@@ -67,8 +78,12 @@ private constructor(
     ß_trc&& ß_trc( 'Instance activated' );
   //console.dir( this.context.globalState );
   //
-    this.globalHistory = new History();
-    this.extensionApi = ßß_vsCode.extensions.getExtension( CExtensionId )!;
+    this.globalHistory =
+      { admin  : new MementoFacade( 'admin' , { version   : 0  } )
+      , config : new MementoFacade( 'config', { executable: '' } )
+      , dummy  : new MementoFacade( 'dummy' , []                 )
+      };
+    this.extensionApi = extensions.getExtension( CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
     this.version     = ü_json.version;
@@ -98,9 +113,10 @@ private async _whenActivationFinalized():Promise<void> {
     const ü_current = parseInt( this.version.replace( ü_versionToNumber, '' ) );
   //
     const ü_admin = this.globalHistory.admin;
-    if ( ü_current > ü_admin.version ) {
+    if ( ü_current > ü_admin.dataRef.version ) {
     //ß_trc&& ß_trc( `Admin-History`, ü_admin );
-      const ü_when = this.globalHistory.whenAdmin( { version: ü_current } );
+      ü_admin.dataRef.version= ü_current;
+      const ü_when = await this.globalHistory.admin.whenCommitted( );
       ö_info( this.version );
     }
   //
