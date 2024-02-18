@@ -1,13 +1,17 @@
 code --install-extension .\open-in-npp-0.0.1.vsix
 
 https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp
-#extension-settings
 https://github.com/CSeitel/open-in-npp
-https://code.visualstudio.com/docs/languages/markdown
-https://code.visualstudio.com/api/working-with-extensions/publishing-extension
-https://help.github.com/articles/markdown-basics/
-https://dev.azure.com/cseitel/
+#extension-settings
 https://code.visualstudio.com/api/get-started/your-first-extension
+https://code.visualstudio.com/api/working-with-extensions/publishing-extension
+https://code.visualstudio.com/docs/languages/markdown
+https://help.github.com/articles/markdown-basics/
+
+https://code.visualstudio.com/api/references/vscode-api
+https://code.visualstudio.com/api/references/commands
+
+https://dev.azure.com/cseitel/
 https://phrase.com/blog/posts/step-step-guide-javascript-localization/
 https://sumtips.com/how-to/open-file-at-a-specific-line-number-in-notepad/
 https://stackoverflow.com/questions/46714353/how-to-customize-context-menu-in-visual-studio-code

@@ -19,8 +19,9 @@
          , whenFileTypeKnown
          , whenKnownAsFolder
          } from '../../../vsc/fsUtil';
+  import { whenTextEditorOpened
+         } from '../../../vsc/docUtil';
   import { isContainedInWorkspace
-         , whenTextEditorOpened
          } from '../../../lib/vsc';
   import { expect
          } from '../../../lib/error';

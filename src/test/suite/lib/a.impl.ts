@@ -25,7 +25,8 @@
   import { MementoFacade
          } from '../../../vsc/histUtil';
   import { whenTextEditorOpened
-         } from '../../../lib/vsc';
+         , whenNewTextEditorOpened_
+         } from '../../../vsc/docUtil';
   import {
           whenDelay
          } from '../../../lib/asyncUtil';
@@ -74,6 +75,8 @@ export async function tst_b(){
 //====================================================================
 
 export async function tst_(){
+    await whenNewTextEditorOpened_( { content:'{"a":33}' } );
+    const ü_pid_1 = await commands.executeCommand<number>( CECommands.oActive );
     await whenDelay( 30 * 1000 );
 }
 

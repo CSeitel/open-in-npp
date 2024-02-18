@@ -18,8 +18,7 @@
   import { EButtons as EButtons
          } from '../i18n';
 //------------------------------------------------------------------------------
-  import {
-          whenChildProcessSpawned
+  import { whenChildProcessSpawned
          } from '../lib/any';
   import { shortenText
          , expandEnvVariables
@@ -55,6 +54,7 @@
 //------------------------------------------------------------------------------
   const enum EModes
     { NOFILE = 0
+    , UNTITLED
     , PALETTE
     , EDITOR
     , EXPLORER
@@ -121,6 +121,9 @@ constructor( ü_mode:TAllModes, ü_mainUri?:ßß_vsCode.Uri, ü_others?:string[]
 
       case EModes.PALETTE:
         if ( this._activeEditor === undefined ) {
+          this._mode         = EModes.UNTITLED;
+          this._mainPath     = '';
+        } else if ( this._activeEditor.document.isUntitled ) {
           this._mode         = EModes.NOFILE;
           this._mainPath     = '';
         } else {
@@ -138,6 +141,7 @@ static _fsPath( ü_fileUri:Uri ):string {
           return ü_fileUri.fsPath;
         case 'vscode-settings':
           return expandEnvVariables( '%APPDATA%/Code/User/settings.json' );
+        case 'untitled':
     }
     return '';
 }
@@ -147,6 +151,7 @@ async submit():Promise<number> {
     switch ( this._mode ) {
 
       case EModes.NOFILE:
+      case EModes.UNTITLED:
         ß_showInformationMessage( ßß_i18n.no_active_file() );
         return CNotAPid;
 

@@ -2,19 +2,16 @@
 */
   import { type TFileUri
          } from '../types/vsc.fsUtil.d';
-  import { type TextEditor
-         , type TextDocumentShowOptions
-         } from 'vscode';
   import { EVscConstants
          } from '../constants/vsc';
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
   import { Uri
          , workspace
          , window
          , commands
          , env
          } from 'vscode';
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
   import { ß_trc
          } from '../core/runtime';
   import { fileToUri
@@ -99,19 +96,6 @@ export async function whenOpenedInOSDefaultApp( ü_fileUri:TFileUri ):Promise<bo
       console.error( (ü_eX as Error).message );
       return false;
     }
-}
-
-export async function whenTextEditorOpened( ü_fileUri:TFileUri, ü_preview = false, ü_languageId?:string ):Promise<TextEditor> {
-  //
-    const ü_opts:TextDocumentShowOptions =
-      { preview: ü_preview
-      };
-  //
-    const ü_doc = await workspace.openTextDocument( fileToUri( ü_fileUri ) );
-  //const ü_edt = await ßß_vsCode.window.showTextDocument( ü_doc, ßß_vsCode.ViewColumn.One, true );
-    const ü_edt = await window.showTextDocument( ü_doc, ü_opts );
-  //
-    return ü_edt;
 }
 
 //==============================================================================

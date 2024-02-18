@@ -3,11 +3,10 @@
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
 //--------------------------------------------------------------------
-  import { basename
-         } from 'path';
   import { strictEqual
          } from 'assert';
-  import * as ßß_assert from 'assert';
+  import { basename
+         } from 'path';
 //--------------------------------------------------------------------
   import { expect
          } from '../../../lib/error';
