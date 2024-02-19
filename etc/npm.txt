@@ -1,0 +1,4 @@
+
+npm link typescript webpack
+
+npm install -g @vscode/vsce

@@ -11,17 +11,12 @@
   "bugs": {
     "url": "https://github.com/CSeitel/open-in-npp/issues"
   },
-  "engines": {
-    "vscode": "^1.52.0"
-  },
   "license": "MIT",
   "icon": "images/icons8-notepad++-144.png",
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-  ],
-  "main": "./out/extension.js",
+  "activationEvents": [],
   "contributes": {
     "commands": [
       {
@@ -147,6 +142,10 @@
       }
     }
   },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./out/extension.js",
   "scripts": {
     "watch": "tsc -watch -p ./src/",
     "compile": "tsc -p ./src/",
@@ -157,13 +156,14 @@
     "mocha": "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/**/all.spec.js",
     "vscode:package": "vsce package",
     "vscode:install": "code --install-extension open-in-npp-0.1.5.vsix",
-    "vscode:prepublish": "npm run compile"
+    "vscode:pre_publish": "npm run compile",
+    "buildBundle": "webpack -c ./out/build/webpack.config.js --mode development --env o.min_"
   },
   "devDependencies": {
     "@types/glob": "^7.1.3",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
-    "@types/vscode": "^1.52.0",
+    "@types/vscode": "^1.85.0",
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.3.8",
     "glob": "^7.1.6",

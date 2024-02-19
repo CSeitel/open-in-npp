@@ -40,7 +40,7 @@
          , SCancelButtonId
          , ListItem
          , DropDownList
-         } from '../lib/ui';
+         } from '../vsc/ui';
 //--------------------------------------------------------------------
   import ß_showInformationMessage = window.showInformationMessage ;
   import ß_showWarningMessage     = window.showWarningMessage     ;
