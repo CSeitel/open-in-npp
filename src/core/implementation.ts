@@ -5,6 +5,10 @@
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_path   from 'path';
+  import {
+         } from 'path';
+  import { promises as ßß_fs_p
+         } from 'fs';
   import { Uri
          , window
          } from 'vscode';
@@ -18,23 +22,26 @@
   import { EButtons as EButtons
          } from '../i18n';
 //------------------------------------------------------------------------------
+  import { ConfigSnapshot
+         } from '../core/configProxy';
   import { whenChildProcessSpawned
          } from '../lib/any';
+  import { whenTempFile
+         } from '../lib/fsUtil';
   import { shortenText
          , expandEnvVariables
          } from '../lib/textUtil';
   import { findFiles
          , whenKnownAsFolder
          } from '../vsc/fsUtil';
+//--------------------------------------------------------------------
   import { TButtons
          , TDropDownListOptions
          , SCancelButtonId
          , ListItem
          , DropDownList
          } from '../lib/ui';
-  import { ConfigSnapshot
-         } from '../core/configProxy';
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
   import ß_showInformationMessage = window.showInformationMessage ;
   import ß_showWarningMessage     = window.showWarningMessage     ;
   import ß_showErrorMessage       = window.showErrorMessage       ;
@@ -121,10 +128,10 @@ constructor( ü_mode:TAllModes, ü_mainUri?:ßß_vsCode.Uri, ü_others?:string[]
 
       case EModes.PALETTE:
         if ( this._activeEditor === undefined ) {
-          this._mode         = EModes.UNTITLED;
+          this._mode         = EModes.NOFILE;
           this._mainPath     = '';
         } else if ( this._activeEditor.document.isUntitled ) {
-          this._mode         = EModes.NOFILE;
+          this._mode         = EModes.UNTITLED;
           this._mainPath     = '';
         } else {
           this._mainFileType = EFileTypes.FILE;
@@ -151,9 +158,17 @@ async submit():Promise<number> {
     switch ( this._mode ) {
 
       case EModes.NOFILE:
-      case EModes.UNTITLED:
         ß_showInformationMessage( ßß_i18n.no_active_file() );
         return CNotAPid;
+
+      case EModes.UNTITLED:
+        //this._mode         = EModes.UNTITLED;
+          const ü_doc = this._activeEditor!.document;
+          const ü_file = await whenTempFile( ü_doc.fileName );
+          await ßß_fs_p.writeFile( ü_file, ü_doc.getText() );
+          ( this._mainPath as any  ) = ü_file;
+        break;
+      //return CNotAPid;
 
       case EModes.EXPLORER: // folders possible
         const ü_pattern = this._config.filesInFolderPattern;

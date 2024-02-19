@@ -74,13 +74,13 @@ export async function tst_b(){
 
 //====================================================================
 
-export async function tst_(){
+export async function tst_c(){
     await whenNewTextEditorOpened_( { content:'{"a":33}' } );
     const ü_pid_1 = await commands.executeCommand<number>( CECommands.oActive );
-    await whenDelay( 30 * 1000 );
+    await whenDelay( 3 * 1000 );
 }
 
-export async function tst_c(){
+export async function tst_(){
     const ü_extn = await ß_RuntimeContext.whenActive();
   //
     const ü_adminHist = ü_extn.globalHistory.admin;

@@ -32,7 +32,7 @@
 
   , { "prependHeader": true
     , "label": "Test-Workspace"
-    , "baseFolder": "src/test/suite/cliArguments"
+    , "baseFolder": "etc/test"
     , "filePattern_": "*.code-workspace"
     }
 

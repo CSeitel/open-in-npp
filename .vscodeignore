@@ -1,4 +1,5 @@
 .vscode/**
+.vscode-temp/**
 .vscode-test/**
 etc/**
 images/VSC.PNG

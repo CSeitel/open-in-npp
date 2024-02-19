@@ -1,16 +1,21 @@
 /*
+https://code.visualstudio.com/api/working-with-extensions/testing-extension
 */
-  import * as ßß_path from 'path';
-  import { runTests as whenVscTestsRun } from '@vscode/test-electron';
-//------------------------------------------------------------------------------
+  import { join
+         } from 'path';
+  import { runTests as whenVscTestsRun
+         } from '@vscode/test-electron';
+  import {
+         } from './index';
+//--------------------------------------------------------------------
   main();
 //==============================================================================
 
 async function main():Promise<void> {
   //
     const ü_opts =
-      { extensionDevelopmentPath: ßß_path.join( __dirname, '../../../' ) // the extension to load
-      , extensionTestsPath      : ßß_path.join( __dirname, './index'   ) // the tests     to execute
+      { extensionDevelopmentPath: join( __dirname, '../../../' ) // the extension to load
+      , extensionTestsPath      : join( __dirname, './index'   ) // the tests     to execute
       };
     console.log( ü_opts.extensionTestsPath );
   //

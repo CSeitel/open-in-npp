@@ -23,6 +23,7 @@
 //====================================================================
 
 export async function whenNewTextEditorOpened_( ü_text:TUntitled, ü_preview = false ):Promise<TextEditor> {
+  //workspace.open
     const ü_doc = await workspace.openTextDocument( ü_text );
   //
     const ü_opts:TextDocumentShowOptions =
