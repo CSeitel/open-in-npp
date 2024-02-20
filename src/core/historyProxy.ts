@@ -3,7 +3,7 @@
   import { type Memento
          } from 'vscode';
   import { type IHistoryData
-         } from '../types/runtime.d';
+         } from '../types/vsc.extension.d';
   import { type IReleaseResource
          } from '../types/lib.asyncUtil.d';
   import { type TINITIAL

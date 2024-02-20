@@ -14,6 +14,8 @@
          , testEqual
          , bind
          } from '../../../lib/testUtil';
+  import { ß_trc
+         } from '../../../runtime/context';
 //====================================================================
 
 export async function tst_expandEnvVariables(){
@@ -25,7 +27,7 @@ export async function tst_expandEnvVariables(){
       , [ '%T__P%',       '%T__P%'  ]
       ] as TResultArray<string,string>;
     testFunction( expandEnvVariables, ü_data );
-    console.log( testSummary( strictEqual, 'expandEnvVariables' ) );
+    ß_trc&& ß_trc( testSummary( strictEqual, 'expandEnvVariables' ) );
 }
 
 /*

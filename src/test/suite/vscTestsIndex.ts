@@ -13,9 +13,9 @@
          } from '../../lib/asyncUtil';
 //--------------------------------------------------------------------
 export default class TestRuntime {
-    static readonly developerTrace :false|typeof console.log = console.log;
+    static readonly devTrace :false|typeof console.log = console.log;
 }
-  const ß_trc = TestRuntime.developerTrace;
+  const ß_trc = TestRuntime.devTrace;
 //--------------------------------------------------------------------
 //const ß_what = '**/**.spec.js';
   const ß_specsRoot = join( __dirname, '.' );

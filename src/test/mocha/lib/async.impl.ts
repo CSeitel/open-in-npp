@@ -10,6 +10,8 @@
   import { testSummary
          , testEqual
          } from '../../../lib/testUtil';
+  import { ß_trc
+         } from '../../../runtime/context';
 //====================================================================
 
 export async function tst_UR(){

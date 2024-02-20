@@ -3,7 +3,7 @@
   import { type ExtensionContext
          } from 'vscode';
   import { type TOpenInNpp
-         } from './types/runtime';
+         } from './types/vsc.extension.d';
 //--------------------------------------------------------------------
   import {
          } from 'vscode';

@@ -4,7 +4,7 @@
          } from '../../../types/lib.testUtil.d';
   import { type TOpenInNpp
          , type IHistoryData
-         } from '../../../types/runtime.d';
+         } from '../../../types/vsc.extension.d';
   import { CExtensionId
          , CECommands
          } from '../../../constants/extension';
@@ -38,7 +38,7 @@
          , testNotEqual
          , testCondition
          } from '../../../lib/testUtil';
-  //let ß_trc           :TRuntimeContext['developerTrace']
+  //let ß_trc           :TRuntimeContext['devTrace']
 //====================================================================
 
 export async function tst_b(){

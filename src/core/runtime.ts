@@ -8,7 +8,9 @@
          , type TExtensionCommand
          , type TOpenInNpp
          , type THistoryProxy
-         } from '../types/runtime';
+         } from '../types/vsc.extension.d';
+  import { type IRuntimeContext
+         } from '../types/runtime.context.d';
   import { type TExtensionConfig
          } from '../constants/extension';
 //--------------------------------------------------------------------
@@ -42,7 +44,8 @@
 //====================================================================
 
 class ExtensionRuntimeContext {
-    static readonly developerTrace :false|typeof console.log = console.log;
+    static readonly lineSep = '\n';
+    static readonly devTrace :false|typeof console.log = console.log;
     static          activeInstance :ExtensionRuntimeContext //|undefined = undefined;
 
 static async whenActive():Promise<TActiveExtension> {
@@ -136,8 +139,8 @@ async function ö_info( ü_newVersion:string ):Promise<void> {
 //====================================================================
   export type TActiveExtension  = ExtensionRuntimeContext
 //--------------------------------------------------------------------
-  export const ß_RuntimeContext = ExtensionRuntimeContext;
-  export const ß_trc            = ExtensionRuntimeContext.developerTrace;
+  export const ß_RuntimeContext = ExtensionRuntimeContext as ( typeof ExtensionRuntimeContext & IRuntimeContext );
+  export const ß_trc            = ExtensionRuntimeContext.devTrace;
 //====================================================================
 /*
 */
