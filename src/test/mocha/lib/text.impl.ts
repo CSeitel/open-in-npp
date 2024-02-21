@@ -3,8 +3,6 @@
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
 //--------------------------------------------------------------------
-  import { strictEqual
-         } from 'assert';
   import { expandEnvVariables
          } from '../../../lib/textUtil';
   import { testSrc
@@ -27,7 +25,7 @@ export async function tst_expandEnvVariables(){
       , [ '%T__P%',       '%T__P%'  ]
       ] as TResultArray<string,string>;
     testFunction( expandEnvVariables, ü_data );
-    ß_trc&& ß_trc( testSummary( strictEqual, 'expandEnvVariables' ) );
+    ß_trc&& ß_trc( testSummary( 'expandEnvVariables' ) );
 }
 
 /*

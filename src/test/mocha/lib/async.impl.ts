@@ -1,8 +1,6 @@
 /*
 */
 //--------------------------------------------------------------------
-  import { strictEqual
-         } from 'assert';
   import { whenDelay
          , UniqueResource
          , LockHandler
@@ -49,7 +47,7 @@ export async function tst_UR(){
     await whenDelay( 5 * 100 );
     testEqual( ö_some, 1  );
   //
-    const ü_all = testSummary( strictEqual, 'UniqueResource' );
+    const ü_all = testSummary( 'UniqueResource' );
     console.log( ü_all );
 //
 async function ö_access( ü_secs:number ):Promise<void> {

@@ -13,8 +13,6 @@
   import * as ßß_assert from 'assert';
   import * as ßß_path   from 'path';
 //--------------------------------------------------------------------
-  import { strictEqual
-         } from 'assert';
   import { commands
          , extensions
          } from 'vscode';
@@ -52,7 +50,7 @@ export async function tst_b(){
                   ü_dummyData.push( 6 );
                   ü_dummyHist.triggerCommit();
     console.log( 'rrr' + ü_dummyData );
-    console.log( testSummary( strictEqual, 'tst_' ) );
+    console.log( testSummary( 'tst_' ) );
     return;
   //
   //
@@ -107,7 +105,7 @@ export async function tst__(){
     testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
     console.log( typeof( ü_pid_1), ü_pid_1 );
   //
-    console.log( testSummary( strictEqual, 'tst_' ) );
+    console.log( testSummary( 'tst_' ) );
   //
 }
 
@@ -128,7 +126,7 @@ export async function tst_a(){
     testEqual( ü_done, true );
   */
   //
-    console.log( testSummary( strictEqual, 'tst_' ) );
+    console.log( testSummary( 'tst_' ) );
   //
 }
 

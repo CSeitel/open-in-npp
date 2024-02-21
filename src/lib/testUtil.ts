@@ -53,8 +53,7 @@ export function testSuite( ü_name:string, ü_tests:Record<string,TAsyncTestFunc
     const ü_suiteApi = ü_withMocha ? suite
                                    : function(title:string,impl:()=>void){ console.log( title ); impl(); }
                                    ;
-    const ü_testApi  = ü_withMocha ? test
-                                   : function(title:string,impl:()=>Promise<void>){ console.log( title ); CSuiteOfTests.push( impl() ); }
+    const ü_testApi  = ü_withMocha ? test : ö_test 
                                    ;
   //
     const ü_suite = ü_skip
@@ -65,6 +64,17 @@ export function testSuite( ü_name:string, ü_tests:Record<string,TAsyncTestFunc
                   ;
   //
     ü_suiteApi( ü_name, ü_suite );
+  //
+function ö_test( ü_title:string, ü_impl:()=>Promise<void> ):void {
+    console.log( ü_title );
+    let ü_prms:Promise<void>
+    try {
+        ü_prms = ü_impl();
+    } catch (error) {
+        ü_prms = Promise.reject( error );
+    }
+    CSuiteOfTests.push( ü_prms );
+}
 }
 
 export async function whenTestSuite():Promise<void> {
@@ -103,9 +113,8 @@ function ö_bound( ...ü_realArgs:any[] ):T {
 }
 
 //====================================================================
-  type TR = TTestResult|readonly TTestResult[]
 
-export function testSummary( ü_assertEqual:TAssert, ü_series?:string ):string {
+export function testSummary( ü_series?:string ):string {
   //
     const ü_results = CSeriesOfTests;
     const ü_crlf = '\r\n';
@@ -120,7 +129,9 @@ export function testSummary( ü_assertEqual:TAssert, ü_series?:string ):string 
     const ü_echo = ü_results.join( ü_crlf );// + ü_crlf;
   //
     CSeriesOfTests.length = 0;
-    ü_assertEqual( ü_ok, ü_all, ü_echo );
+    if ( ü_ok !== ü_all ) {
+        throw new Error( ü_echo );
+    }
     return ü_echo;
 }
 

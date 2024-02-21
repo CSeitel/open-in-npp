@@ -37,7 +37,7 @@ export async function tst_testEquals_1(){
     testEqual(  0,  0 )
     const ü_fref = bind( ö_echo, { arrangeReal:[2] }, '_0','_1' )
     testFunction( ü_fref, [['A_','_0\t_1\tA_']] as TResultArray<string,string> )
-    testSummary( strictEqual );
+    testSummary();
   //testSummary( ü_all, strictEqual )
     //strictEqual( 0, 1, ü_all.join('\r\n') )
 function ö_echo<T>( ...ü_args:T[] ):string {
@@ -53,7 +53,7 @@ export async function tst_testEquals(){
           ü_data_.set( '_'    , false );
   //
     await testAsyncFunction( ö_someAsync, ü_data_ );
-    testSummary( strictEqual );
+    testSummary();
   //
 async function ö_someAsync( ü_text:string ):Promise<boolean> {
     await whenDelay( 1 );
@@ -74,7 +74,7 @@ export async function tst_whenFileInfoRead(){
     const ü_data = [ 'virtual_2_d'
                    , 'virtual_1_d' ].map( ü_name => [testSrc( ü_name ), '0.1' ] as [string,string] )
     await testAsyncFunction( ö_whenCtime, ü_data );
-    testSummary( strictEqual );
+    testSummary();
 
 async function ö_whenCtime( ü_path:string ):Promise<string> {
     const ü_info = ( await whenFileInfoRead( ü_path ) )!;
@@ -124,7 +124,7 @@ export async function tst_whenKnownAsFolder():Promise<void> {
     await testAsyncFunction( ü_LSymLink        , ü_04  );
     await testAsyncFunction( whenKnownAsFile   , ü_05, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
     await testAsyncFunction( ü_LFile           , ü_06  );
-    testSummary( strictEqual );
+    testSummary();
 }
 
 export async function tst_isExe(){
@@ -142,7 +142,7 @@ export async function tst_isExe(){
       ] as TResultArray<string,boolean>;
   //
     await testAsyncFunction( isExe, ü_data )
-    testSummary( strictEqual );
+    testSummary();
 //await isExe( await ßß_impl.defaultNppExecutable()                 );
 }
 

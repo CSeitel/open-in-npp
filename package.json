@@ -154,6 +154,7 @@
     "test_": "node  ./out/test/suite/npmRunVscTests.js",
     "test": "vscode-test",
     "mocha": "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/**/all.spec.js",
+    "testm": "node                                       ./out/test/mocha/all.spec.js",
     "vscode:package": "vsce package",
     "vscode:install": "code --install-extension open-in-npp-0.1.5.vsix",
     "vscode:pre_publish": "npm run compile",
