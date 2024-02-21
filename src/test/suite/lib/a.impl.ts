@@ -81,6 +81,11 @@ export async function tst_c(){
 }
 
 export async function tst_(){
+    console.log( __filename );
+    throw new Error( __dirname )
+}
+
+export async function tst__(){
     const ü_extn = await ß_RuntimeContext.whenActive();
   //
     const ü_adminHist = ü_extn.globalHistory.admin;

@@ -20,6 +20,7 @@
 //--------------------------------------------------------------------
   export const CTestDirName = join( __dirname, '../../.vscode-temp' );
   const CSeriesOfTests = [] as TTestResult[];
+  const CSuiteOfTests  = [] as Promise<void>[];
 //--------------------------------------------------------------------
   export const successSymbol = String.fromCharCode( 0x2705 ); // 0x221a
   export const failureSymbol = String.fromCharCode( 0x274c );
@@ -47,14 +48,30 @@ export function echo( ü_oref:any, ü_length:number ):string {
 //====================================================================
 
 export function testSuite( ü_name:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):void {
+    const ü_withMocha = typeof( suite ) !== 'undefined';
+  //
+    const ü_suiteApi = ü_withMocha ? suite
+                                   : function(title:string,impl:()=>void){ console.log( title ); impl(); }
+                                   ;
+    const ü_testApi  = ü_withMocha ? test
+                                   : function(title:string,impl:()=>Promise<void>){ console.log( title ); CSuiteOfTests.push( impl() ); }
+                                   ;
   //
     const ü_suite = ü_skip
                   ? ()=>{}
                   : Array.isArray( ü_tests )
-                  ? function(){              ü_tests  .forEach(function( ü_testImpl ){  test( ü_testImpl.name, ü_testImpl            );  }) }
-                  : function(){ Object.keys( ü_tests ).forEach(function( ü_testName ){  test( ü_testName     , ü_tests[ ü_testName ] );  }) }
+                  ? function(){              ü_tests  .forEach(function( ü_testImpl ){  ü_testApi( ü_testImpl.name, ü_testImpl            );  }) }
+                  : function(){ Object.keys( ü_tests ).forEach(function( ü_testName ){  ü_testApi( ü_testName     , ü_tests[ ü_testName ] );  }) }
                   ;
-    suite( ü_name, ü_suite );
+  //
+    ü_suiteApi( ü_name, ü_suite );
+}
+
+export async function whenTestSuite():Promise<void> {
+    const ü_done = await Promise.allSettled( CSuiteOfTests )as PromiseRejectedResult[];
+    ü_done.filter(function( ü_prms ){ return ü_prms.status === 'rejected' })
+          .forEach(function( ü_prms ){ console.error( ü_prms.reason ); })
+    CSeriesOfTests.length = 0;
 }
 
 export function testToggle( ü_testImpl:TAsyncTestFunction, ü_disable = false ):TAsyncTestFunction {
