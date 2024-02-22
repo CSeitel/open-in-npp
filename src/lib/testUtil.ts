@@ -47,26 +47,48 @@ export function echo( ü_oref:any, ü_length:number ):string {
 
 //====================================================================
 
-export function testSuite( ü_name:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):void {
+export async function testSuite( ü_title:string, ö_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):Promise<number> {
+    if ( ü_skip ) { return 0; }
+  //
+    const ü_isArray = Array.isArray( ö_tests );
     const ü_withMocha = typeof( suite ) !== 'undefined';
+    const ö_testApi  = ü_withMocha ? test : ö_test ;
+    if ( ü_withMocha ) {
+        suite( ü_title, ü_isArray ? ö_suiteArray
+                                  : ö_suiteRecord );
+        return 0;
+    }
   //
-    const ü_suiteApi = ü_withMocha ? suite
-                                   : function(title:string,impl:()=>void){ console.log( title ); impl(); }
-                                   ;
-    const ü_testApi  = ü_withMocha ? test : ö_test 
-                                   ;
+    let ö_previous = Promise.resolve(0);
   //
-    const ü_suite = ü_skip
-                  ? ()=>{}
-                  : Array.isArray( ü_tests )
-                  ? function(){              ü_tests  .forEach(function( ü_testImpl ){  ü_testApi( ü_testImpl.name, ü_testImpl            );  }) }
-                  : function(){ Object.keys( ü_tests ).forEach(function( ü_testName ){  ü_testApi( ü_testName     , ü_tests[ ü_testName ] );  }) }
-                  ;
-  //
-    ü_suiteApi( ü_name, ü_suite );
-  //
-function ö_test( ü_title:string, ü_impl:()=>Promise<void> ):void {
     console.log( ü_title );
+    if ( ü_isArray ) { ö_suiteArray (); }
+    else             { ö_suiteRecord(); }
+    return ö_previous;
+  //
+function ö_suiteArray():void {
+    for ( const ü_testImpl of ö_tests as TAsyncTestFunction[] ) {
+        ö_testApi( ü_testImpl.name, ü_testImpl );
+    }
+}
+function ö_suiteRecord():void {
+    for ( const ü_testName in ö_tests ) {
+        ö_testApi( ü_testName, ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ] );
+    }
+}
+function ö_test( ü_title:string, ü_impl:TAsyncTestFunction ):void {
+    ö_previous = ö_previous.then(function( ö_rc ){
+        console.log( ü_title );
+        const ü_next = ü_impl().then(function(){ return ö_rc; }).catch(function( ü_e ){
+            console.warn( ü_e );
+            return ö_rc + 1;
+        });
+       return ü_next ;
+    })
+    ;
+    return;
+    const ö_todo = [] as [string,TAsyncTestFunction][];
+    ö_todo.push([ ü_title, ü_impl ]);
     let ü_prms:Promise<void>
     try {
         ü_prms = ü_impl();

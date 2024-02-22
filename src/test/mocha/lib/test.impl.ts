@@ -17,12 +17,19 @@
 //====================================================================
 
 export async function tst_a(){
+    ß_trc&& ß_trc( 'A '+Date.now() );
     testEqual( 1 , 0 );
+    await whenDelay( 1500 );
+
+    ß_trc&& ß_trc( 'A '+Date.now() );
     ß_trc&& ß_trc( testSummary( 'Aaa' ) );
 }
 
 export async function tst_b(){
-    testEqual( 1 , 0 );
+    ß_trc&& ß_trc( 'B '+Date.now() );
+    testEqual( 2 , 0 );
+    await whenDelay( 100 );
+    ß_trc&& ß_trc( 'B '+Date.now() );
     ß_trc&& ß_trc( testSummary( 'Bbb' ) );
 }
 
