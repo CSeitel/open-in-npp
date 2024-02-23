@@ -15,3 +15,5 @@ mklink /D  .\.vscode-temp\virtual_6_d  .\real_0
 
 await require('fs').promises.realpath('.\\.vscode-temp\\virtual_2_d' )
 var fs = require('fs'), await fs.promises.access('.\\.vscode-temp\\virtual_2_d', fs.constants.X_OK )
+
+.\node_modules\.bin\mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/all.spec.js > .\.vscode-temp\out.txt 2> .\.vscode-temp\err.txt

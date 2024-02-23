@@ -5,6 +5,7 @@
          , type TResultArray
          , type TAnyFunction
          , type TAsyncTestFunction
+         , type TTestSuite
          , type TArgMap
          , type TArgumentsInfo
          } from '../types/lib.testUtil.d';
@@ -26,9 +27,12 @@
          const successPrefix = successSymbol + ' ';
          const failurePrefix = failureSymbol + ' ';
 //--------------------------------------------------------------------
+  export const CWithMocha = typeof( suite ) !== 'undefined';
   export const CTestDirName = join( __dirname, '../../.vscode-temp' );
   const CSeriesOfTests = [] as TTestResult[];
   let ß_errorCount = 0;
+  const toStdOut = function( ü_text:string ){process.stdout.write( ü_text + '\n' ); }
+  //process.stdout.write.bind( process.stdout );
 //====================================================================
 
 export function testSrc( ...ü_segs:string[] ):string {
@@ -45,29 +49,40 @@ export function echo( ü_oref:any, ü_length:number ):string {
 
 //====================================================================
 
+export async function whenAllTestsRun( ü_suites:[string,TTestSuite,boolean|undefined][] ):Promise<number> {
+    while ( ü_suites.length > 0 ) {
+        const ü_suite = ü_suites.shift()!;
+        await whenTestSuite( ... ü_suite );
+    }
+  //
+    return suiteSummary();
+}
+
 export function suiteSummary():number {
     const ü_rc = ß_errorCount;
-    console.log( 'reeer'+ü_rc );
-    ß_errorCount = 0;
+                 ß_errorCount = 0;
+    if ( ! CWithMocha ) {
+        toStdOut( `Overall result: ${ ü_rc } failed tests` );
+        process.exit( ü_rc );
+    }
     return ü_rc;
 }
 
-export async function whenTestSuite( ü_title:string, ö_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):Promise<number> {
+ async function whenTestSuite( ü_title:string, ö_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):Promise<number> {
     if ( ü_skip ) { return 0; }
   //
     const ü_chain = [ Promise.resolve(0) ];
     const ü_isArray = Array.isArray( ö_tests );
-    const ü_withMocha = typeof( suite ) !== 'undefined';
-    const ö_testApi  = ü_withMocha ? test
-                                   : ß_testChain( ü_chain );
-    if ( ü_withMocha ) {
+    const ö_testApi  = CWithMocha ? test
+                                  : ß_testChain( ü_chain );
+    if ( CWithMocha ) {
         suite( ü_title, ü_isArray ? ö_suiteArray
                                   : ö_suiteRecord );
         return 0;
     } else {
     }
   //
-    console.log( ü_title );
+    toStdOut( ü_title );
     if ( ü_isArray ) { ö_suiteArray (); }
     else             { ö_suiteRecord(); }
   //
