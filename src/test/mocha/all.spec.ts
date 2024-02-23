@@ -1,6 +1,7 @@
 /*
 */
-  import { testSuite
+  import { whenTestSuite
+         , suiteSummary
          } from '../../lib/testUtil';
 //--------------------------------------------------------------------
   import * as ß_async from './lib/async.impl';
@@ -11,14 +12,15 @@
   main(  true ); // = NOT skip single test
 
 async function main( ü_skipTests = false ):Promise<void> {
-    let ü_rc = 0;
-    ü_rc += await testSuite( 'Single', { Test: ß_text.tst_expandEnvVariables
-                                     },!!ü_skipTests );
-    ü_rc += await testSuite( 'Async' , ß_async,  ü_skipTests );
-    ü_rc += await testSuite( 'Fs'    , ß_fs   ,  ü_skipTests );
-    ü_rc += await testSuite( 'Test'  , ß_test , !ü_skipTests );
-    ü_rc += await testSuite( 'Text'  , ß_text ,  ü_skipTests );
-    console.log( 'rr'+ü_rc );
+  //
+    await whenTestSuite( 'Single', { Test: ß_text.tst_expandEnvVariables
+                                         },!!ü_skipTests );
+    await whenTestSuite( 'Async' , ß_async,  ü_skipTests );
+    await whenTestSuite( 'Fs'    , ß_fs   ,  ü_skipTests );
+    await whenTestSuite( 'Test'  , ß_test , !ü_skipTests );
+    await whenTestSuite( 'Text'  , ß_text ,  ü_skipTests );
+  //
+    const ü_rc = suiteSummary();
     process.exit( ü_rc );
 }
 

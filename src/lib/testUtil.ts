@@ -15,12 +15,6 @@
          } from 'util';
   import { shortenText
          } from './textUtil';
-  import { straightenArray
-         } from './arrayUtil';
-//--------------------------------------------------------------------
-  export const CTestDirName = join( __dirname, '../../.vscode-temp' );
-  const CSeriesOfTests = [] as TTestResult[];
-  const CSuiteOfTests  = [] as Promise<void>[];
 //--------------------------------------------------------------------
   export const successSymbol = String.fromCharCode( 0x2705 ); // 0x221a
   export const failureSymbol = String.fromCharCode( 0x274c );
@@ -31,6 +25,10 @@
 //--------------------------------------------------------------------
          const successPrefix = successSymbol + ' ';
          const failurePrefix = failureSymbol + ' ';
+//--------------------------------------------------------------------
+  export const CTestDirName = join( __dirname, '../../.vscode-temp' );
+  const CSeriesOfTests = [] as TTestResult[];
+  let ß_errorCount = 0;
 //====================================================================
 
 export function testSrc( ...ü_segs:string[] ):string {
@@ -47,24 +45,35 @@ export function echo( ü_oref:any, ü_length:number ):string {
 
 //====================================================================
 
-export async function testSuite( ü_title:string, ö_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):Promise<number> {
+export function suiteSummary():number {
+    const ü_rc = ß_errorCount;
+    console.log( 'reeer'+ü_rc );
+    ß_errorCount = 0;
+    return ü_rc;
+}
+
+export async function whenTestSuite( ü_title:string, ö_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):Promise<number> {
     if ( ü_skip ) { return 0; }
   //
+    const ü_chain = [ Promise.resolve(0) ];
     const ü_isArray = Array.isArray( ö_tests );
     const ü_withMocha = typeof( suite ) !== 'undefined';
-    const ö_testApi  = ü_withMocha ? test : ö_test ;
+    const ö_testApi  = ü_withMocha ? test
+                                   : ß_testChain( ü_chain );
     if ( ü_withMocha ) {
         suite( ü_title, ü_isArray ? ö_suiteArray
                                   : ö_suiteRecord );
         return 0;
+    } else {
     }
-  //
-    let ö_previous = Promise.resolve(0);
   //
     console.log( ü_title );
     if ( ü_isArray ) { ö_suiteArray (); }
     else             { ö_suiteRecord(); }
-    return ö_previous;
+  //
+    const ü_rc = await ü_chain[0];
+    ß_errorCount += ü_rc;
+    return ü_rc;
   //
 function ö_suiteArray():void {
     for ( const ü_testImpl of ö_tests as TAsyncTestFunction[] ) {
@@ -76,40 +85,20 @@ function ö_suiteRecord():void {
         ö_testApi( ü_testName, ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ] );
     }
 }
-function ö_test( ü_title:string, ü_impl:TAsyncTestFunction ):void {
-    ö_previous = ö_previous.then(function( ö_rc ){
+}
+
+function ß_testChain( ö_chain:Promise<number>[] ) {
+    return ö_testChain;
+function ö_testChain( ü_title:string, ü_impl:TAsyncTestFunction ):void {
+    ö_chain[0] = ö_chain[0].then(function( ö_rc ){
         console.log( ü_title );
-        const ü_next = ü_impl().then(function(){ return ö_rc; }).catch(function( ü_e ){
+        return ü_impl().then (function(){ return ö_rc; })
+                       .catch(function( ü_e ){
             console.warn( ü_e );
             return ö_rc + 1;
         });
-       return ü_next ;
-    })
-    ;
-    return;
-    const ö_todo = [] as [string,TAsyncTestFunction][];
-    ö_todo.push([ ü_title, ü_impl ]);
-    let ü_prms:Promise<void>
-    try {
-        ü_prms = ü_impl();
-    } catch (error) {
-        ü_prms = Promise.reject( error );
-    }
-    CSuiteOfTests.push( ü_prms );
+    });
 }
-}
-
-export async function whenTestSuite():Promise<void> {
-    const ü_done = await Promise.allSettled( CSuiteOfTests )as PromiseRejectedResult[];
-    ü_done.filter(function( ü_prms ){ return ü_prms.status === 'rejected' })
-          .forEach(function( ü_prms ){ console.error( ü_prms.reason ); })
-    CSeriesOfTests.length = 0;
-}
-
-export function testToggle( ü_testImpl:TAsyncTestFunction, ü_disable = false ):TAsyncTestFunction {
-    return ü_disable ? async ()=>{}
-                     : ü_testImpl
-                     ;
 }
 
 //====================================================================
