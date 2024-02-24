@@ -1,14 +1,11 @@
 /*
 */
-  import { type Extension
-         } from 'vscode';
-  import { type TActiveExtension
+  import { type _OpenInNpp
          } from '../core/runtime';
   import { type MementoFacade
          } from '../vsc/histUtil';
 //====================================================================
-  type TOpenInNpp = TActiveExtension
-  export type TExtension = Extension<TOpenInNpp>
+  export type TOpenInNpp = _OpenInNpp
 //--------------------------------------------------------------------
   export type TCommandIds = 'openInNpp.openSettings'
                           | 'extension.openInNpp'

@@ -1,12 +1,14 @@
 /*
 */
   import { type ExtensionContext
+         , type Extension
+         , type ConfigurationChangeEvent
          } from 'vscode';
   import { type TAnyFunction
          } from '../types/generic.d';
-  import { type TExtension
+  import {
+           type TOpenInNpp
          , type TExtensionCommand
-         , type TOpenInNpp
          , type THistoryProxy
          } from '../types/vsc.extension.d';
   import { type IRuntimeContext
@@ -29,12 +31,8 @@
          , openInNppEditor
          , openInNppExplorer
          } from '../core/implementation';
-  import { ConfigHandler
-         } from '../core/configHandler';
-  import { ConfigSnapshot
-         } from '../core/configProxy';
-  import { whenDelay
-         } from '../lib/asyncUtil';
+  import   ConfigContext
+           from '../core/configContext';
   import { whenUriOpened
          , whenSettingsOpened
          } from '../vsc/cmdUtil';
@@ -43,33 +41,33 @@
          } from '../vsc/histUtil';
 //====================================================================
 
-class ExtensionRuntimeContext {
+class XtnRuntimeContext {
     static readonly lineSep = '\n';
     static readonly devTrace :false|typeof console.log = console.log;
-    static          activeInstance :ExtensionRuntimeContext //|undefined = undefined;
+    static          activeInstance :TOpenInNpp //|undefined = undefined;
 
-static async whenActive():Promise<TActiveExtension> {
+static async whenActiveInstanceAvailable():Promise<TOpenInNpp> {
     const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId )!;
     if ( ! ü_extn.isActive ) { await ü_extn.activate(); }
     return ü_extn.exports;
 }
 
-static async activate( ü_extnContext:ExtensionContext ):Promise<TActiveExtension> {
-    if ( ExtensionRuntimeContext.activeInstance === undefined ) {
-       await new ExtensionRuntimeContext( ü_extnContext )._whenActivationFinalized();
+static async _whenXtnActivated( ü_extnContext:ExtensionContext ):Promise<TOpenInNpp> {
+    if ( XtnRuntimeContext.activeInstance === undefined ) {
+       await new XtnRuntimeContext( ü_extnContext )._whenActivationFinalized();
     } else {
       ß_trc&& ß_trc( 'Re-Activation' );
-      if ( ExtensionRuntimeContext.activeInstance.context !== ü_extnContext ) {
+      if ( XtnRuntimeContext.activeInstance.context !== ü_extnContext ) {
           ß_trc&& ß_trc( 'Re-Activation: new Context' );
       }
     }
   //
-    return ExtensionRuntimeContext.activeInstance;
+    return XtnRuntimeContext.activeInstance;
 }
 
   //----------
     readonly globalHistory:THistoryProxy
-    readonly extensionApi :TExtension
+    readonly extensionApi :Extension<TOpenInNpp>
   //
     readonly version      :string
     readonly commands     :TExtensionCommand[]
@@ -78,7 +76,7 @@ static async activate( ü_extnContext:ExtensionContext ):Promise<TActiveExtensio
 private constructor(
     readonly context      :ExtensionContext
 ){
-    ExtensionRuntimeContext.activeInstance = this;
+    XtnRuntimeContext.activeInstance = this;
     ß_trc&& ß_trc( 'Instance activated' );
   //console.dir( this.context.globalState );
   //
@@ -87,7 +85,8 @@ private constructor(
       , config : new MementoFacade( 'config', { executable: '' } )
       , dummy  : new MementoFacade( 'dummy' , []                 )
       };
-    this.extensionApi = extensions.getExtension( CExtensionId )!;
+  //
+    this.extensionApi = context.extension;// extensions.getExtension( CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
     this.version     = ü_json.version;
@@ -108,8 +107,13 @@ private constructor(
         }
         this.context.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
-        this.context.subscriptions.push(  workspace.onDidChangeConfiguration( ConfigSnapshot.modificationSignalled )  );
+        this.context.subscriptions.push(  workspace.onDidChangeConfiguration( this.modificationSignalled.bind( this ) )  );
   //
+}
+
+private modificationSignalled( ü_change:ConfigurationChangeEvent ):void {
+    if ( ! ü_change.affectsConfiguration( CPrefix ) ) { return; }
+    ConfigContext.modificationSignalled( ü_change );
 }
 
 private async _whenActivationFinalized():Promise<void> {
@@ -137,10 +141,10 @@ async function ö_info( ü_newVersion:string ):Promise<void> {
 }
 
 //====================================================================
-  export type TActiveExtension  = ExtensionRuntimeContext
+  export type _OpenInNpp = XtnRuntimeContext
 //--------------------------------------------------------------------
-  export const ß_RuntimeContext = ExtensionRuntimeContext as ( typeof ExtensionRuntimeContext & IRuntimeContext );
-  export const ß_trc            = ExtensionRuntimeContext.devTrace;
+  export const ß_RuntimeContext = XtnRuntimeContext as ( typeof XtnRuntimeContext & IRuntimeContext );
+  export const ß_trc            = XtnRuntimeContext.devTrace;
 //====================================================================
 /*
 */

@@ -7,6 +7,7 @@
          } from '../../../types/vsc.extension.d';
   import { CExtensionId
          , CEXtnCommands
+         , EConfigurationIds
          } from '../../../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
@@ -17,6 +18,7 @@
   import { commands
          , extensions
          , workspace
+         , ConfigurationTarget
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_RuntimeContext
@@ -52,7 +54,13 @@ export async function tst_dbg(){
 //====================================================================
 
 export async function tst_history(){
-    const ü_extn = await ß_RuntimeContext.whenActive();
+    const ü_extn = await ß_RuntimeContext.whenActiveInstanceAvailable();
+  //
+  //ü_extn.settings
+    const configuration = workspace.getConfiguration();
+    const ü_a = configuration.update( EConfigurationIds.executable, '1otepad.exe', ConfigurationTarget.Workspace );
+    const ü_b = configuration.update( EConfigurationIds.executable, '2otepad.exe', ConfigurationTarget.Workspace );
+    await Promise.all([ü_a,ü_b]);
   //
     const ü_home = workspace.workspaceFolders![0].uri.fsPath
     ß_trc&& ß_trc( ü_home );
@@ -96,7 +104,7 @@ export async function tst_history(){
 }
 
 export async function tst_b(){
-    const ü_extn = await ß_RuntimeContext.whenActive();
+    const ü_extn = await ß_RuntimeContext.whenActiveInstanceAvailable();
   //
     await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
     await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) );

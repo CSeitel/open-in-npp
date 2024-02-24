@@ -12,8 +12,6 @@
   import { ß_RuntimeContext
          , ß_trc
          } from '../core/runtime';
-  import { ConfigSnapshot
-         } from './configProxy';
   import { shortenText
          , expandEnvVariables
          } from '../lib/textUtil';
@@ -21,9 +19,18 @@
          } from '../lib/fsUtil';
 //====================================================================
 
-export class ConfigHandler {
+export async function whenExecutableChecked( ü_exeInput:string ):Promise<string> {
+      const ü_exeFile = normalize( expandEnvVariables( ü_exeInput ) );
+      if ( isAbsolute( ü_exeFile ) ) {
+          const ü_valid = await isExe( ü_exeFile );
+          if ( ! ü_valid ) { ß_trc&& ß_trc( `Not valid ${ ü_exeFile }` ); }
+      } else {
+        console.warn( `Not a absolute Path: "${ ü_exeFile }" ${ process.cwd() }` );
+      }
+      return ü_exeFile;
+}
 
-static async whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise<string> {
+export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise<string> {
   //
     if ( ü_explicit.length > 0 ) {
       const ü_current = normalize( expandEnvVariables( ü_explicit ) );
@@ -69,9 +76,12 @@ static async whenExecutable( ü_explicit:string, ü_useHistory:boolean ):Promise
     }
 }
 
-static async whenWorkingDir( ü_dir:string ):Promise<string> {
+//--------------------------------------------------------------------
+
+export async function whenWorkingDir( ü_dir:string ):Promise<string> {
     return expandEnvVariables( ü_dir );
 }
 
-}
-
+//====================================================================
+/*
+*/

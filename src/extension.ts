@@ -14,7 +14,7 @@
 
 export async function activate( ü_extnContext:ExtensionContext ):Promise<TOpenInNpp> {
     ß_trc&& ß_trc( 'Activation' );
-    return ß_RuntimeContext.activate( ü_extnContext );
+    return ß_RuntimeContext._whenXtnActivated( ü_extnContext );
 }
 
 export async function deactivate():Promise<void> {

@@ -22,8 +22,8 @@
   import { EButtons as EButtons
          } from '../i18n';
 //------------------------------------------------------------------------------
-  import { ConfigSnapshot
-         } from '../core/configProxy';
+  import   ConfigContext
+           from '../core/configContext';
   import { whenChildProcessSpawned
          } from '../lib/any';
   import { whenTempFile
@@ -99,7 +99,7 @@ export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:
 //==============================================================================
 
 class CLIArgs {
-    private readonly _config                   = ConfigSnapshot.current;
+    private readonly _config                   = ConfigContext.current;
     private readonly _activeEditor             = window.activeTextEditor;
     private readonly _mode         :EModes
     private readonly _mainPath     :string

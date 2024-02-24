@@ -12,10 +12,13 @@
 //--------------------------------------------------------------------
   import { workspace
          , ConfigurationChangeEvent
+         , ConfigurationTarget
          } from 'vscode';
   import { ß_trc
          } from '../core/runtime';
-  import { ConfigHandler
+  import { whenExecutable
+         , whenWorkingDir
+         , whenExecutableChecked
          } from './configHandler';
 //====================================================================
 
@@ -33,22 +36,24 @@ class ConfigProxy {
     get  filesInFolderPattern  ():string       { return this._wsConfig.get<any>( EConfigurationIds.filesInFolderPattern  ); }
     get  matchingFilesLimit    ():number       { return this._wsConfig.get<any>( EConfigurationIds.matchingFilesLimit    ); }
     get  preserveCursor        ():boolean      { return this._wsConfig.get<any>( EConfigurationIds.preserveCursor        ); }
+    set executable( ü_executable:string ) {
+        this._wsConfig.update( EConfigurationIds.executable, ü_executable, ConfigurationTarget.Workspace );
+    }
 }
 
 //--------------------------------------------------------------------
 
-export class ConfigSnapshot extends ConfigProxy {
+export default class ConfigContext extends ConfigProxy {
 //
-    private static         _current :ConfigSnapshot|TINITIAL = SINITIAL;
-    private static         _touched                          = 1;
-    private static         _executableTouched                = 0;
+    private static         _current :ConfigContext|TINITIAL = SINITIAL;
+    private static         _touched                         = 1;
+    private static         _executableTouched               = 0;
 //
-static modificationSignalled( this:undefined, ü_change:ConfigurationChangeEvent ):void {
-    const ü_that = ConfigSnapshot;
+static modificationSignalled( ü_change:ConfigurationChangeEvent ):void {
+    const ü_that = ConfigContext;
   //
-    if ( ! ü_change.affectsConfiguration( CPrefix ) ) { return; }
     if(ß_trc){ß_trc( `Configuration modified: "${ ü_that._touched }"` );}
-    if ( ü_that._current === SINITIAL ) { return; } // _touched = 1
+  //if ( ü_that._current === SINITIAL ) { return; } // _touched = 1
   //
     if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
       || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
@@ -56,32 +61,37 @@ static modificationSignalled( this:undefined, ü_change:ConfigurationChangeEvent
        ) { return; }
   //
                                                                            ü_that._touched           ++ ;
-    if ( ü_change.affectsConfiguration( EConfigurationIds.executable ) ) { ü_that._executableTouched ++ ; }
+    if ( ü_change.affectsConfiguration( EConfigurationIds.executable ) ) { ü_that._executableTouched ++ ;
+        whenExecutableChecked( ConfigContext.current.executable );
+      //ß_trc&& ß_trc( ConfigSnapshot.current.executable );
+    }
   //
 }
 //
-static get current():ConfigSnapshot {
+static get current():ConfigContext {
     if ( this._touched > 0 ) {
          this._touched = 0 ;
     //
-      const ü_current = new ConfigSnapshot( this._current, this._executableTouched > 0 );
+      const ü_current = new ConfigContext( this._current, this._executableTouched > 0 );
       this._current           = ü_current;
       this._executableTouched = 0;
     }
   //
-    return this._current as ConfigSnapshot;
+    return this._current as ConfigContext;
 }
 //
     private          _whenWorkingDir    :Promise<string> | TINITIAL = SINITIAL;
     private          _whenExecutable    :Promise<string> | TINITIAL = SINITIAL;
     private          _executable        :        string  | TINITIAL = SINITIAL;
-constructor(
-                    ü_previous          :ConfigSnapshot  | TINITIAL
+private constructor(
+                    ü_previous          :ConfigContext  | TINITIAL
   , private readonly _executableTouched :boolean
 ){
     super();
   //
-    if ( ü_previous !== SINITIAL ) {
+    if ( ü_previous === SINITIAL ) {
+        ß_trc&& ß_trc( 'Config Initial Load' );
+    } else {
       if ( this._executableTouched ) {
         if ( ü_previous.executable === this.executable ) {
           if(ß_trc){ß_trc( `Constant` );}
@@ -92,7 +102,7 @@ constructor(
 //
 async whenExecutable():Promise<string> {
       if ( this._executable === SINITIAL )
-         { this._executable = await ConfigHandler.whenExecutable( super.executable, ! this._executableTouched );
+         { this._executable = await whenExecutable( super.executable, ! this._executableTouched );
          //this._whenExecutable.then( ü_executable => { this.executable = ü_executable; } );
          }
     return this._executable;
@@ -100,7 +110,7 @@ async whenExecutable():Promise<string> {
 
 get whenWorkingDir():Promise<string> {
       if ( this._whenWorkingDir === SINITIAL )
-         { this._whenWorkingDir = ConfigHandler.whenWorkingDir( super.workingDirectory ); }
+         { this._whenWorkingDir = whenWorkingDir( super.workingDirectory ); }
     return this._whenWorkingDir;
 }
 //
