@@ -8,7 +8,7 @@
          , testAsyncFunction
          , testFunction
          , testEqual
-         , bind
+         , bindArgs
          } from '../../../lib/testUtil';
   import { whenDelay
          } from '../../../lib/asyncUtil';
@@ -22,7 +22,7 @@ export async function tst_a(){
     await whenDelay( 1500 );
 
     ß_trc&& ß_trc( 'A '+Date.now() );
-    ß_trc&& ß_trc( testSummary( 'Aaa' ) );
+    testSummary( 'Aaa' );
 }
 
 export async function tst_b(){
@@ -30,7 +30,7 @@ export async function tst_b(){
     testEqual( 2 , 0 );
     await whenDelay( 100 );
     ß_trc&& ß_trc( 'B '+Date.now() );
-    ß_trc&& ß_trc( testSummary( 'Bbb' ) );
+    testSummary( 'Bbb' );
 }
 
 /*

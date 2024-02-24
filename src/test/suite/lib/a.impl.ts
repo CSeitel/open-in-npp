@@ -6,15 +6,17 @@
          , type IHistoryData
          } from '../../../types/vsc.extension.d';
   import { CExtensionId
-         , CECommands
+         , CEXtnCommands
          } from '../../../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
   import * as ßß_assert from 'assert';
-  import * as ßß_path   from 'path';
+  import { join
+         } from 'path';
 //--------------------------------------------------------------------
   import { commands
          , extensions
+         , workspace
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_RuntimeContext
@@ -22,11 +24,13 @@
          } from '../../../core/runtime';
   import { MementoFacade
          } from '../../../vsc/histUtil';
+  import { CVscFs
+         , fileToUri
+         } from '../../../vsc/fsUtil';
   import { whenTextEditorOpened
-         , whenNewTextEditorOpened_
+         , whenNewTextEditorOpened
          } from '../../../vsc/docUtil';
-  import {
-          whenDelay
+  import { whenDelay
          } from '../../../lib/asyncUtil';
   import { expandEnvVariables
          } from '../../../lib/textUtil';
@@ -36,24 +40,91 @@
          , testNotEqual
          , testCondition
          } from '../../../lib/testUtil';
-  //let ß_trc           :TRuntimeContext['devTrace']
 //====================================================================
+
+export async function tst_dbg(){
+    return tst_history();
+
+    console.log( __filename );
+    throw new Error( __dirname )
+}
+
+//====================================================================
+
+export async function tst_history(){
+    const ü_extn = await ß_RuntimeContext.whenActive();
+  //
+    const ü_home = workspace.workspaceFolders![0].uri.fsPath
+    ß_trc&& ß_trc( ü_home );
+    const ü_wsCfg = join( ü_home, '.vscode', 'settings.json' );
+    const ü_data = await CVscFs.readFile( fileToUri( ü_wsCfg ) );
+    const ü_jso_ = JSON.parse( Buffer.from( ü_data ).toString( 'utf8' ) );
+    const ü_doc = await workspace.openTextDocument( fileToUri( ü_wsCfg ) );
+        //ü_doc.
+    const ü_json = JSON.parse( ü_doc.getText() );
+    ß_trc&& ß_trc( ü_json );
+  //
+    const ü_dummyHist = ü_extn.globalHistory.dummy;
+    ß_trc&& ß_trc( 'Hello'+ JSON.stringify( ü_dummyHist.dataRef ) );
+  //testEqual( ü_dummyHist.dataRef[0], 2, 'DataRef[0]' );
+    const ü_dummyDat1 = [] as IHistoryData['dummy'];
+    const ü_dummyDat2 = [] as IHistoryData['dummy'];
+    ü_dummyHist.dataRef = ü_dummyDat1;
+    testEqual( ü_dummyHist.dataRef, ü_dummyDat1, 'DataRef' );
+    ü_dummyDat1.push( 1 );
+    testEqual( ü_dummyHist.dataRef[0], ü_dummyDat1[0], 'DataRef[0]' );
+    ü_dummyHist.dataRef = ü_dummyDat2;
+    testEqual( ü_dummyHist.dataRef, ü_dummyDat2, 'DataRef' );
+  //
+    ü_dummyDat2.push( 2 );
+  //ü_dummyHist.triggerCommit();
+    const ü_count = await ü_dummyHist.whenCommitted();
+    ß_trc&& ß_trc( 'Co'+ ü_count );
+  //
+    const ü_adminHist = ü_extn.globalHistory.admin;
+    const ü_adminData = ü_adminHist.dataRef;
+    testEqual( ü_adminData.version, 15, 'Version' );
+  //
+    const ü_cfgHist = ü_extn.globalHistory.config;
+    const ü_cfgData = ü_cfgHist.dataRef;
+    testEqual( ü_cfgData.executable, '', 'Executable' );
+  //
+  //
+    testSummary();
+    return;
+  //
+}
 
 export async function tst_b(){
     const ü_extn = await ß_RuntimeContext.whenActive();
   //
-    const ü_dummyHist = ü_extn.globalHistory.dummy;
-    const ü_dummyData = ü_dummyHist.dataRef;
-    console.log( 'rrr' + ü_dummyData );
-    testNotEqual( ü_dummyData.length, 0 );
-                  ü_dummyData.length = 0;
-                  ü_dummyData.push( 6 );
-                  ü_dummyHist.triggerCommit();
-    console.log( 'rrr' + ü_dummyData );
-    console.log( testSummary( 'tst_' ) );
+    await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
+    await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) );
+    const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    await whenDelay( 2000 );
+    const ü_pid_2 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    await whenDelay( 2000 );
+    testEqual( ü_pid_1, ü_pid_2, 'Pid' );
+  //
+    testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
+    console.log( typeof( ü_pid_1), ü_pid_1 );
+  //
+    testSummary( 'tst_' );
+  //
     return;
-  //
-  //
+  /*
+var setting: vscode.Uri = vscode.Uri.parse("untitled:" + "C:\summary.txt");
+vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
+    vscode.window.showTextDocument(a, 1, false).then(e => {
+        e.edit(edit => {
+            edit.insert(new vscode.Position(0, 0), "Your advertisement here");
+        });
+    });
+}, (error: any) => {
+    console.error(error);
+    debugger;
+});
+  */
     const ü_dummy_1 = new MementoFacade<'dummy',IHistoryData>( 'dummy', []    );
     const ü_dummy_2 = new MementoFacade<'dummy',IHistoryData>( 'dummy', [0,8] );
     const ü_r1 = ü_dummy_1.dataRef;
@@ -73,40 +144,9 @@ export async function tst_b(){
 //====================================================================
 
 export async function tst_c(){
-    await whenNewTextEditorOpened_( { content:'{"a":33}' } );
-    const ü_pid_1 = await commands.executeCommand<number>( CECommands.oActive );
+    await whenNewTextEditorOpened( { content:'{"a":33}' } );
+    const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
     await whenDelay( 3 * 1000 );
-}
-
-export async function tst_(){
-    console.log( __filename );
-    throw new Error( __dirname )
-}
-
-export async function tst__(){
-    const ü_extn = await ß_RuntimeContext.whenActive();
-  //
-    const ü_adminHist = ü_extn.globalHistory.admin;
-    const ü_adminData = ü_adminHist.dataRef;
-    testEqual( ü_adminData.version, 15, 'Version' );
-    const ü_cfgHist = ü_extn.globalHistory.config;
-    const ü_cfgData = ü_cfgHist.dataRef;
-    testEqual( ü_cfgData.executable, '', 'Executable' );
-  //
-  //
-    await commands.executeCommand<unknown>( CECommands.oSettings );
-    await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) );
-    const ü_pid_1 = await commands.executeCommand<number>( CECommands.oActive );
-    await whenDelay( 2000 );
-    const ü_pid_2 = await commands.executeCommand<number>( CECommands.oActive );
-    await whenDelay( 2000 );
-    testEqual( ü_pid_1, ü_pid_2, 'Pid' );
-  //
-    testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
-    console.log( typeof( ü_pid_1), ü_pid_1 );
-  //
-    console.log( testSummary( 'tst_' ) );
-  //
 }
 
 //====================================================================
@@ -126,7 +166,7 @@ export async function tst_a(){
     testEqual( ü_done, true );
   */
   //
-    console.log( testSummary( 'tst_' ) );
+    testSummary( 'tst_' );
   //
 }
 
@@ -138,7 +178,7 @@ static async test_0():Promise<void> {
   //
     const ü_wsFolders = ßß_vsCode.workspace.workspaceFolders;
     const ü_folders   = ü_wsFolders?.map( ü_folder => ü_folder.uri.fsPath );
-    const ü_file = ßß_path.join( ü_folders![0], 'Has Blank ß.txt' );
+    const ü_file = join( ü_folders![0], 'Has Blank ß.txt' );
     if(ß_trc){ß_trc( `Test: "${ __filename }"` );}
     if(ß_trc){ß_trc( `Workspace: "${ ü_file }"` );}
     await whenTextEditorOpened( ü_file );
@@ -193,21 +233,3 @@ static async openInNpp():Promise<void> {
 }
 
 }
-
-//==============================================================================
-
-async function prepareWs( ö_ws:typeof ßß_vsCode.workspace ):Promise<void> {
-//
-  const ü_dir = ßß_path.normalize( __dirname + ßß_path.sep + 'empty' )
-                       .replace( 'out', 'src' );
-  const ü_uri = ßß_vsCode.Uri.file( ü_dir );
-  ö_ws.updateWorkspaceFolders( 0, null, { uri: ü_uri } );
-//
-  return new Promise<void>( (ö_resolve,ü_reject) => {
-    ö_ws.onDidChangeWorkspaceFolders( ü_e => {
-      ö_resolve();
-    });
-  });
-}
-
-//==============================================================================

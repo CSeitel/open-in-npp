@@ -10,7 +10,7 @@
   export const CExtensionUrl = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
 //export const CExtensionUrl = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
 //====================================================================
-  export const enum CECommands {
+  export const enum CEXtnCommands {
       oSettings = 'openInNpp.openSettings'
     , oActive   = 'extension.openInNpp'
     , oEditor   = 'extension.openInNppX'

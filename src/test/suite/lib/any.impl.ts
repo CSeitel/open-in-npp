@@ -11,9 +11,8 @@
          , whenFileInfoRead
          , whenFileTypeKnown
          , whenKnownAsFolder
+         , isContainedInWorkspace
          } from '../../../vsc/fsUtil';
-  import { isContainedInWorkspace
-         } from '../../../lib/vsc';
   import { expect
          } from '../../../lib/error';
   import { pickDuplet
@@ -24,7 +23,7 @@
          , testSummary
          , testFunction
          , testAsyncFunction
-         , bind
+         , bindArgs
          } from '../../../lib/testUtil';
 //====================================================================
 
@@ -85,7 +84,7 @@ export async function tst_whenWS(){
       , [ testSrc( '../etc/test/workspaceFolder/temp' ), true ]
       , [ testSrc( 'virtual_6_d' ), false ]
       ] as TResultArray<string,boolean>;
-    testFunction( bind( isContainedInWorkspace, { refine: {0:fileToUri} } ), ü_data )
+    testFunction( bindArgs( isContainedInWorkspace, { refine: {0:fileToUri} } ), ü_data )
     testSummary();
 }
 

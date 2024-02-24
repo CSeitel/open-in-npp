@@ -17,7 +17,7 @@
   import { CExtensionId
          , CExtensionUrl
          , CPrefix
-         , CECommands
+         , CEXtnCommands
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { workspace
@@ -37,7 +37,7 @@
          } from '../lib/asyncUtil';
   import { whenUriOpened
          , whenSettingsOpened
-         } from '../lib/vsc';
+         } from '../vsc/cmdUtil';
 //--------------------------------------------------------------------
   import { MementoFacade
          } from '../vsc/histUtil';
@@ -98,10 +98,10 @@ private constructor(
         let ü_cmdImpl:TAnyFunction
         const ü_cmdId = ü_cmd.command;
         switch ( ü_cmdId ) {
-            case CECommands.oSettings : ü_cmdImpl = whenSettingsOpened.bind( null, CPrefix ); break;
-            case CECommands.oActive   : ü_cmdImpl = openInNppActive   ; break;
-            case CECommands.oEditor   : ü_cmdImpl = openInNppEditor   ; break;
-            case CECommands.oExplorer : ü_cmdImpl = openInNppExplorer ; break;
+            case CEXtnCommands.oSettings : ü_cmdImpl = whenSettingsOpened.bind( null, CPrefix ); break;
+            case CEXtnCommands.oActive   : ü_cmdImpl = openInNppActive   ; break;
+            case CEXtnCommands.oEditor   : ü_cmdImpl = openInNppEditor   ; break;
+            case CEXtnCommands.oExplorer : ü_cmdImpl = openInNppExplorer ; break;
             default:
                 console.error( `Command "${ ü_cmdId }" not implemented.` );
                 continue;

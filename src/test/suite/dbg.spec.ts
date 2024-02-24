@@ -1,6 +1,6 @@
 /*
 */
-  import { tst_ as testImpl
+  import { tst_dbg as testImpl
          } from './lib/a.impl';
 
 suite( 'Debug', ()=>{

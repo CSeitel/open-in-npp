@@ -27,7 +27,7 @@
          , testAsyncFunction
          , testFunction
          , testEqual
-         , bind
+         , bindArgs
          } from '../../../lib/testUtil';
 //====================================================================
 
@@ -35,10 +35,9 @@ export async function tst_testEquals_1(){
     testEqual( {}, {}, '9999' )
     testEqual(  0,  0 )
     testEqual(  0,  0 )
-    const ü_fref = bind( ö_echo, { arrangeReal:[2] }, '_0','_1' )
+    const ü_fref = bindArgs( ö_echo, { arrangeReal:[2] }, '_0','_1' )
     testFunction( ü_fref, [['A_','_0\t_1\tA_']] as TResultArray<string,string> )
     testSummary();
-  //testSummary( ü_all, strictEqual )
     //strictEqual( 0, 1, ü_all.join('\r\n') )
 function ö_echo<T>( ...ü_args:T[] ):string {
     return ü_args.join( '\t' );
@@ -114,9 +113,9 @@ export async function tst_whenKnownAsFolder():Promise<void> {
     const ü_05 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 5 ) );
     const ü_06 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 6 ) );
   //
-    const ü_LFolder  = bind( whenKnownAsFolder , { realFirst:true }, true );
-    const ü_LSymLink = bind( whenKnownAsSymLink, { realFirst:true }, true );
-    const ü_LFile    = bind( whenKnownAsFile   , { realFirst:true }, true );
+    const ü_LFolder  = bindArgs( whenKnownAsFolder , { realFirst:true }, true );
+    const ü_LSymLink = bindArgs( whenKnownAsSymLink, { realFirst:true }, true );
+    const ü_LFile    = bindArgs( whenKnownAsFile   , { realFirst:true }, true );
   //
     await testAsyncFunction( whenKnownAsFolder , ü_01, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
     await testAsyncFunction( ü_LFolder         , ü_02  );

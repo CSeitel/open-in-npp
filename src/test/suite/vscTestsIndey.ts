@@ -9,8 +9,8 @@
 export async function run():Promise<void> {
 
     const ß_skipTests =  true; // = except single test
-    whenAllTestsRun([
-        [ 'Single'   , [ ß_a.tst_
+    await whenAllTestsRun([
+        [ 'Single'   , [ ß_a.tst_dbg
                            ], !ß_skipTests ]
       , [ 'Any'      , ß_any,  ß_skipTests ]
       ]);

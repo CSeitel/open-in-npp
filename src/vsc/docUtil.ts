@@ -12,8 +12,6 @@
   import { Uri
          , workspace
          , window
-         , commands
-         , env
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_trc
@@ -22,7 +20,7 @@
          } from '../vsc/fsUtil';
 //====================================================================
 
-export async function whenNewTextEditorOpened_( ü_text:TUntitled, ü_preview = false ):Promise<TextEditor> {
+export async function whenNewTextEditorOpened( ü_text:TUntitled, ü_preview = false ):Promise<TextEditor> {
   //workspace.open
     const ü_doc = await workspace.openTextDocument( ü_text );
   //

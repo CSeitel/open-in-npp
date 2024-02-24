@@ -103,22 +103,21 @@ function ö_suiteRecord():void {
 }
 
 function ß_testChain( ö_chain:Promise<number>[] ) {
-    return ö_testChain;
-function ö_testChain( ü_title:string, ü_impl:TAsyncTestFunction ):void {
+ return function ö_testChain( ü_title:string, ü_impl:TAsyncTestFunction ):void {
     ö_chain[0] = ö_chain[0].then(function( ö_rc ){
         console.log( ü_title );
         return ü_impl().then (function(){ return ö_rc; })
-                       .catch(function( ü_e ){
-            console.warn( ü_e );
+                       .catch(function( ü_err ){
+            toStdOut( echo( ü_err, 300 ) );
             return ö_rc + 1;
         });
     });
-}
+ };
 }
 
 //====================================================================
 
-export function bind<T>( ö_fref:TAnyFunction<T>, ö_map:TArgumentsInfo, ...ö_baseArgs:readonly any[] ):TAnyFunction<T> {
+export function bindArgs<T>( ö_fref:TAnyFunction<T>, ö_map:TArgumentsInfo, ...ö_baseArgs:readonly any[] ):TAnyFunction<T> {
     return ö_bound;
 //
 function ö_bound( ...ü_realArgs:any[] ):T {
@@ -140,7 +139,7 @@ function ö_bound( ...ü_realArgs:any[] ):T {
 
 //====================================================================
 
-export function testSummary( ü_series?:string ):string {
+export function testSummary( ü_series?:string ):void {
   //
     const ü_results = CSeriesOfTests;
     const ü_crlf = '\r\n';
@@ -152,13 +151,11 @@ export function testSummary( ü_series?:string ):string {
     const ü_head = ü_series === undefined ? ''
                                           : ü_series + ': ';
     ü_results.unshift(  `${ ü_head }Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%` );
-    const ü_echo = ü_results.join( ü_crlf );// + ü_crlf;
+    const ü_echo = ü_results.join( ü_crlf ) + ü_crlf;
   //
     CSeriesOfTests.length = 0;
-    if ( ü_ok !== ü_all ) {
-        throw new Error( ü_echo );
-    }
-    return ü_echo;
+    if ( ü_ok === ü_all ) { toStdOut( ü_echo ); }
+    else                  { throw new Error( ü_echo ); }
 }
 
 export function testFailed<T=any>( ü_reason:any, ü_message?:string ):false {

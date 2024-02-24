@@ -47,8 +47,7 @@ export async function tst_UR(){
     await whenDelay( 5 * 100 );
     testEqual( ö_some, 1  );
   //
-    const ü_all = testSummary( 'UniqueResource' );
-    console.log( ü_all );
+    testSummary( 'UniqueResource' );
 //
 async function ö_access( ü_secs:number ):Promise<void> {
     const ü_done = await ö_usrc.whenAvailable( ''+ü_secs );

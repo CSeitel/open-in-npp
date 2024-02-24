@@ -10,7 +10,7 @@
          , testAsyncFunction
          , testFunction
          , testEqual
-         , bind
+         , bindArgs
          } from '../../../lib/testUtil';
   import { ß_trc
          } from '../../../runtime/context';
@@ -25,8 +25,9 @@ export async function tst_expandEnvVariables(){
       , [ '%T__P%',       '%T__P%'  ]
       ] as TResultArray<string,string>;
     testFunction( expandEnvVariables, ü_data );
-    ß_trc&& ß_trc( testSummary( 'expandEnvVariables' ) );
+    testSummary( 'expandEnvVariables' );
 }
 
+//====================================================================
 /*
 */
