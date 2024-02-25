@@ -1,15 +1,13 @@
 /*
 */
   import { type Memento
+         , type ExtensionContext
          } from 'vscode';
   import { type IReleaseResource
          } from '../types/lib.asyncUtil.d';
   import { SINITIAL
          } from '../constants/extension';
 //--------------------------------------------------------------------
-  import { ß_RuntimeContext
-         , ß_trc
-         } from '../core/runtime';
   import { UniqueResource
          } from '../lib/asyncUtil';
 //====================================================================
@@ -22,12 +20,13 @@ export class MementoFacade<P extends string,T extends Record<P,object>> {
   //private          _dataRef   :               T[P]  = SINITIAL as any;
     private readonly _dataApi   :Memento
 constructor(
-    public  readonly  mKey        :  P
-  , private readonly _initialValue:T[P]
-  ,                 ü_global = false ){
-    this._dataApi = ß_RuntimeContext.activeInstance.context[
-                      ü_global ?    'globalState'
-                               : 'workspaceState' ];
+                    ü_vscXtnContext:ExtensionContext
+  , public  readonly  mKey         :  P
+  , private readonly _initialValue :T[P]
+  ,                 ü_global = false
+  ){
+    this._dataApi = ü_vscXtnContext[ ü_global ?    'globalState'
+                                              : 'workspaceState' ];
 }
 
 get dataRef():T[P] {

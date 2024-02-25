@@ -13,9 +13,8 @@
          , window
          } from 'vscode';
 //--------------------------------------------------------------------
-  import { ß_RuntimeContext
-         , ß_trc
-         } from '../core/runtime';
+  import { ß_trc
+         } from '../runtime/context';
 //--------------------------------------------------------------------
   import   ßß_i18n
            from '../i18n';
@@ -81,7 +80,7 @@ export async function openInNppActive( this:null ):Promise<number> {
 }
 
 export async function openInNppEditor( this:null, ü_fileUri:Uri, ...ü_more:any[] ):Promise<number> {
-    if(ß_trc){ß_trc( `Editor Context: ${ arguments.length }`, ü_more );}
+    if(ß_trc){ß_trc( `Editor Context: ${ arguments.length }` );}
   //
     const ü_args = new CLIArgs( EModes.EDITOR, ü_fileUri );
     return ü_args.submit();
@@ -200,7 +199,7 @@ async submit():Promise<number> {
     const ü_args = await this._arguments( ü_verbatim );
     if ( ü_args.length === 0 ) { return CNotAPid; }
   //
-    if(ß_trc){ß_trc( 'ChildProcess', ü_exe, ü_args, ü_opts );}
+    if(ß_trc){ß_trc( `ChildProcess ${ ü_exe }  ${ ü_args}  ${ü_opts} ` );}
     try {
       const ü_pid =  await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
       return ü_pid;

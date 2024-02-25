@@ -11,7 +11,7 @@
 //--------------------------------------------------------------------
   import { ß_RuntimeContext
          , ß_trc
-         } from '../core/runtime';
+         } from '../runtime/context-XTN';
   import { shortenText
          , expandEnvVariables
          } from '../lib/textUtil';
@@ -44,7 +44,7 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
     const ü_done = await ü_cfgHst.whenDataRef<string>();
     try {
         const ü_cfgData = ü_cfgHst.dataRef;
-        if(ß_trc){ß_trc( `Config-History`, ü_cfgData );}
+        if(ß_trc){ß_trc( `Config-History ${ ü_cfgData }` );}
       //
         if ( ü_useHistory ) {
             const ü_lastExe = ü_cfgData.executable;

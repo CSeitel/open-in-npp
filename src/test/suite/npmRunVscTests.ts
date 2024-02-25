@@ -15,7 +15,7 @@ async function main():Promise<void> {
   //
     const ü_opts =
       { extensionDevelopmentPath: join( __dirname, '../../../'       ) // the extension to load
-      , extensionTestsPath      : join( __dirname, './vscTestsIndey' ) // the tests     to execute
+      , extensionTestsPath      : join( __dirname, './vscTestsIndex' ) // the tests     to execute
       };
     console.log( ü_opts.extensionTestsPath );
   //

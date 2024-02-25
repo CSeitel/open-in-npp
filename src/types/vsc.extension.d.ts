@@ -1,11 +1,11 @@
 /*
 */
-  import { type _OpenInNpp
+  import { type XtnOpenInNpp as _XtnOpenInNpp
          } from '../core/runtime';
   import { type MementoFacade
          } from '../vsc/histUtil';
 //====================================================================
-  export type TOpenInNpp = _OpenInNpp
+  export type XtnOpenInNpp = _XtnOpenInNpp
 //--------------------------------------------------------------------
   export type TCommandIds = 'openInNpp.openSettings'
                           | 'extension.openInNpp'

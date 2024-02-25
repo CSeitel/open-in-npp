@@ -9,13 +9,10 @@
          } from 'util';
   import * as    Mocha from 'mocha';
   import * as ßß_glob  from 'glob';
+  import { ß_trc
+         } from '../../runtime/context';
   import { createPromise
          } from '../../lib/asyncUtil';
-//--------------------------------------------------------------------
-export default class TestRuntime {
-    static readonly devTrace :false|typeof console.log = console.log;
-}
-  const ß_trc = TestRuntime.devTrace;
 //--------------------------------------------------------------------
 //const ß_what = '**/**.spec.js';
   const ß_specsRoot = join( __dirname, '.' );

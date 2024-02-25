@@ -1,0 +1,117 @@
+/*
+*/
+//--------------------------------------------------------------------
+  import { type IRuntimeContext
+         } from '../types/runtime.context.d';
+  import { type TWritable
+         } from '../types/generic.d';
+  type TInitialRuntimeContext = TWritable<IRuntimeContext>
+//--------------------------------------------------------------------
+  declare const ßRuntimeContext$:IRuntimeContext|null|undefined;
+//====================================================================
+  const ß_alreadyGlobal = typeof( ßRuntimeContext$ )==='object';
+         const ß_that = ß_alreadyGlobal && ßRuntimeContext$ !== null
+                      ? ßRuntimeContext$
+                      : {} as IRuntimeContext;
+//--------------------------------------------------------------------
+                     ß_implement( ß_that, ß_alreadyGlobal && ßRuntimeContext$ === null );
+  export const ß_RuntimeContext = ß_that;
+  export const ß_trc            = ß_that.devTrace;
+//====================================================================
+
+function ß_implement( ü_rtCntxt:TInitialRuntimeContext, ü_makeGlobal:boolean ):IRuntimeContext {
+      ü_rtCntxt.self           = ü_rtCntxt;
+    //
+      ü_rtCntxt.typeCode       = 'any';
+      ü_rtCntxt.lineSep        = '\n';
+      ü_rtCntxt.pathSep        = '/';
+      ü_rtCntxt.hasGlobalScope = false;
+      ü_rtCntxt.devTrace       = false;
+      ü_rtCntxt.makeGlobal     = ö_makeGlobal  ;
+    //
+      ü_rtCntxt.globalThis     = null as any as IRuntimeContext['globalThis'];
+      ü_rtCntxt.globalData     = {};
+    //
+      ü_rtCntxt .ioEncoding    = 'utf8';
+  //
+    const ö_that = ü_rtCntxt;
+    if ( ü_makeGlobal ) { ü_rtCntxt.makeGlobal(); }
+  //
+    return ü_rtCntxt;
+//
+function ö_makeGlobal():boolean {
+    if ( ö_that.hasGlobalScope ) { return false; }
+    ö_that.globalThis.ßRuntimeContext$ = ö_that;
+    return ö_that.hasGlobalScope = true;
+}
+
+}
+
+//====================================================================
+
+export function getNamedArgument( ü_name:string, ü_type:'string'                    , ü_args:readonly string[] ):string
+export function getNamedArgument( ü_name:string, ü_type:         'boolean'          , ü_args:readonly string[] ):       boolean
+export function getNamedArgument( ü_name:string, ü_type:                   'number' , ü_args:readonly string[] ):               number
+export function getNamedArgument( ü_name:string, ü_type:'string'|'boolean'|'number' , ü_args:readonly string[] ):string|boolean|number {
+  //
+    const ü_match = new RegExp( `\\/${ ü_name }(?::.+|:?)`, 'ig' );
+  //
+        let ü_hit  = '';
+      const ü_lngt = ü_args.length;
+        let ü_indx = 0;
+    while ( ü_indx < ü_lngt ) {
+      if ( ü_match.test( ü_args[ ü_indx ] ) ) {
+                 ü_hit = ü_args[ ü_indx ];
+        break;
+      }
+      ü_indx ++ ;
+    }
+  //
+    if ( ü_hit.length === 0 ) {
+      //
+      switch ( ü_type ) {
+        case 'boolean': return false;
+        case 'number' : return -1;
+        default       : return ''; // null
+      }
+    } else {
+    //
+      let ü_value = ü_hit.slice( ü_name.length +2 );
+      if ( ü_value.length === 0 ) {
+        switch ( ü_type ) {
+          case 'boolean': return ü_hit.charAt( ü_name.length +1 ) !== ':';
+          case 'number' : return 0;
+          default       : return '';
+        }
+      }
+      switch ( ü_type ) {
+        case 'boolean':
+                 ü_value = ü_value.toLowerCase();
+          return ü_value === 'true'
+              || ü_value === '1'
+               ;
+        case 'number': return parseFloat( ü_value );
+        default      : return             ü_value  ;
+      }
+    //
+    }
+}
+
+
+export function shortenText( ü_text:string, ü_limit:number ):string {
+  //
+    if ( ü_limit >= ü_text.length
+      || ü_limit <= 5 ) { return ü_text; }
+  //const ü_tooMuch = 3 + ü_path.length - ü_length;
+    const ü_available = ü_limit - 5;
+    const ü_0or1      =   ü_available            % 2;
+    const ü_evenHalf  = ( ü_available - ü_0or1 ) / 2;
+    return ü_text.slice( 0                   , ü_evenHalf   )
+         + ' ... '
+         + ü_text.slice( -ü_evenHalf -ü_0or1, ü_text.length )
+         ;
+}
+
+//====================================================================
+/*
+*/

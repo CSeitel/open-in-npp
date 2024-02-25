@@ -11,7 +11,7 @@
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_trc
-         } from '../core/runtime';
+         } from '../runtime/context';
   import { fileToUri
          , isContainedInWorkspace
          } from '../vsc/fsUtil';

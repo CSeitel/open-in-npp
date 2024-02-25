@@ -15,7 +15,7 @@
          , ConfigurationTarget
          } from 'vscode';
   import { ß_trc
-         } from '../core/runtime';
+         } from '../runtime/context';
   import { whenExecutable
          , whenWorkingDir
          , whenExecutableChecked

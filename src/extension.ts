@@ -2,19 +2,19 @@
 */
   import { type ExtensionContext
          } from 'vscode';
-  import { type TOpenInNpp
+  import { type XtnOpenInNpp
          } from './types/vsc.extension.d';
 //--------------------------------------------------------------------
   import {
          } from 'vscode';
-  import { ß_RuntimeContext
+  import { ß_whenXtnActivated
          , ß_trc
-         } from './core/runtime';
+         } from './runtime/context-XTN';
 //====================================================================
 
-export async function activate( ü_extnContext:ExtensionContext ):Promise<TOpenInNpp> {
+export async function activate( ü_vscXtnContext:ExtensionContext ):Promise<XtnOpenInNpp> {
     ß_trc&& ß_trc( 'Activation' );
-    return ß_RuntimeContext._whenXtnActivated( ü_extnContext );
+    return ß_whenXtnActivated( ü_vscXtnContext );
 }
 
 export async function deactivate():Promise<void> {

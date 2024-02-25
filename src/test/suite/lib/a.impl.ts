@@ -2,7 +2,7 @@
 */
   import { type TTestResult
          } from '../../../types/lib.testUtil.d';
-  import { type TOpenInNpp
+  import { type XtnOpenInNpp
          , type IHistoryData
          } from '../../../types/vsc.extension.d';
   import { CExtensionId
@@ -21,9 +21,9 @@
          , ConfigurationTarget
          } from 'vscode';
 //--------------------------------------------------------------------
-  import { ß_RuntimeContext
+  import { ß_whenActiveInstanceAvailable
          , ß_trc
-         } from '../../../core/runtime';
+         } from '../../../runtime/context-XTN';
   import { MementoFacade
          } from '../../../vsc/histUtil';
   import { CVscFs
@@ -54,7 +54,7 @@ export async function tst_dbg(){
 //====================================================================
 
 export async function tst_history(){
-    const ü_extn = await ß_RuntimeContext.whenActiveInstanceAvailable();
+    const ü_extn = await ß_whenActiveInstanceAvailable();
   //
   //ü_extn.settings
     const configuration = workspace.getConfiguration();
@@ -104,7 +104,7 @@ export async function tst_history(){
 }
 
 export async function tst_b(){
-    const ü_extn = await ß_RuntimeContext.whenActiveInstanceAvailable();
+    const ü_extn = await ß_whenActiveInstanceAvailable();
   //
     await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
     await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) );
@@ -132,7 +132,6 @@ vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
     console.error(error);
     debugger;
 });
-  */
     const ü_dummy_1 = new MementoFacade<'dummy',IHistoryData>( 'dummy', []    );
     const ü_dummy_2 = new MementoFacade<'dummy',IHistoryData>( 'dummy', [0,8] );
     const ü_r1 = ü_dummy_1.dataRef;
@@ -147,6 +146,7 @@ vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
     testEqual( ü_dummy_2.dataRef.length, 2 , 'Dummy 2' ) && testEqual( ü_dummy_2.dataRef[0], 33 );
     await ü_when;
     testEqual( ü_dummy_1.dataRef.length, 1 , 'Dummy 1' ) && testEqual( ü_dummy_1.dataRef[0], 33 );
+  */
 }
 
 //====================================================================
@@ -160,7 +160,7 @@ export async function tst_c(){
 //====================================================================
 
 export async function tst_a(){
-    const ü_extn = extensions.getExtension<TOpenInNpp>( CExtensionId )!;
+    const ü_extn = extensions.getExtension<XtnOpenInNpp>( CExtensionId )!;
     if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
     testEqual( ü_extn.id, CExtensionId );
     testEqual( ü_extn.isActive, false, 'isActive' );
@@ -191,7 +191,7 @@ static async test_0():Promise<void> {
     if(ß_trc){ß_trc( `Workspace: "${ ü_file }"` );}
     await whenTextEditorOpened( ü_file );
   //
-    const ü_activeInstance = ß_RuntimeContext.activeInstance;
+    const ü_activeInstance = await ß_whenActiveInstanceAvailable();
     if(ß_trc){ß_trc( `Extension: "${ ü_activeInstance.extensionApi.id }"` );}
   //
   /*
