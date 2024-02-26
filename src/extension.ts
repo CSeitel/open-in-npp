@@ -7,8 +7,9 @@
 //--------------------------------------------------------------------
   import {
          } from 'vscode';
+  import { ß_trc
+         } from './runtime/context';
   import { ß_whenXtnActivated
-         , ß_trc
          } from './runtime/context-XTN';
 //====================================================================
 

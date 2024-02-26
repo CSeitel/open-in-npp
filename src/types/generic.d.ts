@@ -4,6 +4,7 @@
   export type TWritable<T extends any> = {
       -readonly [K in keyof T] :T[K]
     }
+  export type TNotReadonly<T extends any> = TWritable<{ro:T}>['ro']
 
   export type TOther<T,U> = {
       [K in keyof T]:T[K] & U

@@ -21,9 +21,10 @@
          , ConfigurationTarget
          } from 'vscode';
 //--------------------------------------------------------------------
-  import { ß_whenActiveInstanceAvailable
-         , ß_trc
+  import { ß_whenXtnAvailable
          } from '../../../runtime/context-XTN';
+  import { ß_trc
+         } from '../../../runtime/context';
   import { MementoFacade
          } from '../../../vsc/histUtil';
   import { CVscFs
@@ -54,7 +55,7 @@ export async function tst_dbg(){
 //====================================================================
 
 export async function tst_history(){
-    const ü_extn = await ß_whenActiveInstanceAvailable();
+    const ü_extn = await ß_whenXtnAvailable();
   //
   //ü_extn.settings
     const configuration = workspace.getConfiguration();
@@ -104,7 +105,7 @@ export async function tst_history(){
 }
 
 export async function tst_b(){
-    const ü_extn = await ß_whenActiveInstanceAvailable();
+    const ü_extn = await ß_whenXtnAvailable();
   //
     await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
     await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) );
@@ -191,7 +192,7 @@ static async test_0():Promise<void> {
     if(ß_trc){ß_trc( `Workspace: "${ ü_file }"` );}
     await whenTextEditorOpened( ü_file );
   //
-    const ü_activeInstance = await ß_whenActiveInstanceAvailable();
+    const ü_activeInstance = await ß_whenXtnAvailable();
     if(ß_trc){ß_trc( `Extension: "${ ü_activeInstance.extensionApi.id }"` );}
   //
   /*

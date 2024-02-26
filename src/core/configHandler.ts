@@ -9,8 +9,9 @@
   import {
          } from 'vscode';
 //--------------------------------------------------------------------
-  import { ß_RuntimeContext
-         , ß_trc
+  import { ß_trc
+         } from '../runtime/context';
+  import { ß_XtnOpenInNpp
          } from '../runtime/context-XTN';
   import { shortenText
          , expandEnvVariables
@@ -40,7 +41,7 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
       return ü_current;
     }
   //
-    const ü_cfgHst = ß_RuntimeContext.activeInstance.globalHistory.config;
+    const ü_cfgHst = ß_XtnOpenInNpp.globalHistory.config;
     const ü_done = await ü_cfgHst.whenDataRef<string>();
     try {
         const ü_cfgData = ü_cfgHst.dataRef;

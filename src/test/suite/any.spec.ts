@@ -5,7 +5,6 @@
 //--------------------------------------------------------------------
   import * as ß_any from './lib/any.impl';
 //====================================================================
-
   const ß_skipTests =  true; // = except single test
   whenAllTestsRun([
       [ 'Single', [ ß_any.tst_whenFileTypeKnown

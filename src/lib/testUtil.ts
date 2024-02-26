@@ -14,6 +14,8 @@
          } from 'path';
   import { inspect
          } from 'util';
+  import { ß_writeStdOut
+         } from '../runtime/context';
   import { shortenText
          } from './textUtil';
 //--------------------------------------------------------------------
@@ -31,7 +33,6 @@
   export const CTestDirName = join( __dirname, '../../.vscode-temp' );
   const CSeriesOfTests = [] as TTestResult[];
   let ß_errorCount = 0;
-  const toStdOut = function( ü_text:string ){process.stdout.write( ü_text + '\n' ); }
   //process.stdout.write.bind( process.stdout );
 //====================================================================
 
@@ -62,7 +63,7 @@ export function suiteSummary():number {
     const ü_rc = ß_errorCount;
                  ß_errorCount = 0;
     if ( ! CWithMocha ) {
-        toStdOut( `Overall result: ${ ü_rc } failed tests` );
+        ß_writeStdOut( `Overall result: ${ ü_rc } failed tests` );
         process.exit( ü_rc );
     }
     return ü_rc;
@@ -82,7 +83,7 @@ export function suiteSummary():number {
     } else {
     }
   //
-    toStdOut( ü_title );
+    ß_writeStdOut( ü_title );
     if ( ü_isArray ) { ö_suiteArray (); }
     else             { ö_suiteRecord(); }
   //
@@ -108,7 +109,7 @@ function ß_testChain( ö_chain:Promise<number>[] ) {
         console.log( ü_title );
         return ü_impl().then (function(){ return ö_rc; })
                        .catch(function( ü_err ){
-            toStdOut( echo( ü_err, 300 ) );
+            ß_writeStdOut( echo( ü_err, 300 ) );
             return ö_rc + 1;
         });
     });
@@ -154,7 +155,7 @@ export function testSummary( ü_series?:string ):void {
     const ü_echo = ü_results.join( ü_crlf ) + ü_crlf;
   //
     CSeriesOfTests.length = 0;
-    if ( ü_ok === ü_all ) { toStdOut( ü_echo ); }
+    if ( ü_ok === ü_all ) { ß_writeStdOut( ü_echo ); }
     else                  { throw new Error( ü_echo ); }
 }
 

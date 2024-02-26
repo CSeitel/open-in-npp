@@ -18,7 +18,7 @@
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { ß_trc
-         } from '../runtime/context-XTN';
+         } from '../runtime/context';
   import { workspace
          , commands
          , window
@@ -114,9 +114,6 @@ async function ö_info( ü_newVersion:string ):Promise<void> {
 
 }
 
-//====================================================================
-  export type _OpenInNpp = XtnOpenInNpp
-//--------------------------------------------------------------------
 //====================================================================
 /*
 */
