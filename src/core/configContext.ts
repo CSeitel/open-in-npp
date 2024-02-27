@@ -20,6 +20,7 @@
          , whenWorkingDir
          , whenExecutableChecked
          } from './configHandler';
+
 //====================================================================
 
 class ConfigProxy {

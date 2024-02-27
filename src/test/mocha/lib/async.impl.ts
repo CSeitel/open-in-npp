@@ -4,6 +4,7 @@
   import { whenDelay
          , UniqueResource
          , LockHandler
+         , ValueCalcY
          } from '../../../lib/asyncUtil';
   import { testSummary
          , testEqual
@@ -55,6 +56,28 @@ async function ö_access( ü_secs:number ):Promise<void> {
     ü_done();
     ü_done();
     ö_some = ü_secs;
+}
+}
+
+//====================================================================
+
+export async function tst_XY(){
+    const ü_calc = new ValueCalcY( 200 as number, ö_whenY );
+    const ü_whenY = ü_calc.whenY;
+    ü_calc.x = 10;
+    testEqual( await ü_calc.whenY,  23 );
+    let ü_y = 0;
+    try {
+        ü_y = await ü_whenY;
+    } catch (error) {
+        ü_y = 0;
+    }
+    testEqual( ü_y, 0, 'Reached' );
+    testSummary( 'UniqueResource' );
+//
+async function ö_whenY( ü_x:number ):Promise<number> {
+    await whenDelay( ü_x );
+    return ü_x + 13;
 }
 }
 

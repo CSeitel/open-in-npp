@@ -33,7 +33,7 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IRuntimeContext {
 //====================================================================
 
 export function ß_trc( ü_text:any ):void {
-    console.log( ü_text );
+    console.error( 'TST:', ü_text );
 }
 
 export function ß_writeStdOut( ü_text:string ):void {

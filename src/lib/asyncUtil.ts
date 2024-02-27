@@ -1,5 +1,7 @@
 /*
 */
+  import { type TAsyncFunctionSingleArg
+         } from '../types/generic.d';
   import { TPromise
          , IReleaseResource
          } from '../types/lib.asyncUtil.d';
@@ -28,6 +30,34 @@ function ö_later():void {
                       const ü_end   = process.hrtime.bigint();
                       const ü_delta = ( ü_end - ö_start ) / BigInt( 1000000 );
     ö_oref.resolve( Number( ü_delta ) );
+}
+
+}
+
+//====================================================================
+
+export class ValueCalcY<Ty,Tx=Ty> {
+    private          _whenY:PromiseLike<Ty> = undefined as any;
+    private          _x    :            Tx  = undefined as any;
+constructor(        ü_x             :Tx
+  , private readonly _whenCalculated:TAsyncFunctionSingleArg<Ty,Tx>
+){
+    this.x = ü_x;
+}
+
+set x( ü_x:Tx ) {
+    this._whenY = this._whenCalculated( this._x = ü_x );
+}
+
+get whenY():PromiseLike<Ty> {
+    let ö_pendingY = this._whenY;
+    let ö_x        = this._x    ;
+    return this._whenY.then( ü_y =>{
+        if ( ö_pendingY === this._whenY ) { return ü_y; }
+        throw new Error( `Outdated ${ ö_x }` )
+                                           return this.whenY;
+
+    });
 }
 
 }

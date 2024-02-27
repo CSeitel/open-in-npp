@@ -11,8 +11,10 @@
     }
 //====================================================================
 
-  export type TAnyFunction  <T=any> = ( ...args:any[] )=>            T
-  export type TAsyncFunction<T=any> = ( ...args:any[] )=>PromiseLike<T>
+  export type TAnyFunction           <Ty=any> = ( ...args:any[] )=>            Ty
+  export type TAnyFunctionSingleArg  <Ty=any> = ( ...args:any[] )=>            Ty
+  export type TAsyncFunction         <Ty=any> = ( ...args:any[] )=>PromiseLike<Ty>
+  export type TAsyncFunctionSingleArg<Ty,Tx>  = (    arg0:Tx    )=>PromiseLike<Ty>
 
   export type TStringify  <T=any> = ( arg0:T )=>string
 
