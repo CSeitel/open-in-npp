@@ -2,6 +2,8 @@
 */
   import { type SpawnOptions
          } from 'child_process';
+  import { type TAsyncFunctionSingleArg
+         } from '../types/generic.d';
   import { type TINITIAL
          } from '../constants/extension';
 //--------------------------------------------------------------------
@@ -16,10 +18,12 @@
          } from 'vscode';
   import { ß_trc
          } from '../runtime/context';
+  import { ValueCalcY
+         } from '../lib/asyncUtil';
   import { whenExecutable
          , whenWorkingDir
          , whenExecutableChecked
-         } from './configHandler';
+         } from '../core/configHandler';
 
 //====================================================================
 
@@ -43,6 +47,17 @@ class ConfigProxy {
 }
 
 //--------------------------------------------------------------------
+
+export class ConfgContext extends ConfigProxy {
+    private readonly _whenExecutable = new ValueCalcY( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> );
+    private readonly _whenWorkingDir = new ValueCalcY( super.workingDirectory, whenWorkingDir                                               );
+
+get whenExecutable():PromiseLike<string> { return this._whenExecutable.whenY; }
+get whenWorkingDir():PromiseLike<string> { return this._whenWorkingDir.whenY; }
+
+}
+
+//====================================================================
 
 export default class ConfigContext extends ConfigProxy {
 //
@@ -95,7 +110,7 @@ private constructor(
     } else {
       if ( this._executableTouched ) {
         if ( ü_previous.executable === this.executable ) {
-          if(ß_trc){ß_trc( `Constant` );}
+          ß_trc&& ß_trc( `Constant` );
         }
       }
     }

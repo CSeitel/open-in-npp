@@ -46,7 +46,7 @@
 //====================================================================
 
 export async function tst_dbg(){
-    return tst_history();
+    return tst_b();
 
     console.log( __filename );
     throw new Error( __dirname )

@@ -15,14 +15,16 @@
 //--------------------------------------------------------------------
   import { ß_trc
          } from '../runtime/context';
+  import { ß_XtnOpenInNpp
+         } from '../runtime/context-XTN';
 //--------------------------------------------------------------------
   import   ßß_i18n
            from '../i18n';
   import { EButtons as EButtons
          } from '../i18n';
 //------------------------------------------------------------------------------
-  import   ConfigContext
-           from '../core/configContext';
+  import { ConfgContext
+         } from '../core/configContext';
   import { whenChildProcessSpawned
          } from '../lib/any';
   import { whenTempFile
@@ -98,7 +100,7 @@ export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:
 //==============================================================================
 
 class CLIArgs {
-    private readonly _config                   = ConfigContext.current;
+    private readonly _config                   = ß_XtnOpenInNpp.cfgCntxt;
     private readonly _activeEditor             = window.activeTextEditor;
     private readonly _mode         :EModes
     private readonly _mainPath     :string
@@ -189,7 +191,7 @@ async submit():Promise<number> {
 
     }
   //
-      let ü_exe  = await this._config.whenExecutable();
+      let ü_exe  = await this._config.whenExecutable;
     const ü_opts = await this._options();
   //
     const ü_verbatim = !!ü_opts.windowsVerbatimArguments === true;

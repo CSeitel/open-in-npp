@@ -22,11 +22,11 @@
   import { ß_RuntimeContext
          , ß_trc
          } from './context';
+//====================================================================
+  export const ß_XtnOpenInNpp   = null as unknown as XtnOpenInNpp;
+         const ß_that           = ß_implement( ß_RuntimeContext as TInitialRuntimeContext );
   import { XtnOpenInNpp
          } from '../core/runtime';
-//====================================================================
-         const ß_that           = ß_implement( ß_RuntimeContext as TInitialRuntimeContext );
-  export const ß_XtnOpenInNpp   = null as unknown as XtnOpenInNpp;
 //====================================================================
 
 function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IXtnRuntimeContext {
@@ -59,7 +59,7 @@ export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):P
     }
   //
     //ß_trc&& ß_trc( 'Re-Activation' );
-      if ( ß_XtnOpenInNpp.context !== ü_vscXtnContext ) {
+      if ( ß_XtnOpenInNpp.vscContext !== ü_vscXtnContext ) {
         //ß_trc&& ß_trc( 'Re-Activation: new Context' );
       }
   //

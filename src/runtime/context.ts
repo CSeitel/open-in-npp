@@ -32,7 +32,7 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IRuntimeContext {
 
 //====================================================================
 
-export function ß_trc( ü_text:any ):void {
+export const ß_trc:IRuntimeContext['devTrace'] = function( ü_text:any ):void {
     console.error( 'TST:', ü_text );
 }
 

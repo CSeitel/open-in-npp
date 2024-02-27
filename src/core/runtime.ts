@@ -17,18 +17,20 @@
          , CEXtnCommands
          } from '../constants/extension';
 //--------------------------------------------------------------------
-  import { ß_trc
-         } from '../runtime/context';
   import { workspace
          , commands
          , window
          } from 'vscode';
+  import { ß_trc
+         } from '../runtime/context';
+  import { ConfgContext
+         } from '../core/configContext';
+  import   ConfigContext
+           from '../core/configContext';
   import { openInNppActive
          , openInNppEditor
          , openInNppExplorer
          } from '../core/implementation';
-  import   ConfigContext
-           from '../core/configContext';
   import { whenUriOpened
          , whenSettingsOpened
          } from '../vsc/cmdUtil';
@@ -45,20 +47,22 @@ export class XtnOpenInNpp {
     readonly version      :string
     readonly commands     :TExtensionCommand[]
     readonly settings     :TExtensionConfig
+    readonly cfgCntxt     :ConfgContext
 
 constructor(
-    readonly context      :ExtensionContext
+    readonly vscContext   :ExtensionContext
 ){
     ß_trc&& ß_trc( 'Instance activated' );
   //console.dir( this.context.globalState );
+    this.cfgCntxt = new ConfgContext();
   //
     this.globalHistory =
-      { admin  : new MementoFacade( context, 'admin' , { version   : 0  } )
-      , config : new MementoFacade( context, 'config', { executable: '' } )
-      , dummy  : new MementoFacade( context, 'dummy' , []                 )
+      { admin  : new MementoFacade( vscContext, 'admin' , { version   : 0  } )
+      , config : new MementoFacade( vscContext, 'config', { executable: '' } )
+      , dummy  : new MementoFacade( vscContext, 'dummy' , []                 )
       };
   //
-    this.extensionApi = context.extension;// extensions.getExtension( CExtensionId )!;
+    this.extensionApi = vscContext.extension;// extensions.getExtension( CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
     this.version     = ü_json.version;
@@ -77,9 +81,9 @@ constructor(
                 console.error( `Command "${ ü_cmdId }" not implemented.` );
                 continue;
         }
-        this.context.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
+        this.vscContext.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
-        this.context.subscriptions.push(  workspace.onDidChangeConfiguration( this.modificationSignalled.bind( this ) )  );
+        this.vscContext.subscriptions.push(  workspace.onDidChangeConfiguration( this.modificationSignalled.bind( this ) )  );
   //
     this.whenActivated = this._whenActivationFinalized();
 }
