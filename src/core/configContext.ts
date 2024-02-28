@@ -28,7 +28,7 @@
 //====================================================================
 
 class ConfigProxy {
-    private readonly _wsConfig = workspace.getConfiguration();
+    private _wsConfig = workspace.getConfiguration();
   //
     get  executable            ():string       { return this._wsConfig.get<any>( EConfigurationIds.executable            ); }
     get  spawnOptions          ():SpawnOptions { return this._wsConfig.get<any>( EConfigurationIds.spawnOptions          ); }
@@ -41,97 +41,63 @@ class ConfigProxy {
     get  filesInFolderPattern  ():string       { return this._wsConfig.get<any>( EConfigurationIds.filesInFolderPattern  ); }
     get  matchingFilesLimit    ():number       { return this._wsConfig.get<any>( EConfigurationIds.matchingFilesLimit    ); }
     get  preserveCursor        ():boolean      { return this._wsConfig.get<any>( EConfigurationIds.preserveCursor        ); }
+  //
     set executable( ü_executable:string ) {
         this._wsConfig.update( EConfigurationIds.executable, ü_executable, ConfigurationTarget.Workspace );
     }
+protected _update():void {
+              this._wsConfig = workspace.getConfiguration();
+}
+
 }
 
 //--------------------------------------------------------------------
 
-export class ConfgContext extends ConfigProxy {
-    private readonly _whenExecutable = new ValueCalcY( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> );
-    private readonly _whenWorkingDir = new ValueCalcY( super.workingDirectory, whenWorkingDir                                               );
-
-get whenExecutable():PromiseLike<string> { return this._whenExecutable.whenY; }
-get whenWorkingDir():PromiseLike<string> { return this._whenWorkingDir.whenY; }
-
+export class ConfigContext extends ConfigProxy {
+  public  static api = new ConfigContext();
+//static get api():ConfgContext { }
+    private          _whenExecutable :ValueCalcY<string>|null = null;
+    private          _whenWorkingDir :ValueCalcY<string>|null = null;
+            readonly  modificationSignalled = this._modificationSignalled.bind( this );
+private constructor(){
+    super();
 }
-
-//====================================================================
-
-export default class ConfigContext extends ConfigProxy {
 //
-    private static         _current :ConfigContext|TINITIAL = SINITIAL;
-    private static         _touched                         = 1;
-    private static         _executableTouched               = 0;
+get whenExecutable():PromiseLike<string> { return (   this._whenExecutable
+                                                 || ( this._whenExecutable = new ValueCalcY( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ) ) ).whenY; }
+get whenWorkingDir():PromiseLike<string> { return (   this._whenWorkingDir
+                                                 || ( this._whenWorkingDir = new ValueCalcY( super.workingDirectory, whenWorkingDir                                               ) ) ).whenY; }
 //
-static modificationSignalled( ü_change:ConfigurationChangeEvent ):void {
-    const ü_that = ConfigContext;
+private async _modificationSignalled( ü_change:ConfigurationChangeEvent ):Promise<void> {
+    if ( ! ü_change.affectsConfiguration( CPrefix ) ) { return; }
   //
-    if(ß_trc){ß_trc( `Configuration modified: "${ ü_that._touched }"` );}
-  //if ( ü_that._current === SINITIAL ) { return; } // _touched = 1
+    ß_trc&& ß_trc( `Event: Configuration changed` );
   //
     if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
       || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
       || ü_change.affectsConfiguration( EConfigurationIds.extendEditorTitleMenu     )
        ) { return; }
   //
-                                                                           ü_that._touched           ++ ;
-    if ( ü_change.affectsConfiguration( EConfigurationIds.executable ) ) { ü_that._executableTouched ++ ;
-        whenExecutableChecked( ConfigContext.current.executable );
-      //ß_trc&& ß_trc( ConfigSnapshot.current.executable );
+    this._update();
+  //
+    if ( ü_change.affectsConfiguration( EConfigurationIds.executable ) ) {
+         if ( this._whenExecutable !== null )
+            { this._whenExecutable.x = super.executable; }
+        const ü_x = this.executable;
+        const ü_y = await this.whenExecutable;
+      //const ü_x = this._whenExecutable!.x;
+        ß_trc&& ß_trc( `${ ü_y } from ${ ü_x }` );
     }
   //
 }
-//
-static get current():ConfigContext {
-    if ( this._touched > 0 ) {
-         this._touched = 0 ;
-    //
-      const ü_current = new ConfigContext( this._current, this._executableTouched > 0 );
-      this._current           = ü_current;
-      this._executableTouched = 0;
-    }
-  //
-    return this._current as ConfigContext;
-}
-//
-    private          _whenWorkingDir    :Promise<string> | TINITIAL = SINITIAL;
-    private          _whenExecutable    :Promise<string> | TINITIAL = SINITIAL;
-    private          _executable        :        string  | TINITIAL = SINITIAL;
-private constructor(
-                    ü_previous          :ConfigContext  | TINITIAL
-  , private readonly _executableTouched :boolean
-){
-    super();
-  //
-    if ( ü_previous === SINITIAL ) {
-        ß_trc&& ß_trc( 'Config Initial Load' );
-    } else {
-      if ( this._executableTouched ) {
-        if ( ü_previous.executable === this.executable ) {
-          ß_trc&& ß_trc( `Constant` );
-        }
-      }
-    }
-}
-//
-async whenExecutable():Promise<string> {
-      if ( this._executable === SINITIAL )
-         { this._executable = await whenExecutable( super.executable, ! this._executableTouched );
-         //this._whenExecutable.then( ü_executable => { this.executable = ü_executable; } );
-         }
-    return this._executable;
-}
-
-get whenWorkingDir():Promise<string> {
-      if ( this._whenWorkingDir === SINITIAL )
-         { this._whenWorkingDir = whenWorkingDir( super.workingDirectory ); }
-    return this._whenWorkingDir;
-}
-//
 }
 
 //====================================================================
 /*
+whenExecutable( ü_update = false ):PromiseLike<string> {
+         if (              this._whenExecutable === null )
+                         { this._whenExecutable   = new ValueCalcY( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ); }
+    else if ( ü_update ) { this._whenExecutable.x =                 super.executable; }
+    return this._whenExecutable.whenY;
+}
 */

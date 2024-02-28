@@ -46,7 +46,7 @@
 //====================================================================
 
 export async function tst_dbg(){
-    return tst_b();
+    return tst_settings();
 
     console.log( __filename );
     throw new Error( __dirname )
@@ -54,7 +54,7 @@ export async function tst_dbg(){
 
 //====================================================================
 
-export async function tst_history(){
+export async function tst_settings(){
     const ü_extn = await ß_whenXtnAvailable();
   //
   //ü_extn.settings
@@ -62,6 +62,12 @@ export async function tst_history(){
     const ü_a = configuration.update( EConfigurationIds.executable, '1otepad.exe', ConfigurationTarget.Workspace );
     const ü_b = configuration.update( EConfigurationIds.executable, '2otepad.exe', ConfigurationTarget.Workspace );
     await Promise.all([ü_a,ü_b]);
+  //
+    testSummary();
+}
+
+export async function tst_history(){
+    const ü_extn = await ß_whenXtnAvailable();
   //
     const ü_home = workspace.workspaceFolders![0].uri.fsPath
     ß_trc&& ß_trc( ü_home );

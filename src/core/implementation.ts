@@ -23,7 +23,7 @@
   import { EButtons as EButtons
          } from '../i18n';
 //------------------------------------------------------------------------------
-  import { ConfgContext
+  import { ConfigContext
          } from '../core/configContext';
   import { whenChildProcessSpawned
          } from '../lib/any';
