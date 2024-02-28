@@ -22,6 +22,7 @@
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_whenXtnAvailable
+         , ß_getConfigSnapshot
          } from '../../../runtime/context-XTN';
   import { ß_trc
          } from '../../../runtime/context';
@@ -57,13 +58,23 @@ export async function tst_dbg(){
 export async function tst_settings(){
     const ü_extn = await ß_whenXtnAvailable();
   //
-  //ü_extn.settings
-    const configuration = workspace.getConfiguration();
-    const ü_a = configuration.update( EConfigurationIds.executable, '1otepad.exe', ConfigurationTarget.Workspace );
-    const ü_b = configuration.update( EConfigurationIds.executable, '2otepad.exe', ConfigurationTarget.Workspace );
-    await Promise.all([ü_a,ü_b]);
+    const ü_cfg_0 = ß_getConfigSnapshot();
+    const ü_mod_a = ö_setExe( '' );
+    testEqual   ( ß_getConfigSnapshot(), ü_cfg_0 );
+    await ü_mod_a;
+    testNotEqual( ß_getConfigSnapshot(), ü_cfg_0 );
+  //
+    const ü_exe_a = await ß_getConfigSnapshot().whenExecutable;
+    await ö_setExe( '2otepad.exe' );
+    const ü_exe_b = await ß_getConfigSnapshot().whenExecutable;
+    ß_trc&& ß_trc( ü_exe_a );
+    ß_trc&& ß_trc( ü_exe_b );
   //
     testSummary();
+  //
+function ö_setExe( ü_exe:string ):PromiseLike<void> {
+    return workspace.getConfiguration().update( EConfigurationIds.executable, ü_exe, ConfigurationTarget.Workspace );
+}
 }
 
 export async function tst_history(){

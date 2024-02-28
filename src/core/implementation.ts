@@ -15,7 +15,7 @@
 //--------------------------------------------------------------------
   import { ß_trc
          } from '../runtime/context';
-  import { ß_XtnOpenInNpp
+  import { ß_getConfigSnapshot
          } from '../runtime/context-XTN';
 //--------------------------------------------------------------------
   import   ßß_i18n
@@ -23,8 +23,6 @@
   import { EButtons as EButtons
          } from '../i18n';
 //------------------------------------------------------------------------------
-  import { ConfigContext
-         } from '../core/configContext';
   import { whenChildProcessSpawned
          } from '../lib/any';
   import { whenTempFile
@@ -100,7 +98,7 @@ export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:
 //==============================================================================
 
 class CLIArgs {
-    private readonly _config                   = ß_XtnOpenInNpp.cfgCntxt;
+    private readonly _config                   = ß_getConfigSnapshot();
     private readonly _activeEditor             = window.activeTextEditor;
     private readonly _mode         :EModes
     private readonly _mainPath     :string

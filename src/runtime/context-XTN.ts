@@ -22,9 +22,12 @@
   import { ß_RuntimeContext
          , ß_trc
          } from './context';
+  import { getConfigSnapshot
+         } from '../core/configContext';
 //====================================================================
-  export const ß_XtnOpenInNpp   = null as unknown as XtnOpenInNpp;
-         const ß_that           = ß_implement( ß_RuntimeContext as TInitialRuntimeContext );
+  export const ß_XtnOpenInNpp      = null as unknown as XtnOpenInNpp;
+  export const ß_getConfigSnapshot = getConfigSnapshot;
+         const ß_that              = ß_implement( ß_RuntimeContext as TInitialRuntimeContext );
   import { XtnOpenInNpp
          } from '../core/runtime';
 //====================================================================

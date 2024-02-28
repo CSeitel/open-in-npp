@@ -23,7 +23,7 @@
          } from 'vscode';
   import { ß_trc
          } from '../runtime/context';
-  import { ConfigContext
+  import { configModificationSignalled
          } from '../core/configContext';
   import { openInNppActive
          , openInNppEditor
@@ -45,14 +45,12 @@ export class XtnOpenInNpp {
     readonly version      :string
     readonly commands     :TExtensionCommand[]
     readonly settings     :TExtensionConfig
-    readonly cfgCntxt     :ConfigContext
 
 constructor(
     readonly vscContext   :ExtensionContext
 ){
     ß_trc&& ß_trc( 'Instance activated' );
   //console.dir( this.context.globalState );
-    this.cfgCntxt = ConfigContext.api;
   //
     this.globalHistory =
       { admin  : new MementoFacade( vscContext, 'admin' , { version   : 0  } )
@@ -81,7 +79,7 @@ constructor(
         }
         this.vscContext.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
-        this.vscContext.subscriptions.push(  workspace.onDidChangeConfiguration( this.cfgCntxt.modificationSignalled )  );
+        this.vscContext.subscriptions.push(  workspace.onDidChangeConfiguration( configModificationSignalled )  );
   //
     this.whenActivated = this._whenActivationFinalized();
 }
