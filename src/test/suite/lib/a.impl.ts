@@ -13,6 +13,7 @@
   import * as ßß_vsCode from 'vscode';
   import * as ßß_assert from 'assert';
   import { join
+         , resolve
          } from 'path';
 //--------------------------------------------------------------------
   import { commands
@@ -68,13 +69,16 @@ export async function tst_settings(){
     await ö_setExe( '2otepad.exe' );
     const ü_exe_b = await ß_getConfigSnapshot().whenExecutable;
     ß_trc&& ß_trc( ü_exe_a );
-    ß_trc&& ß_trc( ü_exe_b );
+    ß_trc&& ß_trc( process.cwd() );
+  //
+    await ö_setDir( resolve( '../a' ) );
+    const ü_cfg_1 = ß_getConfigSnapshot();
+    const ü_dir = await ü_cfg_1.whenWorkingDir;
   //
     testSummary();
   //
-function ö_setExe( ü_exe:string ):PromiseLike<void> {
-    return workspace.getConfiguration().update( EConfigurationIds.executable, ü_exe, ConfigurationTarget.Workspace );
-}
+function ö_setExe( ü_exe:string ):PromiseLike<void> { return workspace.getConfiguration().update( EConfigurationIds.executable      , ü_exe, ConfigurationTarget.Workspace ); }
+function ö_setDir( ü_dir:string ):PromiseLike<void> { return workspace.getConfiguration().update( EConfigurationIds.workingDirectory, ü_dir, ConfigurationTarget.Workspace ); }
 }
 
 export async function tst_history(){

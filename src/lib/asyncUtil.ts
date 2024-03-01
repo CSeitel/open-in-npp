@@ -36,24 +36,32 @@ function ö_later():void {
 
 //====================================================================
 
-export class ValueCalcY<Ty,Tx=Ty> {
-    private          _whenY:PromiseLike<Ty> = undefined as any;
-    private          _x    :            Tx  = undefined as any;
-constructor(        ü_x             :Tx
+export class AsyncCalculation<Ty,Tx=Ty> {
+    private          _tag  :PromiseLike<Ty>|null = null;
+    private          _whenY:PromiseLike<Ty>|null = null;
+    private          _x    :            Tx       = undefined as any;
+constructor(        ü_x    :            Tx
   , private readonly _whenCalculated:TAsyncFunctionSingleArg<Ty,Tx>
+  , public  readonly  lazy = false
 ){
     this.x = ü_x;
 }
 
 set x( ü_x:Tx ) {
-    this._whenY = this._whenCalculated( this._x = ü_x );
+                       this._x     =                           ü_x  ;
+    if ( this.lazy ) { this._tag   = null; }
+    else             { this._whenY = this._whenCalculated( this._x ); }
 }
 
 get whenY():PromiseLike<Ty> {
+    if ( this.lazy ) { this._tag   =
+                       this._whenY = this._whenCalculated( this._x ); }
+  //
     let ö_pendingY = this._whenY;
     let ö_x        = this._x    ;
-    return this._whenY.then( ü_y =>{
-        if ( ö_pendingY === this._whenY ) { return ü_y; }
+    return this._whenY!.then( ü_y => {
+                      const ö_current = this.lazy ? this._tag : this._whenY;
+        if ( ö_pendingY === ö_current ) { return ü_y; }
         throw new Error( `Outdated ${ ö_x }` )
                                            return this.whenY;
 

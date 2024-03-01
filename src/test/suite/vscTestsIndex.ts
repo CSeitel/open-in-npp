@@ -14,10 +14,10 @@
   import { createPromise
          } from '../../lib/asyncUtil';
 //--------------------------------------------------------------------
-//const ß_what = '**/**.spec.js';
   const ß_specsRoot = join( __dirname, '.' );
-  const ß_what_   = '**/any.spec.js';
-  const ß_what    = 'dbg.spec.js';
+    let ß_what    = '**/**.spec.js';
+        ß_what    = 'dbg.spec.js';
+        ß_what    = 'any.spec.js';
   const ß_timeout = 99;
 //====================================================================
 

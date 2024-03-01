@@ -18,7 +18,7 @@
          } from 'vscode';
   import { ß_trc
          } from '../runtime/context';
-  import { ValueCalcY
+  import { AsyncCalculation
          } from '../lib/asyncUtil';
   import { whenExecutable
          , whenWorkingDir
@@ -43,8 +43,12 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
         ß_cfgSnapshot.resetExecutable();
         const ü_x =       ß_cfgSnapshot.executable     ;
         const ü_y = await ß_cfgSnapshot.whenExecutable ;
-      //const ü_x = this._whenExecutable!.x;
-        ß_trc&& ß_trc( `${ ü_y } from ${ ü_x }` );
+        ß_trc&& ß_trc( `Exe ${ ü_y } from ${ ü_x }` );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory ) ) {
+        ß_cfgSnapshot.resetWorkingDir();
+        const ü_x =       ß_cfgSnapshot.workingDirectory;
+        const ü_y = await ß_cfgSnapshot.whenWorkingDir  ;
+        ß_trc&& ß_trc( `Dir ${ ü_y } from ${ ü_x }` );
     }
   //
 }
@@ -88,22 +92,19 @@ constructor(
 export class ConfigSnapshot extends ConfigProxy {
 //static get api():ConfgContext { }
 constructor(
-    protected        _whenExecutable :ValueCalcY<string>|null = null
-  , protected        _whenWorkingDir :ValueCalcY<string>|null = null
+    protected        _whenExecutable :AsyncCalculation<string>|null = null
+  , protected        _whenWorkingDir :AsyncCalculation<string>|null = null
 
 ){
     super();
 }
 //
 get whenExecutable():PromiseLike<string> { return (   this._whenExecutable
-                                                 || ( this._whenExecutable = new ValueCalcY( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ) ) ).whenY; }
+                                                 || ( this._whenExecutable = new AsyncCalculation( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ) ) ).whenY; }
 get whenWorkingDir():PromiseLike<string> { return (   this._whenWorkingDir
-                                                 || ( this._whenWorkingDir = new ValueCalcY( super.workingDirectory, whenWorkingDir                                               ) ) ).whenY; }
-resetExecutable():void {
-         if ( this._whenExecutable !== null )
-            { this._whenExecutable.x = super.executable; }
-
-}
+                                                 || ( this._whenWorkingDir = new AsyncCalculation( super.workingDirectory, whenWorkingDir                                               ) ) ).whenY; }
+resetExecutable():void { if ( this._whenExecutable !== null ) { this._whenExecutable.x = super.executable      ; } }
+resetWorkingDir():void { if ( this._whenWorkingDir !== null ) { this._whenWorkingDir.x = super.workingDirectory; } }
 
 clone():ConfigSnapshot {
     return new ConfigSnapshot( this._whenExecutable, this._whenWorkingDir );

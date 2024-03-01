@@ -6,7 +6,7 @@
   import { normalize
          , isAbsolute
          } from 'path';
-  import {
+  import { FileSystemError
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_trc
@@ -17,7 +17,10 @@
          , expandEnvVariables
          } from '../lib/textUtil';
   import { isExe
+         , whenKnownAsFolder
          } from '../lib/fsUtil';
+  import {
+         } from '../vsc/fsUtil';
 //====================================================================
 
 export async function whenExecutableChecked( ü_exeInput:string ):Promise<string> {
@@ -62,7 +65,7 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
         else if ( await isExe( ü_current =                     EExecutables.x86_32bit    ) ) {}
         else                 { ü_current =                     EExecutables.path_env         ;}
       //
-        if(ß_trc){ß_trc( `Executable found: "${ ü_current }"` );}
+        ß_trc&& ß_trc( `Executable found: "${ ü_current }"` );
                            ü_cfgData.executable = ü_current;
         ü_cfgHst.dataRef = ü_cfgData;
       //
@@ -80,7 +83,13 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
 //--------------------------------------------------------------------
 
 export async function whenWorkingDir( ü_dir:string ):Promise<string> {
-    return expandEnvVariables( ü_dir );
+    const ü_path = expandEnvVariables( ü_dir );
+    if ( isAbsolute( ü_path ) ) {
+        const ü_valid = await whenKnownAsFolder( ü_path );
+      //ß_trc&& ß_trc( `Directory found: "${ ü_path }"` );
+        if ( ! ü_valid ) { throw FileSystemError.FileNotADirectory( ü_path ); }
+    }
+    return ü_path;
 }
 
 //====================================================================

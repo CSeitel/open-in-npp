@@ -4,7 +4,7 @@
   "ß_trc": {
     "scope": "javascript,typescript"
   , "prefix"     : "ß_trc"
-  , "body"       : [ "if(ß_trc){ß_trc( `\"${ $1 }\"` );}", "$2" ]
+  , "body"       : [ "ß_trc&& ß_trc( `\"${ $1 }\"` );", "$2" ]
   , "description": "Log output to console"
   }
 }

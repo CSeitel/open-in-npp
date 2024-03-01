@@ -7,6 +7,8 @@
          } from '../../../constants/vsc';
 /*
 */
+  import { ß_trc
+         } from '../../../runtime/context';
   import { fileToUri
          , whenFileInfoRead
          , whenFileTypeKnown
@@ -21,8 +23,9 @@
          } from '../../../lib/asyncUtil';
   import { testSrc
          , testSummary
-         , testFunction
          , testAsyncFunction
+         , testFunction
+         , testEqual
          , bindArgs
          } from '../../../lib/testUtil';
 //====================================================================
@@ -31,7 +34,15 @@ export async function tst_whenFileInfoRead(){
     const ö_info = ( await whenFileInfoRead( testSrc( 'real_1' ) ) )!;
     const ü_data = [ 'virtual_2_d'
                    , 'virtual_1_d' ].map( ü_name => [testSrc( ü_name ), '0.0' ] as [string,string] )
-    await testAsyncFunction( ö_whenCtime, ü_data )
+    await testAsyncFunction( ö_whenCtime, ü_data );
+  //
+    const ü_a = await whenFileInfoRead( '.'  );
+    const ü_b = await whenFileInfoRead( '..' );
+    ß_trc&& ß_trc( `"${ new Date( ü_a!.mtime ) }"` );
+    ß_trc&& ß_trc( fileToUri( 'Users' ).fsPath );
+    
+    testEqual( ü_a!.mtime, ü_b!.mtime );
+  //
     testSummary();
 
 async function ö_whenCtime( ü_path:string ):Promise<string> {
