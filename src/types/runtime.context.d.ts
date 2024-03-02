@@ -12,7 +12,7 @@
   export type TUnicodeWriter  = ( output:string, moreThanAscii?:boolean )=>void
   export type TInputReader    = ()=>string
   export type TOutputWriter   = ( output:string )=>void
-  export type TDeveloperTrace =(( output:any    )=>void)|false
+  export type TDeveloperTrace = ( output:any, ü_intro ?:string )=>void
   export type TInputDecoder   = (  input:string )=>string
   export type TOutputEncoder  = ( output:string )=>string
   export type TOutputTypeCode = 'abort'
@@ -34,7 +34,7 @@
       readonly globalThis :typeof globalThis & { ßRuntimeContext$ ?:IRuntimeContext }
       readonly globalData :T
     //
-      readonly devTrace   :TDeveloperTrace
+      readonly devTrace   :TDeveloperTrace|false
       readonly writeStdOut:TOutputWriter
   }
 

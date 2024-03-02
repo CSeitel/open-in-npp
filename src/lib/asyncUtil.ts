@@ -3,6 +3,7 @@
   import { type TAsyncFunctionSingleArg
          } from '../types/generic.d';
   import { type TPromise
+         , type TPromiseSettled
          , type IReleaseResource
          } from '../types/lib.asyncUtil.d';
   import { ß_trc
@@ -34,6 +35,14 @@ function ö_later():void {
     ö_oref.resolve( Number( ü_delta ) );
 }
 
+}
+
+//====================================================================
+
+export async function promiseSettled<T>( ü_prms:PromiseLike<T> ):Promise<TPromiseSettled<T>> {
+     const ö_done = ( await Promise.allSettled([ ü_prms ]) )[0] as TPromiseSettled<T>;
+           ö_done.rejected = ö_done.status === 'rejected';
+    return ö_done;
 }
 
 //====================================================================

@@ -3,7 +3,8 @@
   import { EExecutables
          } from '../constants/extension';
 //--------------------------------------------------------------------
-  import { normalize
+  import { resolve
+         , normalize
          , isAbsolute
          } from 'path';
   import { FileSystemError
@@ -48,7 +49,7 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
     const ü_done = await ü_cfgHst.whenDataRef<string>();
     try {
         const ü_cfgData = ü_cfgHst.dataRef;
-        if(ß_trc){ß_trc( `Config-History ${ ü_cfgData }` );}
+        ß_trc&& ß_trc( ü_cfgData, `Config-History` );
       //
         if ( ü_useHistory ) {
             const ü_lastExe = ü_cfgData.executable;
@@ -82,13 +83,12 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
 
 //====================================================================
 
-export async function whenWorkingDir( ü_dir:string ):Promise<string> {
-    const ü_path = expandEnvVariables( ü_dir );
-    if ( isAbsolute( ü_path ) ) {
-        const ü_valid = await whenKnownAsFolder( ü_path );
-      //ß_trc&& ß_trc( `Directory found: "${ ü_path }"` );
-        if ( ! ü_valid ) { throw FileSystemError.FileNotADirectory( ü_path ); }
-    }
+export async function whenWorkingDir( ü_cfgPath:string ):Promise<string> {
+    if ( ü_cfgPath.length === 0 ) { return ü_cfgPath; }
+  //
+    const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
+    if ( isAbsolute( ü_path) && ! await whenKnownAsFolder( ü_path ) ) { throw FileSystemError.FileNotADirectory( ü_path ); }
+  //ß_trc&& ß_trc( `Directory found: "${ ü_path }"` );
     return ü_path;
 }
 

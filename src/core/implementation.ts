@@ -3,9 +3,9 @@
   import { type SpawnOptions
          } from 'child_process';
 //--------------------------------------------------------------------
-  import * as ßß_vsCode from 'vscode';
   import * as ßß_path   from 'path';
-  import {
+  import { join
+         , isAbsolute
          } from 'path';
   import { promises as ßß_fs_p
          } from 'fs';
@@ -25,6 +25,8 @@
 //------------------------------------------------------------------------------
   import { whenChildProcessSpawned
          } from '../lib/any';
+  import { promiseSettled
+         } from '../lib/asyncUtil';
   import { whenTempFile
          } from '../lib/fsUtil';
   import { shortenText
@@ -42,7 +44,6 @@
          } from '../vsc/ui';
 //--------------------------------------------------------------------
   import ß_showInformationMessage = window.showInformationMessage ;
-  import ß_showWarningMessage     = window.showWarningMessage     ;
   import ß_showErrorMessage       = window.showErrorMessage       ;
 //------------------------------------------------------------------------------
   const enum ECLIParameters
@@ -107,9 +108,9 @@ class CLIArgs {
     private          _asWorkspace  :boolean    = false;
 
 constructor( ü_mode:TAllModes                                               );
-constructor( ü_mode:TAllModes, ü_mainUri :ßß_vsCode.Uri                     );
-constructor( ü_mode:TAllModes, ü_mainUri :ßß_vsCode.Uri, ü_others :string[] );
-constructor( ü_mode:TAllModes, ü_mainUri?:ßß_vsCode.Uri, ü_others?:string[]
+constructor( ü_mode:TAllModes, ü_mainUri :Uri                     );
+constructor( ü_mode:TAllModes, ü_mainUri :Uri, ü_others :string[] );
+constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[]
 ){
     if(ß_trc){ß_trc( `ActiveEditor: ${ this._activeEditor !== undefined }` );}
   //
@@ -194,7 +195,7 @@ async submit():Promise<number> {
   //
     const ü_verbatim = !!ü_opts.windowsVerbatimArguments === true;
     if ( ü_verbatim ) {
-      if(ß_trc){ß_trc( `windowsVerbatimArguments: ${ ü_opts.windowsVerbatimArguments }` );}
+      ß_trc&& ß_trc( `windowsVerbatimArguments: ${ ü_opts.windowsVerbatimArguments }` );
     }
     const ü_args = await this._arguments( ü_verbatim );
     if ( ü_args.length === 0 ) { return CNotAPid; }
@@ -204,7 +205,8 @@ async submit():Promise<number> {
       const ü_pid =  await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
       return ü_pid;
     } catch ( ü_eX ) {
-      ß_showErrorMessage( ßß_i18n.spawn_error( ( ü_eX as Error ).message ) );
+        ß_trc&& ß_trc( ü_eX );
+        ß_showErrorMessage( ßß_i18n.spawn_error( ( ü_eX as Error ).message ) );
     //ß_showInformationMessage( ( ü_eX as Error ).message );
       return CNotAPid;
     }
@@ -281,11 +283,18 @@ private async _options():Promise<SpawnOptions> {
 private async _cwd( ü_skip:string|undefined ):Promise<string> {
     if ( ü_skip !== undefined ) { return ''; }
   //
-    let ü_cwd = await this._config.whenWorkingDir;
+    let ü_cwd = '';
+    const ü_whenCwd = await promiseSettled( this._config.whenWorkingDir );
+    if ( ü_whenCwd.rejected ) {
+        window.showWarningMessage( ''+ü_whenCwd.reason );
+        ß_trc&& ß_trc( ü_whenCwd.reason );
+    } else {
+        ü_cwd = ü_whenCwd.value;
+    }
   //
     if ( ü_cwd.length > 0 ) {
-      if ( ! ßß_path.isAbsolute( ü_cwd ) ) {
-       ü_cwd = ßß_path.join( await this._whenMainFolder(), ü_cwd );
+      if ( ! isAbsolute( ü_cwd ) ) {
+       ü_cwd = join( await this._whenMainFolder(), ü_cwd );
       }
     } else {
        ü_cwd = await this._whenMainFolder();

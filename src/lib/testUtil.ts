@@ -106,12 +106,13 @@ function ö_suiteRecord():void {
 function ß_testChain( ö_chain:Promise<number>[] ) {
  return function ö_testChain( ü_title:string, ü_impl:TAsyncTestFunction ):void {
     ö_chain[0] = ö_chain[0].then(function( ö_rc ){
-        console.log( ü_title );
-        return ü_impl().then (function(){ return ö_rc; })
-                       .catch(function( ü_err ){
+        ß_writeStdOut( ü_title );
+        return ü_impl().then( function(){ return ö_rc; }
+                            , function( ü_err ){
             ß_writeStdOut( echo( ü_err, 300 ) );
             return ö_rc + 1;
-        });
+        }
+                            )
     });
  };
 }

@@ -44,8 +44,9 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IXtnRuntimeContext {
     return ü_rtCntxt;
 }
 
-function ß_devTrace( ü_text:any ):void {
-    console.warn( 'Xtn:', ü_text );
+function ß_devTrace( ü_text:any, ü_intro?:string ):void {
+    if ( typeof(ü_intro) === 'string' ) { console.log( 'XTN-%s: %o', ü_intro, ü_text ); }
+    else                                { console.log(    'XTN: %o',          ü_text ); }
 }
 
 //====================================================================

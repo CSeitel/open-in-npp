@@ -13,6 +13,7 @@
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { workspace
+         , window
          , ConfigurationChangeEvent
          , ConfigurationTarget
          } from 'vscode';
@@ -20,51 +21,12 @@
          , ß_toggleDevTrace
          } from '../runtime/context';
   import { AsyncCalculation
+         , promiseSettled
          } from '../lib/asyncUtil';
   import { whenExecutable
          , whenWorkingDir
          , whenExecutableChecked
          } from '../core/configHandler';
-//====================================================================
-
-export async function configModificationSignalled( ü_change:ConfigurationChangeEvent ):Promise<void> {
-    if ( ! ü_change.affectsConfiguration( CPrefix ) ) { return; }
-  //
-    ß_trc&& ß_trc( `Event: Configuration changed` );
-  //
-    if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
-      || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
-      || ü_change.affectsConfiguration( EConfigurationIds.extendEditorTitleMenu     )
-       ) { return; }
-  //
-    ß_cfgIsDirty  = true;
-    ß_cfgSnapshot = getConfigSnapshot() ;
-  //
-           if ( ü_change.affectsConfiguration( EConfigurationIds.executable ) ) {
-        ß_cfgSnapshot.resetExecutable();
-        const ü_x =       ß_cfgSnapshot.executable     ;
-        const ü_y = await ß_cfgSnapshot.whenExecutable ;
-        ß_trc&& ß_trc( `Exe ${ ü_y } from ${ ü_x }` );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory ) ) {
-        ß_cfgSnapshot.resetWorkingDir();
-        const ü_x =       ß_cfgSnapshot.workingDirectory;
-        const ü_y = await ß_cfgSnapshot.whenWorkingDir  ;
-        ß_trc&& ß_trc( `Dir ${ ü_y } from ${ ü_x }` );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace ) ) {
-        ß_toggleDevTrace();
-    }
-  //
-}
-
-export function getConfigSnapshot():ConfigSnapshot {
-    if ( ß_cfgIsDirty ) {
-         ß_cfgIsDirty = false;
-    //ß_trc&& ß_trc( 'Dirty' );
-        ß_cfgSnapshot = ß_cfgSnapshot?.clone() ?? new ConfigSnapshot();
-    }
-      return ß_cfgSnapshot;
-}
-
 //====================================================================
 
 class ConfigProxy {
@@ -86,12 +48,12 @@ constructor(
     get  preserveCursor        ():boolean      { return this._vscConfig.get<any>( EConfigurationIds.preserveCursor        ); }
     get  developerTrace        ():boolean      { return this._vscConfig.get<any>( EConfigurationIds.developerTrace        ); }
   //
-    set executable( ü_executable:string ) {
+    set executable_( ü_executable:string ) {
         this._vscConfig.update( EConfigurationIds.executable, ü_executable, ConfigurationTarget.Workspace );
     }
 }
 
-//====================================================================
+//--------------------------------------------------------------------
 
 export class ConfigSnapshot extends ConfigProxy {
 //static get api():ConfgContext { }
@@ -107,8 +69,18 @@ get whenExecutable():PromiseLike<string> { return (   this._whenExecutable
                                                  || ( this._whenExecutable = new AsyncCalculation( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ) ) ).whenY; }
 get whenWorkingDir():PromiseLike<string> { return (   this._whenWorkingDir
                                                  || ( this._whenWorkingDir = new AsyncCalculation( super.workingDirectory, whenWorkingDir                                               ) ) ).whenY; }
-resetExecutable():void { if ( this._whenExecutable !== null ) { this._whenExecutable.x = super.executable      ; } }
-resetWorkingDir():void { if ( this._whenWorkingDir !== null ) { this._whenWorkingDir.x = super.workingDirectory; } }
+async resetExecutable():Promise<void> {
+    const ü_x = super.executable;
+    if ( this._whenExecutable !== null ) { this._whenExecutable.x = ü_x; }
+    const ü_y = await this.whenExecutable;
+    ß_trc&& ß_trc( `Exe ${ ü_y } from ${ ü_x }` );
+}
+resetWorkingDir():PromiseLike<string> {
+    const ü_x = super.workingDirectory;
+    if ( this._whenWorkingDir !== null ) { this._whenWorkingDir.x = ü_x; }
+    return this.whenWorkingDir;
+  //ß_trc&& ß_trc( `Dir ${ ü_y } from ${ ü_x }` );
+}
 
 clone():ConfigSnapshot {
     return new ConfigSnapshot( this._whenExecutable, this._whenWorkingDir );
@@ -116,10 +88,43 @@ clone():ConfigSnapshot {
 
 }
 
-//--------------------------------------------------------------------
+//====================================================================
     let ß_cfgIsDirty  = true;
     let ß_cfgSnapshot = undefined as unknown as ConfigSnapshot
         ß_cfgSnapshot = getConfigSnapshot();
+//--------------------------------------------------------------------
+
+export function getConfigSnapshot():ConfigSnapshot {
+    if ( ß_cfgIsDirty ) {
+         ß_cfgIsDirty = false;
+    //ß_trc&& ß_trc( 'Dirty' );
+        ß_cfgSnapshot = ß_cfgSnapshot?.clone() ?? new ConfigSnapshot();
+    }
+      return ß_cfgSnapshot;
+}
+
+export async function configModificationSignalled( ü_change:ConfigurationChangeEvent ):Promise<void> {
+    if ( ! ü_change.affectsConfiguration( CPrefix ) ) { return; }
+  //
+    ß_trc&& ß_trc( `Event: Configuration changed` );
+  //
+    if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
+      || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
+      || ü_change.affectsConfiguration( EConfigurationIds.extendEditorTitleMenu     )
+       ) { return; }
+  //
+    ß_cfgIsDirty = true;
+  //
+           if ( ü_change.affectsConfiguration( EConfigurationIds.executable       ) ) { getConfigSnapshot().resetExecutable();
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory ) ) {
+        Promise.allSettled
+        const ü_done = await promiseSettled( getConfigSnapshot().resetWorkingDir() );
+        ü_done.rejected && window.showErrorMessage( ü_done.reason );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace   ) ) { ß_toggleDevTrace ();
+    }
+  //
+}
+
 //====================================================================
 /*
 whenExecutable( ü_update = false ):PromiseLike<string> {

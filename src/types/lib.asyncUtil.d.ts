@@ -7,6 +7,8 @@
       resolve( value :T     ):void
       reject ( reason:Error ):void
     }
+  export type TPromiseSettled<T> = ( PromiseFulfilledResult<T> & { rejected:false   } )
+                                 | ( PromiseRejectedResult     & { rejected:true    } )
 
 //====================================================================
 

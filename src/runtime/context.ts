@@ -10,6 +10,7 @@
   import { sep
          } from 'path';
 //====================================================================
+  
   type TInitialRuntimeContext = TWritable<IRuntimeContext>
          const ß_that           = ß_implement( {} as TInitialRuntimeContext );
   export const ß_RuntimeContext = ß_that;
@@ -34,8 +35,9 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IRuntimeContext {
 
 //====================================================================
 
-export const ß_trc:TDeveloperTrace = function( ü_text:any ):void {
-    console.error( 'TST:', ü_text );
+export const ß_trc:IRuntimeContext['devTrace'] = function( ü_text:any, ü_intro?:string ):void {
+    if ( typeof(ü_intro) === 'string' ) { console.log( 'TST-%s: %o', ü_intro, ü_text ); }
+    else                                { console.log(    'TST: %o',          ü_text ); }
 }
 
 export function ß_writeStdOut( ü_text:string ):void {
@@ -43,7 +45,7 @@ export function ß_writeStdOut( ü_text:string ):void {
 }
 
 export function ß_toggleDevTrace():void {
-    ( ß_trc as TNotReadonly<TDeveloperTrace> ) = ß_trc ? false : ß_that.devTrace;
+    ( ß_trc as TInitialRuntimeContext['devTrace'] ) = ß_trc ? false : ß_that.devTrace;
 }
 
 //====================================================================
