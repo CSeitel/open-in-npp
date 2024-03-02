@@ -80,7 +80,7 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
     }
 }
 
-//--------------------------------------------------------------------
+//====================================================================
 
 export async function whenWorkingDir( ü_dir:string ):Promise<string> {
     const ü_path = expandEnvVariables( ü_dir );

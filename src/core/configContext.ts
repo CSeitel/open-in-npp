@@ -17,6 +17,7 @@
          , ConfigurationTarget
          } from 'vscode';
   import { ß_trc
+         , ß_toggleDevTrace
          } from '../runtime/context';
   import { AsyncCalculation
          } from '../lib/asyncUtil';
@@ -39,7 +40,7 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
     ß_cfgIsDirty  = true;
     ß_cfgSnapshot = getConfigSnapshot() ;
   //
-    if ( ü_change.affectsConfiguration( EConfigurationIds.executable ) ) {
+           if ( ü_change.affectsConfiguration( EConfigurationIds.executable ) ) {
         ß_cfgSnapshot.resetExecutable();
         const ü_x =       ß_cfgSnapshot.executable     ;
         const ü_y = await ß_cfgSnapshot.whenExecutable ;
@@ -49,6 +50,8 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
         const ü_x =       ß_cfgSnapshot.workingDirectory;
         const ü_y = await ß_cfgSnapshot.whenWorkingDir  ;
         ß_trc&& ß_trc( `Dir ${ ü_y } from ${ ü_x }` );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace ) ) {
+        ß_toggleDevTrace();
     }
   //
 }
@@ -81,6 +84,7 @@ constructor(
     get  filesInFolderPattern  ():string       { return this._vscConfig.get<any>( EConfigurationIds.filesInFolderPattern  ); }
     get  matchingFilesLimit    ():number       { return this._vscConfig.get<any>( EConfigurationIds.matchingFilesLimit    ); }
     get  preserveCursor        ():boolean      { return this._vscConfig.get<any>( EConfigurationIds.preserveCursor        ); }
+    get  developerTrace        ():boolean      { return this._vscConfig.get<any>( EConfigurationIds.developerTrace        ); }
   //
     set executable( ü_executable:string ) {
         this._vscConfig.update( EConfigurationIds.executable, ü_executable, ConfigurationTarget.Workspace );

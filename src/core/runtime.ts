@@ -22,8 +22,10 @@
          , window
          } from 'vscode';
   import { ß_trc
+         , ß_toggleDevTrace
          } from '../runtime/context';
   import { configModificationSignalled
+         , getConfigSnapshot
          } from '../core/configContext';
   import { openInNppActive
          , openInNppEditor
@@ -51,6 +53,7 @@ constructor(
 ){
     ß_trc&& ß_trc( 'Instance activated' );
   //console.dir( this.context.globalState );
+    getConfigSnapshot().developerTrace || ß_toggleDevTrace();
   //
     this.globalHistory =
       { admin  : new MementoFacade( vscContext, 'admin' , { version   : 0  } )

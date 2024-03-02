@@ -35,6 +35,8 @@
     , filesInFolderPattern      = 'openInNpp.filesInFolderPattern'
     , matchingFilesLimit        = 'openInNpp.matchingFilesLimit'
     , preserveCursor            = 'openInNpp.preserveCursorPosition'
+  //
+    , developerTrace            = 'openInNpp.developerTrace'
     };
 //--------------------------------------------------------------------
   export const enum EExecutables

@@ -2,5 +2,6 @@
     "openInNpp.Executable": "2otepad.exe"
   ,
   "openInNpp.Executable_": "2otepad.exe",
+  "openInNpp.developerTrace": "true",
   "openInNpp.workingDirectory": "c:\\zzz_Dev\\node_modules\\open-in-npp\\.vscode-test\\a"
 }

@@ -14,7 +14,7 @@
 //====================================================================
 
 export async function activate( ü_vscXtnContext:ExtensionContext ):Promise<XtnOpenInNpp> {
-    ß_trc&& ß_trc( 'Activation' );
+    ß_trc&& ß_trc( 'Welcome to `Open In Notepad++`' );
     return ß_whenXtnActivated( ü_vscXtnContext );
 }
 

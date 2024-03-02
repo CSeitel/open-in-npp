@@ -138,6 +138,11 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Add _Open in Notepad++_ to the title menu of the _VS-Code_ editor"
+        },
+        "openInNpp.developerTrace": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Echo information to _Developer Tools_ console"
         }
       }
     }

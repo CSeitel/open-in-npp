@@ -2,9 +2,11 @@
 */
   import { type TAsyncFunctionSingleArg
          } from '../types/generic.d';
-  import { TPromise
-         , IReleaseResource
+  import { type TPromise
+         , type IReleaseResource
          } from '../types/lib.asyncUtil.d';
+  import { ß_trc
+         } from '../runtime/context';
 //====================================================================
 
 export function createPromise<T>():TPromise<T> {
@@ -98,7 +100,7 @@ isPending( ö_actionId:string ):boolean {
 async whenAvailable<R>( ö_actionId?:string ):Promise<IReleaseResource<R>> {
   //
     const ö_when = Date.now() - this._birth_date;
-    console.log( `Queueing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
+    ß_trc&& ß_trc( `Queueing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
   //
     const ü_next = createPromise<T>();
     const ü_whenPrevious = this._cursor;
@@ -124,10 +126,10 @@ function ö_doneImpl( this:UniqueResource<T>, ...ü_err:any[] ):void|Promise<R> 
         && this._consumers[0][2] === ö_done
          ) {
           this._consumers.shift();
-          console.log( `Releasing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
+          ß_trc&& ß_trc( `Releasing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
           ö_releaseNext( this._resource );
       } else {
-          console.log( 'Second Invocation' );
+          ß_trc&& ß_trc( 'Second Invocation' );
       }
     //
       if ( ü_err.length > 0 ) { return Promise.reject<R>( ü_err[0] ); }

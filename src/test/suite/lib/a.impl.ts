@@ -48,10 +48,14 @@
 //====================================================================
 
 export async function tst_dbg(){
+    return tst_manual();
     return tst_settings();
+}
 
-    console.log( __filename );
-    throw new Error( __dirname )
+//====================================================================
+
+export async function tst_manual(){
+    await whenDelay( 30 * 1000 );
 }
 
 //====================================================================
@@ -171,13 +175,6 @@ vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
   */
 }
 
-//====================================================================
-
-export async function tst_c(){
-    await whenNewTextEditorOpened( { content:'{"a":33}' } );
-    const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
-    await whenDelay( 3 * 1000 );
-}
 
 //====================================================================
 
@@ -195,6 +192,8 @@ export async function tst_a(){
           const ü_done = ü_hist.release( 'config' );
     testEqual( ü_done, true );
   */
+    await whenNewTextEditorOpened( { content:'{"a":33}' } );
+    const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
   //
     testSummary( 'tst_' );
   //

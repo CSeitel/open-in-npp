@@ -1,8 +1,10 @@
 /*
 */
   import { type TWritable
+         , type TNotReadonly
          } from '../types/generic.d';
   import { type IRuntimeContext
+         , type TDeveloperTrace
          } from '../types/runtime.context.d';
 //--------------------------------------------------------------------
   import { sep
@@ -32,12 +34,16 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IRuntimeContext {
 
 //====================================================================
 
-export const ß_trc:IRuntimeContext['devTrace'] = function( ü_text:any ):void {
+export const ß_trc:TDeveloperTrace = function( ü_text:any ):void {
     console.error( 'TST:', ü_text );
 }
 
 export function ß_writeStdOut( ü_text:string ):void {
     process.stdout.write( ü_text + ß_that.lineSep );
+}
+
+export function ß_toggleDevTrace():void {
+    ( ß_trc as TNotReadonly<TDeveloperTrace> ) = ß_trc ? false : ß_that.devTrace;
 }
 
 //====================================================================
