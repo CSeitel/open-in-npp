@@ -10,7 +10,7 @@
          , type THistoryProxy
          } from '../types/vsc.extension.d';
 //--------------------------------------------------------------------
-  import { type TExtensionConfig
+  import { type TXtnConfigJSON
          } from '../constants/extension';
   import { CExtensionUrl
          , CPrefix
@@ -46,7 +46,7 @@ export class XtnOpenInNpp {
   //
     readonly version      :string
     readonly commands     :TExtensionCommand[]
-    readonly settings     :TExtensionConfig
+    readonly settings     :TXtnConfigJSON
 
 constructor(
     readonly vscContext   :ExtensionContext

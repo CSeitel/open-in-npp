@@ -70,8 +70,11 @@ export async function isExe( ü_path:string, ü_enforceAbsolute = false ):Promis
 
 //====================================================================
 
-export async function whenTempFile( ü_base:string, ü_noReuse = false ):Promise<string> {
-    let ü_file = join( tmpdir(), ü_base );
+export async function whenTempFile( ü_base:string, ü_tempDir = '', ü_noReuse = false ):Promise<string> {
+    if ( ü_tempDir.length === 0 )
+       { ü_tempDir = tmpdir(); }
+  //
+    let ü_file = join( ü_tempDir, ü_base );
     const ü_temp = parse( ü_file );
     if ( ! await whenKnownAsFolder( ü_temp.dir ) ) { throw new TypeError( `Not a folder ${ ü_temp.dir }` ); }
   //

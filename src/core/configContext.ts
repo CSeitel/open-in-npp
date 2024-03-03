@@ -9,6 +9,7 @@
 //--------------------------------------------------------------------
   import { SINITIAL
          , EConfigurationIds
+         , TXtnConfigKeys
          , CPrefix
          } from '../constants/extension';
 //--------------------------------------------------------------------
@@ -28,29 +29,47 @@
          , whenExecutableChecked
          } from '../core/configHandler';
 //====================================================================
-
+  interface IConfig {
+  }
 class ConfigProxy {
+              readonly  executable                = undefined as unknown as string       ;
+              readonly  spawnOptions              = undefined as unknown as SpawnOptions ;
+              readonly  workingDirectory          = undefined as unknown as string       ;
+              readonly  decoupledExecution        = undefined as unknown as boolean      ;
+              readonly  commandLineArguments      = undefined as unknown as string[]     ;
+              readonly  multiInst                 = undefined as unknown as boolean      ;
+              readonly  skipSessionHandling       = undefined as unknown as string       ;
+              readonly  openFolderAsWorkspace     = undefined as unknown as string       ;
+              readonly  filesInFolderPattern      = undefined as unknown as string       ;
+              readonly  matchingFilesLimit        = undefined as unknown as number       ;
+              readonly  preserveCursor            = undefined as unknown as boolean      ;
+              readonly  developerTrace            = undefined as unknown as boolean      ;
+              readonly  virtualDocumentsDirectory = undefined as unknown as string       ;
+  //
 constructor(
     private _vscConfig = workspace.getConfiguration()
 ){
+    for ( const ü_prop of [ 'executable'
+                          , 'spawnOptions'
+                          , 'workingDirectory'
+                          , 'decoupledExecution'
+                          , 'commandLineArguments'
+                          , 'multiInst'
+                          , 'skipSessionHandling'
+                          , 'openFolderAsWorkspace'
+                          , 'filesInFolderPattern'
+                          , 'matchingFilesLimit'
+                          , 'preserveCursor'
+                          , 'developerTrace'
+                          , 'virtualDocumentsDirectory'
+                          ] as TXtnConfigKeys[] ) {
+        Object.defineProperty( this, ü_prop, { enumerable:true, get: ()=>{ return this._vscConfig.get<any>( EConfigurationIds[ ü_prop ] ); } } );
+    }
 }
   //
-    get  executable            ():string       { return this._vscConfig.get<any>( EConfigurationIds.executable            ); }
-    get  spawnOptions          ():SpawnOptions { return this._vscConfig.get<any>( EConfigurationIds.spawnOptions          ); }
-    get  workingDirectory      ():string       { return this._vscConfig.get<any>( EConfigurationIds.workingDirectory      ); }
-    get  decoupledExecution    ():boolean      { return this._vscConfig.get<any>( EConfigurationIds.decoupledExecution    ); }
-    get  commandLineArguments  ():string[]     { return this._vscConfig.get<any>( EConfigurationIds.commandLineArguments  ); }
-    get  multiInst             ():boolean      { return this._vscConfig.get<any>( EConfigurationIds.multiInst             ); }
-    get  skipSessionHandling   ():string       { return this._vscConfig.get<any>( EConfigurationIds.skipSessionHandling   ); }
-    get  openFolderAsWorkspace ():string       { return this._vscConfig.get<any>( EConfigurationIds.openFolderAsWorkspace ); }
-    get  filesInFolderPattern  ():string       { return this._vscConfig.get<any>( EConfigurationIds.filesInFolderPattern  ); }
-    get  matchingFilesLimit    ():number       { return this._vscConfig.get<any>( EConfigurationIds.matchingFilesLimit    ); }
-    get  preserveCursor        ():boolean      { return this._vscConfig.get<any>( EConfigurationIds.preserveCursor        ); }
-    get  developerTrace        ():boolean      { return this._vscConfig.get<any>( EConfigurationIds.developerTrace        ); }
-  //
-    set executable_( ü_executable:string ) {
-        this._vscConfig.update( EConfigurationIds.executable, ü_executable, ConfigurationTarget.Workspace );
-    }
+set executable_( ü_executable:string ) {
+    this._vscConfig.update( EConfigurationIds.executable, ü_executable, ConfigurationTarget.Workspace );
+}
 }
 
 //--------------------------------------------------------------------
@@ -58,38 +77,45 @@ constructor(
 export class ConfigSnapshot extends ConfigProxy {
 //static get api():ConfgContext { }
 constructor(
-    protected        _whenExecutable :AsyncCalculation<string>|null = null
-  , protected        _whenWorkingDir :AsyncCalculation<string>|null = null
+    private          _whenExecutable     :AsyncCalculation<string>|null = null
+  , private          _whenWorkingDir     :AsyncCalculation<string>|null = null
+  , private          _whenVirtualDocsDir :AsyncCalculation<string>|null = null
 
 ){
     super();
 }
 //
-get whenExecutable():PromiseLike<string> { return (   this._whenExecutable
-                                                 || ( this._whenExecutable = new AsyncCalculation( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ) ) ).whenY; }
-get whenWorkingDir():PromiseLike<string> { return (   this._whenWorkingDir
-                                                 || ( this._whenWorkingDir = new AsyncCalculation( super.workingDirectory, whenWorkingDir                                               ) ) ).whenY; }
+get whenExecutable    ():PromiseLike<string> { return ( this._whenExecutable
+                                                   || ( this._whenExecutable     = new AsyncCalculation( this .executable               , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ) ) ).whenY; }
+get whenWorkingDir    ():PromiseLike<string> { return ( this._whenWorkingDir
+                                                   || ( this._whenWorkingDir     = new AsyncCalculation( this .workingDirectory         , whenWorkingDir                                               ) ) ).whenY; }
+get whenVirtualDocsDir():PromiseLike<string> { return ( this._whenVirtualDocsDir
+                                                   || ( this._whenVirtualDocsDir = new AsyncCalculation( this .virtualDocumentsDirectory, whenWorkingDir                                               ) ) ).whenY; }
 async resetExecutable():Promise<void> {
-    const ü_x = super.executable;
+    const ü_x = this.executable;
     if ( this._whenExecutable !== null ) { this._whenExecutable.x = ü_x; }
     const ü_y = await this.whenExecutable;
     ß_trc&& ß_trc( `Exe ${ ü_y } from ${ ü_x }` );
 }
-resetWorkingDir():PromiseLike<string> {
-    const ü_x = super.workingDirectory;
-    if ( this._whenWorkingDir !== null ) { this._whenWorkingDir.x = ü_x; }
-    return this.whenWorkingDir;
-  //ß_trc&& ß_trc( `Dir ${ ü_y } from ${ ü_x }` );
-}
 
-clone():ConfigSnapshot {
-    return new ConfigSnapshot( this._whenExecutable, this._whenWorkingDir );
+clone( ü_what ?:TXtnConfigKeys ):ConfigSnapshot {
+    const ü_cfg = new ConfigSnapshot( this._whenExecutable
+                                    , this._whenWorkingDir
+                                    , this._whenVirtualDocsDir
+                                    );
+    switch ( ü_what ) {
+        case 'executable'               : if ( ü_cfg._whenExecutable     !== null ) { ü_cfg._whenExecutable    .x = ü_cfg.executable               ; } break;
+        case 'workingDirectory'         : if ( ü_cfg._whenWorkingDir     !== null ) { ü_cfg._whenWorkingDir    .x = ü_cfg.workingDirectory         ; } break;
+        case 'virtualDocumentsDirectory': if ( ü_cfg._whenVirtualDocsDir !== null ) { ü_cfg._whenVirtualDocsDir.x = ü_cfg.virtualDocumentsDirectory; } break;
+    }
+    return ü_cfg;
 }
 
 }
 
 //====================================================================
     let ß_cfgIsDirty  = true;
+    let ß_what        = undefined as TXtnConfigKeys|undefined;
     let ß_cfgSnapshot = undefined as unknown as ConfigSnapshot
         ß_cfgSnapshot = getConfigSnapshot();
 //--------------------------------------------------------------------
@@ -98,7 +124,7 @@ export function getConfigSnapshot():ConfigSnapshot {
     if ( ß_cfgIsDirty ) {
          ß_cfgIsDirty = false;
     //ß_trc&& ß_trc( 'Dirty' );
-        ß_cfgSnapshot = ß_cfgSnapshot?.clone() ?? new ConfigSnapshot();
+        ß_cfgSnapshot = ß_cfgSnapshot?.clone( ß_what ) ?? new ConfigSnapshot();
     }
       return ß_cfgSnapshot;
 }
@@ -114,13 +140,15 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
        ) { return; }
   //
     ß_cfgIsDirty = true;
+    ß_what       = undefined;
   //
-           if ( ü_change.affectsConfiguration( EConfigurationIds.executable       ) ) { getConfigSnapshot().resetExecutable();
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory ) ) {
-        Promise.allSettled
-        const ü_done = await promiseSettled( getConfigSnapshot().resetWorkingDir() );
-        ü_done.rejected && window.showErrorMessage( ü_done.reason );
+           if ( ü_change.affectsConfiguration( EConfigurationIds.executable                ) ) { ß_what = 'executable'               ; getConfigSnapshot();
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_what = 'virtualDocumentsDirectory'; getConfigSnapshot();
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_what = 'workingDirectory'         ;
+        const ü_done = await promiseSettled( getConfigSnapshot().whenWorkingDir );
+        ü_done.rejected && window.showErrorMessage( ''+ü_done.reason );
     } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace   ) ) { ß_toggleDevTrace ();
+    } else {
     }
   //
 }

@@ -119,6 +119,10 @@
           "default": 10,
           "markdownDescription": "When the setting _files-In-Folder-Pattern_ is applied and more files than the specified number are found a dialog box will provide [options](https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp)"
         },
+        "openInNpp.virtualDocumentsDirectory": {
+          "type": "string",
+          "markdownDescription": "When a file does not exist as it is actually a _virtual document_ [see](https://code.visualstudio.com/api/extension-guides/virtual-documents) a shadow copy for usage by _Notepad++_ will be created in this directory"
+        },
         "openInNpp.preserveCursorPosition": {
           "type": "boolean",
           "default": true,

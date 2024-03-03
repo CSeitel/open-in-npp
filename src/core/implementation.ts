@@ -164,7 +164,12 @@ async submit():Promise<number> {
       case EModes.UNTITLED:
         //this._mode         = EModes.UNTITLED;
           const ü_doc = this._activeEditor!.document;
-          const ü_file = await whenTempFile( ü_doc.fileName );
+          const ü_temp = await this._config.whenVirtualDocsDir;
+          if ( ü_temp.length === 0 ) {
+              window.showInformationMessage( 'Save' );
+              return CNotAPid;
+          }
+          const ü_file = await whenTempFile( ü_doc.fileName, ü_temp, false );
           await ßß_fs_p.writeFile( ü_file, ü_doc.getText() );
           ( this._mainPath as any  ) = ü_file;
         break;
