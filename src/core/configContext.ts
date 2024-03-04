@@ -24,13 +24,14 @@
   import { AsyncCalculation
          , promiseSettled
          } from '../lib/asyncUtil';
+  import { XtnStatusBarItem
+         } from './gui';
   import { whenExecutable
          , whenWorkingDir
          , whenExecutableChecked
          } from '../core/configHandler';
 //====================================================================
-  interface IConfig {
-  }
+
 class ConfigProxy {
               readonly  executable                = undefined as unknown as string       ;
               readonly  spawnOptions              = undefined as unknown as SpawnOptions ;
@@ -115,16 +116,17 @@ clone( ü_what ?:TXtnConfigKeys ):ConfigSnapshot {
 
 //====================================================================
     let ß_cfgIsDirty  = true;
-    let ß_what        = undefined as TXtnConfigKeys|undefined;
-    let ß_cfgSnapshot = undefined as unknown as ConfigSnapshot
+    let ß_whatIsDirty = undefined as TXtnConfigKeys|undefined;
+    let ß_cfgSnapshot = undefined as unknown as ConfigSnapshot;
         ß_cfgSnapshot = getConfigSnapshot();
+  const ß_item = new XtnStatusBarItem();
 //--------------------------------------------------------------------
 
 export function getConfigSnapshot():ConfigSnapshot {
     if ( ß_cfgIsDirty ) {
          ß_cfgIsDirty = false;
     //ß_trc&& ß_trc( 'Dirty' );
-        ß_cfgSnapshot = ß_cfgSnapshot?.clone( ß_what ) ?? new ConfigSnapshot();
+        ß_cfgSnapshot = ß_cfgSnapshot?.clone( ß_whatIsDirty ) ?? new ConfigSnapshot();
     }
       return ß_cfgSnapshot;
 }
@@ -140,14 +142,12 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
        ) { return; }
   //
     ß_cfgIsDirty = true;
-    ß_what       = undefined;
+    ß_whatIsDirty = undefined;
   //
-           if ( ü_change.affectsConfiguration( EConfigurationIds.executable                ) ) { ß_what = 'executable'               ; getConfigSnapshot();
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_what = 'virtualDocumentsDirectory'; getConfigSnapshot();
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_what = 'workingDirectory'         ;
-        const ü_done = await promiseSettled( getConfigSnapshot().whenWorkingDir );
-        ü_done.rejected && window.showErrorMessage( ''+ü_done.reason );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace   ) ) { ß_toggleDevTrace ();
+           if ( ü_change.affectsConfiguration( EConfigurationIds.executable                ) ) { ß_whatIsDirty = 'executable'               ; getConfigSnapshot();
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; ß_item.echoPromise( getConfigSnapshot().whenWorkingDir     );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; ß_item.echoPromise( getConfigSnapshot().whenVirtualDocsDir );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace            ) ) { ß_toggleDevTrace ();
     } else {
     }
   //

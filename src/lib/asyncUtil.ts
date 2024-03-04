@@ -3,6 +3,7 @@
   import { type TAsyncFunctionSingleArg
          } from '../types/generic.d';
   import { type TPromise
+         , type TTimer
          , type TPromiseSettled
          , type IReleaseResource
          } from '../types/lib.asyncUtil.d';
@@ -10,13 +11,32 @@
          } from '../runtime/context';
 //====================================================================
 
-export function createPromise<T>():TPromise<T> {
-    const ö_oref = {} as TPromise<T>;
-                                                ö_oref.promise
-    = new Promise<T>( (ü_resolve,ü_reject) => { ö_oref.resolve = ü_resolve;
-                                                ö_oref.reject  = ü_reject ; }
-                    );
-    return ö_oref;
+export async function promiseSettled<T>( ü_prms:PromiseLike<T> ):Promise<TPromiseSettled<T>> {
+     const ö_done = ( await Promise.allSettled([ ü_prms ]) )[0] as TPromiseSettled<T>;
+           ö_done.rejected = ö_done.status === 'rejected';
+    return ö_done;
+}
+
+//====================================================================
+
+export function createTimer( ö_reset = false, ü_then?:Date ):TTimer {
+    let ö_then = ( ü_then === undefined
+                 ? new Date() : ü_then ).valueOf()
+                 ;
+    return ö_timer;
+  //
+function ö_timer( ü_reset?:boolean ):number {
+     const ü_now  = new Date().valueOf();
+     const ü_diff = ü_now - ö_then;
+  //
+    if (   ü_reset
+      || ( ü_reset === undefined 
+        && ö_reset ) ) {
+      ö_then = ü_now;
+    }
+  //
+    return ü_diff ;
+}
 }
 
 //====================================================================
@@ -34,15 +54,17 @@ function ö_later():void {
                       const ü_delta = ( ü_end - ö_start ) / BigInt( 1000000 );
     ö_oref.resolve( Number( ü_delta ) );
 }
-
 }
 
 //====================================================================
 
-export async function promiseSettled<T>( ü_prms:PromiseLike<T> ):Promise<TPromiseSettled<T>> {
-     const ö_done = ( await Promise.allSettled([ ü_prms ]) )[0] as TPromiseSettled<T>;
-           ö_done.rejected = ö_done.status === 'rejected';
-    return ö_done;
+export function createPromise<T>():TPromise<T> {
+    const ö_oref = {} as TPromise<T>;
+                                                ö_oref.promise
+    = new Promise<T>( (ü_resolve,ü_reject) => { ö_oref.resolve = ü_resolve;
+                                                ö_oref.reject  = ü_reject ; }
+                    );
+    return ö_oref;
 }
 
 //====================================================================
@@ -101,9 +123,12 @@ getResource( ü_done:IReleaseResource<any> ):T {
     return this._resource;
 }
 
-isPending( ö_actionId:string ):boolean {
-  const ü_hit = this._consumers.find(function(ü_action){ return ü_action[1] === ö_actionId; });
-  return ü_hit !== undefined;
+isPending( ö_actionId ?:string ):boolean {
+    if ( ö_actionId === undefined ) {
+        return this._consumers.length > 0;
+    }
+    const ü_hit = this._consumers.find(function(ü_action){ return ü_action[1] === ö_actionId; });
+    return ü_hit !== undefined;
 }
 
 async whenAvailable<R>( ö_actionId?:string ):Promise<IReleaseResource<R>> {
