@@ -18,5 +18,22 @@ export function expect<C extends string,T            >( ü_eX:any, ü_code:C|C[]
 }
 
 //====================================================================
+
+export class ErrorMessage extends Error {
+    private readonly _msgArgs:string[]
+constructor(
+    private readonly _message:string
+  ,              ...ü_msgArgs:string[] ){
+    super();
+    this._msgArgs = ü_msgArgs;
+}
+
+toString():string {
+    return this._message +' '+ this._msgArgs.join(' ');
+}
+
+}
+
+//====================================================================
 /*
 */

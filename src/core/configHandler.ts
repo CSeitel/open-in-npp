@@ -20,8 +20,8 @@
   import { isExe
          , whenKnownAsFolder
          } from '../lib/fsUtil';
-  import {
-         } from '../vsc/fsUtil';
+  import { ErrorMessage
+         } from '../lib/error';
 //====================================================================
 
 export async function whenExecutableChecked( ü_exeInput:string ):Promise<string> {
@@ -87,7 +87,7 @@ export async function whenWorkingDir( ü_cfgPath:string ):Promise<string> {
     if ( ü_cfgPath.length === 0 ) { return ü_cfgPath; }
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
-    if ( isAbsolute( ü_path) && ! await whenKnownAsFolder( ü_path ) ) { throw FileSystemError.FileNotADirectory( ü_path ); }
+    if ( isAbsolute( ü_path) && ! await whenKnownAsFolder( ü_path ) ) { throw new ErrorMessage( 'Invalid Working Directory Def "%1"', ü_path ); }
   //ß_trc&& ß_trc( `Directory found: "${ ü_path }"` );
     return ü_path;
 }

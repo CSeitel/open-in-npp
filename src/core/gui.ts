@@ -1,17 +1,12 @@
 /*
 */
-  import { type TAsyncFunctionSingleArg
+  import { type TTimer
+         } from '../types/lib.asyncUtil.d';
+  import { type TStringify
          } from '../types/generic.d';
-  import { type TINITIAL
-         } from '../constants/extension';
 //--------------------------------------------------------------------
-  import { SINITIAL
-         , EConfigurationIds
-         , TXtnConfigKeys
-         , CPrefix
-         } from '../constants/extension';
 //--------------------------------------------------------------------
-  import { window
+  import { StatusBarAlignment, window
          } from 'vscode';
   import { ß_trc
          } from '../runtime/context';
@@ -25,10 +20,11 @@
 //====================================================================
 
 export class XtnStatusBarItem {
-    private readonly _dura  = 5000;
-    private          _delay = 0;
-            readonly  item = window.createStatusBarItem();
-    private readonly _ur   = new UniqueResource( this.item ); 
+    private readonly _duration = 5000;
+    private          _delay    = 0;
+    private readonly _timer    = createTimer( true );
+            readonly  item     = window.createStatusBarItem( StatusBarAlignment.Right );
+    private readonly _ur       = new UniqueResource( this.item ); 
 
 async echoPromise<T>( ü_whenDone:PromiseLike<T> ):Promise<void> {
     const ü_done = await promiseSettled( ü_whenDone );
@@ -36,27 +32,33 @@ async echoPromise<T>( ü_whenDone:PromiseLike<T> ):Promise<void> {
     else                   { this.echoMessage( ''+ü_done.value , 'i' ); }
 }
 
-async echoMessage( ü_text:string, ü_type:'i'|'w'|'e' = 'i' ):Promise<void> {
+async echoMessage( ü_text:string, ü_type:'i'|'w'|'e' = 'i', ü_tooltip?:string ):Promise<void> {
     const ß_a =
       { 'i': '\u24D8 ' // \u2139
       , 'w': '\u26A0 '
       , 'e': '\u274C ' // \u26A1
       };
   //
-    this.item.text = ß_a[ ü_type ]+ shortenText( ü_text, 50 );
-    this._delay += this._dura;
+    this.item.tooltip = ü_tooltip ?? 'Notepad++';
+    this.item.text    = '\u{1F4DD}'+ ß_a[ ü_type ]+ shortenText( ü_text, 80 );
   //
-    if ( this._ur.isPending() ) { return; }
+    if ( this._ur.isPending() ) {
+                      this._timer() ; // reset
+        this._delay = this._duration; // reset
+        return;
+    }
   //
     const ü_release = await this._ur.whenAvailable();
     try {
         this.item.show();
       //const ü_dura = createTimer();
-        while ( this._delay > 0 ) {
+        
+                                            this._timer() ; // reset
+                             this._delay  = this._duration; // reset
+        while (            ( this._delay -= this._timer() ) > 0 ) {
             await whenDelay( this._delay );
-                             this._delay -= this._dura;
+          //ß_trc&& ß_trc( this._delay, 'Dela' )
         }
-      //thisü_dura()
         this.item.hide();
     } finally {
         ü_release();
