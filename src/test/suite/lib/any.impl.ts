@@ -16,7 +16,7 @@
          , isContainedInWorkspace
          } from '../../../vsc/fsUtil';
   import { expect
-         } from '../../../lib/error';
+         } from '../../../lib/errorUtil';
   import { pickDuplet
          } from '../../../lib/arrayUtil';
   import { whenDelay

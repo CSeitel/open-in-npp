@@ -1,5 +1,7 @@
 /*
 */
+  import { type IMessage
+         } from '../types/lib.errorUtil.d';
 //====================================================================
 
 export function expect<C extends string              >(   eX:any,   code:C                 ):void
@@ -19,17 +21,41 @@ export function expect<C extends string,T            >( ü_eX:any, ü_code:C|C[]
 
 //====================================================================
 
-export class ErrorMessage extends Error {
-    private readonly _msgArgs:string[]
+export class ErrorMessage extends Error implements IMessage {
+             readonly  type      :'w'|'e' = 'e';
+             readonly  variables :string[]
 constructor(
-    private readonly _message:string
-  ,              ...ü_msgArgs:string[] ){
-    super();
-    this._msgArgs = ü_msgArgs;
+                     ü_message   :string
+  ,              ... ü_vars      :string[] ){
+    super( ü_message );
+    this.variables = ü_vars;
+}
+
+get text():string {
+    return this.toString();
 }
 
 toString():string {
-    return this._message +' '+ this._msgArgs.join(' ');
+    return this.message +' '+ this.variables.join(' ');
+}
+
+}
+
+export class InfoMessage implements IMessage {
+             readonly  type      :'i'|'w' = 'i';
+    public   readonly  variables :string[]
+constructor(
+    public            message    :string
+  ,              ... ü_vars      :string[] ){
+    this.variables = ü_vars;
+}
+
+get text():string {
+    return this.toString();
+}
+
+toString():string {
+    return this.message +' '+ this.variables.join(' ');
 }
 
 }

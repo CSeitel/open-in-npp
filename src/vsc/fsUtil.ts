@@ -6,7 +6,7 @@
          } from '../types/vsc.fsUtil.d';
   import { type TVscFSErrorCodes
          , type TNodeFSErrorCodes
-         } from '../types/error.d';
+         } from '../types/lib.errorUtil.d';
 //--------------------------------------------------------------------
   import { CEFileType
          } from '../constants/vsc';
@@ -19,7 +19,7 @@
          , RelativePattern
          } from 'vscode';
   import { expect
-         } from '../lib/error';
+         } from '../lib/errorUtil';
 //--------------------------------------------------------------------
   export const CVscFs = workspace.fs;
 //====================================================================

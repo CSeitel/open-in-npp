@@ -6,7 +6,7 @@ https://nodejs.org/api/fs.html#fslstatpath-options-callback
          } from 'fs';
   import { type TFSError
          , type TNodeFSErrorCodes
-         } from '../types/error.d';
+         } from '../types/lib.errorUtil.d';
 //--------------------------------------------------------------------
   import * as ßß_path from 'path';
   import { tmpdir
@@ -18,7 +18,7 @@ https://nodejs.org/api/fs.html#fslstatpath-options-callback
          , constants as ßß_fs_c
          } from 'fs';
   import { expect
-         } from '../lib/error';
+         } from '../lib/errorUtil';
 //====================================================================
 
 export async function whenFileInfoRead( ü_path:PathLike, ü_slnk = false ):Promise<Stats|null> {

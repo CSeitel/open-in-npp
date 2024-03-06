@@ -9,7 +9,7 @@
          } from 'path';
 //--------------------------------------------------------------------
   import { expect
-         } from '../../../lib/error';
+         } from '../../../lib/errorUtil';
   import { whenDelay
          } from '../../../lib/asyncUtil';
   import { pickDuplet

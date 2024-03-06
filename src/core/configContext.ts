@@ -21,13 +21,14 @@
   import { ß_trc
          , ß_toggleDevTrace
          } from '../runtime/context';
+  import { InfoMessage
+         } from '../lib/errorUtil';
   import { AsyncCalculation
-         , promiseSettled
          } from '../lib/asyncUtil';
   import { XtnStatusBarItem
          } from './gui';
   import { whenExecutable
-         , whenWorkingDir
+         , whenKnownAsFolder
          , whenExecutableChecked
          } from '../core/configHandler';
 //====================================================================
@@ -77,21 +78,21 @@ set executable_( ü_executable:string ) {
 
 export class ConfigSnapshot extends ConfigProxy {
 //static get api():ConfgContext { }
+//
 constructor(
     private          _whenExecutable     :AsyncCalculation<string>|null = null
   , private          _whenWorkingDir     :AsyncCalculation<string>|null = null
   , private          _whenVirtualDocsDir :AsyncCalculation<string>|null = null
-
 ){
     super();
 }
 //
 get whenExecutable    ():PromiseLike<string> { return ( this._whenExecutable
-                                                   || ( this._whenExecutable     = new AsyncCalculation( this .executable               , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ) ) ).whenY; }
+                                                   || ( this._whenExecutable     = new AsyncCalculation( this.executable               , whenExecutable as unknown as TAsyncFunctionSingleArg<string>   ) ) ).whenY; }
 get whenWorkingDir    ():PromiseLike<string> { return ( this._whenWorkingDir
-                                                   || ( this._whenWorkingDir     = new AsyncCalculation( this .workingDirectory         , whenWorkingDir                                               ) ) ).whenY; }
+                                                   || ( this._whenWorkingDir     = new AsyncCalculation( this.workingDirectory         , whenKnownAsFolder.bind( null, 'Working Directory'            ) ) ) ).whenY; }
 get whenVirtualDocsDir():PromiseLike<string> { return ( this._whenVirtualDocsDir
-                                                   || ( this._whenVirtualDocsDir = new AsyncCalculation( this .virtualDocumentsDirectory, whenWorkingDir                                               ) ) ).whenY; }
+                                                   || ( this._whenVirtualDocsDir = new AsyncCalculation( this.virtualDocumentsDirectory, whenKnownAsFolder.bind( null, 'Virtual Documents Directory'  ) ) ) ).whenY; }
 async resetExecutable():Promise<void> {
     const ü_x = this.executable;
     if ( this._whenExecutable !== null ) { this._whenExecutable.x = ü_x; }
@@ -145,8 +146,8 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
     ß_whatIsDirty = undefined;
   //
            if ( ü_change.affectsConfiguration( EConfigurationIds.executable                ) ) { ß_whatIsDirty = 'executable'               ; getConfigSnapshot();
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; ß_item.echoPromise( getConfigSnapshot().whenWorkingDir     );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; ß_item.echoPromise( getConfigSnapshot().whenVirtualDocsDir );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; ß_item.echoPromise( getConfigSnapshot().whenWorkingDir    , new InfoMessage( 'W D '    ) );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; ß_item.echoPromise( getConfigSnapshot().whenVirtualDocsDir, new InfoMessage( 'V D Dir' ) );
     } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace            ) ) { ß_toggleDevTrace ();
     } else {
     }

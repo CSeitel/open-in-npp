@@ -18,10 +18,10 @@
          , expandEnvVariables
          } from '../lib/textUtil';
   import { isExe
-         , whenKnownAsFolder
+         , whenKnownAsFolder as fsWhenKnownAsFolder
          } from '../lib/fsUtil';
   import { ErrorMessage
-         } from '../lib/error';
+         } from '../lib/errorUtil';
 //====================================================================
 
 export async function whenExecutableChecked( ü_exeInput:string ):Promise<string> {
@@ -83,11 +83,11 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
 
 //====================================================================
 
-export async function whenWorkingDir( ü_cfgPath:string ):Promise<string> {
+export async function whenKnownAsFolder( ü_purpose:string, ü_cfgPath:string ):Promise<string> {
     if ( ü_cfgPath.length === 0 ) { return ü_cfgPath; }
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
-    if ( isAbsolute( ü_path) && ! await whenKnownAsFolder( ü_path ) ) { throw new ErrorMessage( 'Invalid Working Directory Def "%1"', ü_path ); }
+    if ( isAbsolute( ü_path) && ! await fsWhenKnownAsFolder( ü_path ) ) { throw new ErrorMessage( 'Unknown or invalid '+ü_purpose+' ', ü_path ); }
   //ß_trc&& ß_trc( `Directory found: "${ ü_path }"` );
     return ü_path;
 }
