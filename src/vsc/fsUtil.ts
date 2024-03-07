@@ -78,7 +78,7 @@ export async function whenTextFileRead( ü_fileUri:TFileUri ):Promise<string> {
 
 //====================================================================
 
-export async function findFiles( ü_folder:string, ü_pattern:string ):Promise<string[]> {
+export async function whenFilesFound( ü_folder:string, ü_pattern:string ):Promise<string[]> {
     const ü_glob = new RelativePattern( ü_folder, ü_pattern );
     const ü_hits = await workspace.findFiles( ü_glob );
   //

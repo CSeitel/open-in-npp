@@ -18,10 +18,10 @@
   import { ß_getConfigSnapshot
          } from '../runtime/context-XTN';
 //--------------------------------------------------------------------
-  import   ßß_i18n
-           from '../i18n';
+  import { CDoIt
+         } from '../l10n/i18n';
   import { EButtons as EButtons
-         } from '../i18n';
+         } from '../l10n/i18n';
 //------------------------------------------------------------------------------
   import { whenChildProcessSpawned
          } from '../lib/any';
@@ -32,9 +32,10 @@
   import { shortenText
          , expandEnvVariables
          } from '../lib/textUtil';
-  import { findFiles
-         , whenKnownAsFolder
+  import { whenFilesFound
          } from '../vsc/fsUtil';
+  import { whenKnownAsFolder
+         } from '../lib/fsUtil';
 //--------------------------------------------------------------------
   import { TButtons
          , TDropDownListOptions
@@ -158,7 +159,7 @@ async submit():Promise<number> {
     switch ( this._mode ) {
 
       case EModes.NOFILE:
-        ß_showInformationMessage( ßß_i18n.no_active_file() );
+        ß_showInformationMessage( CDoIt.no_active_file() );
         return CNotAPid;
 
       case EModes.UNTITLED:
@@ -211,7 +212,7 @@ async submit():Promise<number> {
       return ü_pid;
     } catch ( ü_eX ) {
         ß_trc&& ß_trc( ü_eX );
-        ß_showErrorMessage( ßß_i18n.spawn_error( ( ü_eX as Error ).message ) );
+        ß_showErrorMessage( CDoIt.spawn_error( ( ü_eX as Error ).message ) );
     //ß_showInformationMessage( ( ü_eX as Error ).message );
       return CNotAPid;
     }
@@ -330,7 +331,7 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
   //
     const ö_isFolder = await Promise.all( this._others.map( (ü_file       ) => ü_file === this._mainPath ? this._whenMainIsFolder()
                                                                                                          : whenKnownAsFolder( ü_file )     ) );
-    const ü_subsets  = await Promise.all( this._others.map( (ü_file,ü_indx) => ö_isFolder[ ü_indx ] ? findFiles( ü_file, ö_pattern )
+    const ü_subsets  = await Promise.all( this._others.map( (ü_file,ü_indx) => ö_isFolder[ ü_indx ] ? whenFilesFound( ü_file, ö_pattern )
                                                                                                     :          [ ü_file ]            ) );
                                     const ü_files:string[] = [];
     for ( const ü_subset of ü_subsets ) { ü_files.push( ... ü_subset ); }
@@ -339,7 +340,7 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
     if ( ü_files.length > ü_limit ) {
       await this._whenSelected( ü_files, ü_limit );
     } else {
-      ß_showInformationMessage( ßß_i18n.file_hits( this._others.length, ö_pattern ) );
+      ß_showInformationMessage( CDoIt.file_hits( this._others.length, ö_pattern ) );
     }
   //
     return ü_files;
@@ -348,7 +349,7 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
 private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolean> {
   //
     const ü_todo = ü_limit > 0
-                 ? await ß_showInformationMessage( ßß_i18n.max_items( ü_limit, ü_files.length )
+                 ? await ß_showInformationMessage( CDoIt.max_items( ü_limit, ü_files.length )
                        , { title: EButtons.OK    () , id: EButtons.OK     }
                        , { title: EButtons.SELECT() , id: EButtons.SELECT }
                        , { title: EButtons.ALL   () , id: EButtons.ALL    }

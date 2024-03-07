@@ -3,8 +3,8 @@
   import { whenAllTestsRun
          } from '../../lib/testUtil';
 //--------------------------------------------------------------------
-  import * as ß_a   from './lib/a.impl'   ;
-  import * as ß_any from './lib/any.impl' ;
+  import * as ß_a  from './lib/a.impl'   ;
+  import * as ß_fs from './lib/fs.impl' ;
 //====================================================================
 export async function run():Promise<void> {
 
@@ -12,7 +12,7 @@ export async function run():Promise<void> {
     await whenAllTestsRun([
         [ 'Single'   , [ ß_a.tst_dbg
                            ], !ß_skipTests ]
-      , [ 'Any'      , ß_any,  ß_skipTests ]
+      , [ 'fs'       , ß_fs,  ß_skipTests ]
       ]);
 
 }

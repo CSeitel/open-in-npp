@@ -17,7 +17,7 @@
   const ß_specsRoot = join( __dirname, '.' );
     let ß_what    = '**/**.spec.js';
         ß_what    = 'dbg.spec.js';
-        ß_what    = 'any.spec.js';
+        ß_what    = 'all.spec.js';
   const ß_timeout = 99;
 //====================================================================
 

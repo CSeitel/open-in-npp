@@ -14,6 +14,7 @@
          , whenFileTypeKnown
          , whenKnownAsFolder
          , isContainedInWorkspace
+         , whenFilesFound
          } from '../../../vsc/fsUtil';
   import { expect
          } from '../../../lib/errorUtil';
@@ -52,6 +53,14 @@ async function ö_whenCtime( ü_path:string ):Promise<string> {
          + ( ü_info.mtime - ö_info.mtime )
          ;
 }
+}
+
+//====================================================================
+
+export async function tst_whenFilesFound(){
+    const ü_files = await whenFilesFound( testSrc(), '**/*e*.txt' );
+    testEqual( ü_files.length, 5 );
+    testSummary();
 }
 
 //====================================================================

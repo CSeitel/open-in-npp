@@ -27,6 +27,8 @@
   import { configModificationSignalled
          , getConfigSnapshot
          } from '../core/configContext';
+  import { CTxtXtn
+         } from '../l10n/i18n';
   import { openInNppActive
          , openInNppEditor
          , openInNppExplorer
@@ -101,7 +103,7 @@ private async _whenActivationFinalized():Promise<this> {
     return this;
   //
 async function ö_info( ü_newVersion:string ):Promise<void> {
-    const ü_show = await window.showInformationMessage( `Welcome to \`Open-In-Notepad++\` Version ${ ü_newVersion }`, `What's new ?` );
+    const ü_show = await window.showInformationMessage( CTxtXtn.welcome( ü_newVersion ), CTxtXtn.delta());
     switch ( ü_show ) {
         case undefined: break;
         default:
