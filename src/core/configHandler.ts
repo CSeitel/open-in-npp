@@ -1,6 +1,6 @@
 /*
 */
-  import { EExecutables
+  import { CEExecutable
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { resolve
@@ -12,6 +12,8 @@
 //--------------------------------------------------------------------
   import { ß_trc
          } from '../runtime/context';
+  import { CTxtXtn
+         } from '../l10n/i18n';
   import { ß_XtnOpenInNpp
          } from '../runtime/context-XTN';
   import { shortenText
@@ -60,11 +62,11 @@ export async function whenExecutable( ü_explicit:string, ü_useHistory:boolean 
         }
       //
                            let ü_current:string
-             if ( await isExe( ü_current = expandEnvVariables( EExecutables.x64_64bit  ) ) ) {}
-        else if ( await isExe( ü_current = expandEnvVariables( EExecutables.x86_32bit  ) ) ) {}
-        else if ( await isExe( ü_current =                     EExecutables.x64_64bit_   ) ) {}
-        else if ( await isExe( ü_current =                     EExecutables.x86_32bit    ) ) {}
-        else                 { ü_current =                     EExecutables.path_env         ;}
+             if ( await isExe( ü_current = expandEnvVariables( CEExecutable.x64_64bit  ) ) ) {}
+        else if ( await isExe( ü_current = expandEnvVariables( CEExecutable.x86_32bit  ) ) ) {}
+        else if ( await isExe( ü_current =                     CEExecutable.x64_64bit_   ) ) {}
+        else if ( await isExe( ü_current =                     CEExecutable.x86_32bit    ) ) {}
+        else                 { ü_current =                     CEExecutable.path_env         ;}
       //
         ß_trc&& ß_trc( `Executable found: "${ ü_current }"` );
                            ü_cfgData.executable = ü_current;
@@ -87,7 +89,7 @@ export async function whenKnownAsFolder( ü_purpose:string, ü_cfgPath:string ):
     if ( ü_cfgPath.length === 0 ) { return ü_cfgPath; }
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
-    if ( isAbsolute( ü_path) && ! await fsWhenKnownAsFolder( ü_path ) ) { throw new ErrorMessage( 'Unknown or invalid '+ü_purpose+' ', ü_path ); }
+    if ( isAbsolute( ü_path) && ! await fsWhenKnownAsFolder( ü_path ) ) { throw new ErrorMessage( CTxtXtn.noFolder( ü_purpose, ü_path ) ); }
   //ß_trc&& ß_trc( `Directory found: "${ ü_path }"` );
     return ü_path;
 }

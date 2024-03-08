@@ -2,6 +2,10 @@
 */
   import { type SpawnOptions
          } from 'child_process';
+  import { CETrigger
+         , CECliArgument
+         , CEXtnCommands
+         } from '../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_path   from 'path';
   import { join
@@ -10,7 +14,10 @@
   import { promises as ßß_fs_p
          } from 'fs';
   import { Uri
+         , FileType
          , window
+         , commands
+         , TextDocument
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_trc
@@ -27,15 +34,17 @@
          } from '../lib/any';
   import { promiseSettled
          } from '../lib/asyncUtil';
-  import { whenTempFile
+  import { ErrorMessage
+         } from '../lib/errorUtil';
+  import { whenKnownAsFolder
+         , whenTempFile
          } from '../lib/fsUtil';
   import { shortenText
          , expandEnvVariables
+         , wrapDoubleQuotes
          } from '../lib/textUtil';
   import { whenFilesFound
          } from '../vsc/fsUtil';
-  import { whenKnownAsFolder
-         } from '../lib/fsUtil';
 //--------------------------------------------------------------------
   import { TButtons
          , TDropDownListOptions
@@ -43,106 +52,28 @@
          , ListItem
          , DropDownList
          } from '../vsc/ui';
-//--------------------------------------------------------------------
-  import ß_showInformationMessage = window.showInformationMessage ;
-  import ß_showErrorMessage       = window.showErrorMessage       ;
-//------------------------------------------------------------------------------
-  const enum ECLIParameters
-    { multipleInstances      = '-multiInst'
-    , openFoldersAsWorkspace = '-openFoldersAsWorkspace'
-    , skipSessionHandling    = '-nosession'
-    ,   lineNumber           = '-n'
-    , columnNumber           = '-c'
-    };
-  const enum EFileTypes
-    { UNKNOWN = 0
-    , FILE
-    , FOLDER
-    };
-//------------------------------------------------------------------------------
-  const enum EModes
-    { NOFILE = 0
-    , UNTITLED
-    , PALETTE
-    , EDITOR
-    , EXPLORER
-    };
-  type TAllModes = EModes.EXPLORER
-                 | EModes.EDITOR
-                 | EModes.PALETTE
+//====================================================================
+  type TAllModes = CETrigger.EXPLORER
+                 | CETrigger.EDITOR
+                 | CETrigger.PALETTE
 //------------------------------------------------------------------------------
   const CNotAPid = -1;
-//==============================================================================
+//====================================================================
 
 export async function openInNppActive( this:null ):Promise<number> {
-    if(ß_trc){ß_trc( 'Palette Context' );}
-  //
-    const ü_args = new CLIArgs( EModes.PALETTE );
-    return ü_args.submit();
+    return new CliArgs( CETrigger.PALETTE                       ).submit();
 }
-
 export async function openInNppEditor( this:null, ü_fileUri:Uri, ...ü_more:any[] ):Promise<number> {
-    if(ß_trc){ß_trc( `Editor Context: ${ arguments.length }` );}
-  //
-    const ü_args = new CLIArgs( EModes.EDITOR, ü_fileUri );
-    return ü_args.submit();
+    return new CliArgs( CETrigger.EDITOR  , ü_fileUri           ).submit();
 }
-
 export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:Uri[] ):Promise<number> {
-    if(ß_trc){ß_trc( 'Explorer Context' );}
-  //
     const ü_others = ü_fileUris.map( ü_fileUri => ü_fileUri.fsPath );
-  //
-    const ü_args = new CLIArgs( EModes.EXPLORER, ü_fileUri, ü_others );
-    return ü_args.submit();
+    return new CliArgs( CETrigger.EXPLORER, ü_fileUri, ü_others ).submit();
 }
 
-//==============================================================================
+//====================================================================
 
-class CLIArgs {
-    private readonly _config                   = ß_getConfigSnapshot();
-    private readonly _activeEditor             = window.activeTextEditor;
-    private readonly _mode         :EModes
-    private readonly _mainPath     :string
-    private          _mainFileType :EFileTypes = EFileTypes.UNKNOWN;
-    private          _others       :string[]   = [];
-    private          _asWorkspace  :boolean    = false;
-
-constructor( ü_mode:TAllModes                                               );
-constructor( ü_mode:TAllModes, ü_mainUri :Uri                     );
-constructor( ü_mode:TAllModes, ü_mainUri :Uri, ü_others :string[] );
-constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[]
-){
-    if(ß_trc){ß_trc( `ActiveEditor: ${ this._activeEditor !== undefined }` );}
-  //
-    switch ( this._mode = ü_mode ) {
-
-      case EModes.EXPLORER:
-        this._others   = ü_others !       ;
-        this._mainPath = ü_mainUri!.fsPath;
-        break;
-
-      case EModes.EDITOR:
-        this._mainFileType = EFileTypes.FILE;
-        this._mainPath     = CLIArgs._fsPath( ü_mainUri! );
-        break;
-
-      case EModes.PALETTE:
-        if ( this._activeEditor === undefined ) {
-          this._mode         = EModes.NOFILE;
-          this._mainPath     = '';
-        } else if ( this._activeEditor.document.isUntitled ) {
-          this._mode         = EModes.UNTITLED;
-          this._mainPath     = '';
-        } else {
-          this._mainFileType = EFileTypes.FILE;
-          this._mainPath     = this._activeEditor.document.fileName;
-        }
-        break;
-
-    }
-}
-
+class CliArgs {
 static _fsPath( ü_fileUri:Uri ):string {
     switch ( ü_fileUri.scheme ) {
         case 'file':
@@ -154,29 +85,88 @@ static _fsPath( ü_fileUri:Uri ):string {
     return '';
 }
 
+    private readonly _config                   = ß_getConfigSnapshot();
+    private readonly _activeEditor             = window.activeTextEditor;
+    private readonly _mode         :CETrigger
+    private readonly _mainPath     :string
+    private          _mainFileType :FileType   = FileType.Unknown;
+    private          _others       :string[]   = [];
+    private          _asWorkspace  :boolean    = false;
+
+constructor( ü_mode:TAllModes                                     );
+constructor( ü_mode:TAllModes, ü_mainUri :Uri                     );
+constructor( ü_mode:TAllModes, ü_mainUri :Uri, ü_others :string[] );
+constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
+  //
+    switch ( this._mode = ü_mode ) {
+
+      case CETrigger.EXPLORER:
+        if(ß_trc){ß_trc( 'Explorer Context' );}
+        this._others   = ü_others !       ;
+        this._mainPath = ü_mainUri!.fsPath;
+        break;
+
+      case CETrigger.EDITOR:
+        this._mainFileType = FileType.File;
+        this._mainPath     = CliArgs._fsPath( ü_mainUri! );
+        break;
+
+      case CETrigger.PALETTE:
+        if(ß_trc){ß_trc( 'Palette Context' );}
+        if(ß_trc){ß_trc( `ActiveEditor: ${ this._activeEditor !== undefined }` );}
+        if ( this._activeEditor === undefined ) {
+          this._mode         = CETrigger.None;
+          this._mainPath     = '';
+        } else if ( this._activeEditor.document.isUntitled ) {
+          this._mode         = CETrigger.UNTITLED;
+          this._mainPath     = '';
+        } else {
+          this._mainFileType = FileType.File;
+          this._mainPath     = this._activeEditor.document.fileName;
+        }
+        break;
+
+    }
+}
+
+private async _tmpSave( ü_temp:string, ü_doc:TextDocument ):Promise<string> {
+    const ü_file = await whenTempFile( ü_doc.fileName, ü_temp, false );
+    await ßß_fs_p.writeFile( ü_file, ü_doc.getText() );
+    return ü_file;
+}
+
+private async _tmpSave_( ü_temp:string, ü_doc:TextDocument ):Promise<void> {
+    const ü_open = { title:'OK' };
+    const ü_todo = await window.showInformationMessage( 'Save', ü_open  );
+    switch ( ü_todo ) {
+        case ü_open:
+          const ü_file = await this._tmpSave( ü_temp, ü_doc );
+          commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_file ) );
+          break;
+    }
+}
+
 async submit():Promise<number> {
   //
     switch ( this._mode ) {
 
-      case EModes.NOFILE:
-        ß_showInformationMessage( CDoIt.no_active_file() );
+      case CETrigger.None:
+        window.showInformationMessage( CDoIt.no_active_file() );
         return CNotAPid;
 
-      case EModes.UNTITLED:
+      case CETrigger.UNTITLED:
         //this._mode         = EModes.UNTITLED;
           const ü_doc = this._activeEditor!.document;
           const ü_temp = await this._config.whenVirtualDocsDir;
-          if ( ü_temp.length === 0 ) {
-              window.showInformationMessage( 'Save' );
+          if ( ü_temp.length === 0 ) { this._tmpSave_( '', ü_doc );
               return CNotAPid;
           }
-          const ü_file = await whenTempFile( ü_doc.fileName, ü_temp, false );
-          await ßß_fs_p.writeFile( ü_file, ü_doc.getText() );
-          ( this._mainPath as any  ) = ü_file;
+                                       
+          ( this._mainPath as any  ) = await this._tmpSave( ü_temp, ü_doc );
         break;
       //return CNotAPid;
 
-      case EModes.EXPLORER: // folders possible
+      case CETrigger.EXPLORER: // folders possible
         const ü_pattern = this._config.filesInFolderPattern;
         if ( ü_pattern.length > 0 ) {
           this._others = await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit );
@@ -212,7 +202,7 @@ async submit():Promise<number> {
       return ü_pid;
     } catch ( ü_eX ) {
         ß_trc&& ß_trc( ü_eX );
-        ß_showErrorMessage( CDoIt.spawn_error( ( ü_eX as Error ).message ) );
+        window.showErrorMessage( CDoIt.spawn_error( ( ü_eX as Error ).message ) );
     //ß_showInformationMessage( ( ü_eX as Error ).message );
       return CNotAPid;
     }
@@ -225,14 +215,14 @@ private _compileCursorPosition( ü_args:string[] ):void {
   //
     const ü_active = this._activeEditor.document.fileName;
     switch ( this._mode ) {
-      case EModes.EXPLORER:
+      case CETrigger.EXPLORER:
         const ü_indx = this._others.findIndex( ü_file => ü_file === ü_active );
         if ( ü_indx < 0 ) { return; }
         if ( ü_indx !== ( this._others.length - 1 ) ) {
           this._others.push( this._others[ ü_indx ] );
         }
         break;
-      case EModes.EDITOR:
+      case CETrigger.EDITOR:
         if ( ü_active !== this._mainPath ) {
           return;
         }
@@ -244,8 +234,8 @@ private _compileCursorPosition( ü_args:string[] ):void {
     if (   ü_selection === null
       || ! ü_selection.isEmpty ) { return; }
   //
-    ü_args.push( ECLIParameters.  lineNumber + ( 1 + ü_selection.active.line      ) );
-    ü_args.push( ECLIParameters.columnNumber + ( 1 + ü_selection.active.character ) );
+    ü_args.push( CECliArgument.  lineNumber + ( 1 + ü_selection.active.line      ) );
+    ü_args.push( CECliArgument.columnNumber + ( 1 + ü_selection.active.character ) );
 }
 
 private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
@@ -253,20 +243,20 @@ private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
     const ü_args = [];
   //
     if ( this._config.multiInst
-      || this._asWorkspace                ) { ü_args.push( ECLIParameters.multipleInstances      ); }
+      || this._asWorkspace                ) { ü_args.push( CECliArgument.multipleInstances      ); }
   //
-    if ( this._config.skipSessionHandling ) { ü_args.push( ECLIParameters.skipSessionHandling    ); }
+    if ( this._config.skipSessionHandling ) { ü_args.push( CECliArgument.skipSessionHandling    ); }
   //
-    if ( this._asWorkspace                ) { ü_args.push( ECLIParameters.openFoldersAsWorkspace ); }
+    if ( this._asWorkspace                ) { ü_args.push( CECliArgument.openFoldersAsWorkspace ); }
                  this._compileCursorPosition( ü_args );
   //
                                               ü_args.push( ... this._config.commandLineArguments );
   //
     if (   this._others.length > 0       ) {
-                                              ü_args.push( ... ( ü_verbatim ? ß_quote( ... this._others   )
-                                                                            :              this._others   ) );
-    } else                                  { ü_args.push(       ü_verbatim ? ß_quote(     this._mainPath )[0]
-                                                                            :              this._mainPath   );
+                                              ü_args.push( ... ( ü_verbatim ? wrapDoubleQuotes( ... this._others   )
+                                                                            :                       this._others   ) );
+    } else                                  { ü_args.push(       ü_verbatim ? wrapDoubleQuotes(     this._mainPath )[0]
+                                                                            :                       this._mainPath   );
     }
   //
     return ü_args;
@@ -292,11 +282,9 @@ private async _cwd( ü_skip:string|undefined ):Promise<string> {
     let ü_cwd = '';
     const ü_whenCwd = await promiseSettled( this._config.whenWorkingDir );
     if ( ü_whenCwd.rejected ) {
-        window.showWarningMessage( ''+ü_whenCwd.reason );
-        ß_trc&& ß_trc( ü_whenCwd.reason );
-    } else {
-        ü_cwd = ü_whenCwd.value;
-    }
+        if ( ü_whenCwd.reason instanceof ErrorMessage ) { window.showWarningMessage( ü_whenCwd.reason.text ); }
+        else                                            {                      throw ü_whenCwd.reason       ; }
+    } else { ü_cwd = ü_whenCwd.value; }
   //
     if ( ü_cwd.length > 0 ) {
       if ( ! isAbsolute( ü_cwd ) ) {
@@ -318,13 +306,13 @@ private async _whenMainFolder():Promise<string> {
 }
 
 private async _whenMainIsFolder():Promise<boolean> {
-      if ( this._mainFileType === EFileTypes.UNKNOWN )
+      if ( this._mainFileType === FileType.Unknown )
          { this._mainFileType  =  await whenKnownAsFolder( this._mainPath )
-                               ?  EFileTypes.FOLDER
-                               :  EFileTypes.FILE
+                               ?  FileType.Directory
+                               :  FileType.File
                                ;
          }
-    return this._mainFileType === EFileTypes.FOLDER;
+    return this._mainFileType === FileType.Directory;
 }
 
 private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<string[]> {
@@ -340,7 +328,7 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
     if ( ü_files.length > ü_limit ) {
       await this._whenSelected( ü_files, ü_limit );
     } else {
-      ß_showInformationMessage( CDoIt.file_hits( this._others.length, ö_pattern ) );
+      window.showInformationMessage( CDoIt.file_hits( this._others.length, ö_pattern ) );
     }
   //
     return ü_files;
@@ -349,7 +337,7 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
 private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolean> {
   //
     const ü_todo = ü_limit > 0
-                 ? await ß_showInformationMessage( CDoIt.max_items( ü_limit, ü_files.length )
+                 ? await window.showInformationMessage( CDoIt.max_items( ü_limit, ü_files.length )
                        , { title: EButtons.OK    () , id: EButtons.OK     }
                        , { title: EButtons.SELECT() , id: EButtons.SELECT }
                        , { title: EButtons.ALL   () , id: EButtons.ALL    }
@@ -393,15 +381,6 @@ private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolea
 
 }
 
-//==============================================================================
-
-function ß_quote( ...ü_args:string[] ):string[] {
-           ü_args.forEach( (ü_arg,ü_indx) => { ü_args[ ü_indx ] = `"${ ü_arg }"`; } );
-    return ü_args;
-}
-
-//------------------------------------------------------------------------------
-
-//==============================================================================
+//====================================================================
 /*
 */

@@ -4,8 +4,9 @@
          } from 'vscode';
 //==============================================================================
   export const CTxtXtn =
-    { welcome: ( ü1:string )=>l10n.t( 'Welcome to "Open-In-Notepad++" Version ${ ü1 }', ü1 )
-    , delta  :            ()=>l10n.t( 'What\'s new ?' )
+    { welcome : ( ü1:string )=>l10n.t( 'Welcome to "Open-In-Notepad++" Version ${ ü1 }', ü1 )
+    , delta   :                       ()=>l10n.t( 'What\'s new ?' )
+    , noFolder: ( ü1:string, ü2:string )=>l10n.t( 'Unknown or invalid ${ ü1 }: ${ ü2 } ', ü1, ü2 )
     };
 //------------------------------------------------------------------------------
   export const CDoIt =

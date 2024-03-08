@@ -38,13 +38,28 @@
   //
     , developerTrace            : 'openInNpp.developerTrace'
     };
-//--------------------------------------------------------------------
-  export const enum EExecutables
+//====================================================================
+  export const enum CETrigger
+    { None   = 0
+    , UNTITLED
+    , PALETTE
+    , EDITOR
+    , EXPLORER
+    };
+  export const enum CEExecutable
     { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"
     , x64_64bit_ =       "C:\\Program Files\\Notepad++\\notepad++.exe"
     , x86_32bit  =      "%PrograFiles(x86)%\\Notepad++\\notepad++.exe"
     , x86_32bit_ = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
     , path_env   =                                     "notepad++.exe"
+    };
+//--------------------------------------------------------------------
+  export const enum CECliArgument
+    { multipleInstances      = '-multiInst'
+    , openFoldersAsWorkspace = '-openFoldersAsWorkspace'
+    , skipSessionHandling    = '-nosession'
+    ,   lineNumber           = '-n'
+    , columnNumber           = '-c'
     };
 //====================================================================
 /*

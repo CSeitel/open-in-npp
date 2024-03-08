@@ -33,5 +33,14 @@ function ö_win32( ü_original:string, ü_name:string ):string {
 }
 
 //====================================================================
+
+export function wrapDoubleQuotes( ...ö_args:string[] ):string[] {
+           ö_args.forEach(function( ü_arg, ü_indx ){
+           ö_args[ ü_indx ] = `"${ ü_arg }"`;
+           });
+    return ö_args;
+}
+
+//====================================================================
 /*
 */
