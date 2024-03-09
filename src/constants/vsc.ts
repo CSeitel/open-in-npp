@@ -1,4 +1,7 @@
 //--------------------------------------------------------------------
+  export const enum CELanguageId {
+      txt = 'plaintext'
+    }
 //====================================================================
 
   export const enum CEFileType {
@@ -9,6 +12,8 @@
     , SymLinkFile    = 65
     , SymLinkFolder  = 66
     }
+
+//====================================================================
 
   export const enum CEVscCommands {
       openWbSettings   = 'workbench.action.openSettings'

@@ -1,14 +1,44 @@
 /*
 */
   import * as ßß_vsCode from 'vscode';
-  import {
+  import { ThemeIcon
+         , window
          } from 'vscode';
+  import { format
+         } from 'util';
 //------------------------------------------------------------------------------
   import { ß_trc
+         , ß_RuntimeContext
          } from '../runtime/context';
+  import { LCButton
+         } from '../l10n/i18n';
+  import { whenNewTextEditorOpened
+         } from '../vsc/docUtil';
 //------------------------------------------------------------------------------
   type TIcons = 'close'
-//==============================================================================
+//====================================================================
+
+export async function whenErrorShown( ü_eX:any, ü_context:string ):Promise<void> {
+    const ü_more = new MessageButton( 'OK' );
+    const ü_info = `${ ü_context } ${ ü_eX }`;
+    const ü_done = await window.showErrorMessage( ü_info, ü_more );
+    switch ( ü_done ) {
+        case ü_more:
+          //ü_eX.get
+          const ü_content = ü_eX instanceof Error
+                          ? [ ü_eX.name
+                            , ü_eX.message
+                            , ''
+                            , format( '%o', ü_eX )
+                            ].join( ß_RuntimeContext.lineSep )
+                          : format( ü_eX )
+                          ;
+          whenNewTextEditorOpened( { title:'Error-Details', content:ü_content } );
+          break;
+    }
+}
+
+//====================================================================
 
 export class ListItem<T> implements ßß_vsCode.QuickPickItem {
     public          picked     ?:boolean
@@ -28,10 +58,24 @@ setPicked( ü_picked:boolean = true ):ListItem<T> {
 type TListItems<T> =          ListItem<T>[]
                    | Promise< ListItem<T>[] >
 
-//==============================================================================
+//====================================================================
+
+export class MessageButton<T=unknown> {
+    public readonly title  :string
+    public readonly tooltip:string
+constructor(
+                   ü_titleId :keyof typeof LCButton
+  , public readonly  dataRef?:T
+){
+    this.title = LCButton[ ü_titleId ]();
+    this.tooltip = this.title;
+}
+}
+
+//====================================================================
 
 export class VscQIButton<B> implements ßß_vsCode.QuickInputButton {
-    public          iconPath  :ßß_vsCode.ThemeIcon
+    public          iconPath  :ThemeIcon
 constructor(
 //  public iconPath: { light: ßß_vsCode.Uri dark : ßß_vsCode.Uri }
                   ü_icon      :TIcons
@@ -39,10 +83,10 @@ constructor(
   , public readonly reference :B
 ){
   //this.icon = ü_icon;
-    this.iconPath = new ßß_vsCode.ThemeIcon( ü_icon );
+    this.iconPath = new ThemeIcon( ü_icon );
 }
 set icon( ü_icon:string ) {
-    this.iconPath = new ßß_vsCode.ThemeIcon( ü_icon );
+    this.iconPath = new ThemeIcon( ü_icon );
 }
 //
 }

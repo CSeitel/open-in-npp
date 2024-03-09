@@ -3,13 +3,13 @@
   import { l10n
          } from 'vscode';
 //==============================================================================
-  export const CTxtXtn =
+  export const LCXtn =
     { welcome : ( ü1:string )=>l10n.t( 'Welcome to "Open-In-Notepad++" Version ${ ü1 }', ü1 )
     , delta   :                       ()=>l10n.t( 'What\'s new ?' )
     , noFolder: ( ü1:string, ü2:string )=>l10n.t( 'Unknown or invalid ${ ü1 }: ${ ü2 } ', ü1, ü2 )
     };
 //------------------------------------------------------------------------------
-  export const CDoIt =
+  export const LCDoIt =
     {
       exe_not_found : (   ü1:string                    )=>l10n.t( 'Notepad++ executable not found: "${ ü1 }"'                                    , ü1    )
     , spawn_error   : (   ü1:string                    )=>l10n.t( 'Notepad++ execution failed due to error: "${ ü1 }"'                           , ü1    )
@@ -19,11 +19,11 @@
     , max_items     : (   ü1:number,ü2:number          )=>l10n.t( 'Overall ${ ü2 } matching files were found. Only ${ ü1 } file will be opened.' , ü1,ü2 )
     };
 //------------------------------------------------------------------------------
-  export const EButtons =
-    { OK     : () => 'OK'
-    , ALL    : () => 'Open All'
-    , SELECT : () => 'Open a Subset'
-    , CANCEL : () => 'Cancel'
+  export const LCButton =
+    { OK     : ()=>l10n.t( 'OK' )
+    , ALL    : ()=>l10n.t( 'Open All' )
+    , SELECT : ()=>l10n.t( 'Open a Subset' )
+    , CANCEL : ()=>l10n.t( 'Cancel' )
     };
 //==============================================================================
 /*

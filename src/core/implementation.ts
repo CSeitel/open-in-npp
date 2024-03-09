@@ -1,7 +1,10 @@
 /*
+https://nodejs.org/api/fs.html#file-system-flags
 */
   import { type SpawnOptions
          } from 'child_process';
+  import { type TNotReadonly
+         } from '../types/generic.d';
   import { CETrigger
          , CECliArgument
          , CEXtnCommands
@@ -18,6 +21,7 @@
          , window
          , commands
          , TextDocument
+         , workspace
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_trc
@@ -25,9 +29,8 @@
   import { ß_getConfigSnapshot
          } from '../runtime/context-XTN';
 //--------------------------------------------------------------------
-  import { CDoIt
-         } from '../l10n/i18n';
-  import { EButtons as EButtons
+  import { LCDoIt
+         , LCButton as LCButton
          } from '../l10n/i18n';
 //------------------------------------------------------------------------------
   import { whenChildProcessSpawned
@@ -43,6 +46,9 @@
          , expandEnvVariables
          , wrapDoubleQuotes
          } from '../lib/textUtil';
+  import { MessageButton
+         , whenErrorShown
+         } from '../vsc/ui';
   import { whenFilesFound
          } from '../vsc/fsUtil';
 //--------------------------------------------------------------------
@@ -74,7 +80,9 @@ export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:
 //====================================================================
 
 class CliArgs {
-static _fsPath( ü_fileUri:Uri ):string {
+    private static _docs = new Map<TextDocument,string>();
+
+private static _fsPath( ü_fileUri:Uri ):string {
     switch ( ü_fileUri.scheme ) {
         case 'file':
           return ü_fileUri.fsPath;
@@ -129,20 +137,36 @@ constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
     }
 }
 
-private async _tmpSave( ü_temp:string, ü_doc:TextDocument ):Promise<string> {
-    const ü_file = await whenTempFile( ü_doc.fileName, ü_temp, false );
+private async _tempWithConfig( ü_tempDir:string, ü_doc:TextDocument ):Promise<string> {
+    const ü_stub = (workspace.name??'') +'-'+ ü_doc.fileName;
+    const ü_found = CliArgs._docs.has( ü_doc );
+    const ü_file = ü_found ? CliArgs._docs.get( ü_doc )!
+                           : await whenTempFile( ü_stub, '', ü_tempDir, false );
+  //
     await ßß_fs_p.writeFile( ü_file, ü_doc.getText() );
+    if ( ! ü_found ) { CliArgs._docs.set( ü_doc, ü_file ); }
     return ü_file;
 }
 
-private async _tmpSave_( ü_temp:string, ü_doc:TextDocument ):Promise<void> {
-    const ü_open = { title:'OK' };
-    const ü_todo = await window.showInformationMessage( 'Save', ü_open  );
+private async _tempWithDialog( ü_doc:TextDocument ):Promise<void> {
+    const ü_stub = (workspace.name??'') +'-'+ ü_doc.fileName;
+    const ü_found = CliArgs._docs.has( ü_doc );
+    const ü_file = ü_found ? CliArgs._docs.get( ü_doc )!
+                           : await whenTempFile( ü_stub, '', '', true );
+  //
+    const ü_open = new MessageButton( 'OK' );
+    const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_file }" to be shown in Notepad++ ?`;
+    const ü_todo = await window.showInformationMessage( ü_create, ü_open );
     switch ( ü_todo ) {
         case ü_open:
-          const ü_file = await this._tmpSave( ü_temp, ü_doc );
-          commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_file ) );
-          break;
+            try {
+                await ßß_fs_p.writeFile( ü_file, ü_doc.getText(), { flag:'wx' } );
+                if ( ! ü_found ) { CliArgs._docs.set( ü_doc, ü_file ); }
+                commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_file ) );
+            } catch ( ü_eX ) {
+                whenErrorShown( ü_eX, ü_create );
+            }
+            break;
     }
 }
 
@@ -151,18 +175,18 @@ async submit():Promise<number> {
     switch ( this._mode ) {
 
       case CETrigger.None:
-        window.showInformationMessage( CDoIt.no_active_file() );
+        window.showInformationMessage( LCDoIt.no_active_file() );
         return CNotAPid;
 
       case CETrigger.UNTITLED:
         //this._mode         = EModes.UNTITLED;
           const ü_doc = this._activeEditor!.document;
           const ü_temp = await this._config.whenVirtualDocsDir;
-          if ( ü_temp.length === 0 ) { this._tmpSave_( '', ü_doc );
+          if ( ü_temp.length === 0 ) {
+              this._tempWithDialog( ü_doc );
               return CNotAPid;
           }
-                                       
-          ( this._mainPath as any  ) = await this._tmpSave( ü_temp, ü_doc );
+          ( this._mainPath as TNotReadonly<string> ) = await this._tempWithConfig( ü_temp, ü_doc );
         break;
       //return CNotAPid;
 
@@ -202,7 +226,7 @@ async submit():Promise<number> {
       return ü_pid;
     } catch ( ü_eX ) {
         ß_trc&& ß_trc( ü_eX );
-        window.showErrorMessage( CDoIt.spawn_error( ( ü_eX as Error ).message ) );
+        window.showErrorMessage( LCDoIt.spawn_error( ( ü_eX as Error ).message ) );
     //ß_showInformationMessage( ( ü_eX as Error ).message );
       return CNotAPid;
     }
@@ -328,7 +352,7 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
     if ( ü_files.length > ü_limit ) {
       await this._whenSelected( ü_files, ü_limit );
     } else {
-      window.showInformationMessage( CDoIt.file_hits( this._others.length, ö_pattern ) );
+      window.showInformationMessage( LCDoIt.file_hits( this._others.length, ö_pattern ) );
     }
   //
     return ü_files;
@@ -337,18 +361,18 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
 private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolean> {
   //
     const ü_todo = ü_limit > 0
-                 ? await window.showInformationMessage( CDoIt.max_items( ü_limit, ü_files.length )
-                       , { title: EButtons.OK    () , id: EButtons.OK     }
-                       , { title: EButtons.SELECT() , id: EButtons.SELECT }
-                       , { title: EButtons.ALL   () , id: EButtons.ALL    }
+                 ? await window.showInformationMessage( LCDoIt.max_items( ü_limit, ü_files.length )
+                       , { title: LCButton.OK    () , id: LCButton.OK     }
+                       , { title: LCButton.SELECT() , id: LCButton.SELECT }
+                       , { title: LCButton.ALL   () , id: LCButton.ALL    }
                        )
-                 : { id: EButtons.SELECT }
+                 : { id: LCButton.SELECT }
                  ;
     if(ß_trc){ß_trc( `Button: ${ ü_todo }` );}
   //
     switch ( ü_todo?.id ) {
 
-      case EButtons.SELECT:
+      case LCButton.SELECT:
         const ü_list = ü_files.map( (ü_file,ü_indx) => new ListItem(              ßß_path.basename( ü_file )
                                                           , shortenText( ßß_path.dirname ( ü_file ), 72 )
                                                           ,                                ü_file
@@ -366,12 +390,12 @@ private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolea
         }
         return ü_files.length > 0;
 
-      case EButtons.OK:
+      case LCButton.OK:
         ü_files.splice( ü_limit );
         return true;
-      case EButtons.ALL:
+      case LCButton.ALL:
         return true;
-      case EButtons.CANCEL:
+      case LCButton.CANCEL:
       case undefined :
       default        :
           ü_files.length = 0;

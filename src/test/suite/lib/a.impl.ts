@@ -5,7 +5,7 @@
   import { type XtnOpenInNpp
          , type IHistoryData
          } from '../../../types/vsc.extension.d';
-  import { CExtensionId
+  import { CXtnId
          , CEXtnCommands
          , EConfigurationIds
          } from '../../../constants/extension';
@@ -179,9 +179,9 @@ vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
 //====================================================================
 
 export async function tst_a(){
-    const ü_extn = extensions.getExtension<XtnOpenInNpp>( CExtensionId )!;
+    const ü_extn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
     if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
-    testEqual( ü_extn.id, CExtensionId );
+    testEqual( ü_extn.id, CXtnId );
     testEqual( ü_extn.isActive, false, 'isActive' );
     await ü_extn.activate();
     testEqual( ü_extn.isActive, true , 'isActive' );

@@ -13,7 +13,7 @@
          } from '../types/runtime.context.d';
   type TInitialRuntimeContext = TWritable<IXtnRuntimeContext>
 //--------------------------------------------------------------------
-  import { CExtensionId
+  import { CXtnId
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { extensions
@@ -52,7 +52,7 @@ function ß_devTrace( ü_text:any, ü_intro?:string ):void {
 //====================================================================
 
 export async function ß_whenXtnAvailable():Promise<XtnOpenInNpp> {
-    const ü_eXtn = extensions.getExtension<XtnOpenInNpp>( CExtensionId )!;
+    const ü_eXtn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
     if ( ! ü_eXtn.isActive ) { await ü_eXtn.activate(); }
     return ü_eXtn.exports;
 }

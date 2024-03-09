@@ -12,7 +12,7 @@
 //--------------------------------------------------------------------
   import { ß_trc
          } from '../runtime/context';
-  import { CTxtXtn
+  import { LCXtn
          } from '../l10n/i18n';
   import { ß_XtnOpenInNpp
          } from '../runtime/context-XTN';
@@ -89,7 +89,7 @@ export async function whenKnownAsFolder( ü_purpose:string, ü_cfgPath:string ):
     if ( ü_cfgPath.length === 0 ) { return ü_cfgPath; }
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
-    if ( isAbsolute( ü_path) && ! await fsWhenKnownAsFolder( ü_path ) ) { throw new ErrorMessage( CTxtXtn.noFolder( ü_purpose, ü_path ) ); }
+    if ( isAbsolute( ü_path) && ! await fsWhenKnownAsFolder( ü_path ) ) { throw new ErrorMessage( LCXtn.noFolder( ü_purpose, ü_path ) ); }
   //ß_trc&& ß_trc( `Directory found: "${ ü_path }"` );
     return ü_path;
 }

@@ -15,11 +15,14 @@
   import { CExtensionUrl
          , CPrefix
          , CEXtnCommands
+         , CXtnTxtScheme
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { workspace
          , commands
          , window
+         , Uri
+         , TextDocumentContentProvider
          } from 'vscode';
   import { ß_trc
          , ß_toggleDevTrace
@@ -27,7 +30,7 @@
   import { configModificationSignalled
          , getConfigSnapshot
          } from '../core/configContext';
-  import { CTxtXtn
+  import { LCXtn
          } from '../l10n/i18n';
   import { openInNppActive
          , openInNppEditor
@@ -43,9 +46,11 @@
 
 export class XtnOpenInNpp {
     readonly whenActivated:Promise<this>
-    readonly globalHistory:THistoryProxy
-    readonly extensionApi :Extension<XtnOpenInNpp>
   //
+    readonly echoTextBuffer = new SomeText();
+    readonly globalHistory:THistoryProxy
+  //
+    readonly extensionApi :Extension<XtnOpenInNpp>
     readonly version      :string
     readonly commands     :TExtensionCommand[]
     readonly settings     :TXtnConfigJSON
@@ -85,6 +90,7 @@ constructor(
         this.vscContext.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
         this.vscContext.subscriptions.push(  workspace.onDidChangeConfiguration( configModificationSignalled )  );
+    workspace.registerTextDocumentContentProvider( CXtnTxtScheme, this.echoTextBuffer );
   //
     this.whenActivated = this._whenActivationFinalized();
 }
@@ -103,7 +109,7 @@ private async _whenActivationFinalized():Promise<this> {
     return this;
   //
 async function ö_info( ü_newVersion:string ):Promise<void> {
-    const ü_show = await window.showInformationMessage( CTxtXtn.welcome( ü_newVersion ), CTxtXtn.delta());
+    const ü_show = await window.showInformationMessage( LCXtn.welcome( ü_newVersion ), LCXtn.delta());
     switch ( ü_show ) {
         case undefined: break;
         default:
@@ -112,6 +118,28 @@ async function ö_info( ü_newVersion:string ):Promise<void> {
 }
 }
 
+}
+
+//====================================================================
+
+class SomeText extends Map<string,string> implements TextDocumentContentProvider {
+
+createNewDocument( ü_name:string, ü_content:string ):Uri {
+        const ü_uri = Uri.parse( CXtnTxtScheme +':'+ ü_name + new Date().toUTCString() );
+    this.set( ü_uri.toString(), ü_content );
+       return ü_uri;
+}
+
+provideTextDocumentContent( ü_uri:Uri ):string {
+    const ü_id = ü_uri.toString();
+    if ( ! this.has( ü_id ) ) {
+        return '';
+    }
+  //
+    const ü_content = this.get   ( ü_id )!;
+                      this.delete( ü_id );
+    return ü_content;
+}
 }
 
 //====================================================================

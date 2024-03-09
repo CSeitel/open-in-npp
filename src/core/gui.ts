@@ -6,10 +6,11 @@
   import { type TStringify
          } from '../types/generic.d';
 //--------------------------------------------------------------------
-//--------------------------------------------------------------------
   import { StatusBarAlignment
          , window
          } from 'vscode';
+  import { LCButton
+         } from '../l10n/i18n';
   import { ß_trc
          } from '../runtime/context';
   import { ErrorMessage

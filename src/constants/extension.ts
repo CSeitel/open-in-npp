@@ -5,7 +5,9 @@
 //--------------------------------------------------------------------
   export type TXtnConfigKeys = keyof typeof EConfigurationIds
   export type TXtnConfigJSON = Record<TXtnConfigKeys,{ type:string }>
-  export const CExtensionId  = 'CSeitel.open-in-npp';
+//--------------------------------------------------------------------
+  export const CXtnTxtScheme = 'open-in-npp-echo-text';
+  export const CXtnId  = 'CSeitel.open-in-npp';
   export const CExtensionUrl = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
 //export const CExtensionUrl = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
 //====================================================================
