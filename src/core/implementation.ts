@@ -16,6 +16,10 @@ https://nodejs.org/api/fs.html#file-system-flags
          } from 'path';
   import { promises as ßß_fs_p
          } from 'fs';
+  import { createHash
+         , Hash
+         } from 'crypto';
+
   import { Uri
          , FileType
          , window
@@ -78,9 +82,51 @@ export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:
 }
 
 //====================================================================
+  type TViewDoc = {
+      file :string
+      hash :string
+    }
+class ViewDocument {
+    private static _docViews = new Map<TextDocument,TViewDoc>();
+    public  readonly  isNotIniti:boolean
+    public  readonly  content   :string
+    private readonly _newHash   :string
+    public  readonly _view      :TViewDoc
+constructor(
+    public  readonly  doc    :TextDocument
+){
+    this.content = this.doc.getText();
+    this._newHash   = createHash( 'sha1' ).update( this.content ).digest('hex');
+    this.isNotIniti = ViewDocument._docViews.has( this.doc );
+    this._view = this.isNotIniti ? ViewDocument._docViews.get( this.doc )!
+                                 : { file: ''// await whenTempFile( ü_stub, '', ü_tempDir, ! ü_silent ) // silent = reuse
+                                   , hash: this._newHash
+                                   }
+                                 ;
+}
+
+async update():Promise<boolean> {
+    let ü_writeFlag = this.isNotIniti ? 'w' : 'wx';
+    if ( this.isNotIniti ) {
+                  if (   this._view.hash === this._newHash ) { ü_writeFlag = ''; }
+                  else { this._view.hash  =  this._newHash                     ; }
+    }
+    const ü_done = ü_writeFlag.length > 0;
+    if ( ü_done ) {
+        await ßß_fs_p.writeFile( this._view.file, this.content, { flag:ü_writeFlag } );
+    }
+    if ( this.isNotIniti ) {
+        this._view.hash = this._newHash;
+    } else {
+        ViewDocument._docViews.set( this.doc, this._view );
+    }
+    return ü_done;
+}
+
+}
 
 class CliArgs {
-    private static _docs = new Map<TextDocument,string>();
+    private static _docs = new Map<TextDocument,{file:string,mtime:string}>();
 
 private static _fsPath( ü_fileUri:Uri ):string {
     switch ( ü_fileUri.scheme ) {
@@ -137,37 +183,38 @@ constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
     }
 }
 
-private async _tempWithConfig( ü_tempDir:string, ü_doc:TextDocument ):Promise<string> {
-    const ü_stub = (workspace.name??'') +'-'+ ü_doc.fileName;
-    const ü_found = CliArgs._docs.has( ü_doc );
-    const ü_file = ü_found ? CliArgs._docs.get( ü_doc )!
-                           : await whenTempFile( ü_stub, '', ü_tempDir, false );
-  //
-    await ßß_fs_p.writeFile( ü_file, ü_doc.getText() );
-    if ( ! ü_found ) { CliArgs._docs.set( ü_doc, ü_file ); }
-    return ü_file;
+private async _tempWithConfig( ü_doc:TextDocument, ü_tempDir:string ):Promise<string> {
+    return '';
 }
 
-private async _tempWithDialog( ü_doc:TextDocument ):Promise<void> {
-    const ü_stub = (workspace.name??'') +'-'+ ü_doc.fileName;
-    const ü_found = CliArgs._docs.has( ü_doc );
-    const ü_file = ü_found ? CliArgs._docs.get( ü_doc )!
-                           : await whenTempFile( ü_stub, '', '', true );
+private async _tempWithDialog( ü_doc:TextDocument, ü_silent = false, ü_tempDir = '' ):Promise<string> {
+    const ü_docView = new ViewDocument( ü_doc );
   //
-    const ü_open = new MessageButton( 'OK' );
-    const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_file }" to be shown in Notepad++ ?`;
-    const ü_todo = await window.showInformationMessage( ü_create, ü_open );
-    switch ( ü_todo ) {
-        case ü_open:
+    if ( ! ü_docView.isNotIniti ) {
+                                                 const ü_stub = (workspace.name??'') +'-'+ ü_doc.fileName;
+           ü_docView._view.file =  await whenTempFile( ü_stub, '', ü_tempDir, ! ü_silent ) // silent = reuse
+
+    }
+  //
+    if ( ü_silent ) {
+        ü_docView.update();
+    } else {
+        const ü_open = new MessageButton( 'OK' );
+        const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_docView._view.file }" to be shown in Notepad++ ?`;
+        const ü_todo = await window.showInformationMessage( ü_create, ü_open );
+        switch ( ü_todo ) {
+          case ü_open:
+              ü_docView.update();
+              commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_docView._view.file ) );
+            break;
             try {
-                await ßß_fs_p.writeFile( ü_file, ü_doc.getText(), { flag:'wx' } );
-                if ( ! ü_found ) { CliArgs._docs.set( ü_doc, ü_file ); }
-                commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_file ) );
             } catch ( ü_eX ) {
+                if ( ü_silent ) { throw ü_eX; }
                 whenErrorShown( ü_eX, ü_create );
             }
-            break;
     }
+    }
+    return ü_docView._view.file;
 }
 
 async submit():Promise<number> {
@@ -182,11 +229,8 @@ async submit():Promise<number> {
         //this._mode         = EModes.UNTITLED;
           const ü_doc = this._activeEditor!.document;
           const ü_temp = await this._config.whenVirtualDocsDir;
-          if ( ü_temp.length === 0 ) {
-              this._tempWithDialog( ü_doc );
-              return CNotAPid;
-          }
-          ( this._mainPath as TNotReadonly<string> ) = await this._tempWithConfig( ü_temp, ü_doc );
+                                if ( ü_temp.length === 0 ) { this._tempWithDialog( ü_doc               ); return CNotAPid; }
+          ( this._mainPath as TNotReadonly<string> ) = await this._tempWithDialog( ü_doc, true, ü_temp );
         break;
       //return CNotAPid;
 
