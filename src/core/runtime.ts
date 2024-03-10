@@ -2,7 +2,6 @@
 */
   import { type ExtensionContext
          , type Extension
-         , type ConfigurationChangeEvent
          } from 'vscode';
   import { type TAnyFunction
          } from '../types/generic.d';
@@ -21,8 +20,6 @@
   import { workspace
          , commands
          , window
-         , Uri
-         , TextDocumentContentProvider
          } from 'vscode';
   import { ß_trc
          , ß_toggleDevTrace
@@ -36,18 +33,20 @@
          , openInNppEditor
          , openInNppExplorer
          } from '../core/implementation';
+//--------------------------------------------------------------------
   import { whenUriOpened
          , whenSettingsOpened
          } from '../vsc/cmdUtil';
-//--------------------------------------------------------------------
   import { MementoFacade
          } from '../vsc/histUtil';
+  import { TextDocViewer
+         } from '../vsc/docUtil';
 //====================================================================
 
 export class XtnOpenInNpp {
     readonly whenActivated:Promise<this>
   //
-    readonly echoTextBuffer = new SomeText();
+    readonly showDetailsBuffer = new TextDocViewer( CXtnTxtScheme, 'Details' );
     readonly globalHistory:THistoryProxy
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
@@ -90,7 +89,6 @@ constructor(
         this.vscContext.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
         this.vscContext.subscriptions.push(  workspace.onDidChangeConfiguration( configModificationSignalled )  );
-    workspace.registerTextDocumentContentProvider( CXtnTxtScheme, this.echoTextBuffer );
   //
     this.whenActivated = this._whenActivationFinalized();
 }
@@ -118,28 +116,6 @@ async function ö_info( ü_newVersion:string ):Promise<void> {
 }
 }
 
-}
-
-//====================================================================
-
-class SomeText extends Map<string,string> implements TextDocumentContentProvider {
-
-createNewDocument( ü_name:string, ü_content:string ):Uri {
-        const ü_uri = Uri.parse( CXtnTxtScheme +':'+ ü_name + new Date().toUTCString() );
-    this.set( ü_uri.toString(), ü_content );
-       return ü_uri;
-}
-
-provideTextDocumentContent( ü_uri:Uri ):string {
-    const ü_id = ü_uri.toString();
-    if ( ! this.has( ü_id ) ) {
-        return '';
-    }
-  //
-    const ü_content = this.get   ( ü_id )!;
-                      this.delete( ü_id );
-    return ü_content;
-}
 }
 
 //====================================================================

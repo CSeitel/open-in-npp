@@ -121,11 +121,11 @@ constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
 
       case CETrigger.PALETTE:
         if(ß_trc){ß_trc( 'Palette Context' );}
-        if(ß_trc){ß_trc( `ActiveEditor: ${ this._activeEditor !== undefined }` );}
         if ( this._activeEditor === undefined ) {
           this._mode         = CETrigger.None;
           this._mainPath     = '';
-        } else if ( this._activeEditor.document.isUntitled ) {
+        } else if ( this._activeEditor.document.uri.scheme !== 'file' ) {
+          ß_trc&& ß_trc( `ActiveEditor: ${ this._activeEditor.document.uri.scheme  }` );
           this._mode         = CETrigger.UNTITLED;
           this._mainPath     = '';
         } else {

@@ -10,6 +10,8 @@
   import { ß_trc
          , ß_RuntimeContext
          } from '../runtime/context';
+  import { ß_XtnOpenInNpp
+         } from '../runtime/context-XTN';
   import { LCButton
          } from '../l10n/i18n';
   import { whenNewTextEditorOpened
@@ -30,10 +32,11 @@ export async function whenErrorShown( ü_eX:any, ü_context:string ):Promise<voi
                             , ü_eX.message
                             , ''
                             , format( '%o', ü_eX )
-                            ].join( ß_RuntimeContext.lineSep )
-                          : format( ü_eX )
+                            ]
+                          : [ format( ü_eX ) ]
                           ;
-          whenNewTextEditorOpened( { title:'Error-Details', content:ü_content } );
+          ü_content.unshift( ü_context, '', '' );
+          ß_XtnOpenInNpp.showDetailsBuffer.openNewDocument( ü_content.join( ß_RuntimeContext.lineSep ) );
           break;
     }
 }
