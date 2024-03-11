@@ -71,16 +71,10 @@ https://nodejs.org/api/fs.html#file-system-flags
   const CNotAPid = -1;
 //====================================================================
 
-export async function openInNppActive( this:null ):Promise<number> {
-    return new CliArgs( CETrigger.PALETTE                       ).submit();
-}
-export async function openInNppEditor( this:null, ü_fileUri:Uri, ...ü_more:any[] ):Promise<number> {
-    return new CliArgs( CETrigger.EDITOR  , ü_fileUri           ).submit();
-}
-export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:Uri[] ):Promise<number> {
-    const ü_others = ü_fileUris.map( ü_fileUri => ü_fileUri.fsPath );
-    return new CliArgs( CETrigger.EXPLORER, ü_fileUri, ü_others ).submit();
-}
+export async function openInNppActive  ( this:null                                  ):Promise<number> { return new CliArgs( CETrigger.PALETTE                       ).submit(); }
+export async function openInNppEditor  ( this:null, ü_fileUri:Uri, ... ü_more:any[] ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_fileUri           ).submit(); }
+export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:Uri[] ):Promise<number> { const ü_others = ü_fileUris.map( ü_fileUri => ü_fileUri.fsPath );
+                                                                                                        return new CliArgs( CETrigger.EXPLORER, ü_fileUri, ü_others ).submit(); }
 
 //====================================================================
   type TViewDoc = {
@@ -173,32 +167,32 @@ constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
   //
     switch ( this._mode = ü_mode ) {
 
+      case CETrigger.PALETTE:
+        if ( this._activeEditor === undefined ) {
+            this._mode     = CETrigger.None;
+            this._mainPath = '';
+            return;
+        }
+
+        ß_trc&& ß_trc( `ActiveEditor: ${ this._activeEditor.document.fileName }` );
+        ü_mainUri = this._activeEditor.document.uri;
+        break;
+      case CETrigger.EDITOR:
+        break;
       case CETrigger.EXPLORER:
         if(ß_trc){ß_trc( 'Explorer Context' );}
-        this._others   = ü_others !       ;
-        this._mainPath = ü_mainUri!.fsPath;
+        this._others = ü_others!;
         break;
 
-      case CETrigger.EDITOR:
-        this._mainFileType = FileType.File;
-        this._mainPath     = CliArgs._fsPath( ü_mainUri! );
-        break;
-
-      case CETrigger.PALETTE:
-        if(ß_trc){ß_trc( 'Palette Context' );}
-        if ( this._activeEditor === undefined ) {
-          this._mode         = CETrigger.None;
-          this._mainPath     = '';
-        } else if ( this._activeEditor.document.uri.scheme !== 'file' ) {
-          ß_trc&& ß_trc( `ActiveEditor: ${ this._activeEditor.document.uri.scheme  }` );
+    }
+  //
+    if ( ü_mainUri!.scheme === 'file' ) {
+          this._mainFileType = FileType.File;
+          this._mainPath     = ü_mainUri!.fsPath; //this._activeEditor.document.fileName;
+    } else {
           this._mode         = CETrigger.UNTITLED;
           this._mainPath     = '';
-        } else {
-          this._mainFileType = FileType.File;
-          this._mainPath     = this._activeEditor.document.fileName;
-        }
-        break;
-
+        //this._mainPath     = CliArgs._fsPath( ü_mainUri! );
     }
 }
 
