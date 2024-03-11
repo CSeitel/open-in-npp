@@ -36,6 +36,7 @@
     , filesInFolderPattern      : 'openInNpp.filesInFolderPattern'
     , matchingFilesLimit        : 'openInNpp.matchingFilesLimit'
     , virtualDocumentsDirectory : 'openInNpp.virtualDocumentsDirectory'
+    , virtualDocumentsFileReuse : 'openInNpp.virtualDocumentsFileReuse'
     , preserveCursor            : 'openInNpp.preserveCursorPosition'
   //
     , developerTrace            : 'openInNpp.developerTrace'

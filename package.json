@@ -123,6 +123,11 @@
           "type": "string",
           "markdownDescription": "When a file does not exist as it is actually a _virtual document_ [see](https://code.visualstudio.com/api/extension-guides/virtual-documents) a shadow copy for usage by _Notepad++_ will be created in this directory"
         },
+        "openInNpp.virtualDocumentsFileReuse": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "When file reuse is turned on different editor instances showing the same _virtual document_ [see](https://code.visualstudio.com/api/extension-guides/virtual-documents) will share a common file shadow for being opened in _Notepad++_. Note that this will have the consequence that the file contents will be overwritten."
+        },
         "openInNpp.preserveCursorPosition": {
           "type": "boolean",
           "default": true,

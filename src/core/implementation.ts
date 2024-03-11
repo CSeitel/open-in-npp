@@ -44,6 +44,7 @@ https://nodejs.org/api/fs.html#file-system-flags
   import { ErrorMessage
          } from '../lib/errorUtil';
   import { whenKnownAsFolder
+         , whenFileInfoRead
          , whenTempFile
          } from '../lib/fsUtil';
   import { shortenText
@@ -94,6 +95,8 @@ class ViewDocument {
     public  readonly _view      :TViewDoc
 constructor(
     public  readonly  doc    :TextDocument
+  , public  readonly  tempDir:string
+  , public  readonly  reuse  :boolean
 ){
     this.content = this.doc.getText();
     this._newHash   = createHash( 'sha1' ).update( this.content ).digest('hex');
@@ -105,11 +108,27 @@ constructor(
                                  ;
 }
 
+async whenReady():Promise<void> {
+    if ( ! this.isNotIniti ) {
+                                                 const ü_stub = (workspace.name??'') +'-'+ this.doc.fileName;
+        this._view.file = await whenTempFile( ü_stub, '', this.tempDir, ! this.reuse  );
+    }
+}
+
 async update():Promise<boolean> {
-    let ü_writeFlag = this.isNotIniti ? 'w' : 'wx';
+    let ü_writeFlag = 'w';
     if ( this.isNotIniti ) {
                   if (   this._view.hash === this._newHash ) { ü_writeFlag = ''; }
                   else { this._view.hash  =  this._newHash                     ; }
+    } else {
+        if ( this.reuse ) {
+            const ü_info = await whenFileInfoRead( this._view.file );
+            if ( ü_info === null ) {
+                ü_writeFlag = 'wx';
+            } else {
+                if ( ! ü_info.isFile() ) { throw new TypeError( 'Exists not as File' ); }
+            }
+        } else { ü_writeFlag = 'wx'; }
     }
     const ü_done = ü_writeFlag.length > 0;
     if ( ü_done ) {
@@ -183,17 +202,14 @@ constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
     }
 }
 
-private async _tempWithConfig( ü_doc:TextDocument, ü_tempDir:string ):Promise<string> {
-    return '';
-}
-
-private async _tempWithDialog( ü_doc:TextDocument, ü_silent = false, ü_tempDir = '' ):Promise<string> {
-    const ü_docView = new ViewDocument( ü_doc );
+private async _whenShadowDone( ü_doc:TextDocument, ü_tempDir:string, ü_silent:boolean ):Promise<string> {
+    const ü_docView = new ViewDocument( ü_doc
+                                      , ü_tempDir
+                                      , this._config.virtualDocumentsFileReuse );
   //
     if ( ! ü_docView.isNotIniti ) {
                                                  const ü_stub = (workspace.name??'') +'-'+ ü_doc.fileName;
-           ü_docView._view.file =  await whenTempFile( ü_stub, '', ü_tempDir, ! ü_silent ) // silent = reuse
-
+           ü_docView._view.file = await whenTempFile( ü_stub, '', ü_tempDir, ! this._config.virtualDocumentsFileReuse );
     }
   //
     if ( ü_silent ) {
@@ -212,7 +228,7 @@ private async _tempWithDialog( ü_doc:TextDocument, ü_silent = false, ü_tempDi
                 if ( ü_silent ) { throw ü_eX; }
                 whenErrorShown( ü_eX, ü_create );
             }
-    }
+        }
     }
     return ü_docView._view.file;
 }
@@ -229,8 +245,8 @@ async submit():Promise<number> {
         //this._mode         = EModes.UNTITLED;
           const ü_doc = this._activeEditor!.document;
           const ü_temp = await this._config.whenVirtualDocsDir;
-                                if ( ü_temp.length === 0 ) { this._tempWithDialog( ü_doc               ); return CNotAPid; }
-          ( this._mainPath as TNotReadonly<string> ) = await this._tempWithDialog( ü_doc, true, ü_temp );
+                                if ( ü_temp.length === 0 ) { this._whenShadowDone( ü_doc, ü_temp, false ); return CNotAPid; }
+          ( this._mainPath as TNotReadonly<string> ) = await this._whenShadowDone( ü_doc, ü_temp, true  );
         break;
       //return CNotAPid;
 

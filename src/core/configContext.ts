@@ -47,6 +47,7 @@ class ConfigProxy {
               readonly  preserveCursor            = undefined as unknown as boolean      ;
               readonly  developerTrace            = undefined as unknown as boolean      ;
               readonly  virtualDocumentsDirectory = undefined as unknown as string       ;
+              readonly  virtualDocumentsFileReuse = undefined as unknown as boolean      ;
   //
 constructor(
     private _vscConfig = workspace.getConfiguration()
@@ -64,6 +65,7 @@ constructor(
                           , 'preserveCursor'
                           , 'developerTrace'
                           , 'virtualDocumentsDirectory'
+                          , 'virtualDocumentsFileReuse'
                           ] as TXtnConfigKeys[] ) {
         Object.defineProperty( this, ü_prop, { enumerable:true, get: ()=>{ return this._vscConfig.get<any>( EConfigurationIds[ ü_prop ] ); } } );
     }
