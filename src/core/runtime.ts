@@ -2,11 +2,13 @@
 */
   import { type ExtensionContext
          , type Extension
+         , type TextDocument
          } from 'vscode';
   import { type TAnyFunction
          } from '../types/generic.d';
   import { type TExtensionCommand
          , type THistoryProxy
+         , type TViewDoc
          } from '../types/vsc.extension.d';
 //--------------------------------------------------------------------
   import { type TXtnConfigJSON
@@ -20,6 +22,7 @@
   import { workspace
          , commands
          , window
+
          } from 'vscode';
   import { ß_trc
          , ß_toggleDevTrace
@@ -47,6 +50,7 @@ export class XtnOpenInNpp {
     readonly whenActivated:Promise<this>
   //
     readonly showDetailsBuffer = new TextDocViewer( CXtnTxtScheme, 'Details' );
+    readonly docViewsBuffer    = new Map<TextDocument,TViewDoc>();
     readonly globalHistory:THistoryProxy
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
@@ -89,6 +93,11 @@ constructor(
         this.vscContext.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
         this.vscContext.subscriptions.push(  workspace.onDidChangeConfiguration( configModificationSignalled )  );
+        this.vscContext.subscriptions.push(  workspace.onDidCloseTextDocument( ( ü_doc )=>{ 
+            ß_trc&& ß_trc(  ü_doc.fileName  );
+            this.docViewsBuffer.delete( ü_doc );
+        } )  );
+        
   //
     this.whenActivated = this._whenActivationFinalized();
 }

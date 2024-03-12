@@ -16,6 +16,10 @@
     , title   :string
     }
 
+  export type TViewDoc = {
+      file :string
+      hash :string
+    }
 //--------------------------------------------------------------------
 
   export interface IHistoryData {

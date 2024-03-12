@@ -1,10 +1,13 @@
 /*
 https://nodejs.org/api/fs.html#file-system-flags
+https://code.visualstudio.com/api/references/vscode-api
 */
   import { type SpawnOptions
          } from 'child_process';
   import { type TNotReadonly
          } from '../types/generic.d';
+  import { type TViewDoc
+         } from '../types/vsc.extension.d';
   import { CETrigger
          , CECliArgument
          , CEXtnCommands
@@ -31,6 +34,7 @@ https://nodejs.org/api/fs.html#file-system-flags
   import { ß_trc
          } from '../runtime/context';
   import { ß_getConfigSnapshot
+         , ß_XtnOpenInNpp
          } from '../runtime/context-XTN';
 //--------------------------------------------------------------------
   import { LCDoIt
@@ -77,66 +81,74 @@ export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:
                                                                                                         return new CliArgs( CETrigger.EXPLORER, ü_fileUri, ü_others ).submit(); }
 
 //====================================================================
-  type TViewDoc = {
-      file :string
-      hash :string
-    }
 class ViewDocument {
-    private static _docViews = new Map<TextDocument,TViewDoc>();
-    public  readonly  isNotIniti:boolean
+  //
+    private readonly _isInitial :boolean
     public  readonly  content   :string
     private readonly _newHash   :string
-    public  readonly _view      :TViewDoc
+    private readonly _docView   :TViewDoc
+    private readonly _docViews  = ß_XtnOpenInNpp.docViewsBuffer;
+    private readonly _encoding  = 'utf8';
 constructor(
     public  readonly  doc    :TextDocument
   , public  readonly  tempDir:string
   , public  readonly  reuse  :boolean
 ){
-    this.content = this.doc.getText();
+    this._isInitial = ! this._docViews.has( this.doc );
+    this.content    = this.doc.getText();
     this._newHash   = createHash( 'sha1' ).update( this.content ).digest('hex');
-    this.isNotIniti = ViewDocument._docViews.has( this.doc );
-    this._view = this.isNotIniti ? ViewDocument._docViews.get( this.doc )!
-                                 : { file: ''// await whenTempFile( ü_stub, '', ü_tempDir, ! ü_silent ) // silent = reuse
-                                   , hash: this._newHash
-                                   }
-                                 ;
+    this._docView = this._isInitial ? { file: ''// await whenTempFile( ü_stub, '', ü_tempDir, ! ü_silent ) // silent = reuse
+                                  , hash: this._newHash
+                                  }
+                                : this._docViews.get( this.doc )!
+                                ;
 }
 
-async whenReady():Promise<void> {
-    if ( ! this.isNotIniti ) {
-                                                 const ü_stub = (workspace.name??'') +'-'+ this.doc.fileName;
-        this._view.file = await whenTempFile( ü_stub, '', this.tempDir, ! this.reuse  );
+get file():string {
+    return this._docView.file;
+}
+
+async whenReady():Promise<this> {
+    if ( this._isInitial ) {
+                                        const ü_stub = (workspace.name??'') +'-'+ this.doc.fileName;
+        this._docView.file = await whenTempFile( ü_stub, '', this.tempDir, ! this.reuse  );
     }
+    return this;
 }
 
-async update():Promise<boolean> {
+async updateShadow():Promise<boolean> {
     let ü_writeFlag = 'w';
-    if ( this.isNotIniti ) {
-                  if (   this._view.hash === this._newHash ) { ü_writeFlag = ''; }
-                  else { this._view.hash  =  this._newHash                     ; }
-    } else {
+    if ( this._isInitial ) {
         if ( this.reuse ) {
-            const ü_info = await whenFileInfoRead( this._view.file );
+            const ü_info = await whenFileInfoRead( this._docView.file );
             if ( ü_info === null ) {
                 ü_writeFlag = 'wx';
             } else {
                 if ( ! ü_info.isFile() ) { throw new TypeError( 'Exists not as File' ); }
+                const ü_content = await ßß_fs_p.readFile( this._docView.file, this._encoding );
+                const ü_oldHash = createHash( 'sha1' ).update(  ü_content  ).digest('hex');
+                if ( ü_oldHash === this._newHash ) { ü_writeFlag = ''; ß_trc&& ß_trc( 'Shadow is recent. No write' ); }
             }
         } else { ü_writeFlag = 'wx'; }
+    } else {
+        if ( this._docView.hash === this._newHash ) { ü_writeFlag = ''; ß_trc&& ß_trc( 'No update. No write.' ); }
     }
     const ü_done = ü_writeFlag.length > 0;
     if ( ü_done ) {
-        await ßß_fs_p.writeFile( this._view.file, this.content, { flag:ü_writeFlag } );
+        await ßß_fs_p.writeFile( this._docView.file, this.content, { encoding: this._encoding
+                                                                , flag    : ü_writeFlag } );
     }
-    if ( this.isNotIniti ) {
-        this._view.hash = this._newHash;
+    if ( this._isInitial ) {
+        if ( ! this.doc.isClosed ) { this._docViews.set( this.doc, this._docView ); }
     } else {
-        ViewDocument._docViews.set( this.doc, this._view );
+        this._docView.hash = this._newHash;
     }
     return ü_done;
 }
 
 }
+
+//====================================================================
 
 class CliArgs {
     private static _docs = new Map<TextDocument,{file:string,mtime:string}>();
@@ -196,26 +208,21 @@ constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
     }
 }
 
-private async _whenShadowDone( ü_doc:TextDocument, ü_tempDir:string, ü_silent:boolean ):Promise<string> {
-    const ü_docView = new ViewDocument( ü_doc
-                                      , ü_tempDir
-                                      , this._config.virtualDocumentsFileReuse );
-  //
-    if ( ! ü_docView.isNotIniti ) {
-                                                 const ü_stub = (workspace.name??'') +'-'+ ü_doc.fileName;
-           ü_docView._view.file = await whenTempFile( ü_stub, '', ü_tempDir, ! this._config.virtualDocumentsFileReuse );
-    }
+private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<string> {
+    const ü_docView = await new ViewDocument( ü_doc
+                                            , ü_shadowDir
+                                            , this._config.virtualDocumentsFileReuse ).whenReady();
   //
     if ( ü_silent ) {
-        ü_docView.update();
+        ü_docView.updateShadow();
     } else {
         const ü_open = new MessageButton( 'OK' );
-        const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_docView._view.file }" to be shown in Notepad++ ?`;
+        const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_docView.file }" to be shown in Notepad++ ?`;
         const ü_todo = await window.showInformationMessage( ü_create, ü_open );
         switch ( ü_todo ) {
           case ü_open:
-              ü_docView.update();
-              commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_docView._view.file ) );
+              ü_docView.updateShadow();
+              commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_docView.file ) );
             break;
             try {
             } catch ( ü_eX ) {
@@ -224,7 +231,7 @@ private async _whenShadowDone( ü_doc:TextDocument, ü_tempDir:string, ü_silent
             }
         }
     }
-    return ü_docView._view.file;
+    return ü_docView.file;
 }
 
 async submit():Promise<number> {
