@@ -15,6 +15,9 @@
     { command :TCommandIds
     , title   :string
     }
+	export interface IDisposableLike {
+			dispose():any
+		}
 
   export type TViewDoc = {
       file :string

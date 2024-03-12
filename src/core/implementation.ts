@@ -12,6 +12,8 @@ https://code.visualstudio.com/api/references/vscode-api
          , CECliArgument
          , CEXtnCommands
          } from '../constants/extension';
+  import { CEUriScheme
+         } from '../constants/vsc';
 //--------------------------------------------------------------------
   import * as ßß_path   from 'path';
   import { join
@@ -55,12 +57,12 @@ https://code.visualstudio.com/api/references/vscode-api
          , expandEnvVariables
          , wrapDoubleQuotes
          } from '../lib/textUtil';
-  import { MessageButton
-         , whenErrorShown
-         } from '../vsc/ui';
   import { whenFilesFound
          } from '../vsc/fsUtil';
 //--------------------------------------------------------------------
+  import { MessageButton
+         , whenErrorShown
+         } from '../vsc/ui';
   import { TButtons
          , TDropDownListOptions
          , SCancelButtonId
@@ -68,20 +70,17 @@ https://code.visualstudio.com/api/references/vscode-api
          , DropDownList
          } from '../vsc/ui';
 //====================================================================
-  type TAllModes = CETrigger.EXPLORER
-                 | CETrigger.EDITOR
-                 | CETrigger.PALETTE
-//------------------------------------------------------------------------------
   const CNotAPid = -1;
 //====================================================================
 
-export async function openInNppActive  ( this:null                                  ):Promise<number> { return new CliArgs( CETrigger.PALETTE                       ).submit(); }
-export async function openInNppEditor  ( this:null, ü_fileUri:Uri, ... ü_more:any[] ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_fileUri           ).submit(); }
-export async function openInNppExplorer( this:null, ü_fileUri:Uri, ü_fileUris:Uri[] ):Promise<number> { const ü_others = ü_fileUris.map( ü_fileUri => ü_fileUri.fsPath );
-                                                                                                        return new CliArgs( CETrigger.EXPLORER, ü_fileUri, ü_others ).submit(); }
+export async function openInNppActive  ( this:null                              ):Promise<number> {  return new CliArgs( CETrigger.PALETTE                   ).submit(); 
+}
+export async function openInNppEditor  ( this:null, ü_uri:Uri, ... ü_more:any[] ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_uri           ).submit(); }
+export async function openInNppExplorer( this:null, ü_uri:Uri, ü_others  :Uri[] ):Promise<number> { return new CliArgs( CETrigger.EXPLORER, ü_uri, ü_others ).submit(); }
 
 //====================================================================
-class ViewDocument {
+
+class DocumentView {
   //
     private readonly _isInitial :boolean
     public  readonly  content   :string
@@ -104,7 +103,7 @@ constructor(
                                 ;
 }
 
-get file():string {
+get fileName():string {
     return this._docView.file;
 }
 
@@ -153,17 +152,6 @@ async updateShadow():Promise<boolean> {
 class CliArgs {
     private static _docs = new Map<TextDocument,{file:string,mtime:string}>();
 
-private static _fsPath( ü_fileUri:Uri ):string {
-    switch ( ü_fileUri.scheme ) {
-        case 'file':
-          return ü_fileUri.fsPath;
-        case 'vscode-settings':
-          return expandEnvVariables( '%APPDATA%/Code/User/settings.json' );
-        case 'untitled':
-    }
-    return '';
-}
-
     private readonly _config                   = ß_getConfigSnapshot();
     private readonly _activeEditor             = window.activeTextEditor;
     private readonly _mode         :CETrigger
@@ -172,10 +160,10 @@ private static _fsPath( ü_fileUri:Uri ):string {
     private          _others       :string[]   = [];
     private          _asWorkspace  :boolean    = false;
 
-constructor( ü_mode:TAllModes                                     );
-constructor( ü_mode:TAllModes, ü_mainUri :Uri                     );
-constructor( ü_mode:TAllModes, ü_mainUri :Uri, ü_others :string[] );
-constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
+constructor( ü_mode:CETrigger.PALETTE                                   );
+constructor( ü_mode:CETrigger.EDITOR  , ü_mainUri :Uri                  );
+constructor( ü_mode:CETrigger.EXPLORER, ü_mainUri :Uri, ü_others :Uri[] );
+constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
   //
     switch ( this._mode = ü_mode ) {
 
@@ -193,7 +181,8 @@ constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
         break;
       case CETrigger.EXPLORER:
         if(ß_trc){ß_trc( 'Explorer Context' );}
-        this._others = ü_others!;
+        this._others = ü_others!.filter( ü_someUri => ü_someUri.scheme === CEUriScheme.file )
+                                .map   ( ü_fileUri => ü_fileUri.fsPath                      );
         break;
 
     }
@@ -209,7 +198,7 @@ constructor( ü_mode:TAllModes, ü_mainUri?:Uri, ü_others?:string[] ){
 }
 
 private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<string> {
-    const ü_docView = await new ViewDocument( ü_doc
+    const ü_docView = await new DocumentView( ü_doc
                                             , ü_shadowDir
                                             , this._config.virtualDocumentsFileReuse ).whenReady();
   //
@@ -217,12 +206,12 @@ private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_sile
         ü_docView.updateShadow();
     } else {
         const ü_open = new MessageButton( 'OK' );
-        const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_docView.file }" to be shown in Notepad++ ?`;
+        const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_docView.fileName }" to be shown in Notepad++ ?`;
         const ü_todo = await window.showInformationMessage( ü_create, ü_open );
         switch ( ü_todo ) {
           case ü_open:
               ü_docView.updateShadow();
-              commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_docView.file ) );
+              commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_docView.fileName ) );
             break;
             try {
             } catch ( ü_eX ) {
@@ -231,10 +220,19 @@ private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_sile
             }
         }
     }
-    return ü_docView.file;
+    return ü_docView.fileName;
 }
 
 async submit():Promise<number> {
+    try {
+        return this._submit();
+    } catch ( ü_eX ) {
+        whenErrorShown( ü_eX, '' );
+        return CNotAPid;
+    }
+}
+
+private async _submit():Promise<number> {
   //
     switch ( this._mode ) {
 

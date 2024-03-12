@@ -1,6 +1,12 @@
 //--------------------------------------------------------------------
+
   export const enum CELanguageId {
       txt = 'plaintext'
+    }
+  export const enum CEUriScheme {
+      file        = 'file'
+    , vscSettings = 'vscode-settings'
+    , untitled    = 'untitled'
     }
 //====================================================================
 

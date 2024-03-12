@@ -9,6 +9,7 @@
   import { type TExtensionCommand
          , type THistoryProxy
          , type TViewDoc
+         , type IDisposableLike
          } from '../types/vsc.extension.d';
 //--------------------------------------------------------------------
   import { type TXtnConfigJSON
@@ -22,7 +23,6 @@
   import { workspace
          , commands
          , window
-
          } from 'vscode';
   import { ß_trc
          , ß_toggleDevTrace
@@ -51,6 +51,7 @@ export class XtnOpenInNpp {
   //
     readonly showDetailsBuffer = new TextDocViewer( CXtnTxtScheme, 'Details' );
     readonly docViewsBuffer    = new Map<TextDocument,TViewDoc>();
+    readonly disposables = [] as IDisposableLike[]
     readonly globalHistory:THistoryProxy
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
@@ -66,12 +67,12 @@ constructor(
     getConfigSnapshot().developerTrace || ß_toggleDevTrace();
   //
     this.globalHistory =
-      { admin  : new MementoFacade( vscContext, 'admin' , { version   : 0  } )
-      , config : new MementoFacade( vscContext, 'config', { executable: '' } )
-      , dummy  : new MementoFacade( vscContext, 'dummy' , []                 )
+      { admin  : new MementoFacade( this.vscContext, 'admin' , { version   : 0  } )
+      , config : new MementoFacade( this.vscContext, 'config', { executable: '' } )
+      , dummy  : new MementoFacade( this.vscContext, 'dummy' , []                 )
       };
   //
-    this.extensionApi = vscContext.extension;// extensions.getExtension( CExtensionId )!;
+    this.extensionApi = this.vscContext.extension;// extensions.getExtension( CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
     this.version     = ü_json.version;
@@ -90,16 +91,32 @@ constructor(
                 console.error( `Command "${ ü_cmdId }" not implemented.` );
                 continue;
         }
-        this.vscContext.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
+      this.vscContext.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
-        this.vscContext.subscriptions.push(  workspace.onDidChangeConfiguration( configModificationSignalled )  );
-        this.vscContext.subscriptions.push(  workspace.onDidCloseTextDocument( ( ü_doc )=>{ 
-            ß_trc&& ß_trc(  ü_doc.fileName  );
-            this.docViewsBuffer.delete( ü_doc );
-        } )  );
-        
+  //
+      this.vscContext.subscriptions.push(
+        workspace.onDidChangeConfiguration( configModificationSignalled        )
+      , workspace.onDidCloseTextDocument  ( this._onDocViewClosed.bind( this ) )
+      ,                          { dispose: this._dispose        .bind( this ) }
+      );
   //
     this.whenActivated = this._whenActivationFinalized();
+}
+
+private _onDocViewClosed( ü_doc:TextDocument ):void {
+    ß_trc&& ß_trc(  ü_doc.fileName  );
+    this.docViewsBuffer.delete( ü_doc );
+}
+
+private _dispose():void {
+    this.docViewsBuffer   .clear();
+    this.showDetailsBuffer.clear();
+    this.disposables.forEach( ü_disp => {
+        try {
+            ü_disp.dispose();
+        } catch (error) {
+        }
+    });
 }
 
 private async _whenActivationFinalized():Promise<this> {
