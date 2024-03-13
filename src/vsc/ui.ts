@@ -21,8 +21,8 @@
 //====================================================================
 
 export async function whenErrorShown( ü_eX:any, ü_context:string ):Promise<void> {
-    const ü_more = new MessageButton( 'OK' );
-    const ü_info = `${ ü_context } ${ ü_eX }`;
+    const ü_more = new MessageButton( 'DETAILS' );
+    const ü_info = `${ ü_context }: "${ ü_eX }"`;
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
     switch ( ü_done ) {
         case ü_more:

@@ -150,8 +150,6 @@ async updateShadow():Promise<boolean> {
 //====================================================================
 
 class CliArgs {
-    private static _docs = new Map<TextDocument,{file:string,mtime:string}>();
-
     private readonly _config                   = ß_getConfigSnapshot();
     private readonly _activeEditor             = window.activeTextEditor;
     private readonly _mode         :CETrigger
@@ -159,7 +157,7 @@ class CliArgs {
     private          _mainFileType :FileType   = FileType.Unknown;
     private          _others       :string[]   = [];
     private          _asWorkspace  :boolean    = false;
-
+  //
 constructor( ü_mode:CETrigger.PALETTE                                   );
 constructor( ü_mode:CETrigger.EDITOR  , ü_mainUri :Uri                  );
 constructor( ü_mode:CETrigger.EXPLORER, ü_mainUri :Uri, ü_others :Uri[] );
@@ -184,7 +182,6 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
         this._others = ü_others!.filter( ü_someUri => ü_someUri.scheme === CEUriScheme.file )
                                 .map   ( ü_fileUri => ü_fileUri.fsPath                      );
         break;
-
     }
   //
     if ( ü_mainUri!.scheme === 'file' ) {
@@ -225,9 +222,9 @@ private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_sile
 
 async submit():Promise<number> {
     try {
-        return this._submit();
+        return await this._submit();
     } catch ( ü_eX ) {
-        whenErrorShown( ü_eX, '' );
+        whenErrorShown( ü_eX, `When opening "${ this._mainPath }" in Notepad++` );
         return CNotAPid;
     }
 }
@@ -280,11 +277,11 @@ private async _submit():Promise<number> {
     if ( ü_args.length === 0 ) { return CNotAPid; }
   //
     if(ß_trc){ß_trc( `ChildProcess ${ ü_exe }  ${ ü_args}  ${ü_opts} ` );}
-    try {
       const ü_pid =  await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
       return ü_pid;
+    try {
     } catch ( ü_eX ) {
-        ß_trc&& ß_trc( ü_eX );
+      //ß_trc&& ß_trc( ü_eX );
         window.showErrorMessage( LCDoIt.spawn_error( ( ü_eX as Error ).message ) );
     //ß_showInformationMessage( ( ü_eX as Error ).message );
       return CNotAPid;

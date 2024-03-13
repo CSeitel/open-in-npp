@@ -31,7 +31,10 @@
          , getConfigSnapshot
          } from '../core/configContext';
   import { LCXtn
+         , LCDoIt
          } from '../l10n/i18n';
+  import { LCHeader
+         } from '../l10n/generic';
   import { openInNppActive
          , openInNppEditor
          , openInNppExplorer
@@ -49,9 +52,9 @@
 export class XtnOpenInNpp {
     readonly whenActivated:Promise<this>
   //
-    readonly showDetailsBuffer = new TextDocViewer( CXtnTxtScheme, 'Details' );
     readonly docViewsBuffer    = new Map<TextDocument,TViewDoc>();
-    readonly disposables = [] as IDisposableLike[]
+    readonly showDetailsBuffer = new TextDocViewer( CXtnTxtScheme, LCHeader.DETAILS() );
+    readonly disposables       = this.showDetailsBuffer.disposables.slice( 0 ); //as IDisposableLike[]
     readonly globalHistory:THistoryProxy
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
@@ -95,7 +98,8 @@ constructor(
     }
   //
       this.vscContext.subscriptions.push(
-        workspace.onDidChangeConfiguration( configModificationSignalled        )
+        this.showDetailsBuffer
+      , workspace.onDidChangeConfiguration( configModificationSignalled        )
       , workspace.onDidCloseTextDocument  ( this._onDocViewClosed.bind( this ) )
       ,                          { dispose: this._dispose        .bind( this ) }
       );

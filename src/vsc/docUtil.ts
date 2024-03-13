@@ -2,8 +2,11 @@
 */
   import { type TextEditor
          , type TextDocumentContentProvider
-         , type TextDocumentShowOptions,
+         , type TextDocumentShowOptions
+         , type TextDocument
          } from 'vscode';
+  import { type IDisposableLike
+         } from '../types/vsc.extension.d';
   import { type TFileUri
          } from '../types/vsc.fsUtil.d';
   import { type TUntitled
@@ -61,36 +64,37 @@ export async function whenTextEditorOpened( ü_fileUri:TFileUri, ü_preview = fa
 }
 
 //====================================================================
+//CancellationTokenSource
 
-export class TextDocViewer extends Map<string,string> implements TextDocumentContentProvider {
-    private _count = 1;
+export class TextDocViewer extends Map<string,{content:string,alias:number}> implements TextDocumentContentProvider {
+    private _count = [] as boolean[];
+    readonly disposables            = [] as IDisposableLike[];
+
+readonly dispose = ()=>{
+    this.clear();
+    this._count.length = 0;
+};
+readonly onDidCloseTextDocument = ( ü_doc:TextDocument )=>{
+        if ( ü_doc.uri.scheme !== this.scheme ) { return; }
+        const ü_id = ü_doc.uri.toString();
+        if ( ! this.has( ü_id ) ) { return; }
+        const ü_metaDoc = this.get( ü_id )!;
+        this._count[ ü_metaDoc.alias ] = false;
+        this.delete( ü_id );
+};
+
 constructor(
     public  readonly  scheme:string
   , public  readonly  title :string
   , public  readonly  langId:string = CELanguageId.txt
 ){
     super();
-    workspace.registerTextDocumentContentProvider( this.scheme, this );
-}
-async openNewDocument( ü_content:string, ü_title?:string ):Promise<TextEditor> {
-    const ü_uri = this.createNewDocument( ü_content, ü_title );
-    const ü_doc = await workspace.openTextDocument( ü_uri );
-    languages.setTextDocumentLanguage( ü_doc, this. langId );
-    const ü_opts:TextDocumentShowOptions =
-      { preview:false
-      };
-  //const ü_edt = await window.showTextDocument( ü_doc, ViewColumn.One, true );
-    const ü_edt = await window.showTextDocument( ü_doc, ü_opts );
-    return ü_edt;
-}
+    this.disposables.push( this
+      , workspace.registerTextDocumentContentProvider( this.scheme, this )
+      , workspace.onDidCloseTextDocument( this.onDidCloseTextDocument )
+    );
 
-createNewDocument( ü_content:string, ü_title?:string ):Uri {
-    if ( ü_title === undefined )
-       { ü_title = this.title; }
-        const ü_uri = Uri.parse( this.scheme +':'+ ü_title
-                                             +` (${ this._count ++ })` );
-    this.set( ü_uri.toString(), ü_content );
-       return ü_uri;
+    //workspace. onDidChangeVisibleTextEditors(function(){ } )
 }
 
 provideTextDocumentContent( ü_uri:Uri ):string {
@@ -99,10 +103,45 @@ provideTextDocumentContent( ü_uri:Uri ):string {
         return '';
     }
   //
-    const ü_content = this.get   ( ü_id )!;
-                      this.delete( ü_id );
-    return ü_content;
+    const ü_metaDoc = this.get   ( ü_id )!;
+    return ü_metaDoc.content;
 }
+
+async openNewDocument( ü_content:string, ü_title?:string ):Promise<TextEditor> {
+    const ü_uri = this.createNewDocument( ü_content, ü_title );
+    const ü_doc = await workspace.openTextDocument( ü_uri );
+  //
+    languages.setTextDocumentLanguage( ü_doc, this. langId );
+  //
+    const ü_opts:TextDocumentShowOptions =
+      { preview:false
+      };
+  //const ü_edt = await window.showTextDocument( ü_doc, ViewColumn.One, true );
+    const ü_edt = await window.showTextDocument( ü_doc, ü_opts );
+  //window.
+  //
+    return ü_edt;
+}
+
+createNewDocument( ü_content:string, ü_title?:string ):Uri {
+    if ( ü_title === undefined )
+       { ü_title = this.title; }
+  //
+    const ü_metaDoc =
+      { content: ü_content
+      , alias  : this._count.findIndex( used=>!used )
+      };
+            if ( ü_metaDoc.alias < 0 )
+               { ü_metaDoc.alias = this._count.length; }
+    this._count[ ü_metaDoc.alias ] = true;
+  //
+        const ü_uri = Uri.parse( this.scheme +':'+ ü_title
+                                           //+` (${ ü_metaDoc.alias ++ })` );
+                                             +` (${ 1 })` );
+    this.set( ü_uri.toString(), ü_metaDoc );
+       return ü_uri;
+}
+
 }
 
 //====================================================================

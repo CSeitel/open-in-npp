@@ -24,6 +24,7 @@
     , ALL    : ()=>l10n.t( 'Open All' )
     , SELECT : ()=>l10n.t( 'Open a Subset' )
     , CANCEL : ()=>l10n.t( 'Cancel' )
+    , DETAILS: ()=>l10n.t( 'Show Details' )
     };
 //==============================================================================
 /*
