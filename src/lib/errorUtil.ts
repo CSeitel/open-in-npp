@@ -2,6 +2,8 @@
 */
   import { type IMessage
          } from '../types/lib.errorUtil.d';
+  import { expandTemplateString
+         } from '../lib/textUtil';
 //====================================================================
 
 export function expect<C extends string              >(   eX:any,   code:C                 ):void
@@ -21,9 +23,10 @@ export function expect<C extends string,T            >( ü_eX:any, ü_code:C|C[]
 
 //====================================================================
 
-export class ErrorMessage extends Error implements IMessage {
+export class ErrorMessage<T=any> extends Error implements IMessage<T> {
              readonly  type      :'w'|'e' = 'e';
              readonly  variables :string[]
+                       reason   ?:T
 constructor(
                      ü_message   :string
   ,              ... ü_vars      :string[] ){
@@ -33,6 +36,11 @@ constructor(
 
 get text():string {
     return this.toString();
+}
+
+setReason( ü_reason:T ):this {
+    this.reason = ü_reason;
+    return this;
 }
 
 toString():string {

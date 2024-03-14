@@ -275,13 +275,13 @@ private async _submit():Promise<number> {
     const ü_args = await this._arguments( ü_verbatim );
     if ( ü_args.length === 0 ) { return CNotAPid; }
   //
+    try {
     if(ß_trc){ß_trc( `ChildProcess ${ ü_exe }  ${ ü_args}  ${ü_opts} ` );}
       const ü_pid =  await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
       return ü_pid;
-    try {
     } catch ( ü_eX ) {
       //ß_trc&& ß_trc( ü_eX );
-        window.showErrorMessage( LCDoIt.spawn_error( ( ü_eX as Error ).message ) );
+        throw new ErrorMessage( LCDoIt.spawn_error( ( ü_eX as Error ).message ) );
     //ß_showInformationMessage( ( ü_eX as Error ).message );
       return CNotAPid;
     }

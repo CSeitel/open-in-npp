@@ -11,7 +11,7 @@
 
   const ß_skipTests =  true; // = except single test
   whenAllTestsRun([
-      [ 'Single', [ ß_async.tst_XY
+      [ 'Single', [ ß_text.tst_expandEnvVariables
                         ], !ß_skipTests ]
     , [ 'Async' , ß_async,  ß_skipTests ]
     , [ 'Fs'    , ß_fs   ,  ß_skipTests ]

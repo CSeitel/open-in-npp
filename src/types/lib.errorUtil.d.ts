@@ -1,10 +1,11 @@
 /*
 */
   export type TMessageType = 'i'|'w'|'e'
-  export interface IMessage {
+  export interface IMessage<T=any> {
       readonly type     :TMessageType
       readonly variables:string[]
       readonly text     :string
+      readonly reason  ?:T
   }
 
 //====================================================================
