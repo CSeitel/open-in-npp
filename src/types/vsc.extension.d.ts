@@ -19,7 +19,7 @@
 			dispose():any
 		}
 
-  export type TViewDoc = {
+  export type TShadowDoc = {
       file :string
       hash :string
     }

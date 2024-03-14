@@ -14,6 +14,7 @@
   type TInitialRuntimeContext = TWritable<IXtnRuntimeContext>
 //--------------------------------------------------------------------
   import { CXtnId
+         , CXtnTxtScheme
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { extensions
@@ -22,11 +23,16 @@
   import { ß_RuntimeContext
          , ß_trc
          } from './context';
+  import { LCHeader
+         } from '../l10n/generic';
   import { getConfigSnapshot
          } from '../core/configContext';
+  import { TextDocViewer
+         } from '../vsc/docUtil';
 //====================================================================
   export const ß_XtnOpenInNpp      = null as unknown as XtnOpenInNpp;
   export const ß_getConfigSnapshot = getConfigSnapshot;
+  export const ß_ViewErrorDetails  = new TextDocViewer( CXtnTxtScheme, LCHeader.DETAILS() );
          const ß_that              = ß_implement( ß_RuntimeContext as TInitialRuntimeContext );
   import { XtnOpenInNpp
          } from '../core/runtime';
@@ -59,6 +65,7 @@ export async function ß_whenXtnAvailable():Promise<XtnOpenInNpp> {
 
 export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):Promise<XtnOpenInNpp> {
     if ( ß_XtnOpenInNpp === null ) {
+        ü_vscXtnContext.subscriptions.push( ß_ViewErrorDetails );
         (ß_XtnOpenInNpp as TNotReadonly<XtnOpenInNpp> ) = await new XtnOpenInNpp( ü_vscXtnContext ).whenActivated;
     }
   //

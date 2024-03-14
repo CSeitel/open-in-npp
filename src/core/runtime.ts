@@ -8,7 +8,7 @@
          } from '../types/generic.d';
   import { type TExtensionCommand
          , type THistoryProxy
-         , type TViewDoc
+         , type TShadowDoc
          , type IDisposableLike
          } from '../types/vsc.extension.d';
 //--------------------------------------------------------------------
@@ -23,6 +23,7 @@
   import { workspace
          , commands
          , window
+         , Disposable
          } from 'vscode';
   import { ß_trc
          , ß_toggleDevTrace
@@ -45,22 +46,31 @@
          } from '../vsc/cmdUtil';
   import { MementoFacade
          } from '../vsc/histUtil';
-  import { TextDocViewer
-         } from '../vsc/docUtil';
 //====================================================================
 
 export class XtnOpenInNpp {
     readonly whenActivated:Promise<this>
   //
-    readonly docViewsBuffer    = new Map<TextDocument,TViewDoc>();
-    readonly showDetailsBuffer = new TextDocViewer( CXtnTxtScheme, LCHeader.DETAILS() );
-    readonly disposables       = this.showDetailsBuffer.disposables.slice( 0 ); //as IDisposableLike[]
-    readonly globalHistory:THistoryProxy
+    readonly shadowDocsBfr = new Map<TextDocument,TShadowDoc>();
+    readonly vscDisposables:ReadonlyArray<IDisposableLike> & { push:( ... item:IDisposableLike[] )=>void }
+    readonly globalHistory :THistoryProxy
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
     readonly version      :string
     readonly commands     :TExtensionCommand[]
     readonly settings     :TXtnConfigJSON
+
+readonly dispose = ()=>{
+    this.shadowDocsBfr.clear();
+}
+
+private _onDocViewClosed = ( ü_doc:TextDocument )=>{
+    if ( ! ü_doc.isClosed
+      ||   ü_doc.uri.scheme === 'file'
+       ) { return; }
+    ß_trc&& ß_trc(  ü_doc.fileName  );
+    this.shadowDocsBfr.delete( ü_doc );
+}
 
 constructor(
     readonly vscContext   :ExtensionContext
@@ -75,6 +85,7 @@ constructor(
       , dummy  : new MementoFacade( this.vscContext, 'dummy' , []                 )
       };
   //
+    this.vscDisposables = this.vscContext.subscriptions
     this.extensionApi = this.vscContext.extension;// extensions.getExtension( CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
@@ -94,33 +105,15 @@ constructor(
                 console.error( `Command "${ ü_cmdId }" not implemented.` );
                 continue;
         }
-      this.vscContext.subscriptions.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
+      this.vscDisposables.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
   //
-      this.vscContext.subscriptions.push(
-        this.showDetailsBuffer
-      , workspace.onDidChangeConfiguration( configModificationSignalled        )
-      , workspace.onDidCloseTextDocument  ( this._onDocViewClosed.bind( this ) )
-      ,                          { dispose: this._dispose        .bind( this ) }
+      this.vscDisposables.push(             this
+      , workspace.onDidChangeConfiguration( configModificationSignalled )
+      , workspace.onDidCloseTextDocument  ( this._onDocViewClosed       )
       );
   //
     this.whenActivated = this._whenActivationFinalized();
-}
-
-private _onDocViewClosed( ü_doc:TextDocument ):void {
-    ß_trc&& ß_trc(  ü_doc.fileName  );
-    this.docViewsBuffer.delete( ü_doc );
-}
-
-private _dispose():void {
-    this.docViewsBuffer   .clear();
-    this.showDetailsBuffer.clear();
-    this.disposables.forEach( ü_disp => {
-        try {
-            ü_disp.dispose();
-        } catch (error) {
-        }
-    });
 }
 
 private async _whenActivationFinalized():Promise<this> {

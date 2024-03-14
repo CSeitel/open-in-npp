@@ -10,7 +10,7 @@
   import { ß_trc
          , ß_RuntimeContext
          } from '../runtime/context';
-  import { ß_XtnOpenInNpp
+  import { ß_ViewErrorDetails
          } from '../runtime/context-XTN';
   import { LCButton
          } from '../l10n/i18n';
@@ -36,7 +36,7 @@ export async function whenErrorShown( ü_eX:any, ü_context:string ):Promise<voi
                           : [ format( ü_eX ) ]
                           ;
           ü_content.unshift( ü_context, '', '' );
-          ß_XtnOpenInNpp.showDetailsBuffer.openNewDocument( ü_content.join( ß_RuntimeContext.lineSep ) );
+          ß_ViewErrorDetails.openNewDocument( ü_content.join( ß_RuntimeContext.lineSep ) );
           break;
     }
 }

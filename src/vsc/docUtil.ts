@@ -66,21 +66,25 @@ export async function whenTextEditorOpened( ü_fileUri:TFileUri, ü_preview = fa
 //====================================================================
 //CancellationTokenSource
 
-export class TextDocViewer extends Map<string,{content:string,alias:number}> implements TextDocumentContentProvider {
-    private _count = [] as boolean[];
-    readonly disposables            = [] as IDisposableLike[];
+export class TextDocViewer extends Map<string,{content:string,indX:number}> implements TextDocumentContentProvider {
+    private _metaDocs    = [] as boolean[];
+    readonly disposables = [] as IDisposableLike[];
 
 readonly dispose = ()=>{
     this.clear();
-    this._count.length = 0;
+    this._metaDocs.length = 0;
 };
+
 readonly onDidCloseTextDocument = ( ü_doc:TextDocument )=>{
-        if ( ü_doc.uri.scheme !== this.scheme ) { return; }
-        const ü_id = ü_doc.uri.toString();
-        if ( ! this.has( ü_id ) ) { return; }
-        const ü_metaDoc = this.get( ü_id )!;
-        this._count[ ü_metaDoc.alias ] = false;
-        this.delete( ü_id );
+    if ( ü_doc.isClosed   === false // language switch
+      || ü_doc.uri.scheme !== this.scheme ) { return; }
+  //
+               const ü_id = ü_doc.uri.toString();
+    if ( ! this.has( ü_id ) ) { return; }
+  //
+    const ü_metaDoc = this.get( ü_id )!;
+    this._metaDocs[ ü_metaDoc.indX ] = false;
+    this.delete( ü_id );
 };
 
 constructor(
@@ -91,24 +95,31 @@ constructor(
     super();
     this.disposables.push( this
       , workspace.registerTextDocumentContentProvider( this.scheme, this )
-      , workspace.onDidCloseTextDocument( this.onDidCloseTextDocument )
+      , workspace.onDidCloseTextDocument             ( this.onDidCloseTextDocument )
+    /*
+      , window   .onDidChangeVisibleTextEditors(function( ü_a ){ 
+           if ( ü_a.length === 0 ) {
+                return;
+           }
+           const ü_s =  ü_a[0].document
+      })
+    */
     );
 
-    //workspace. onDidChangeVisibleTextEditors(function(){ } )
 }
 
 provideTextDocumentContent( ü_uri:Uri ):string {
-    const ü_id = ü_uri.toString();
-    if ( ! this.has( ü_id ) ) {
-        return '';
-    }
+               const ü_id = ü_uri.toString();
+    if ( ! this.has( ü_id ) ) { return ''; }
   //
-    const ü_metaDoc = this.get   ( ü_id )!;
-    return ü_metaDoc.content;
+    const ü_metaDoc = this.get( ü_id )!;
+    const ü_content = ü_metaDoc.content;
+                      ü_metaDoc.content = '';
+    return ü_content;
 }
 
-async openNewDocument( ü_content:string, ü_title?:string ):Promise<TextEditor> {
-    const ü_uri = this.createNewDocument( ü_content, ü_title );
+async openNewDocument( ü_content:string ):Promise<TextEditor> {
+    const ü_uri = this.createNewDocument( ü_content );
     const ü_doc = await workspace.openTextDocument( ü_uri );
   //
     languages.setTextDocumentLanguage( ü_doc, this. langId );
@@ -123,21 +134,22 @@ async openNewDocument( ü_content:string, ü_title?:string ):Promise<TextEditor>
     return ü_edt;
 }
 
-createNewDocument( ü_content:string, ü_title?:string ):Uri {
-    if ( ü_title === undefined )
-       { ü_title = this.title; }
+createNewDocument( ü_content:string ):Uri {
   //
     const ü_metaDoc =
       { content: ü_content
-      , alias  : this._count.findIndex( used=>!used )
+      , indX  : this._metaDocs.findIndex( used=>!used )
       };
-            if ( ü_metaDoc.alias < 0 )
-               { ü_metaDoc.alias = this._count.length; }
-    this._count[ ü_metaDoc.alias ] = true;
+            if ( ü_metaDoc.indX < 0 )
+               { ü_metaDoc.indX = this._metaDocs.length; }
+    this._metaDocs[ ü_metaDoc.indX ] = true;
   //
-        const ü_uri = Uri.parse( this.scheme +':'+ ü_title
-                                           //+` (${ ü_metaDoc.alias ++ })` );
-                                             +` (${ 1 })` );
+        const ü_uri = Uri.parse( this.scheme
+                               + ':'
+                               + this.title
+                               + '-'
+                               + ü_metaDoc.indX
+                               );
     this.set( ü_uri.toString(), ü_metaDoc );
        return ü_uri;
 }

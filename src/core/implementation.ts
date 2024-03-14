@@ -6,7 +6,7 @@ https://code.visualstudio.com/api/references/vscode-api
          } from 'child_process';
   import { type TNotReadonly
          } from '../types/generic.d';
-  import { type TViewDoc
+  import { type TShadowDoc
          } from '../types/vsc.extension.d';
   import { CETrigger
          , CECliArgument
@@ -73,8 +73,7 @@ https://code.visualstudio.com/api/references/vscode-api
   const CNotAPid = -1;
 //====================================================================
 
-export async function openInNppActive  ( this:null                              ):Promise<number> {  return new CliArgs( CETrigger.PALETTE                   ).submit(); 
-}
+export async function openInNppActive  ( this:null                              ):Promise<number> { return new CliArgs( CETrigger.PALETTE                   ).submit(); }
 export async function openInNppEditor  ( this:null, ü_uri:Uri, ... ü_more:any[] ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_uri           ).submit(); }
 export async function openInNppExplorer( this:null, ü_uri:Uri, ü_others  :Uri[] ):Promise<number> { return new CliArgs( CETrigger.EXPLORER, ü_uri, ü_others ).submit(); }
 
@@ -85,8 +84,8 @@ class DocumentView {
     private readonly _isInitial :boolean
     public  readonly  content   :string
     private readonly _newHash   :string
-    private readonly _docView   :TViewDoc
-    private readonly _docViews  = ß_XtnOpenInNpp.docViewsBuffer;
+    private readonly _docView   :TShadowDoc
+    private readonly _docViews  = ß_XtnOpenInNpp.shadowDocsBfr;
     private readonly _encoding  = 'utf8';
 constructor(
     public  readonly  doc    :TextDocument
