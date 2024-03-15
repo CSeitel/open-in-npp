@@ -156,8 +156,9 @@ export function testSummary( ü_series?:string ):void {
     const ü_echo = ü_results.join( ü_crlf ) + ü_crlf;
   //
     CSeriesOfTests.length = 0;
-    if ( ü_ok === ü_all ) { ß_writeStdOut( ü_echo ); }
-    else                  { throw new Error( ü_echo ); }
+    ß_writeStdOut( ü_echo );
+    if ( ü_ok === ü_all ) {  }
+    else                  { throw new Error( `${ ü_all - ü_ok } Failures` ); }
 }
 
 export function testFailed<T=any>( ü_reason:any, ü_message?:string ):false {

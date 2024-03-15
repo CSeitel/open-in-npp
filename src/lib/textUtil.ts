@@ -3,6 +3,21 @@
 //--------------------------------------------------------------------
 //====================================================================
 
+export function escape256( ü_text:string ):string {
+  // unescape('%2c %3a %3b %3c %3d %3e %3f %5b %5c %5d %5e %60 %7b %7c %7d %7e %7f')
+  // , : ; < = > ? [ \ ] ^ ` { | } ~ 
+    const ü_rgXp = /[\x00-\x29\x2c\x3a-\x3f\x5b-\x5e\x60\x7b-\x7f\x80-\xff]/g;
+    return ü_text.replace( ü_rgXp, ß_escapeFF );
+}
+
+function ß_escapeFF( ü_hit:string ):string {
+    const ü_hex = ü_hit.charCodeAt(0).toString(16);
+    return ( ü_hex.length === 1 ? '%0' : '%' )
+         + ü_hex.toUpperCase();
+}
+
+//====================================================================
+
 export function shortenText( ü_path:string, ü_length:number ):string {
     if ( ü_path.length <= ü_length ) { return ü_path; }
   //const ü_tooMuch = 3 + ü_path.length - ü_length;

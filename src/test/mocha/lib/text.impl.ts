@@ -3,9 +3,17 @@
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
 //--------------------------------------------------------------------
+  import { promises as ß_fs_p
+         } from 'fs';
   import { expandEnvVariables
          , expandTemplateString
+         , escape256
          } from '../../../lib/textUtil';
+  import { createArray
+         } from '../../../lib/arrayUtil';
+  import { whenTempFile
+         , whenKnownAsFile
+         } from '../../../lib/fsUtil';
   import { testSrc
          , testSummary
          , testAsyncFunction
@@ -25,13 +33,13 @@ export async function tst_expandEnvVariables(){
       , [ '%TEMP$',       '%TEMP$'  ]
       , [ '%T__P%',       '%T__P%'  ]
       ] as TResultArray<string,string>;
-  //testFunction( expandEnvVariables, ü_data );
+    testFunction( expandEnvVariables, ü_data );
   //
     const ü_temp =
-      [ [ 'a-${ 0 }'  , 'a-000'   ]
+      [ [ 'a-${ 0 } ${1}'  , 'a-00 11'   ]
       , [ 'a-${ hugo}', 'a-HUGO'  ]
       ] as TResultArray<string,string>;
-    const ü_vars = ['000'];
+    const ü_vars = ['00','11'];
     const ö_expandTemplateString_o = bindArgs( expandTemplateString, { arrangeBound:[1], realFirst:true }
                                            , Object.assign( ü_vars, {hugo : 'HUGO'} ) );
     testFunction( ö_expandTemplateString_o, ü_temp );
@@ -41,6 +49,63 @@ export async function tst_expandEnvVariables(){
     testFunction( ö_expandTemplateString_a, ü_temp );
   //
     testSummary( 'expand' );
+}
+
+//====================================================================
+
+export async function tst_escape(){
+    const ü_chars = createArray( 256, function(ü_indx){
+        const ü_c = String.fromCharCode( ü_indx ); return [ ü_c, encodeURI( ü_c ) ] as [string,string]; });
+  //
+    const ü_2 = ü_chars.map((ü_item)=>[ü_item[0],escape(ü_item[0])] as [string,string])
+    const ü_temp =
+      [ 
+      , [ 'a-${ hugo}', 'a-HUGO'  ]
+      ] as TResultArray<string,string>;
+  //
+    testFunction( escape256, ü_2 );
+    testFunction( escape, ü_chars );
+  //
+    testSummary( 'escape' );
+}
+
+export async function tst_win32Names(){
+    const ö_stub = await whenTempFile( 'qqqqqq' );
+    let ü_file = ö_stub+'.txt';
+                   await ß_fs_p.writeFile( ü_file, '' );
+    let ü_indx = 0x21;
+    do {
+        const ü_char = String.fromCharCode( ü_indx );
+        try {
+            ü_file = await ö_rename( ü_file, ü_char );
+        } catch ( error ) {
+            switch ( ü_char ) {
+                case '"': //\x22
+                case '*': //\x2a
+                case '/': //\x2f
+                case ':': //\x3a
+                case '<': //\x3c
+                case '>': //\x3e
+                case '?': //\x3f
+                case '\\'://\x5c
+                case '|': //\x7c
+                  testEqual( ü_char, ü_char, ü_indx.toString(16) );
+                  break;
+                default:
+                  testEqual( ü_indx.toString(16), ü_char );
+            }
+            continue;
+        }
+        
+        testEqual( true, await whenKnownAsFile( ü_file ), ü_file );
+      //break;
+    } while ( ü_indx ++ < 0x100 );
+    testSummary( 'File Names' );
+async function ö_rename( ü_file:string, ü_char:string ):Promise<string> {
+    const ü_done = ö_stub+ü_char+'.txt';
+    await ß_fs_p.rename( ü_file, ü_done );
+    return ü_done;
+}
 }
 
 //====================================================================
