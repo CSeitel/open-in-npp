@@ -7,7 +7,8 @@
   //                "                           *   /   :       <       >   ?       \                   |
   export const CRgXp =
     { js_escape  : /[\x00-\x29\x2c\x3a-\x3f\x5b-\x5e\x60\x7b-\x7f\x80-\xff]/g
-    , js_template: /\$\{[^}]+\}/g
+    , lx_template: /\{([^}]+)\}/g
+    , js_template_: /\$\{([^}]+)\}/g
     , fs_win32   : /[\x22\x25\x2a\x2f\x3a\x3c\x3e\x3f\x5c\x7c]/g
     , env_win32  : /%([^%]+)%/g
     };

@@ -22,7 +22,7 @@
   type TIcons = 'close'
 //====================================================================
 
-export async function whenErrorShown( ü_eX:any, ü_context:string ):Promise<void> {
+export async function threadShowError( ü_eX:any, ü_context:string ):Promise<void> {
     const ü_more = new MessageButton( 'DETAILS' );
     const ü_info = `${ ü_context }: "${ ü_eX }"`;
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
@@ -42,7 +42,7 @@ export async function whenErrorShown( ü_eX:any, ü_context:string ):Promise<voi
               ü_content.push( '', '', format( '%o', ü_eX.reason ) )
           }
           ü_content.unshift( ü_context, '', '' );
-          ß_ViewErrorDetails.openNewDocument( ü_content.join( ß_RuntimeContext.lineSep ) );
+          ß_ViewErrorDetails.whenNewDocumentShown( ü_content.join( ß_RuntimeContext.lineSep ) );
           break;
     }
 }

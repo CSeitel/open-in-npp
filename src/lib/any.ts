@@ -3,13 +3,17 @@
   import { type SpawnOptions
          } from 'child_process';
 //------------------------------------------------------------------------------
-  import * as ßß_fs     from 'fs';
   import * as ßß_cp     from 'child_process';
   import * as ßß_util   from 'util';
   import { Disposable
          } from 'vscode';
+  import { spawn
+         } from 'child_process';
+  import { promises as ß_fs_p
+         } from 'fs';
+  import { createPromise
+         } from '../lib/asyncUtil';
 //------------------------------------------------------------------------------
-  export const ßß_fs_p = ßß_fs.promises;
   export const child_process =
     { execFile: ßß_util.promisify( ßß_cp.execFile )
     };
@@ -72,36 +76,13 @@ dispose():void {
 //==============================================================================
 
 export async function whenChildProcessSpawned( ü_exe:string, ü_args:readonly string[], ü_opts?:SpawnOptions ):Promise<number> {
+    const ü_prms = createPromise<number>();
   //
-    if ( ü_opts === undefined )
-       { ü_opts = {};
-       }
+    const ö_proc = spawn( ü_exe, ü_args, ü_opts ?? {} );
+    if ( ö_proc.pid === undefined ) { ö_proc.on( 'error', ü_prms.reject              ); }
+    else                            {                     ü_prms.resolve( ö_proc.pid ); }
   //
-    let ö_resolve:(ü_value:number) => void
-    let ö_reject :(ü_error:Error ) => void
-    const ü_whenPid = new Promise<number>( (ü_resolve,ü_reject) => {
-      ö_resolve = ü_resolve;
-      ö_reject  = ü_reject ;
-    //ö_reject  = ( ü_eX ) => { ü_reject( ü_eX ); }; _showError( ü_eX, [ ü_exe, ... ü_args ] );
-    });
-  //
-    try {
-    //
-      const ö_proc = ßß_cp.spawn( ü_exe, ü_args, ü_opts );
-      if ( ö_proc.pid === undefined ) { ö_proc.on( 'error', ö_rejectError          ); }
-      else                            {                     ö_resolve!( ö_proc.pid ); }
-    //
-    } catch ( ü_eX ) {
-      ö_rejectError( ü_eX as Error );
-    }
-  //
-    return ü_whenPid;
-//
-function ö_rejectError( ü_eX:Error ) {
-    console.error( ü_eX );
-    ö_reject( ü_eX );
-}
-//
+    return ü_prms.promise;
 }
 
 //==============================================================================

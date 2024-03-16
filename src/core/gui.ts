@@ -1,28 +1,28 @@
 /*
 */
-  import { type IMessage
-         , type TMessageType
+  import { type IUiXMessage
+         , type TUiXMessageType
+         , type TUiXMessageTemplate
          } from '../types/lib.errorUtil.d';
   import { type TStringify
          } from '../types/generic.d';
+  import { CEUiXMessageType
+         } from '../constants/error';
 //--------------------------------------------------------------------
   import { StatusBarAlignment
          , window
          } from 'vscode';
-  import { LCButton
-         } from '../l10n/i18n';
-  import { ß_trc
+  import { ß_stringify
          } from '../runtime/context';
-  import { ErrorMessage
-         , InfoMessage
-         } from '../lib/errorUtil';
   import { shortenText
          } from '../lib/textUtil';
   import { UniqueResource
          , createTimer
          , whenDelay
-         , promiseSettled
+         , whenPromiseSettled_
          } from '../lib/asyncUtil';
+  import { threadShowError
+         } from '../vsc/ui';
 //====================================================================
 
 export class XtnStatusBarItem {
@@ -32,21 +32,14 @@ export class XtnStatusBarItem {
             readonly  item     = window.createStatusBarItem( StatusBarAlignment.Right );
     private readonly _ur       = new UniqueResource( this.item ); 
 
-async echoPromise<T>( ü_whenDone:PromiseLike<T>, ü_msg:InfoMessage ):Promise<void> {
-    const ü_done = await promiseSettled( ü_whenDone );
-    if ( ü_done.rejected ) {
-        if ( ü_done.reason instanceof ErrorMessage )
-             { this.echoMessage( ü_done.reason ); }
-        else { throw             ü_done.reason  ; }
-    } else {
-        ü_msg.variables[ 0 ] = ''+ü_done.value;
-        this.echoMessage( ü_msg );
-    }
+async echoPromise<T>( ü_whenDone:PromiseLike<T>, ü_msg:TUiXMessageTemplate ):Promise<void> {
+    const ü_done = await whenPromiseSettled_( ü_whenDone, ü_msg );
+    this.echoMessage( ü_done );
 }
 
-async echoMessage(   text :       IMessage                                               ):Promise<void>
-async echoMessage( ü_text :string         , ü_type:TMessageType      , ü_tooltip?:string ):Promise<void>
-async echoMessage( ü_text_:string|IMessage, ü_type:TMessageType = 'i', ü_tooltip?:string ):Promise<void> {
+async echoMessage(   text :       IUiXMessage                                                                    ):Promise<void>
+async echoMessage( ü_text :string            , ü_type:TUiXMessageType                        , ü_tooltip?:string ):Promise<void>
+async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXMessageType.info, ü_tooltip?:string ):Promise<void> {
     const ß_a =
       { 'i': '\u24D8 ' // \u2139
       , 'w': '\u26A0 '
@@ -56,7 +49,7 @@ async echoMessage( ü_text_:string|IMessage, ü_type:TMessageType = 'i', ü_tool
     const ü_msg = typeof( ü_text_ ) === 'string'
                 ? { text: ü_text_
                   , type: ü_type
-                  } as IMessage
+                  } as IUiXMessage
                 :         ü_text_ ;
   //
     this.item.text    = '\u{1F4DD}'+ ß_a[ ü_msg.type ]+ shortenText( ü_msg.text, 80 );

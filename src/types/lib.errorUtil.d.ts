@@ -1,15 +1,20 @@
 /*
 */
-  export type TMessageType = 'i'|'w'|'e'
-  export interface IXpandMessageVars {
+  import { type CEUiXMessageType
+         } from '../constants/error';
+//====================================================================
+  export type TUiXMessageType = CEUiXMessageType
+
+  export interface IUiXMessage<R=any> {
+      readonly type     :CEUiXMessageType
+      readonly text     :string
+      readonly context ?:string
+      readonly reason  ?:R
+  }
+  export interface IExpandUiXMessageVars {
       ( ...vars:any[] ):string
   }
-  export interface IMessage<T=any> {
-      readonly type     :TMessageType
-      readonly variables:string[]
-      readonly text     :string
-      readonly reason  ?:T
-  }
+  export type TUiXMessageTemplate = string|IExpandUiXMessageVars
 
 //====================================================================
   export type TFSError = Error &

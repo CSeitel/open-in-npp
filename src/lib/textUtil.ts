@@ -56,9 +56,9 @@ export function expandTemplateString( ü_tmpl:string, ... ü_vars:(string|Array<
                  ?         ü_vars[0] as            Record<string|number,string>
                  :         ü_vars    as unknown as Record<string|number,string>
                  ;
-    return ü_tmpl.replace( CRgXp.js_template
-                         , function( ü_mKey ) { 
-                             return ü_oref[ ü_mKey.trim() ] ?? ü_mKey ;
+    return ü_tmpl.replace( CRgXp.lx_template
+                         , function( ü_all, ü_mKey ) { 
+                             return ü_oref[ ü_mKey.trim() ] ?? ü_all ;
                          }
                        //, function(_, a) { return a.split('.').reduce((b, c) => b?.[c], ü_vars ); }
                          );

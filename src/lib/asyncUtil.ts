@@ -3,18 +3,40 @@
   import { type TAsyncFunctionSingleArg
          } from '../types/generic.d';
   import { type TPromise
-         , type TTimer
          , type TPromiseSettled
+         , type TTimer
          , type IReleaseResource
          } from '../types/lib.asyncUtil.d';
+  import { type IUiXMessage
+         , type TUiXMessageTemplate
+         } from '../types/lib.errorUtil.d';
+//--------------------------------------------------------------------
   import { ß_trc
+         , ß_stringify
          } from '../runtime/context';
+  import { ErrorMessage
+         , UiXMessage
+         } from '../lib/errorUtil';
 //====================================================================
 
-export async function promiseSettled<T>( ü_prms:PromiseLike<T> ):Promise<TPromiseSettled<T>> {
-     const ö_done = ( await Promise.allSettled([ ü_prms ]) )[0] as TPromiseSettled<T>;
-           ö_done.rejected = ö_done.status === 'rejected';
-    return ö_done;
+export async function whenPromiseSettled<T>( ü_whenDone:PromiseLike<T> ):Promise<TPromiseSettled<T>> {
+     const ü_done = ( await Promise.allSettled([ ü_whenDone ]) )[0] as TPromiseSettled<T>;
+           ü_done.rejected = ü_done.status === 'rejected';
+    return ü_done;
+}
+
+export async function whenPromiseSettled_( ü_whenDone:PromiseLike<unknown>, ü_msg:TUiXMessageTemplate ):Promise<IUiXMessage> {
+    const ü_done = await whenPromiseSettled( ü_whenDone );
+    if ( ü_done.rejected ) {
+        if ( ü_done.reason instanceof ErrorMessage )
+             { return ü_done.reason.setContext( ü_msg ); }
+        else { throw  ü_done.reason                    ; }
+    } else {
+        return         typeof( ü_msg ) === 'string'
+             ? new UiXMessage( ü_msg, ß_stringify( ü_done.value ) )
+             : new UiXMessage( ü_msg,              ü_done.value   )
+             ;
+    }
 }
 
 //====================================================================

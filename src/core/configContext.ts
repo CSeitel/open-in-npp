@@ -21,7 +21,7 @@
   import { ß_trc
          , ß_toggleDevTrace
          } from '../runtime/context';
-  import { InfoMessage
+  import { UiXMessage
          } from '../lib/errorUtil';
   import { AsyncCalculation
          } from '../lib/asyncUtil';
@@ -148,8 +148,8 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
     ß_whatIsDirty = undefined;
   //
            if ( ü_change.affectsConfiguration( EConfigurationIds.executable                ) ) { ß_whatIsDirty = 'executable'               ; getConfigSnapshot();
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; ß_item.echoPromise( getConfigSnapshot().whenWorkingDir    , new InfoMessage( 'W D '    ) );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; ß_item.echoPromise( getConfigSnapshot().whenVirtualDocsDir, new InfoMessage( 'V D Dir' ) );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; ß_item.echoPromise( getConfigSnapshot().whenWorkingDir    , 'Work D {0}'  );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; ß_item.echoPromise( getConfigSnapshot().whenVirtualDocsDir, 'V D Dir {0}' );
     } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace            ) ) { ß_toggleDevTrace ();
     } else {
     }

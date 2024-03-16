@@ -118,7 +118,7 @@ provideTextDocumentContent( ü_uri:Uri ):string {
     return ü_content;
 }
 
-async openNewDocument( ü_content:string ):Promise<TextEditor> {
+async whenNewDocumentShown( ü_content:string ):Promise<TextEditor> {
     const ü_uri = this.createNewDocument( ü_content );
     const ü_doc = await workspace.openTextDocument( ü_uri );
   //

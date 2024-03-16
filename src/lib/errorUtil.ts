@@ -1,8 +1,17 @@
 /*
 */
-  import { type IMessage
-         , type IXpandMessageVars
+  import { type IUiXMessage
+         , type TUiXMessageType
+         , type TUiXMessageTemplate
+         , type IExpandUiXMessageVars
          } from '../types/lib.errorUtil.d';
+  import { CEUiXMessageType
+         } from '../constants/error';
+//--------------------------------------------------------------------
+  import { format
+         } from 'util';
+  import { ß_stringify
+         } from '../runtime/context';
   import { expandTemplateString
          } from '../lib/textUtil';
 //====================================================================
@@ -24,57 +33,48 @@ export function expect<C extends string,T            >( ü_eX:any, ü_code:C|C[]
 
 //====================================================================
 
-export class ErrorMessage<T=any> extends Error implements IMessage<T> {
-             readonly  type      :'w'|'e' = 'e';
-             readonly  variables :string[]
-                       reason   ?:T
-constructor(
-    private  readonly _message   :string|IXpandMessageVars
-  ,              ... ü_vars      :string[] ){
+export class UiXMessage<C=any> implements IUiXMessage<unknown> {
+            readonly  type    :TUiXMessageType = CEUiXMessageType.info;
+            readonly  text    :string
+    private          _context?:C
+constructor(   msgTmpl:string               , ...  vars:string[] );
+constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] );
+constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
+    this.text    =               typeof( ü_msgTmpl ) === 'string'
+                 ? expandTemplateString( ü_msgTmpl            , ü_vars )
+                 :                       ü_msgTmpl.apply( null, ü_vars )
+                 ;
+}
+setContext( ü_context:C ):this { this._context = ü_context; return this; }
+
+toString():string { return this.text; }
+
+}
+
+export class ErrorMessage<R=any,C=any> extends Error implements IUiXMessage<R> {
+            readonly  type    :TUiXMessageType = CEUiXMessageType.error;
+            readonly  text    :string
+                      reason ?:R
+                     _context?:C
+constructor(   msgTmpl:string               , ...  vars:string[] );
+constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] );
+constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
   //super( typeof( _message ) === 'string' ? _message : _message.name );
     super();
-    this.variables = ü_vars;
   //
     this.name    = 'ErrorWithMessage';
-    this.message = typeof( _message ) === 'string'
-         ? expandTemplateString(      _message            , this.variables )
-         :                            _message.apply( null, this.variables )
-         ;
+    this.message =
+    this.text    =               typeof( ü_msgTmpl ) === 'string'
+                 ? expandTemplateString( ü_msgTmpl            , ü_vars )
+                 :                       ü_msgTmpl.apply( null, ü_vars )
+                 ;
 }
+setReason ( ü_reason :R ):this { this.reason   = ü_reason ; return this; }
+setContext( ü_context:C ):this { this._context = ü_context; return this; }
+toString():string { return this.text; }
 
-get text():string {
-    return this.toString();
-}
-
-setReason( ü_reason:T ):this {
-    this.reason = ü_reason;
-    return this;
-}
-
-toString_():string {
-    return typeof( this._message ) === 'string'
-         ? expandTemplateString( this._message            , this.variables )
-         :                       this._message.apply( null, this.variables )
-         ;
-}
-
-}
-
-export class InfoMessage implements IMessage {
-             readonly  type      :'i'|'w' = 'i';
-    public   readonly  variables :string[]
-constructor(
-    public            message    :string
-  ,              ... ü_vars      :string[] ){
-    this.variables = ü_vars;
-}
-
-get text():string {
-    return this.toString();
-}
-
-toString():string {
-    return this.message +' '+ this.variables.join(' ');
+get context():string {
+    return ß_stringify( this._context );
 }
 
 }

@@ -9,6 +9,8 @@
 //--------------------------------------------------------------------
   import { sep
          } from 'path';
+  import { format
+         } from 'util';
 //====================================================================
   
   type TInitialRuntimeContext = TWritable<IRuntimeContext>
@@ -38,6 +40,10 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IRuntimeContext {
 export const ß_trc:IRuntimeContext['devTrace'] = function( ü_text:any, ü_intro?:string ):void {
     if ( typeof(ü_intro) === 'string' ) { console.log( 'TST-%s: %o', ü_intro, ü_text ); }
     else                                { console.log(    'TST: %o',          ü_text ); }
+}
+
+export function ß_stringify( ü_oref:any ):string {
+    return format( '%o', ü_oref );
 }
 
 export function ß_writeStdOut( ü_text:string ):void {

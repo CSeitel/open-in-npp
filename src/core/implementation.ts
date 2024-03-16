@@ -47,7 +47,7 @@ https://code.visualstudio.com/api/references/vscode-api
 //------------------------------------------------------------------------------
   import { whenChildProcessSpawned
          } from '../lib/any';
-  import { promiseSettled
+  import { whenPromiseSettled
          } from '../lib/asyncUtil';
   import { ErrorMessage
          } from '../lib/errorUtil';
@@ -63,7 +63,7 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../vsc/fsUtil';
 //--------------------------------------------------------------------
   import { MessageButton
-         , whenErrorShown
+         , threadShowError
          } from '../vsc/ui';
   import { TButtons
          , TDropDownListOptions
@@ -81,7 +81,7 @@ export async function openInNppExplorer( this:null, ü_uri:Uri, ü_others  :Uri[
 
 //====================================================================
 
-class DocumentView {
+class VirtualDocumentView {
   //
     private readonly _isInitial :boolean
     public  readonly  content   :string
@@ -197,10 +197,18 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
     }
 }
 
+private async _threadShadowDone( ü_doc:TextDocument, ü_shadowDir:string ):Promise<void> {
+    try {
+        await this._whenShadowDone( ü_doc, ü_shadowDir, false );
+    } catch ( ü_eX ) {
+        threadShowError( ü_eX, 'Shadow' );
+    }
+}
+
 private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<string> {
-    const ü_docView = await new DocumentView( ü_doc
-                                            , ü_shadowDir
-                                            , this._config.virtualDocumentsFileReuse ).whenReady();
+    const ü_docView = await new VirtualDocumentView( ü_doc
+                                                , ü_shadowDir
+                                                , this._config.virtualDocumentsFileReuse ).whenReady();
   //
     if ( ü_silent ) {
         ü_docView.updateShadow();
@@ -216,7 +224,7 @@ private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_sile
             try {
             } catch ( ü_eX ) {
                 if ( ü_silent ) { throw ü_eX; }
-                whenErrorShown( ü_eX, ü_create );
+                threadShowError( ü_eX, ü_create );
             }
         }
     }
@@ -227,7 +235,7 @@ async submit():Promise<number> {
     try {
         return await this._submit();
     } catch ( ü_eX ) {
-        whenErrorShown( ü_eX, `When opening "${ this._mainPath }" in Notepad++` );
+        threadShowError( ü_eX, `When opening "${ this._mainPath }" in Notepad++` );
         return CNotAPid;
     }
 }
@@ -244,8 +252,8 @@ private async _submit():Promise<number> {
         //this._mode         = EModes.UNTITLED;
           const ü_doc = this._activeEditor!.document;
           const ü_temp = await this._config.whenVirtualDocsDir;
-                                if ( ü_temp.length === 0 ) { this._whenShadowDone( ü_doc, ü_temp, false ); return CNotAPid; }
-          ( this._mainPath as TNotReadonly<string> ) = await this._whenShadowDone( ü_doc, ü_temp, true  );
+                                if ( ü_temp.length === 0 ) { this._threadShadowDone( ü_doc, ü_temp        ); return CNotAPid; }
+          ( this._mainPath as TNotReadonly<string> ) = await this._whenShadowDone  ( ü_doc, ü_temp, true  );
         break;
       //return CNotAPid;
 
@@ -281,8 +289,8 @@ private async _submit():Promise<number> {
   //
     try {
     if(ß_trc){ß_trc( `ChildProcess ${ ü_exe }  ${ ü_args}  ${ü_opts} ` );}
-      const ü_pid =  await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
-      return ü_pid;
+        const ü_pid = await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
+        return ü_pid;
     } catch ( ü_eX ) {
       //ß_trc&& ß_trc( ü_eX );
         throw new ErrorMessage( LCDoIt.spawn_error,  ''+ü_eX  ).setReason( ü_eX );
@@ -363,7 +371,7 @@ private async _cwd( ü_skip:string|undefined ):Promise<string> {
     if ( ü_skip !== undefined ) { return ''; }
   //
     let ü_cwd = '';
-    const ü_whenCwd = await promiseSettled( this._config.whenWorkingDir );
+    const ü_whenCwd = await whenPromiseSettled( this._config.whenWorkingDir );
     if ( ü_whenCwd.rejected ) {
         if ( ü_whenCwd.reason instanceof ErrorMessage ) { window.showWarningMessage( ü_whenCwd.reason.text ); }
         else                                            {                      throw ü_whenCwd.reason       ; }
