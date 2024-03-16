@@ -1,6 +1,9 @@
 /*
 */
   export type TMessageType = 'i'|'w'|'e'
+  export interface IXpandMessageVars {
+      ( ...vars:any[] ):string
+  }
   export interface IMessage<T=any> {
       readonly type     :TMessageType
       readonly variables:string[]

@@ -16,6 +16,8 @@
          } from '../l10n/i18n';
   import { whenNewTextEditorOpened
          } from '../vsc/docUtil';
+  import { ErrorMessage
+         } from '../lib/errorUtil';
 //------------------------------------------------------------------------------
   type TIcons = 'close'
 //====================================================================
@@ -35,6 +37,10 @@ export async function whenErrorShown( ü_eX:any, ü_context:string ):Promise<voi
                             ]
                           : [ format( ü_eX ) ]
                           ;
+          if ( ü_eX instanceof ErrorMessage
+            && ü_eX.reason instanceof Error ) {
+              ü_content.push( '', '', format( '%o', ü_eX.reason ) )
+          }
           ü_content.unshift( ü_context, '', '' );
           ß_ViewErrorDetails.openNewDocument( ü_content.join( ß_RuntimeContext.lineSep ) );
           break;

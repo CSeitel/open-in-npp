@@ -7,7 +7,7 @@
          } from 'fs';
   import { expandEnvVariables
          , expandTemplateString
-         , escape256
+         , escapeFF
          } from '../../../lib/textUtil';
   import { createArray
          } from '../../../lib/arrayUtil';
@@ -63,7 +63,7 @@ export async function tst_escape(){
       , [ 'a-${ hugo}', 'a-HUGO'  ]
       ] as TResultArray<string,string>;
   //
-    testFunction( escape256, ü_2 );
+    testFunction( escapeFF(), ü_2 );
     testFunction( escape, ü_chars );
   //
     testSummary( 'escape' );

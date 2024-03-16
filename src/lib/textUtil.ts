@@ -1,13 +1,17 @@
 /*
 */
+  import { type TOutputEncoder
+         } from '../types/generic.d';
+  import { CRgXp
+         } from '../constants/text';
 //--------------------------------------------------------------------
 //====================================================================
 
-export function escape256( ü_text:string ):string {
-  // unescape('%2c %3a %3b %3c %3d %3e %3f %5b %5c %5d %5e %60 %7b %7c %7d %7e %7f')
-  // , : ; < = > ? [ \ ] ^ ` { | } ~ 
-    const ü_rgXp = /[\x00-\x29\x2c\x3a-\x3f\x5b-\x5e\x60\x7b-\x7f\x80-\xff]/g;
-    return ü_text.replace( ü_rgXp, ß_escapeFF );
+export function escapeFF( ö_rgXp:RegExp = CRgXp.js_escape ):TOutputEncoder {
+    return ö_encoder;
+function ö_encoder( ü_text:string ):string {
+    return ü_text.replace( ö_rgXp, ß_escapeFF );
+}
 }
 
 function ß_escapeFF( ü_hit:string ):string {
@@ -34,32 +38,26 @@ export function shortenText( ü_path:string, ü_length:number ):string {
 
 export function expandEnvVariables( ü_path:string ):string {
   //
-    const ü_rgXp = /%([^%]+)%/g;
-    return ü_path.replace( ü_rgXp, ö_win32 );
-//
-function ö_win32( ü_original:string, ü_name:string ):string {
-    const ü_resolved = process.env[ ü_name ];
-    return ü_resolved === undefined
-         ? ü_original
-         : ü_resolved
-         ;
+    return ü_path.replace( CRgXp.env_win32, ö_env_win32 );
 }
-//
+function ö_env_win32( ü_original:string, ü_name:string ):string {
+    return process.env[ ü_name ] ?? ü_original;
 }
+
 //--------------------------------------------------------------------
 
-
 	//args?: Array<string | number | boolean> | Record<string, any>;
-export function expandTemplateString(   tmpl:string, ...   vars:Array<string>                              ):string;
 export function expandTemplateString(   tmpl:string,       vars:             Record<string|number,string>  ):string;
-export function expandTemplateString( ü_tmpl:string, ... ü_vars:Array<string|Record<string|number,string>> ):string {
-    const ü_rgXp = /\$\{([^}]+)\}/gi;
+export function expandTemplateString(   tmpl:string,       vars:             Array <              string>  ):string;
+export function expandTemplateString(   tmpl:string, ...   vars:      string[]                             ):string;
+export function expandTemplateString( ü_tmpl:string, ... ü_vars:(string|Array<string>|Record<string|number,string>)[] ):string {
+  //
     const ü_oref = typeof( ü_vars[0] ) === 'object'
                  ?         ü_vars[0] as            Record<string|number,string>
                  :         ü_vars    as unknown as Record<string|number,string>
                  ;
-    return ü_tmpl.replace( ü_rgXp
-                         , function( ü_all, ü_mKey ) { 
+    return ü_tmpl.replace( CRgXp.js_template
+                         , function( ü_mKey ) { 
                              return ü_oref[ ü_mKey.trim() ] ?? ü_mKey ;
                          }
                        //, function(_, a) { return a.split('.').reduce((b, c) => b?.[c], ü_vars ); }

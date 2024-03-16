@@ -1,6 +1,7 @@
 /*
 */
   import { type IMessage
+         , type IXpandMessageVars
          } from '../types/lib.errorUtil.d';
   import { expandTemplateString
          } from '../lib/textUtil';
@@ -28,10 +29,17 @@ export class ErrorMessage<T=any> extends Error implements IMessage<T> {
              readonly  variables :string[]
                        reason   ?:T
 constructor(
-                     ü_message   :string
+    private  readonly _message   :string|IXpandMessageVars
   ,              ... ü_vars      :string[] ){
-    super( ü_message );
+  //super( typeof( _message ) === 'string' ? _message : _message.name );
+    super();
     this.variables = ü_vars;
+  //
+    this.name    = 'ErrorWithMessage';
+    this.message = typeof( _message ) === 'string'
+         ? expandTemplateString(      _message            , this.variables )
+         :                            _message.apply( null, this.variables )
+         ;
 }
 
 get text():string {
@@ -43,8 +51,11 @@ setReason( ü_reason:T ):this {
     return this;
 }
 
-toString():string {
-    return this.message +' '+ this.variables.join(' ');
+toString_():string {
+    return typeof( this._message ) === 'string'
+         ? expandTemplateString( this._message            , this.variables )
+         :                       this._message.apply( null, this.variables )
+         ;
 }
 
 }

@@ -16,7 +16,11 @@
   export type TAsyncFunction         <Ty=any> = ( ...args:any[] )=>PromiseLike<Ty>
   export type TAsyncFunctionSingleArg<Ty,Tx=Ty> = (    arg0:Tx    )=>PromiseLike<Ty>
 
-  export type TStringify  <T=any> = ( arg0:T )=>string
+//====================================================================
+
+  export type TStringify<T=any> = (   arg0:T      )=>string
+  export type TInputDecoder     = (  input:string )=>string
+  export type TOutputEncoder    = ( output:string )=>string
 
 //====================================================================
 /*

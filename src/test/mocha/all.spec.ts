@@ -11,7 +11,7 @@
 
   const ß_skipTests =  true; // = except single test
   whenAllTestsRun([
-      [ 'Single', [ ß_text.tst_win32Names
+      [ 'Single', [ ß_text.tst_escape//tst_win32Names
                         ], !ß_skipTests ]
     , [ 'Async' , ß_async,  ß_skipTests ]
     , [ 'Fs'    , ß_fs   ,  ß_skipTests ]

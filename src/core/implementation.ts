@@ -14,6 +14,8 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../constants/extension';
   import { CEUriScheme
          } from '../constants/vsc';
+  import { CRgXp
+         } from '../constants/text';
 //--------------------------------------------------------------------
   import * as ßß_path   from 'path';
   import { join
@@ -54,7 +56,7 @@ https://code.visualstudio.com/api/references/vscode-api
          , whenTempFile
          } from '../lib/fsUtil';
   import { shortenText
-         , expandEnvVariables
+         , escapeFF
          , wrapDoubleQuotes
          } from '../lib/textUtil';
   import { whenFilesFound
@@ -108,7 +110,9 @@ get fileName():string {
 
 async whenReady():Promise<this> {
     if ( this._isInitial ) {
-                                        const ü_stub = (workspace.name??'') +'-'+ this.doc.fileName;
+        const ü_stub = escapeFF( CRgXp.fs_win32 )( (workspace.name??'')
+                     + '-'
+                     + this.doc.fileName );
         this._docView.file = await whenTempFile( ü_stub, '', this.tempDir, ! this.reuse  );
     }
     return this;
@@ -281,7 +285,7 @@ private async _submit():Promise<number> {
       return ü_pid;
     } catch ( ü_eX ) {
       //ß_trc&& ß_trc( ü_eX );
-        throw new ErrorMessage( LCDoIt.spawn_error( ( ü_eX as Error ).message ) );
+        throw new ErrorMessage( LCDoIt.spawn_error,  ''+ü_eX  ).setReason( ü_eX );
     //ß_showInformationMessage( ( ü_eX as Error ).message );
       return CNotAPid;
     }
