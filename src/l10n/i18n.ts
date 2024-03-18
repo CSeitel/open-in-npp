@@ -4,9 +4,15 @@
          } from 'vscode';
 //==============================================================================
   export const LCXtn =
-    { welcome : ( _0:string           )=>l10n.t( 'Welcome to "Open-In-Notepad++" Version ${0}', _0 )
+    { welcome : ( _0:string           )=>l10n.t( 'Welcome to "Open-In-Notepad++" Version {0}', _0 )
     , delta   :                      ()=>l10n.t( 'What\'s new ?' )
-    , noFolder: ( _0:string,_1:string )=>l10n.t( 'Unknown or invalid ${0}: ${1} ', _0,_1 )
+    };
+  export const LCConfig =
+    { executable    : ( _0:string           )=>l10n.t( 'Executable "{0}"'                , _0    )
+    , workingDir    : ( _0:string           )=>l10n.t( 'Working Directory "{0}"'         , _0    )
+    , virtualDocsDir: ( _0:string           )=>l10n.t( 'Virtual Documents Diretory "{0}"', _0    )
+    , noFolder      : ( _0:string,_1:string )=>l10n.t( 'Unknown or invalid {0}: "{1}"'   , _0,_1 )
+    , noExeFile     : ( _0:string           )=>l10n.t( 'Not an executable file: "{0}"'   , _0    )
     };
 //------------------------------------------------------------------------------
   export const LCDoIt =

@@ -19,7 +19,7 @@
   import { UniqueResource
          , createTimer
          , whenDelay
-         , whenPromiseSettled_
+         , whenDoneWithMessage
          } from '../lib/asyncUtil';
   import { threadShowError
          } from '../vsc/ui';
@@ -33,7 +33,7 @@ export class XtnStatusBarItem {
     private readonly _ur       = new UniqueResource( this.item ); 
 
 async echoPromise<T>( ü_whenDone:PromiseLike<T>, ü_msg:TUiXMessageTemplate ):Promise<void> {
-    const ü_done = await whenPromiseSettled_( ü_whenDone, ü_msg );
+    const ü_done = await whenDoneWithMessage( ü_whenDone, ü_msg );
     this.echoMessage( ü_done );
 }
 

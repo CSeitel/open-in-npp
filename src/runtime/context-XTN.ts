@@ -29,9 +29,12 @@
          } from '../core/configContext';
   import { TextDocViewer
          } from '../vsc/docUtil';
+  import { XtnStatusBarItem
+         } from '../core/gui';
 //====================================================================
   export const ß_XtnOpenInNpp      = null as unknown as XtnOpenInNpp;
   export const ß_getConfigSnapshot = getConfigSnapshot;
+  export const ß_StatusBarItem     = new XtnStatusBarItem();
   export const ß_ViewErrorDetails  = new TextDocViewer( CXtnTxtScheme, LCHeader.DETAILS() );
          const ß_that              = ß_implement( ß_RuntimeContext as TInitialRuntimeContext );
   import { XtnOpenInNpp

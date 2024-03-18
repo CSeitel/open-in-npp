@@ -25,12 +25,12 @@
          } from '../lib/errorUtil';
   import { AsyncCalculation
          } from '../lib/asyncUtil';
-  import { XtnStatusBarItem
-         } from './gui';
   import { whenExecutable
          , whenKnownAsFolder
-         , whenExecutableChecked
-         } from '../core/configHandler';
+         , onNewExecutable
+         , onNewWorkingDir
+         , onNewVirtualDocsDir
+         } from '../core/configUtil';
 //====================================================================
 
 class ConfigProxy {
@@ -90,7 +90,7 @@ constructor(
 }
 //
 get whenExecutable    ():PromiseLike<string> { return ( this._whenExecutable
-                                                   || ( this._whenExecutable     = new AsyncCalculation( this.executable               , whenExecutable as unknown as TAsyncFunctionSingleArg<string>   ) ) ).whenY; }
+                                                   || ( this._whenExecutable     = new AsyncCalculation( this.executable               , whenExecutable   .bind( null, true                           ) ) ) ).whenY; }
 get whenWorkingDir    ():PromiseLike<string> { return ( this._whenWorkingDir
                                                    || ( this._whenWorkingDir     = new AsyncCalculation( this.workingDirectory         , whenKnownAsFolder.bind( null, 'Working Directory'            ) ) ) ).whenY; }
 get whenVirtualDocsDir():PromiseLike<string> { return ( this._whenVirtualDocsDir
@@ -122,8 +122,7 @@ clone( ü_what ?:TXtnConfigKeys ):ConfigSnapshot {
     let ß_whatIsDirty = undefined as TXtnConfigKeys|undefined;
     let ß_cfgSnapshot = undefined as unknown as ConfigSnapshot;
         ß_cfgSnapshot = getConfigSnapshot();
-  const ß_item = new XtnStatusBarItem();
-//--------------------------------------------------------------------
+//====================================================================
 
 export function getConfigSnapshot():ConfigSnapshot {
     if ( ß_cfgIsDirty ) {
@@ -133,6 +132,8 @@ export function getConfigSnapshot():ConfigSnapshot {
     }
       return ß_cfgSnapshot;
 }
+
+//--------------------------------------------------------------------
 
 export async function configModificationSignalled( ü_change:ConfigurationChangeEvent ):Promise<void> {
     if ( ! ü_change.affectsConfiguration( CPrefix ) ) { return; }
@@ -147,9 +148,9 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
     ß_cfgIsDirty = true;
     ß_whatIsDirty = undefined;
   //
-           if ( ü_change.affectsConfiguration( EConfigurationIds.executable                ) ) { ß_whatIsDirty = 'executable'               ; getConfigSnapshot();
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; ß_item.echoPromise( getConfigSnapshot().whenWorkingDir    , 'Work D {0}'  );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; ß_item.echoPromise( getConfigSnapshot().whenVirtualDocsDir, 'V D Dir {0}' );
+           if ( ü_change.affectsConfiguration( EConfigurationIds.executable                ) ) { ß_whatIsDirty = 'executable'               ; onNewExecutable    ( getConfigSnapshot() );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; onNewWorkingDir    ( getConfigSnapshot() );
+    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; onNewVirtualDocsDir( getConfigSnapshot() );
     } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace            ) ) { ß_toggleDevTrace ();
     } else {
     }

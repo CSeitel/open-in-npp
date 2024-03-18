@@ -25,7 +25,7 @@ export async function whenPromiseSettled<T>( ü_whenDone:PromiseLike<T> ):Promis
     return ü_done;
 }
 
-export async function whenPromiseSettled_( ü_whenDone:PromiseLike<unknown>, ü_msg:TUiXMessageTemplate ):Promise<IUiXMessage> {
+export async function whenDoneWithMessage( ü_whenDone:PromiseLike<unknown>, ü_msg:TUiXMessageTemplate ):Promise<IUiXMessage> {
     const ü_done = await whenPromiseSettled( ü_whenDone );
     if ( ü_done.rejected ) {
         if ( ü_done.reason instanceof ErrorMessage )
