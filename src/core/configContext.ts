@@ -95,13 +95,6 @@ get whenWorkingDir    ():PromiseLike<string> { return ( this._whenWorkingDir
                                                    || ( this._whenWorkingDir     = new AsyncCalculation( this.workingDirectory         , whenKnownAsFolder.bind( null, 'Working Directory'            ) ) ) ).whenY; }
 get whenVirtualDocsDir():PromiseLike<string> { return ( this._whenVirtualDocsDir
                                                    || ( this._whenVirtualDocsDir = new AsyncCalculation( this.virtualDocumentsDirectory, whenKnownAsFolder.bind( null, 'Virtual Documents Directory'  ) ) ) ).whenY; }
-async resetExecutable():Promise<void> {
-    const ü_x = this.executable;
-    if ( this._whenExecutable !== null ) { this._whenExecutable.x = ü_x; }
-    const ü_y = await this.whenExecutable;
-    ß_trc&& ß_trc( `Exe ${ ü_y } from ${ ü_x }` );
-}
-
 clone( ü_what ?:TXtnConfigKeys ):ConfigSnapshot {
     const ü_cfg = new ConfigSnapshot( this._whenExecutable
                                     , this._whenWorkingDir

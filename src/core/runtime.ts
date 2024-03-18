@@ -49,7 +49,7 @@
 //====================================================================
 
 export class XtnOpenInNpp {
-    readonly whenActivated:Promise<this>
+    readonly whenReady:Promise<this>
   //
     readonly shadowDocsBfr = new Map<TextDocument,TShadowDoc>();
     readonly vscDisposables:ReadonlyArray<IDisposableLike> & { push:( ... item:IDisposableLike[] )=>void }
@@ -113,7 +113,7 @@ constructor(
       , workspace.onDidCloseTextDocument  ( this._onDocViewClosed       )
       );
   //
-    this.whenActivated = this._whenActivationFinalized();
+    this.whenReady = this._whenActivationFinalized();
 }
 
 private async _whenActivationFinalized():Promise<this> {
