@@ -51,7 +51,7 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../lib/asyncUtil';
   import { ErrorMessage
          } from '../lib/errorUtil';
-  import { whenKnownAsFolder
+  import { whenKnownAsFolder as fsWhenKnownAsFolder
          , whenFileInfoRead
          , whenTempFile
          } from '../lib/fsUtil';
@@ -60,6 +60,7 @@ https://code.visualstudio.com/api/references/vscode-api
          , wrapDoubleQuotes
          } from '../lib/textUtil';
   import { whenFilesFound
+         , whenKnownAsFolder
          } from '../vsc/fsUtil';
 //--------------------------------------------------------------------
   import { MessageButton
@@ -158,6 +159,7 @@ class CliArgs {
     private readonly _mode         :CETrigger
     private readonly _mainPath     :string
     private          _mainFileType :FileType   = FileType.Unknown;
+    private          _all          :Uri[]      = [];
     private          _others       :string[]   = [];
     private          _asWorkspace  :boolean    = false;
   //
@@ -181,7 +183,8 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
       case CETrigger.EDITOR:
         break;
       case CETrigger.EXPLORER:
-        if(ß_trc){ß_trc( 'Explorer Context' );}
+        ß_trc&& ß_trc( 'Explorer Context' );
+        this._all    = ü_others!;//.filter( ü_uri => ü_uri.toString() !== ü_mainUri!.toString() );
         this._others = ü_others!.filter( ü_someUri => ü_someUri.scheme === CEUriScheme.file )
                                 .map   ( ü_fileUri => ü_fileUri.fsPath                      );
         break;
@@ -190,10 +193,14 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
     if ( ü_mainUri!.scheme === 'file' ) {
           this._mainFileType = FileType.File;
           this._mainPath     = ü_mainUri!.fsPath; //this._activeEditor.document.fileName;
-    } else {
+    } else if ( this._mode != CETrigger.EXPLORER ) {
           this._mode         = CETrigger.UNTITLED;
           this._mainPath     = '';
         //this._mainPath     = CliArgs._fsPath( ü_mainUri! );
+    } else {
+          this._mainPath     = '';
+          this._mainPath     = ü_mainUri!.fsPath;
+        whenKnownAsFolder( ü_mainUri! );
     }
 }
 
@@ -245,8 +252,8 @@ private async _submit():Promise<number> {
     switch ( this._mode ) {
 
       case CETrigger.None:
-        window.showInformationMessage( LCDoIt.no_active_file() );
-        return CNotAPid;
+          window.showInformationMessage( LCDoIt.no_active_file() );
+          return CNotAPid;
 
       case CETrigger.UNTITLED:
         //this._mode         = EModes.UNTITLED;
@@ -254,26 +261,26 @@ private async _submit():Promise<number> {
           const ü_temp = await this._config.whenVirtualDocsDir;
                                 if ( ü_temp.length === 0 ) { this._threadShadowDone( ü_doc, ü_temp        ); return CNotAPid; }
           ( this._mainPath as TNotReadonly<string> ) = await this._whenShadowDone  ( ü_doc, ü_temp, true  );
-        break;
+          break;
       //return CNotAPid;
 
       case CETrigger.EXPLORER: // folders possible
-        const ü_pattern = this._config.filesInFolderPattern;
-        if ( ü_pattern.length > 0 ) {
-          this._others = await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit );
-          if ( this._others.length === 0 ) {
-            return CNotAPid;
+          const ü_pattern = this._config.filesInFolderPattern;
+          if ( ü_pattern.length > 0 ) {
+              this._others = await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit );
+              if ( this._others.length === 0 ) {
+                return CNotAPid;
+              }
+              if ( this._config.openFolderAsWorkspace ) {
+                // ignored
+              }
+          } else {
+              if (       this._config.openFolderAsWorkspace
+                && await this._whenMainIsFolder() ) {
+                         this._asWorkspace = true;
+              }
           }
-          if ( this._config.openFolderAsWorkspace ) {
-            // ignored
-          }
-        } else {
-          if (       this._config.openFolderAsWorkspace
-            && await this._whenMainIsFolder() ) {
-                     this._asWorkspace = true;
-          }
-        }
-        break;
+          break;
 
     }
   //
@@ -398,7 +405,7 @@ private async _whenMainFolder():Promise<string> {
 
 private async _whenMainIsFolder():Promise<boolean> {
       if ( this._mainFileType === FileType.Unknown )
-         { this._mainFileType  =  await whenKnownAsFolder( this._mainPath )
+         { this._mainFileType  = await fsWhenKnownAsFolder( this._mainPath )
                                ?  FileType.Directory
                                :  FileType.File
                                ;
@@ -409,7 +416,7 @@ private async _whenMainIsFolder():Promise<boolean> {
 private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<string[]> {
   //
     const ö_isFolder = await Promise.all( this._others.map( (ü_file       ) => ü_file === this._mainPath ? this._whenMainIsFolder()
-                                                                                                         : whenKnownAsFolder( ü_file )     ) );
+                                                                                                         : fsWhenKnownAsFolder( ü_file )     ) );
     const ü_subsets  = await Promise.all( this._others.map( (ü_file,ü_indx) => ö_isFolder[ ü_indx ] ? whenFilesFound( ü_file, ö_pattern )
                                                                                                     :          [ ü_file ]            ) );
                                     const ü_files:string[] = [];
