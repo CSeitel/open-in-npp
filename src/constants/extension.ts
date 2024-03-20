@@ -43,11 +43,11 @@
     };
 //====================================================================
   export const enum CETrigger
-    { None   = 0
-    , UNTITLED
-    , PALETTE
+    { PALETTE  = 0
     , EDITOR
     , EXPLORER
+    , None
+    , UNTITLED
     };
   export const enum CEExecutable
     { x64_64bit  =          "%ProgramFiles%\\Notepad++\\notepad++.exe"

@@ -17,9 +17,10 @@ https://code.visualstudio.com/api/references/vscode-api
   import { CRgXp
          } from '../constants/text';
 //--------------------------------------------------------------------
-  import * as ßß_path   from 'path';
   import { join
          , isAbsolute
+         , dirname
+         , basename
          } from 'path';
   import { promises as ßß_fs_p
          } from 'fs';
@@ -28,7 +29,6 @@ https://code.visualstudio.com/api/references/vscode-api
          } from 'crypto';
 
   import { Uri
-         , FileType
          , window
          , commands
          , TextDocument
@@ -49,6 +49,8 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../lib/any';
   import { whenPromiseSettled
          } from '../lib/asyncUtil';
+  import { straightenArray
+         } from '../lib/arrayUtil';
   import { ErrorMessage
          } from '../lib/errorUtil';
   import { whenKnownAsFolder as fsWhenKnownAsFolder
@@ -155,11 +157,15 @@ async updateShadow():Promise<boolean> {
 
 class CliArgs {
     private readonly _config                   = ß_getConfigSnapshot();
-    private readonly _activeEditor             = window.activeTextEditor;
     private readonly _mode         :CETrigger
-    private readonly _mainPath     :string
-    private          _mainFileType :FileType   = FileType.Unknown;
-    private          _all          :Uri[]      = [];
+  //
+    private readonly _activeEditor             = window.activeTextEditor;
+    private readonly _mainUri      :Uri
+    private          _mainIsFolder :boolean    = false;
+    private readonly _mainFsPath   :string     = '';
+  //
+    private readonly _all          :Uri[]
+    private readonly _mainIndx     :number     = -1;
     private          _others       :string[]   = [];
     private          _asWorkspace  :boolean    = false;
   //
@@ -167,41 +173,50 @@ constructor( ü_mode:CETrigger.PALETTE                                   );
 constructor( ü_mode:CETrigger.EDITOR  , ü_mainUri :Uri                  );
 constructor( ü_mode:CETrigger.EXPLORER, ü_mainUri :Uri, ü_others :Uri[] );
 constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
+    this._mode    = ü_mode    ;
+    this._mainUri = ü_mainUri!;
+    this._all     = ü_others ?? [];
   //
-    switch ( this._mode = ü_mode ) {
+    switch ( this._mode ) {
 
       case CETrigger.PALETTE:
-        if ( this._activeEditor === undefined ) {
-            this._mode     = CETrigger.None;
-            this._mainPath = '';
-            return;
-        }
+          if ( this._activeEditor === undefined ) {
+              this._mode     = CETrigger.None;
+              return;
+          }
+          this._mainUri      = this._activeEditor.document.uri;
+          break;
 
-        ß_trc&& ß_trc( `ActiveEditor: ${ this._activeEditor.document.fileName }` );
-        ü_mainUri = this._activeEditor.document.uri;
-        break;
       case CETrigger.EDITOR:
-        break;
+          break;
       case CETrigger.EXPLORER:
-        ß_trc&& ß_trc( 'Explorer Context' );
-        this._all    = ü_others!;//.filter( ü_uri => ü_uri.toString() !== ü_mainUri!.toString() );
-        this._others = ü_others!.filter( ü_someUri => ü_someUri.scheme === CEUriScheme.file )
-                                .map   ( ü_fileUri => ü_fileUri.fsPath                      );
-        break;
+          const ü_a      = this._all.filter   ( ü_someUri => ü_someUri            === this._mainUri            );
+          this._mainIndx = this._all.findIndex( ü_someUri => ü_someUri.toString() === this._mainUri.toString() );
+          break;
     }
+          this._mainFsPath   = this._mainUri.fsPath; //this._activeEditor.document.fileName;
   //
-    if ( ü_mainUri!.scheme === 'file' ) {
-          this._mainFileType = FileType.File;
-          this._mainPath     = ü_mainUri!.fsPath; //this._activeEditor.document.fileName;
-    } else if ( this._mode != CETrigger.EXPLORER ) {
-          this._mode         = CETrigger.UNTITLED;
-          this._mainPath     = '';
-        //this._mainPath     = CliArgs._fsPath( ü_mainUri! );
-    } else {
-          this._mainPath     = '';
-          this._mainPath     = ü_mainUri!.fsPath;
-        whenKnownAsFolder( ü_mainUri! );
+    if ( this._mainUri.scheme !== CEUriScheme.file
+      && this._mode !== CETrigger.EXPLORER
+       ) {
+         this._mode   = CETrigger.UNTITLED;
     }
+}
+
+async whenReady():Promise<this> {
+    switch ( this._mode ) {
+
+        case CETrigger.None:
+            break;
+
+        case CETrigger.EXPLORER:
+          if ( await whenKnownAsFolder( this._mainUri ) )
+                                      { this._mainIsFolder = true; }
+          this._others = this._all.filter( ü_someUri => ü_someUri.scheme === CEUriScheme.file )
+                                  .map   ( ü_fileUri => ü_fileUri.fsPath                      );
+          break;
+    }
+    return this;
 }
 
 private async _threadShadowDone( ü_doc:TextDocument, ü_shadowDir:string ):Promise<void> {
@@ -240,9 +255,9 @@ private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_sile
 
 async submit():Promise<number> {
     try {
-        return await this._submit();
+        return await( await this.whenReady() )._submit();
     } catch ( ü_eX ) {
-        threadShowError( ü_eX, `When opening "${ this._mainPath }" in Notepad++` );
+        threadShowError( ü_eX, `When opening "${ this._mainFsPath }" in Notepad++` );
         return CNotAPid;
     }
 }
@@ -260,7 +275,7 @@ private async _submit():Promise<number> {
           const ü_doc = this._activeEditor!.document;
           const ü_temp = await this._config.whenVirtualDocsDir;
                                 if ( ü_temp.length === 0 ) { this._threadShadowDone( ü_doc, ü_temp        ); return CNotAPid; }
-          ( this._mainPath as TNotReadonly<string> ) = await this._whenShadowDone  ( ü_doc, ü_temp, true  );
+          ( this._mainFsPath as TNotReadonly<string> ) = await this._whenShadowDone  ( ü_doc, ü_temp, true  );
           break;
       //return CNotAPid;
 
@@ -275,9 +290,8 @@ private async _submit():Promise<number> {
                 // ignored
               }
           } else {
-              if (       this._config.openFolderAsWorkspace
-                && await this._whenMainIsFolder() ) {
-                         this._asWorkspace = true;
+              if ( this._mainIsFolder && this._config.openFolderAsWorkspace ) {
+                   this._asWorkspace = true;
               }
           }
           break;
@@ -311,20 +325,20 @@ private _compileCursorPosition( ü_args:string[] ):void {
   //
     if ( this._activeEditor === undefined ) { return; }
   //
-    const ü_active = this._activeEditor.document.fileName;
+    const ü_activeDoc = this._activeEditor.document;
     switch ( this._mode ) {
-      case CETrigger.EXPLORER:
-        const ü_indx = this._others.findIndex( ü_file => ü_file === ü_active );
-        if ( ü_indx < 0 ) { return; }
-        if ( ü_indx !== ( this._others.length - 1 ) ) {
-          this._others.push( this._others[ ü_indx ] );
-        }
-        break;
+        case CETrigger.EXPLORER:
+            const ü_indx = this._others.findIndex( ü_file => ü_file === ü_activeDoc.fileName );
+            if ( ü_indx < 0 ) { return; }
+            if ( ü_indx !== ( this._others.length - 1 ) ) {
+              this._others.push( this._others[ ü_indx ] );
+            }
+            break;
       case CETrigger.EDITOR:
-        if ( ü_active !== this._mainPath ) {
-          return;
-        }
-        break;
+          if ( ü_activeDoc.uri.toString() !== this._mainUri.toString() ) {
+            return;
+          }
+          break;
       default:
     }
   //
@@ -353,8 +367,8 @@ private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
     if (   this._others.length > 0       ) {
                                               ü_args.push( ... ( ü_verbatim ? wrapDoubleQuotes( ... this._others   )
                                                                             :                       this._others   ) );
-    } else                                  { ü_args.push(       ü_verbatim ? wrapDoubleQuotes(     this._mainPath )[0]
-                                                                            :                       this._mainPath   );
+    } else                                  { ü_args.push(       ü_verbatim ? wrapDoubleQuotes(     this._mainFsPath )[0]
+                                                                            :                       this._mainFsPath   );
     }
   //
     return ü_args;
@@ -386,47 +400,40 @@ private async _cwd( ü_skip:string|undefined ):Promise<string> {
   //
     if ( ü_cwd.length > 0 ) {
       if ( ! isAbsolute( ü_cwd ) ) {
-       ü_cwd = join( await this._whenMainFolder(), ü_cwd );
+          ü_cwd = join( this._folderOfMain(), ü_cwd );
       }
     } else {
-       ü_cwd = await this._whenMainFolder();
+          ü_cwd = this._folderOfMain();
     }
   //
     return ü_cwd;
 //
 }
 
-private async _whenMainFolder():Promise<string> {
-    return            await this._whenMainIsFolder()
-         ?                  this._mainPath
-         : ßß_path.dirname( this._mainPath )
+private _folderOfMain():string {
+    return          this._mainIsFolder
+         ?          this._mainFsPath
+         : dirname( this._mainFsPath )
          ;
-}
-
-private async _whenMainIsFolder():Promise<boolean> {
-      if ( this._mainFileType === FileType.Unknown )
-         { this._mainFileType  = await fsWhenKnownAsFolder( this._mainPath )
-                               ?  FileType.Directory
-                               :  FileType.File
-                               ;
-         }
-    return this._mainFileType === FileType.Directory;
 }
 
 private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<string[]> {
   //
-    const ö_isFolder = await Promise.all( this._others.map( (ü_file       ) => ü_file === this._mainPath ? this._whenMainIsFolder()
-                                                                                                         : fsWhenKnownAsFolder( ü_file )     ) );
-    const ü_subsets  = await Promise.all( this._others.map( (ü_file,ü_indx) => ö_isFolder[ ü_indx ] ? whenFilesFound( ü_file, ö_pattern )
-                                                                                                    :          [ ü_file ]            ) );
-                                    const ü_files:string[] = [];
-    for ( const ü_subset of ü_subsets ) { ü_files.push( ... ü_subset ); }
-                                          ü_files.sort();
+    const ü_subsets = await Promise.all( this._all.map( ( ü_uri, ü_indx )=>
+        ( ü_indx === this._mainIndx ? this._mainIsFolder
+                                    : whenKnownAsFolder( ü_uri ) ) ? whenFilesFound( ü_uri, ö_pattern )
+                                                                   :                 ü_uri
+                                                          ) );
+  //
+    const ü_files = straightenArray( ü_subsets ).filter( ü_uri => ü_uri.scheme === CEUriScheme.file )
+                                                .map   ( ü_uri => ü_uri.fsPath )
+                                                ;
+          ü_files.sort();
   //
     if ( ü_files.length > ü_limit ) {
-      await this._whenSelected( ü_files, ü_limit );
+        await this._whenSelected( ü_files, ü_limit );
     } else {
-      window.showInformationMessage( LCDoIt.file_hits( this._others.length, ö_pattern ) );
+        window.showInformationMessage( LCDoIt.file_hits( this._others.length, ö_pattern ) );
     }
   //
     return ü_files;
@@ -447,8 +454,8 @@ private async _whenSelected( ü_files:string[], ü_limit:number ):Promise<boolea
     switch ( ü_todo?.id ) {
 
       case LCButton.SELECT:
-        const ü_list = ü_files.map( (ü_file,ü_indx) => new ListItem(              ßß_path.basename( ü_file )
-                                                          , shortenText( ßß_path.dirname ( ü_file ), 72 )
+        const ü_list = ü_files.map( (ü_file,ü_indx) => new ListItem(              basename( ü_file )
+                                                          , shortenText( dirname ( ü_file ), 72 )
                                                           ,                                ü_file
                                                           ).setPicked( ü_indx < ü_limit ) );
         ü_files.length = 0;
