@@ -12,7 +12,7 @@ https://code.visualstudio.com/api/references/vscode-api
          , CECliArgument
          , CEXtnCommands
          } from '../constants/extension';
-  import { CEUriScheme
+  import {
          } from '../constants/vsc';
   import { CRgXp
          } from '../constants/text';
@@ -53,8 +53,7 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../lib/arrayUtil';
   import { ErrorMessage
          } from '../lib/errorUtil';
-  import { whenKnownAsFolder as fsWhenKnownAsFolder
-         , whenFileInfoRead
+  import { whenFileInfoRead
          , whenTempFile
          } from '../lib/fsUtil';
   import { shortenText
@@ -63,6 +62,9 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../lib/textUtil';
   import { whenFilesFound
          , whenKnownAsFolder
+         , hasFileScheme
+         , uriToFile
+         , matchingUris
          } from '../vsc/fsUtil';
 //--------------------------------------------------------------------
   import { MessageButton
@@ -78,9 +80,9 @@ https://code.visualstudio.com/api/references/vscode-api
   const CNotAPid = -1;
 //====================================================================
 
-export async function openInNppActive  ( this:null                              ):Promise<number> { return new CliArgs( CETrigger.PALETTE                   ).submit(); }
-export async function openInNppEditor  ( this:null, ü_uri:Uri, ... ü_more:any[] ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_uri           ).submit(); }
-export async function openInNppExplorer( this:null, ü_uri:Uri, ü_others  :Uri[] ):Promise<number> { return new CliArgs( CETrigger.EXPLORER, ü_uri, ü_others ).submit(); }
+export async function openInNppActive  (                             ):Promise<number> { return new CliArgs( CETrigger.PALETTE                   ).submit(); }
+export async function openInNppEditor  ( ü_uri:Uri                   ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_uri           ).submit(); }
+export async function openInNppExplorer( ü_uri:Uri, ü_others  :Uri[] ):Promise<number> { return new CliArgs( CETrigger.EXPLORER, ü_uri, ü_others ).submit(); }
 
 //====================================================================
 
@@ -107,9 +109,8 @@ constructor(
                                 ;
 }
 
-get fileName():string {
-    return this._docView.file;
-}
+get uri     ():Uri    { return Uri.file( this._docView.file ); }
+get fileName():string { return           this._docView.file  ; }
 
 async whenReady():Promise<this> {
     if ( this._isInitial ) {
@@ -159,7 +160,6 @@ class CliArgs {
     private readonly _config                   = ß_getConfigSnapshot();
     private readonly _mode         :CETrigger
   //
-    private readonly _activeEditor             = window.activeTextEditor;
     private readonly _mainUri      :Uri
     private          _mainIsFolder :boolean    = false;
     private readonly _mainFsPath   :string     = '';
@@ -180,23 +180,23 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
     switch ( this._mode ) {
 
       case CETrigger.PALETTE:
-          if ( this._activeEditor === undefined ) {
+          if ( window.activeTextEditor === undefined ) {
               this._mode     = CETrigger.None;
               return;
           }
-          this._mainUri      = this._activeEditor.document.uri;
+          this._mainUri      = window.activeTextEditor.document.uri;
           break;
 
       case CETrigger.EDITOR:
           break;
       case CETrigger.EXPLORER:
-          const ü_a      = this._all.filter   ( ü_someUri => ü_someUri            === this._mainUri            );
-          this._mainIndx = this._all.findIndex( ü_someUri => ü_someUri.toString() === this._mainUri.toString() );
+          const ü_a      = this._all.filter   ( ü_someUri => ü_someUri            === this._mainUri   );
+          this._mainIndx = this._all.findIndex( ü_someUri => matchingUris( ü_someUri, this._mainUri ) );
           break;
     }
-          this._mainFsPath   = this._mainUri.fsPath; //this._activeEditor.document.fileName;
+          this._mainFsPath   = uriToFile( this._mainUri ); //this._activeEditor.document.fileName;
   //
-    if ( this._mainUri.scheme !== CEUriScheme.file
+    if ( hasFileScheme( this._mainUri )
       && this._mode !== CETrigger.EXPLORER
        ) {
          this._mode   = CETrigger.UNTITLED;
@@ -204,17 +204,35 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
 }
 
 async whenReady():Promise<this> {
-    switch ( this._mode ) {
 
-        case CETrigger.None:
-            break;
+    switch ( this._mode ) {
 
         case CETrigger.EXPLORER:
           if ( await whenKnownAsFolder( this._mainUri ) )
                                       { this._mainIsFolder = true; }
-          this._others = this._all.filter( ü_someUri => ü_someUri.scheme === CEUriScheme.file )
-                                  .map   ( ü_fileUri => ü_fileUri.fsPath                      );
+          else {
+              if ( hasFileScheme( this._mainUri ) ) {
+            ( this._mode       as TNotReadonly<CETrigger> ) = CETrigger.UNTITLED;
+                  this._all.length = 0;
+                  
+              }
+
+          }
+          this._others = this._all.filter( hasFileScheme ).map( uriToFile );
           break;
+    }
+
+    switch ( this._mode ) {
+        case CETrigger.UNTITLED:
+          //this._mode         = EModes.UNTITLED;
+            const ü_doc  = await workspace.openTextDocument( this._mainUri );//. this._activeEditor!.document;
+            const ü_temp = await this._config.whenVirtualDocsDir;
+            if ( ü_temp.length === 0 ) { this._threadShadowDone( ü_doc, ü_temp        );
+            } else {
+            }
+            ( this._mainFsPath as TNotReadonly<string>    ) = await this._whenShadowDone( ü_doc, ü_temp, true  );
+            ( this._mode       as TNotReadonly<CETrigger> ) = CETrigger.EDITOR;
+            break;
     }
     return this;
 }
@@ -241,7 +259,7 @@ private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_sile
         switch ( ü_todo ) {
           case ü_open:
               ü_docView.updateShadow();
-              commands.executeCommand<number>( CEXtnCommands.oEditor, Uri.file( ü_docView.fileName ) );
+              openInNppEditor( ü_docView.uri );
             break;
             try {
             } catch ( ü_eX ) {
@@ -271,13 +289,7 @@ private async _submit():Promise<number> {
           return CNotAPid;
 
       case CETrigger.UNTITLED:
-        //this._mode         = EModes.UNTITLED;
-          const ü_doc = this._activeEditor!.document;
-          const ü_temp = await this._config.whenVirtualDocsDir;
-                                if ( ü_temp.length === 0 ) { this._threadShadowDone( ü_doc, ü_temp        ); return CNotAPid; }
-          ( this._mainFsPath as TNotReadonly<string> ) = await this._whenShadowDone  ( ü_doc, ü_temp, true  );
-          break;
-      //return CNotAPid;
+          return CNotAPid;
 
       case CETrigger.EXPLORER: // folders possible
           const ü_pattern = this._config.filesInFolderPattern;
@@ -320,12 +332,16 @@ private async _submit():Promise<number> {
     }
 }
 
-private _compileCursorPosition( ü_args:string[] ):void {
-    if ( ! this._config.preserveCursor ) { return; }
+private async _compileCursorPosition( ü_args:string[] ):Promise<void> {
+    const ü_editor = window.activeTextEditor;
   //
-    if ( this._activeEditor === undefined ) { return; }
+    if ( ü_editor === undefined
+    //|| ü_editor.document.uri.toString() !== this._mainUri.toString()
+       ) {
+        return;
+    }
   //
-    const ü_activeDoc = this._activeEditor.document;
+    const ü_activeDoc = ü_editor.document;
     switch ( this._mode ) {
         case CETrigger.EXPLORER:
             const ü_indx = this._others.findIndex( ü_file => ü_file === ü_activeDoc.fileName );
@@ -335,14 +351,13 @@ private _compileCursorPosition( ü_args:string[] ):void {
             }
             break;
       case CETrigger.EDITOR:
-          if ( ü_activeDoc.uri.toString() !== this._mainUri.toString() ) {
-            return;
-          }
+          const ü_doc = await workspace.openTextDocument( this._mainUri );
+          if ( matchingUris( ü_activeDoc.uri, this._mainUri ) ) { return; }
           break;
       default:
     }
   //
-    const ü_selection = this._activeEditor.selection;
+    const ü_selection = ü_editor.selection;
     if (   ü_selection === null
       || ! ü_selection.isEmpty ) { return; }
   //
@@ -360,7 +375,8 @@ private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
     if ( this._config.skipSessionHandling ) { ü_args.push( CECliArgument.skipSessionHandling    ); }
   //
     if ( this._asWorkspace                ) { ü_args.push( CECliArgument.openFoldersAsWorkspace ); }
-                 this._compileCursorPosition( ü_args );
+    if ( this._config.preserveCursor ) {
+           await this._compileCursorPosition( ü_args ); }
   //
                                               ü_args.push( ... this._config.commandLineArguments );
   //
@@ -419,15 +435,13 @@ private _folderOfMain():string {
 
 private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<string[]> {
   //
-    const ü_subsets = await Promise.all( this._all.map( ( ü_uri, ü_indx )=>
+    const ü_subsets = await Promise.all( this._all.map(  async ( ü_uri, ü_indx )=>
         ( ü_indx === this._mainIndx ? this._mainIsFolder
-                                    : whenKnownAsFolder( ü_uri ) ) ? whenFilesFound( ü_uri, ö_pattern )
-                                                                   :                 ü_uri
+                                    : await whenKnownAsFolder( ü_uri ) ) ? whenFilesFound( ü_uri, ö_pattern )
+                                                                         :                 ü_uri
                                                           ) );
   //
-    const ü_files = straightenArray( ü_subsets ).filter( ü_uri => ü_uri.scheme === CEUriScheme.file )
-                                                .map   ( ü_uri => ü_uri.fsPath )
-                                                ;
+    const ü_files = straightenArray( ü_subsets ).filter( hasFileScheme ).map( uriToFile );
           ü_files.sort();
   //
     if ( ü_files.length > ü_limit ) {

@@ -9,6 +9,7 @@
          } from '../types/lib.errorUtil.d';
 //--------------------------------------------------------------------
   import { CEFileType
+         , CEUriScheme
          } from '../constants/vsc';
 //--------------------------------------------------------------------
   import { TextDecoder
@@ -31,6 +32,14 @@ export function fileToUri( ü_path:TFileUri ):Uri {
          ? Uri.file( ü_path )
          :           ü_path.uri
          ;
+}
+
+export function matchingUris( ü_uri_a:Uri, ü_uri_b:Uri ):boolean {
+    return ü_uri_a.toString() === ü_uri_b.toString();
+}
+
+export function hasFileScheme( ü_uri:Uri ):boolean {
+    return ü_uri.scheme === CEUriScheme.file;
 }
 
 export function uriToFile( ü_uri:Uri ):string {
