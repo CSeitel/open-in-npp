@@ -13,6 +13,7 @@
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_trc
+         , ß_err
          } from '../runtime/context';
   import { ß_XtnOpenInNpp
          , ß_StatusBarItem
@@ -54,6 +55,7 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
         const ü_cfgHst = ß_XtnOpenInNpp.globalHistory.config;
         const ü_release = await ü_cfgHst.whenDataRef<string>();
         try {
+
             const ü_cfgData = ü_cfgHst.dataRef;
             ß_trc&& ß_trc( ü_cfgData, `Config-History` );
             const ü_lastExe = ü_cfgData.executable;
@@ -67,13 +69,8 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
                 ü_cfgHst.dataRef = ü_cfgData;
                 return ü_nextExe;
             }
-        } catch ( ü_eX ) {
-            console.error( ü_eX );
-            throw ü_eX;
-          //return ü_done( ü_eX );
-        } finally {
-            ü_release();
-        }
+
+        } finally { ü_release(); }
     } else {
                            let ü_path:string
              if ( await isExe( ü_path = expandEnvVariables( CEExecutable.x64_64bit  ) ) ) {}
