@@ -26,7 +26,9 @@
     };
 //------------------------------------------------------------------------------
   export const LCButton =
-    { OK     : ()=>l10n.t( 'OK' )
+    { YES    : ()=>l10n.t( 'Yes' )
+    , NO     : ()=>l10n.t( 'No' )
+    , OK     : ()=>l10n.t( 'OK' )
     , ALL    : ()=>l10n.t( 'Open All' )
     , SELECT : ()=>l10n.t( 'Open a Subset' )
     , CANCEL : ()=>l10n.t( 'Cancel' )

@@ -1,27 +1,6 @@
 {
   "version": "0.2.0",
   "configurations": [
-    {
-      "args": [
-        "-u",
-        "tdd",
-      //"--timeout", "999999",
-      //"--colors",
-          "--no-timeouts",
-        "--require",
-        "ts-node/register",
-        "${workspaceFolder}/out/test/mocha/**/a*.spec.js"
-      //"${workspaceFolder}/src/test/mocha/**/a*.spec.ts"
-         ],
-      "internalConsoleOptions": "openOnSessionStart",
-      "name": "Mocha Tests 2222",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "request": "launch",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "type": "node"
-    },
  {
         "name": "Debug mocha 3333",
         "type": "node",
@@ -137,10 +116,15 @@
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": [ "-u", "tdd"
               , "--timeout", "999999"
-              , "${workspaceFolder}/out/test/mocha/**/*.spec.js"
+            //, "--no-timeouts"
+              , "${workspaceFolder}/out/test/mocha/all.spec.js"
               ]
     , "cwd": "${workspaceFolder}"
     , "internalConsoleOptions": "openOnSessionStart"
-    }
+    , "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+
   ]
 }

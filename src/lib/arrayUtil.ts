@@ -3,20 +3,40 @@
   import {} from '../types/generic.d'
 //====================================================================
 
-export function putFirst<T,P extends keyof T>( ü_list:T[], ö_item:T|T[P], ü_prop?:P ):number {
-    const ü_indx = ü_prop === undefined
+export function putFirst<T,P extends keyof T>(   list:T[],   item:  T[P],   prop :P ):number
+export function putFirst<T,P extends keyof T>(   list:T[],   item:T                 ):number
+export function putFirst<T,P extends keyof T>( ü_list:T[], ö_item:T|T[P], ö_prop?:P ):number {
+    const ü_indx = ö_prop === undefined
                  ? ü_list.findIndex( ü_item => ü_item           === ö_item )
-                 : ü_list.findIndex( ü_item => ü_item[ ü_prop ] === ö_item )
+                 : ü_list.findIndex( ü_item => ü_item[ ö_prop ] === ö_item )
                  ;
-    if ( ü_indx > 0 ) {
-      putFirstIndex( ü_list, ü_indx );
-    }
+    if ( ü_indx > 0 ) { putFirstIndex( ü_list, ü_indx ); }
+    return ü_indx;
+}
+
+export function putLast<T,P extends keyof T>(   list:T[],   item:  T[P],   prop :P ):number
+export function putLast<T,P extends keyof T>(   list:T[],   item:T                 ):number
+export function putLast<T,P extends keyof T>( ü_list:T[], ö_item:T|T[P], ö_prop?:P ):number {
+    const ü_indx = ö_prop === undefined
+                 ? ü_list.findIndex( ü_item => ü_item           === ö_item )
+                 : ü_list.findIndex( ü_item => ü_item[ ö_prop ] === ö_item )
+                 ;
+    const ü_more = ü_indx + 1;
+    if ( ü_more > 0
+      && ü_more < ü_list.length ) { putLastIndex( ü_list, ü_indx ); }
     return ü_indx;
 }
 
 export function putFirstIndex<T>( ü_list:T[], ü_indx:number ):void {
-    if ( ü_indx > 0 ) {
-      ü_list.unshift( ü_list.splice( ü_indx, 1 )[0] );
+    if ( ü_indx > 0
+      && ü_indx < ü_list.length ) {
+        ü_list.unshift( ü_list.splice( ü_indx, 1 )[0] );
+    }
+}
+
+export function putLastIndex<T>( ü_list:T[], ü_indx:number ):void {
+    if ( ü_indx < ü_list.length - 1 ) {
+        ü_list.push( ü_list.splice( ü_indx, 1 )[0] );
     }
 }
 

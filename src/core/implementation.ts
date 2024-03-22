@@ -50,6 +50,7 @@ https://code.visualstudio.com/api/references/vscode-api
   import { whenPromiseSettled
          } from '../lib/asyncUtil';
   import { straightenArray
+         , putLastIndex
          } from '../lib/arrayUtil';
   import { ErrorMessage
          } from '../lib/errorUtil';
@@ -80,9 +81,10 @@ https://code.visualstudio.com/api/references/vscode-api
   const CNotAPid = -1;
 //====================================================================
 
-export async function openInNppActive  (                             ):Promise<number> { return new CliArgs( CETrigger.PALETTE                   ).submit(); }
-export async function openInNppEditor  ( ü_uri:Uri                   ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_uri           ).submit(); }
-export async function openInNppExplorer( ü_uri:Uri, ü_others  :Uri[] ):Promise<number> { return new CliArgs( CETrigger.EXPLORER, ü_uri, ü_others ).submit(); }
+export async function openInNppActive  (                           ):Promise<number> { return new CliArgs( CETrigger.PALETTE                    ).submit(); }
+export async function openInNppEditor  ( ü_uri:Uri                 ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_uri            ).submit(); }
+export async function openInNppExplorer( ü_uri:Uri, ü_all:Uri[]    ):Promise<number> { return new CliArgs( CETrigger.EXPLORER, ü_uri    , ü_all ).submit(); }
+       async function openInNppShadow  ( ü_doc:VirtualDocumentView ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_doc.uri, ü_doc ).submit(); }
 
 //====================================================================
 
@@ -163,20 +165,19 @@ class CliArgs {
     private readonly _mainUri      :Uri
     private          _mainIsFolder :boolean    = false;
     private readonly _mainIsFs     :boolean
-  //private readonly _mainFsPath   :string     = '';
   //
-    private readonly _all          :Uri[]
-    private readonly _mainIndx     :number     = -1;
+    private readonly _ref          :VirtualDocumentView|null = null;
     private          _others       :Uri[]      = [];
     private          _asWorkspace  :boolean    = false;
   //
-constructor( ü_mode:CETrigger.PALETTE                                   );
-constructor( ü_mode:CETrigger.EDITOR  , ü_mainUri :Uri                  );
-constructor( ü_mode:CETrigger.EXPLORER, ü_mainUri :Uri, ü_others :Uri[] );
-constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
+constructor( ü_mode:CETrigger.PALETTE                                                       )
+constructor( ü_mode:CETrigger.EDITOR  ,   mainUri :Uri,   others?:      VirtualDocumentView )
+constructor( ü_mode:CETrigger.EXPLORER,   mainUri :Uri,   others :Uri[]                     )
+constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[]|VirtualDocumentView ){
     this._mode    = ü_mode    ;
     this._mainUri = ü_mainUri!;
-    this._all     = ü_others ?? [];
+    this._others  = Array.isArray( ü_others ) ? ü_others
+                                              : [];
   //
     switch ( this._mode ) {
 
@@ -189,95 +190,63 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[] ){
           this._mainUri      = window.activeTextEditor.document.uri;
           break;
       case CETrigger.EDITOR:
+          if ( ü_others instanceof VirtualDocumentView ) { this._ref = ü_others; }
           break;
 
       case CETrigger.EXPLORER:
-          const ü_a      = this._all.filter   ( ü_someUri => ü_someUri            === this._mainUri   );
-          this._mainIndx = this._all.findIndex( ü_someUri => matchingUris( ü_someUri, this._mainUri ) );
           break;
     }
           this._mainIsFs = hasFileScheme( this._mainUri );
   //
-    if ( ! this._mainIsFs
-      && this._mode !== CETrigger.EXPLORER
-       ) {
-         this._mode   = CETrigger.UNTITLED;
-    }
 }
 
 async whenReady():Promise<this> {
+    let ü_shadow = false;
 
     switch ( this._mode ) {
 
-        case CETrigger.EXPLORER:
-          if ( await whenKnownAsFolder( this._mainUri ) )
-                                      { this._mainIsFolder = true; }
-          else {
-              if ( this._mainIsFs ) {
-            ( this._mode       as TNotReadonly<CETrigger> ) = CETrigger.UNTITLED;
-                  this._all.length = 0;
-                  
+        case CETrigger.None:
+            window.showInformationMessage( LCDoIt.no_active_file() );
+            break;
+        case CETrigger.PALETTE:
+        case CETrigger.EDITOR:
+            ü_shadow = ! this._mainIsFs;
+            break;
+
+        case CETrigger.EXPLORER: // folders possible
+          if ( await whenKnownAsFolder( this._mainUri ) ) {
+                                        this._mainIsFolder = true;
+          } else {
+          }
+        //
+          const ü_pattern = this._config.filesInFolderPattern;
+          if ( ü_pattern.length > 0 ) { // only go for files
+              this._others = await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit );
+              if ( this._config.openFolderAsWorkspace ) {} // ignored
+          } else {
+              if ( this._config.openFolderAsWorkspace ) { this._asWorkspace = true; }
+              if ( ! this._mainIsFolder ) {
+                  ü_shadow = ! this._mainIsFs;
+                  if ( ü_shadow ) { this._others.length = 0; }
               }
           }
           break;
     }
   //
-    switch ( this._mode ) {
-        case CETrigger.UNTITLED:
-            const ü_doc  = await workspace.openTextDocument( this._mainUri );//. this._activeEditor!.document;
-            const ü_temp = await this._config.whenVirtualDocsDir;
-            if ( ü_temp.length === 0 ) { this._threadShadowDone( ü_doc, ü_temp        );
-            } else {
-            ( this._mainUri as TNotReadonly<Uri      > ) = Uri.file( await this._whenShadowDone( ü_doc, ü_temp, true  ) );
-            ( this._mode    as TNotReadonly<CETrigger> ) = CETrigger.EDITOR;
-            }
-            break;
+    if ( ü_shadow ) {
+        const ü_doc  = await workspace.openTextDocument( this._mainUri );//. this._activeEditor!.document;
+        const ü_temp = await this._config.whenVirtualDocsDir;
+        if ( ü_temp.length === 0 ) {
+              this._threadShadowDone( ü_doc, ü_temp );
+            ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.None;
+        } else {
+            ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.EDITOR;
+            ( this._ref     as TNotReadonly<VirtualDocumentView> ) = await this._whenShadowDone( ü_doc, ü_temp, true ); // silent without UI
+            ( this._mainUri as TNotReadonly<Uri                > ) = this._ref!.uri;
+        }
     }
   //
     return this;
-}
-
-private async _threadShadowDone( ü_doc:TextDocument, ü_shadowDir:string ):Promise<void> {
-    try {
-        await this._whenShadowDone( ü_doc, ü_shadowDir, false ); // not silent with UI
-    } catch ( ü_eX ) {
-        threadShowError( ü_eX, 'Shadow' );
-    }
-}
-
-private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<string> {
-    const ü_docView = await new VirtualDocumentView( ü_doc
-                                                , ü_shadowDir
-                                                , this._config.virtualDocumentsFileReuse ).whenReady();
-  //
-    if ( ü_silent ) {
-        ü_docView.updateShadow();
-    } else {
-        const ü_open = new MessageButton( 'OK' );
-        const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_docView.fileName }" to be shown in Notepad++ ?`;
-        const ü_todo = await window.showInformationMessage( ü_create, ü_open );
-        switch ( ü_todo ) {
-          case ü_open:
-              ü_docView.updateShadow();
-              openInNppEditor( ü_docView.uri );
-            break;
-            try {
-            } catch ( ü_eX ) {
-                if ( ü_silent ) { throw ü_eX; }
-                threadShowError( ü_eX, ü_create );
-            }
-        }
-    }
-    return ü_docView.fileName;
-}
-
-async submit():Promise<number> {
-    try {
-        return await( await this.whenReady() )._submit();
-    } catch ( ü_eX ) {
-        threadShowError( ü_eX, `When opening "${ this._mainUri }" in Notepad++` );
-        return CNotAPid;
-    }
 }
 
 private async _submit():Promise<number> {
@@ -285,28 +254,10 @@ private async _submit():Promise<number> {
     switch ( this._mode ) {
 
       case CETrigger.None:
-          window.showInformationMessage( LCDoIt.no_active_file() );
           return CNotAPid;
 
-      case CETrigger.UNTITLED:
-          return CNotAPid;
-
-      case CETrigger.EXPLORER: // folders possible
-          const ü_pattern = this._config.filesInFolderPattern;
-          if ( ü_pattern.length > 0 ) {
-              this._others = await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit );
-              if ( this._others.length === 0 ) {
-                return CNotAPid;
-              }
-              if ( this._config.openFolderAsWorkspace ) {
-                // ignored
-              }
-          } else {
-              this._others = this._all;
-              if ( this._mainIsFolder && this._config.openFolderAsWorkspace ) {
-                   this._asWorkspace = true;
-              }
-          }
+      case CETrigger.EXPLORER:
+          if ( this._others.length === 0 ) { return CNotAPid; }
           break;
 
     }
@@ -333,29 +284,66 @@ private async _submit():Promise<number> {
     }
 }
 
+async submit():Promise<number> {
+    try {
+        return await( await this.whenReady() )._submit();
+    } catch ( ü_eX ) {
+        threadShowError( ü_eX, `When opening "${ this._mainUri }" in Notepad++` );
+        return CNotAPid;
+    }
+}
+
+private async _threadShadowDone( ü_doc:TextDocument, ü_shadowDir:string ):Promise<void> {
+    try {
+        await this._whenShadowDone( ü_doc, ü_shadowDir, false ); // not silent with UI
+    } catch ( ü_eX ) {
+        threadShowError( ü_eX, 'Shadow' );
+    }
+}
+
+private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<VirtualDocumentView> {
+    const ü_docView = await new VirtualDocumentView( ü_doc
+                                                , ü_shadowDir
+                                                , this._config.virtualDocumentsFileReuse ).whenReady();
+  //
+    if ( ü_silent ) {
+        ü_docView.updateShadow();
+    } else {
+        const ü_open = new MessageButton( 'YES' );
+        const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_docView.fileName }" to be shown in Notepad++ ?`;
+        const ü_todo = await window.showInformationMessage( ü_create, ü_open );
+        switch ( ü_todo ) {
+          case ü_open:
+              ü_docView.updateShadow();
+              openInNppShadow( ü_docView );
+            break;
+        }
+    }
+    return ü_docView;
+}
+
 private async _compileCursorPosition( ü_args:string[] ):Promise<void> {
     const ü_editor = window.activeTextEditor;
+    if ( ü_editor === undefined ) { return; }
+    const ü_activeUri = ü_editor.document.uri;
   //
-    if ( ü_editor === undefined
-    //|| ü_editor.document.uri.toString() !== this._mainUri.toString()
-       ) {
-        return;
-    }
-  //
-    const ü_activeDoc = ü_editor.document;
     switch ( this._mode ) {
+
         case CETrigger.EXPLORER:
-            const ü_indx = this._others.findIndex( ü_uri => matchingUris( ü_uri, ü_activeDoc.uri ) );
+            const ü_indx = this._others.findIndex( ü_uri => matchingUris( ü_uri, ü_activeUri ) );
             if ( ü_indx < 0 ) { return; }
-            if ( ü_indx !== ( this._others.length - 1 ) ) {
-              this._others.push( this._others[ ü_indx ] );
-            }
+            putLastIndex( this._others, ü_indx );
             break;
-      case CETrigger.EDITOR:
-          const ü_doc = await workspace.openTextDocument( this._mainUri );
-          if ( matchingUris( ü_activeDoc.uri, this._mainUri ) ) { return; }
-          break;
-      default:
+
+        case CETrigger.EDITOR:
+            const ü_doc = await workspace.openTextDocument( ü_activeUri );
+            if ( ü_doc == this._ref?.doc ) {
+               1 == 1;
+            } 
+            if ( ! matchingUris( ü_activeUri, this._ref === null ? this._mainUri
+                                                                 : this._ref.doc.uri ) ) { return; }
+            break;
+
     }
   //
     const ü_selection = ü_editor.selection;
@@ -428,19 +416,21 @@ private async _cwd():Promise<string> {
 }
 
 private _folderOfMain():string {
-    return          this._mainIsFolder
-         ?          this._mainUri.fsPath
-         : dirname( this._mainUri.fsPath )
-         ;
+    return                     this._mainIsFs
+         ? (                   this._mainIsFolder
+         ?          uriToFile( this._mainUri )
+         : dirname( uriToFile( this._mainUri ) )
+           ) : ''
+             ;
 }
 
 private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<Uri[]> {
   //
-    const ü_subsets = await Promise.all( this._all.map(  async ( ü_uri, ü_indx )=>
-        ( ü_indx === this._mainIndx ? this._mainIsFolder
-                                    : await whenKnownAsFolder( ü_uri ) ) ? whenFilesFound( ü_uri, ö_pattern )
-                                                                         :                 ü_uri
-                                                          ) );
+    const ü_subsets = await Promise.all( this._others.map(  async ( ü_uri )=>
+        ( matchingUris( ü_uri, this._mainUri ) ? this._mainIsFolder
+                                               : await whenKnownAsFolder( ü_uri ) ) ? await whenFilesFound( ü_uri, ö_pattern )
+                                                                                    :                       ü_uri
+                                                      ) );
   //
     const ü_files = straightenArray( ü_subsets );
         //ü_files.sort();

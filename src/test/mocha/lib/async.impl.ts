@@ -1,16 +1,16 @@
 /*
 */
+  import { ß_trc
+         } from '../../../runtime/context';
+  import { testSummary
+         , testEqual
+         } from '../../../lib/testUtil';
 //--------------------------------------------------------------------
   import { whenDelay
          , UniqueResource
          , LockHandler
          , AsyncCalculation
          } from '../../../lib/asyncUtil';
-  import { testSummary
-         , testEqual
-         } from '../../../lib/testUtil';
-  import { ß_trc
-         } from '../../../runtime/context';
 //====================================================================
 
 export async function tst_UR(){
