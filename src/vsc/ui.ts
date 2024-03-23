@@ -3,11 +3,15 @@
   import * as ßß_vsCode from 'vscode';
   import { ThemeIcon
          , window
+         , Disposable as vscDisposable
+         , QuickPickItem
+         , QuickInputButton
          } from 'vscode';
   import { format
          } from 'util';
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
   import { ß_trc
+         , ß_err
          , ß_RuntimeContext
          } from '../runtime/context';
   import { ß_ViewErrorDetails
@@ -18,11 +22,26 @@
          } from '../vsc/docUtil';
   import { ErrorMessage
          } from '../lib/errorUtil';
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
   type TIcons = 'close'
 //====================================================================
 
+export class MessageButton<T=unknown> {
+    public readonly title  :string
+    public readonly tooltip:string
+constructor(
+                   ü_titleId :keyof typeof LCButton
+  , public readonly  dataRef?:T
+){
+    this.title = LCButton[ ü_titleId ]();
+    this.tooltip = this.title;
+}
+}
+
+//====================================================================
+
 export async function threadShowError( ü_eX:any, ü_context:string ):Promise<void> {
+    ß_err( ü_eX );
     const ü_more = new MessageButton( 'DETAILS' );
     const ü_info = `${ ü_context }: "${ ü_eX }"`;
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
@@ -49,7 +68,7 @@ export async function threadShowError( ü_eX:any, ü_context:string ):Promise<vo
 
 //====================================================================
 
-export class ListItem<T> implements ßß_vsCode.QuickPickItem {
+export class ListItem<T> implements QuickPickItem {
     public          picked     ?:boolean
 constructor(
     public          label       :string
@@ -69,21 +88,7 @@ type TListItems<T> =          ListItem<T>[]
 
 //====================================================================
 
-export class MessageButton<T=unknown> {
-    public readonly title  :string
-    public readonly tooltip:string
-constructor(
-                   ü_titleId :keyof typeof LCButton
-  , public readonly  dataRef?:T
-){
-    this.title = LCButton[ ü_titleId ]();
-    this.tooltip = this.title;
-}
-}
-
-//====================================================================
-
-export class VscQIButton<B> implements ßß_vsCode.QuickInputButton {
+export class VscQIButton<B> implements QuickInputButton {
     public          iconPath  :ThemeIcon
 constructor(
 //  public iconPath: { light: ßß_vsCode.Uri dark : ßß_vsCode.Uri }
@@ -101,10 +106,11 @@ set icon( ü_icon:string ) {
 }
 
 //------------------------------------------------------------------------------
+//--------------------------------------------------------------------
   export const SCancelButtonId  = Symbol();
          const  CancelButton    = new VscQIButton( 'close', 'Cancel', SCancelButtonId    );
   export type TButtons = VscQIButton<typeof SCancelButtonId>[]
-//------------------------------------------------------------------------------
+//--------------------------------------------------------------------
 
 type TOptions<B> =
   { header      ?:string
@@ -123,14 +129,14 @@ export type TDropDownListOptions<B> = TOptions<B> &
 //==============================================================================
   const CNULL = null;
   type  TNULL = typeof CNULL
-  type  TSINGLEVALUE   <T> = T   | typeof SCancelButtonId
-  type  TMULTIPLEVALUES<T> = T[] | typeof SCancelButtonId
-//------------------------------------------------------------------------------
+  type  TSingleValue   <T> = T   | typeof SCancelButtonId
+  type  TMultipleValues<T> = T[] | typeof SCancelButtonId
+//--------------------------------------------------------------------
 
 export class DropDownList<T,B> {
 //
 static async whenItemPicked<T,B>( ü_items:TListItems<T>
-                                , ü_opts :TDropDownListOptions<B> ):Promise<TSINGLEVALUE<T>|B> {
+                                , ü_opts :TDropDownListOptions<B> ):Promise<TSingleValue<T>|B> {
   const ü_pick = new DropDownList<T,B>( ü_items, ü_opts );
   try {
     return await ü_pick.whenItemPicked();
@@ -140,7 +146,7 @@ static async whenItemPicked<T,B>( ü_items:TListItems<T>
 }
 //
 static async whenItemsPicked<T,B>( ü_items:TListItems<T>
-                                 , ü_opts :TDropDownListOptions<B> ):Promise<TMULTIPLEVALUES<T>|B> {
+                                 , ü_opts :TDropDownListOptions<B> ):Promise<TMultipleValues<T>|B> {
   const ü_pick = new DropDownList<T,B>( ü_items, ü_opts );
   try {
     return await ü_pick.whenItemsPicked();
@@ -149,11 +155,11 @@ static async whenItemsPicked<T,B>( ü_items:TListItems<T>
   }
 }
 //
-    private readonly _pick          = ßß_vsCode.window.createQuickPick< ListItem<T> >();
-    private readonly _disposables    :ßß_vsCode.Disposable[] = [];
+    private readonly _pick          = window.createQuickPick< ListItem<T> >();
+    private readonly _disposables    :vscDisposable[] = [];
     private readonly _hint          ?:string
     private          _selection      :readonly ListItem<T>[]|TNULL          = CNULL;
-    private          _resolveItem    :( ü_value :TMULTIPLEVALUES<T>|B|T ) => void    = () => {};
+    private          _resolveItem    :( ü_value :TMultipleValues<T>|B|T ) => void    = () => {};
     private          _multiple                                                     = true;
     private          _onButton      ?:( ü_button:          B, ü_self: DropDownList<T,B> ) => boolean
 constructor(
@@ -201,7 +207,7 @@ private _onDidChangeSelection( ü_items:readonly ListItem<T>[] ):any {
     if(ß_trc){ß_trc( `onDidChangeSelection: "${ ü_items.length } items"` );}
     this._selection = ü_items;
 }
-private async _onDidTriggerButton( ü_button:ßß_vsCode.QuickInputButton ):Promise<any> {
+private async _onDidTriggerButton( ü_button:QuickInputButton ):Promise<any> {
     if(ß_trc){ß_trc( `onDidTriggerButton: "${ ü_button.tooltip }"` );}
     
     const ü_pressed = ü_button as VscQIButton<B>;
@@ -243,11 +249,11 @@ set buttons( ü_buttons:readonly ßß_vsCode.QuickInputButton[] ) {
     this._pick.buttons = ü_buttons;
 }
 //
-private async _whenPicked( ö_multiple:true    ):Promise<TMULTIPLEVALUES<T>|B>
-private async _whenPicked( ö_multiple:false   ):Promise<  TSINGLEVALUE <T>|B>
-private async _whenPicked( ö_multiple:boolean ):Promise<TMULTIPLEVALUES<T>|B|T> {
+private async _whenPicked( ö_multiple:true    ):Promise<TMultipleValues<T>|B>
+private async _whenPicked( ö_multiple:false   ):Promise<  TSingleValue <T>|B>
+private async _whenPicked( ö_multiple:boolean ):Promise<TMultipleValues<T>|B|T> {
   //
-    const ü_whenPicked = new Promise<TMULTIPLEVALUES<T>|B|T>( (ü_resolve,ö_reject) => {
+    const ü_whenPicked = new Promise<TMultipleValues<T>|B|T>( (ü_resolve,ö_reject) => {
       this._resolveItem = ü_resolve ;
       this._multiple    = ö_multiple;
     } );
@@ -271,8 +277,8 @@ private async _whenPicked( ö_multiple:boolean ):Promise<TMULTIPLEVALUES<T>|B|T>
     return ü_whenPicked;
 }
 //
-async whenItemsPicked():Promise<TMULTIPLEVALUES<T>|B> { return this._whenPicked( true  ); }
-async whenItemPicked ():Promise<  TSINGLEVALUE <T>|B> { return this._whenPicked( false ); }
+async whenItemsPicked():Promise<TMultipleValues<T>|B> { return this._whenPicked( true  ); }
+async whenItemPicked ():Promise<  TSingleValue <T>|B> { return this._whenPicked( false ); }
 //
 async whenItemsUpdated( ü_whenItems :() => TListItems<T> ):Promise<void> {
     this._pick.enabled = false;

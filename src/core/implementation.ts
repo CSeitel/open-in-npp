@@ -5,6 +5,7 @@ https://code.visualstudio.com/api/references/vscode-api
   import { type SpawnOptions
          } from 'child_process';
   import { type TNotReadonly
+         , type TWritable
          } from '../types/generic.d';
   import { type TShadowDoc
          } from '../types/vsc.extension.d';
@@ -25,17 +26,15 @@ https://code.visualstudio.com/api/references/vscode-api
   import { promises as ßß_fs_p
          } from 'fs';
   import { createHash
-         , Hash
          } from 'crypto';
-
   import { Uri
          , window
-         , commands
          , TextDocument
          , workspace
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_trc
+         , ß_err
          } from '../runtime/context';
   import { ß_getConfigSnapshot
          , ß_XtnOpenInNpp
@@ -93,7 +92,7 @@ class VirtualDocumentView {
     private readonly _isInitial :boolean
     public  readonly  content   :string
     private readonly _newHash   :string
-    private readonly _docView   :TShadowDoc
+    private readonly _docViewBE :TShadowDoc
     private readonly _docViews  = ß_XtnOpenInNpp.shadowDocsBfr;
     private readonly _encoding  = 'utf8';
 constructor(
@@ -104,22 +103,22 @@ constructor(
     this._isInitial = ! this._docViews.has( this.doc );
     this.content    = this.doc.getText();
     this._newHash   = createHash( 'sha1' ).update( this.content ).digest('hex');
-    this._docView = this._isInitial ? { file: ''// await whenTempFile( ü_stub, '', ü_tempDir, ! ü_silent ) // silent = reuse
+    this._docViewBE = this._isInitial ? { file: ''// await whenTempFile( ü_stub, '', ü_tempDir, ! ü_silent ) // silent = reuse
                                   , hash: this._newHash
                                   }
                                 : this._docViews.get( this.doc )!
                                 ;
 }
 
-get uri     ():Uri    { return Uri.file( this._docView.file ); }
-get fileName():string { return           this._docView.file  ; }
+get uri     ():Uri    { return Uri.file( this._docViewBE.file ); }
+get fileName():string { return           this._docViewBE.file  ; }
 
 async whenReady():Promise<this> {
     if ( this._isInitial ) {
         const ü_stub = escapeFF( CRgXp.fs_win32 )( (workspace.name??'')
                      + '-'
                      + this.doc.fileName );
-        this._docView.file = await whenTempFile( ü_stub, '', this.tempDir, ! this.reuse  );
+        this._docViewBE.file = await whenTempFile( ü_stub, '', this.tempDir, ! this.reuse  );
     }
     return this;
 }
@@ -128,28 +127,28 @@ async updateShadow():Promise<boolean> {
     let ü_writeFlag = 'w';
     if ( this._isInitial ) {
         if ( this.reuse ) {
-            const ü_info = await whenFileInfoRead( this._docView.file );
+            const ü_info = await whenFileInfoRead( this._docViewBE.file );
             if ( ü_info === null ) {
                 ü_writeFlag = 'wx';
             } else {
                 if ( ! ü_info.isFile() ) { throw new TypeError( 'Exists not as File' ); }
-                const ü_content = await ßß_fs_p.readFile( this._docView.file, this._encoding );
+                const ü_content = await ßß_fs_p.readFile( this._docViewBE.file, this._encoding );
                 const ü_oldHash = createHash( 'sha1' ).update(  ü_content  ).digest('hex');
                 if ( ü_oldHash === this._newHash ) { ü_writeFlag = ''; ß_trc&& ß_trc( 'Shadow is recent. No write' ); }
             }
         } else { ü_writeFlag = 'wx'; }
     } else {
-        if ( this._docView.hash === this._newHash ) { ü_writeFlag = ''; ß_trc&& ß_trc( 'No update. No write.' ); }
+        if ( this._docViewBE.hash === this._newHash ) { ü_writeFlag = ''; ß_trc&& ß_trc( 'No update. No write.' ); }
     }
     const ü_done = ü_writeFlag.length > 0;
     if ( ü_done ) {
-        await ßß_fs_p.writeFile( this._docView.file, this.content, { encoding: this._encoding
+        await ßß_fs_p.writeFile( this._docViewBE.file, this.content, { encoding: this._encoding
                                                                 , flag    : ü_writeFlag } );
     }
     if ( this._isInitial ) {
-        if ( ! this.doc.isClosed ) { this._docViews.set( this.doc, this._docView ); }
+        if ( ! this.doc.isClosed ) { this._docViews.set( this.doc, this._docViewBE ); }
     } else {
-        this._docView.hash = this._newHash;
+        this._docViewBE.hash = this._newHash;
     }
     return ü_done;
 }
@@ -163,8 +162,8 @@ class CliArgs {
     private readonly _mode         :CETrigger
   //
     private readonly _mainUri      :Uri
-    private          _mainIsFolder :boolean    = false;
-    private readonly _mainIsFs     :boolean
+    private readonly _mainIsFolder :boolean    = false;
+  //private readonly _mainIsFs     :boolean
   //
     private readonly _ref          :VirtualDocumentView|null = null;
     private          _others       :Uri[]      = [];
@@ -181,23 +180,30 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[]|Virtu
   //
     switch ( this._mode ) {
 
-      case CETrigger.PALETTE:
-          if ( window.activeTextEditor === undefined ) {
-              this._mode     = CETrigger.None;
-              this._mainIsFs = false;
-              return;
-          }
-          this._mainUri      = window.activeTextEditor.document.uri;
+        case CETrigger.PALETTE:
+          if ( window.activeTextEditor === undefined )
+               { this._mode    = CETrigger.None                      ; }
+          else { this._mainUri = window.activeTextEditor.document.uri; }
           break;
-      case CETrigger.EDITOR:
+        case CETrigger.EDITOR:
           if ( ü_others instanceof VirtualDocumentView ) { this._ref = ü_others; }
           break;
-
-      case CETrigger.EXPLORER:
+        case CETrigger.EXPLORER:
           break;
+
     }
-          this._mainIsFs = hasFileScheme( this._mainUri );
+}
+
+private get _hasNoFileScheme():boolean {
+    return ! hasFileScheme( this._mainUri );
+}
+
+private _setShadow( ü_ref:VirtualDocumentView ):this {
+            ( this._ref     as TNotReadonly<VirtualDocumentView> ) = ü_ref; // silent without UI
+            ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.EDITOR;
+            ( this._mainUri as TNotReadonly<Uri                > ) = this._ref!.uri;
   //
+    return this;
 }
 
 async whenReady():Promise<this> {
@@ -210,23 +216,26 @@ async whenReady():Promise<this> {
             break;
         case CETrigger.PALETTE:
         case CETrigger.EDITOR:
-            ü_shadow = ! this._mainIsFs;
+            ü_shadow = this._hasNoFileScheme;
             break;
 
         case CETrigger.EXPLORER: // folders possible
           if ( await whenKnownAsFolder( this._mainUri ) ) {
-                                        this._mainIsFolder = true;
+              ( this._mainIsFolder as TNotReadonly<boolean> ) = true;
           } else {
           }
         //
           const ü_pattern = this._config.filesInFolderPattern;
           if ( ü_pattern.length > 0 ) { // only go for files
-              this._others = await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit );
+              
+              if ( 0 === await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit ) ) {
+            ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.None;
+              }
               if ( this._config.openFolderAsWorkspace ) {} // ignored
           } else {
               if ( this._config.openFolderAsWorkspace ) { this._asWorkspace = true; }
               if ( ! this._mainIsFolder ) {
-                  ü_shadow = ! this._mainIsFs;
+                  ü_shadow = this._hasNoFileScheme;
                   if ( ü_shadow ) { this._others.length = 0; }
               }
           }
@@ -240,9 +249,8 @@ async whenReady():Promise<this> {
               this._threadShadowDone( ü_doc, ü_temp );
             ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.None;
         } else {
-            ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.EDITOR;
-            ( this._ref     as TNotReadonly<VirtualDocumentView> ) = await this._whenShadowDone( ü_doc, ü_temp, true ); // silent without UI
-            ( this._mainUri as TNotReadonly<Uri                > ) = this._ref!.uri;
+            this._setShadow( await this._whenShadowReady( ü_doc, ü_temp, true ) // silent without UI
+                                                                              );// switch to Editor mode
         }
     }
   //
@@ -257,7 +265,6 @@ private async _submit():Promise<number> {
           return CNotAPid;
 
       case CETrigger.EXPLORER:
-          if ( this._others.length === 0 ) { return CNotAPid; }
           break;
 
     }
@@ -295,25 +302,25 @@ async submit():Promise<number> {
 
 private async _threadShadowDone( ü_doc:TextDocument, ü_shadowDir:string ):Promise<void> {
     try {
-        await this._whenShadowDone( ü_doc, ü_shadowDir, false ); // not silent with UI
+        const ü_docView = await this._whenShadowReady( ü_doc, ü_shadowDir, false ); // not silent with UI
     } catch ( ü_eX ) {
         threadShowError( ü_eX, 'Shadow' );
     }
 }
 
-private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<VirtualDocumentView> {
+private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<VirtualDocumentView> {
     const ü_docView = await new VirtualDocumentView( ü_doc
-                                                , ü_shadowDir
-                                                , this._config.virtualDocumentsFileReuse ).whenReady();
+                                                   , ü_shadowDir
+                                                   , this._config.virtualDocumentsFileReuse ).whenReady();
   //
     if ( ü_silent ) {
         ü_docView.updateShadow();
     } else {
-        const ü_open = new MessageButton( 'YES' );
-        const ü_create = `Save the contents of "${ ü_doc.fileName }" as "${ ü_docView.fileName }" to be shown in Notepad++ ?`;
-        const ü_todo = await window.showInformationMessage( ü_create, ü_open );
+        const ü_yes    = new MessageButton( 'YES' );
+        const ü_create = LCDoIt.createShadow( ü_doc.fileName, ü_docView.fileName );
+        const ü_todo = await window.showInformationMessage( ü_create, ü_yes );
         switch ( ü_todo ) {
-          case ü_open:
+          case ü_yes:
               ü_docView.updateShadow();
               openInNppShadow( ü_docView );
             break;
@@ -322,26 +329,26 @@ private async _whenShadowDone( ü_doc:TextDocument, ü_shadowDir:string, ü_sile
     return ü_docView;
 }
 
-private async _compileCursorPosition( ü_args:string[] ):Promise<void> {
+private async _compileCursorPosition( ü_args:string[], ü_others:Uri[] ):Promise<void> {
     const ü_editor = window.activeTextEditor;
     if ( ü_editor === undefined ) { return; }
-    const ü_activeUri = ü_editor.document.uri;
+    const ü_uriWithCursor = ü_editor.document.uri;
   //
     switch ( this._mode ) {
 
         case CETrigger.EXPLORER:
-            const ü_indx = this._others.findIndex( ü_uri => matchingUris( ü_uri, ü_activeUri ) );
+            const ü_indx = ü_others.findIndex( ü_uri => matchingUris( ü_uri, ü_uriWithCursor ) );
             if ( ü_indx < 0 ) { return; }
             putLastIndex( this._others, ü_indx );
             break;
 
         case CETrigger.EDITOR:
-            const ü_doc = await workspace.openTextDocument( ü_activeUri );
+            const ü_doc = await workspace.openTextDocument( ü_uriWithCursor );
             if ( ü_doc == this._ref?.doc ) {
                1 == 1;
             } 
-            if ( ! matchingUris( ü_activeUri, this._ref === null ? this._mainUri
-                                                                 : this._ref.doc.uri ) ) { return; }
+            if ( ! matchingUris( ü_uriWithCursor, this._ref === null ? this._mainUri
+                                                                     : this._ref.doc.uri ) ) { return; }
             break;
 
     }
@@ -355,8 +362,9 @@ private async _compileCursorPosition( ü_args:string[] ):Promise<void> {
 }
 
 private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
-    if ( this._others.length === 0 )
+    if ( this._mode !== CETrigger.EXPLORER )
        { this._others.push( this._mainUri ); }
+    const ü_others = this._others;
   //
     const ü_args = [];
   //
@@ -367,7 +375,7 @@ private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
   //
     if ( this._asWorkspace                ) { ü_args.push( CECliArgument.openFoldersAsWorkspace ); }
     if ( this._config.preserveCursor ) {
-           await this._compileCursorPosition( ü_args ); }
+           await this._compileCursorPosition( ü_args, this._others ); }
   //
                                               ü_args.push( ... this._config.commandLineArguments );
   //
@@ -416,17 +424,18 @@ private async _cwd():Promise<string> {
 }
 
 private _folderOfMain():string {
-    return                     this._mainIsFs
-         ? (                   this._mainIsFolder
-         ?          uriToFile( this._mainUri )
-         : dirname( uriToFile( this._mainUri ) )
-           ) : ''
-             ;
+    return                       this._hasNoFileScheme
+         ? ''
+         :                       this._mainIsFolder
+           ?          uriToFile( this._mainUri )
+           : dirname( uriToFile( this._mainUri ) )
+         ;
 }
 
-private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<Uri[]> {
+private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<number> {
+    const ü_others = this._others;
   //
-    const ü_subsets = await Promise.all( this._others.map(  async ( ü_uri )=>
+    const ü_subsets = await Promise.all( ü_others.map(  async ( ü_uri )=>
         ( matchingUris( ü_uri, this._mainUri ) ? this._mainIsFolder
                                                : await whenKnownAsFolder( ü_uri ) ) ? await whenFilesFound( ü_uri, ö_pattern )
                                                                                     :                       ü_uri
@@ -441,7 +450,9 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
         window.showInformationMessage( LCDoIt.file_hits( ü_files.length, ö_pattern ) );
     }
   //
-    return ü_files;
+    ü_others.length = 0;
+    ü_others.push( ... ü_files );
+    return ü_files.length;
 }
 
 private async _whenSelected( ü_files:Uri[], ü_limit:number ):Promise<boolean> {
