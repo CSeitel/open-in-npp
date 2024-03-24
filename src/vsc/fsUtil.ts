@@ -26,16 +26,25 @@
 //====================================================================
 
 export function fileToUri( ü_path:TFileUri ):Uri {
-    return           ü_path instanceof Uri
-         ?           ü_path
-         :   typeof( ü_path ) === 'string'
+    return   typeof( ü_path ) === 'string'
          ? Uri.file( ü_path )
-         :           ü_path.uri
+         :           ü_path
+    //            ü_path instanceof Uri
+       // ? Uri.file( ü_path )
+       // :           ü_path.uri
          ;
 }
 
 export function matchingUris( ü_uri_a:Uri, ü_uri_b:Uri ):boolean {
     return ü_uri_a.toString() === ü_uri_b.toString();
+}
+
+export function matchingUri( ü_uri_a:Uri ):(uri:Uri)=>boolean {
+    const ö_a = ü_uri_a.toString();
+    return ö_match;
+function ö_match( ü_uri_b:Uri ):boolean {
+    return ö_a === ü_uri_b.toString();
+}
 }
 
 export function hasFileScheme  ( ü_uri:Uri ):boolean { return ü_uri.scheme === CEUriScheme.file; }

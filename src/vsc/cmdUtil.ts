@@ -23,7 +23,7 @@
 export async function whenShownInVscExplorer( ü_fileUri:TFileUri ):Promise<boolean> {
   //
     if ( isContainedInWorkspace( ü_fileUri = fileToUri( ü_fileUri ) ) ) {
-      await commands.executeCommand( CEVscCommands.revealInExplorer, ü_fileUri );
+        await commands.executeCommand( CEVscCommands.revealInExplorer, ü_fileUri );
              return true ;
     } else { return false; }
 }
@@ -33,7 +33,7 @@ export async function whenShownInOSExplorer( ü_fileUri:TFileUri ):Promise<void>
 }
 
 export async function whenOpenedInOSDefaultApp( ü_fileUri:TFileUri ):Promise<boolean> {
-    return whenDoneWith( env.openExternal( fileToUri( ü_fileUri ) ), 'Open in OS {0}', ü_fileUri.toString() );
+    return await env.openExternal( fileToUri( ü_fileUri ) );
 }
 
 //====================================================================
@@ -41,12 +41,6 @@ export async function whenOpenedInOSDefaultApp( ü_fileUri:TFileUri ):Promise<bo
 export async function whenSettingsOpened( ü_prefix:string ):Promise<void> {
   //
     const ü_done = await commands.executeCommand<null>( CEVscCommands.openWbSettings, ü_prefix );
-    try {
-      //console.log( typeof( ü_done ) );
-    } catch (error) {
-      console.error( error );
-    }
-    //ß_trc&& ß_trc( typeof( ü_done ) + 'ttt' );
 }
 
 export async function whenUriOpened( ü_realUri:Uri|string ):Promise<void> {
