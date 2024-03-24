@@ -11,7 +11,10 @@
          } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_trc
+         , ß_err
          } from '../runtime/context';
+  import { whenDoneWith
+         } from '../lib/asyncUtil';
   import { fileToUri
          , isContainedInWorkspace
          } from '../vsc/fsUtil';
@@ -30,13 +33,7 @@ export async function whenShownInOSExplorer( ü_fileUri:TFileUri ):Promise<void>
 }
 
 export async function whenOpenedInOSDefaultApp( ü_fileUri:TFileUri ):Promise<boolean> {
-  //
-    try {
-      return env.openExternal( fileToUri( ü_fileUri ) );
-    } catch ( ü_eX ) {
-      console.error( (ü_eX as Error).message );
-      return false;
-    }
+    return whenDoneWith( env.openExternal( fileToUri( ü_fileUri ) ), 'Open in OS {0}', ü_fileUri.toString() );
 }
 
 //====================================================================

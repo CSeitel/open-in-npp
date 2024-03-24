@@ -161,12 +161,13 @@ async updateShadow():Promise<boolean> {
 class CliArgs {
     private readonly _config                   = ß_getConfigSnapshot();
     private readonly _mode         :CETrigger
-    private          _return       :boolean = false;
+    private          _return       :boolean    = false;
   //
     private readonly _mainUri      :Uri
     private readonly _mainIsFolder :boolean    = false;
   //
-    private readonly _ref          :VirtualDocumentView|null = null;
+    private readonly _ref          :VirtualDocumentView|null
+                                               = null;
     private          _others       :Uri[]      = [];
     private          _asWorkspace  :boolean    = false;
   //
@@ -189,9 +190,8 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[]|Virtu
         case CETrigger.EDITOR:
           if ( ü_others instanceof VirtualDocumentView ) { this._ref = ü_others; }
           break;
-        case CETrigger.EXPLORER:
-          break;
 
+        case CETrigger.EXPLORER: break;
     }
 }
 
@@ -251,7 +251,8 @@ async whenReady():Promise<this> {
                       ) );
                        ü_refUri = this._others.find(  ( ü_uri, ü_indx )=>ö_isNoFolder[ ü_indx ]  ) ?? null;
                                   this._others.length = 0;
-                  if ( ü_refUri === null ) { this._return = true;
+                  if ( ü_refUri === null ) { window.showInformationMessage( LCDoIt.only_folders() );
+                                             this._return = true;
                                              return this; }
               } else { ü_refUri = this._others[0];
                                   this._others.length = 0;

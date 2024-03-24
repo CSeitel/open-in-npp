@@ -14,7 +14,9 @@
   export interface IExpandUiXMessageVars {
       ( ...vars:any[] ):string
   }
-  export type TUiXMessageTemplate = string|IExpandUiXMessageVars
+
+  export type TTextTemplate       = string
+  export type TUiXMessageTemplate = TTextTemplate|IExpandUiXMessageVars
 
 //====================================================================
   export type TFSError = Error &

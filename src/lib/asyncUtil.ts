@@ -9,9 +9,11 @@
          } from '../types/lib.asyncUtil.d';
   import { type IUiXMessage
          , type TUiXMessageTemplate
+         , type TTextTemplate
          } from '../types/lib.errorUtil.d';
 //--------------------------------------------------------------------
   import { ß_trc
+         , ß_err
          , ß_stringify
          } from '../runtime/context';
   import { ErrorMessage
@@ -19,8 +21,8 @@
          } from '../lib/errorUtil';
 //====================================================================
 
-export async function whenPromiseSettled<T>( ü_whenDone:PromiseLike<T> ):Promise<TPromiseSettled<T>> {
-     const ü_done = ( await Promise.allSettled([ ü_whenDone ]) )[0] as TPromiseSettled<T>;
+export async function whenPromiseSettled<T,R=any>( ü_whenDone:PromiseLike<T> ):Promise<TPromiseSettled<T,R>> {
+     const ü_done = ( await Promise.allSettled([ ü_whenDone ]) )[0] as TPromiseSettled<T,R>;
            ü_done.rejected = ü_done.status === 'rejected';
     return ü_done;
 }
@@ -36,6 +38,15 @@ export async function whenDoneWithMessage( ü_whenDone:PromiseLike<unknown>, ü_
              ? new UiXMessage( ü_msg, ß_stringify( ü_done.value ) )
              : new UiXMessage( ü_msg,              ü_done.value   )
              ;
+    }
+}
+
+export async function whenDoneWith<T>( ü_whenDone:PromiseLike<T>, ü_txtTmpl:TTextTemplate, ... ü_vars:string[] ):Promise<T> {
+    try {
+        return await ü_whenDone;
+    } catch ( ü_eX ) {
+        ß_err( new ErrorMessage( ü_txtTmpl, ...ü_vars ).setReason( ü_eX ), 'Caught' );
+        throw ü_eX;
     }
 }
 

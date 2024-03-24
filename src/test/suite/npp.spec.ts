@@ -3,7 +3,7 @@
   import { whenAllTestsRun
          } from '../../lib/testUtil';
 //--------------------------------------------------------------------
-  import * as ß_any   from './lib/a.impl';
+  import * as ß_any   from './lib/a.npp';
 //====================================================================
 
   const ß_skipTests =  true; // = except single test
