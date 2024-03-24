@@ -43,8 +43,7 @@
     };
 //====================================================================
   export const enum CETrigger
-    { None     = 0
-    , PALETTE
+    { PALETTE  = 0
     , EDITOR
     , EXPLORER
     };

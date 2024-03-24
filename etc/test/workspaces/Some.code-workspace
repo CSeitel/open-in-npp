@@ -12,9 +12,9 @@
         "TEMP": "C:\\${HOME}\\"
       }
   },
-  "openInNpp.filesInFolderPattern": "**/*.*",
+  "openInNpp.filesInFolderPattern": "",
   "openInNpp.limit": 0,
-  "openInNpp.matchingFilesLimit": 1,
+  "openInNpp.matchingFilesLimit": 2,
   "openInNpp.virtualDocumentsDirectory": "",
   "openInNpp.developerTrace": true
   }

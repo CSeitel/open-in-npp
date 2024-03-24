@@ -20,6 +20,8 @@
          } from '../l10n/i18n';
   import { whenNewTextEditorOpened
          } from '../vsc/docUtil';
+  import { createPromise
+         } from '../lib/asyncUtil';
   import { ErrorMessage
          } from '../lib/errorUtil';
 //--------------------------------------------------------------------
@@ -30,10 +32,10 @@ export class MessageButton<T=unknown> {
     public readonly title  :string
     public readonly tooltip:string
 constructor(
-                   ü_titleId :keyof typeof LCButton
-  , public readonly  dataRef?:T
+    public readonly titleId :keyof typeof LCButton
+  , public readonly dataRef?:T
 ){
-    this.title = LCButton[ ü_titleId ]();
+    this.title   = LCButton[ this.titleId ]();
     this.tooltip = this.title;
 }
 }
@@ -105,7 +107,6 @@ set icon( ü_icon:string ) {
 //
 }
 
-//------------------------------------------------------------------------------
 //--------------------------------------------------------------------
   export const SCancelButtonId  = Symbol();
          const  CancelButton    = new VscQIButton( 'close', 'Cancel', SCancelButtonId    );
@@ -126,7 +127,7 @@ export type TDropDownListOptions<B> = TOptions<B> &
   {
   }
 
-//==============================================================================
+//====================================================================
   const CNULL = null;
   type  TNULL = typeof CNULL
   type  TSingleValue   <T> = T   | typeof SCancelButtonId
@@ -136,34 +137,36 @@ export type TDropDownListOptions<B> = TOptions<B> &
 export class DropDownList<T,B> {
 //
 static async whenItemPicked<T,B>( ü_items:TListItems<T>
-                                , ü_opts :TDropDownListOptions<B> ):Promise<TSingleValue<T>|B> {
-  const ü_pick = new DropDownList<T,B>( ü_items, ü_opts );
-  try {
-    return await ü_pick.whenItemPicked();
-  } finally {
-    ü_pick.dispose();
-  }
+                                , ü_opts :TDropDownListOptions<B>
+                                ):Promise<TSingleValue<T>|B> {
+    const ü_pick = new DropDownList<T,B>( ü_items, ü_opts );
+    try {
+        return await ü_pick._whenPicked( false );
+    } finally {
+        ü_pick.dispose();
+    }
 }
 //
 static async whenItemsPicked<T,B>( ü_items:TListItems<T>
-                                 , ü_opts :TDropDownListOptions<B> ):Promise<TMultipleValues<T>|B> {
-  const ü_pick = new DropDownList<T,B>( ü_items, ü_opts );
-  try {
-    return await ü_pick.whenItemsPicked();
-  } finally {
-    ü_pick.dispose();
-  }
+                                 , ü_opts :TDropDownListOptions<B>
+                                 ):Promise<TMultipleValues<T>|B> {
+    const ü_pick = new DropDownList<T,B>( ü_items, ü_opts );
+    try {
+        return await ü_pick._whenPicked( true  );
+    } finally {
+        ü_pick.dispose();
+    }
 }
-//
-    private readonly _pick          = window.createQuickPick< ListItem<T> >();
-    private readonly _disposables    :vscDisposable[] = [];
-    private readonly _hint          ?:string
-    private          _selection      :readonly ListItem<T>[]|TNULL          = CNULL;
-    private          _resolveItem    :( ü_value :TMultipleValues<T>|B|T ) => void    = () => {};
+  //
+    private readonly _whenDone                     = createPromise<TMultipleValues<T>|B|T>();
+    private readonly _disposables :vscDisposable[] = [];
+    private readonly _pick                         = window.createQuickPick<ListItem<T>>();
+    private readonly _hint       ?:string
+    private          _selection   :readonly ListItem<T>[]|TNULL          = CNULL;
     private          _multiple                                                     = true;
-    private          _onButton      ?:( ü_button:          B, ü_self: DropDownList<T,B> ) => boolean
-constructor(
-    private          _items          :TListItems<T>
+    private          _onButton   ?:( ü_button:          B, ü_self: DropDownList<T,B> ) => boolean
+private constructor(
+    private          _whenItems   :TListItems<T>
   , { header
     ,      step
     , totalSteps
@@ -172,7 +175,7 @@ constructor(
     , onButton
   //, canPickMany
     }                       :TDropDownListOptions<B>
-) {
+){
     this._onButton = onButton;
     this._hint = hint === undefined
                ? `Press 'Enter' to confirm your input or 'Escape' to cancel`
@@ -218,7 +221,7 @@ private async _onDidTriggerButton( ü_button:QuickInputButton ):Promise<any> {
       }
     }
   //
-    this._resolveItem( ü_pressed.reference );
+    this._whenDone.resolve( ü_pressed.reference );
     this._pick.hide();
   //
 }
@@ -227,17 +230,17 @@ private _onDidHide() {
     if ( this._selection !== CNULL ) {
          this._selection  =  CNULL;
     } else {
-      this._resolveItem( CancelButton.reference );
+      this._whenDone.resolve( CancelButton.reference );
     }
 }
 private _onDidAccept( ü_e:void ):any {
     if(ß_trc){ß_trc( `onDidAccept: "${ this._selection?.length || -1 }"` );}
     if ( this._selection === CNULL ) {
     } else {
-      this._resolveItem( this._multiple
-                       ? this._selection.map( ü_item => ü_item.reference )
-                       : this._selection                   [0].reference
-                       );
+        this._whenDone.resolve( this._multiple
+                              ? this._selection.map( ü_item => ü_item.reference )
+                              : this._selection                   [0].reference
+                              );
     }
     this._pick.hide();
 }
@@ -245,49 +248,43 @@ private _onDidAccept( ü_e:void ):any {
 set header( ü_header:string ) {
     this._pick.title = ü_header;
 }
-set buttons( ü_buttons:readonly ßß_vsCode.QuickInputButton[] ) {
+set buttons( ü_buttons:readonly QuickInputButton[] ) {
     this._pick.buttons = ü_buttons;
 }
 //
-private async _whenPicked( ö_multiple:true    ):Promise<TMultipleValues<T>|B>
-private async _whenPicked( ö_multiple:false   ):Promise<  TSingleValue <T>|B>
-private async _whenPicked( ö_multiple:boolean ):Promise<TMultipleValues<T>|B|T> {
+private async _whenPicked(   multiple:true    ):Promise<TMultipleValues<T>|B>
+private async _whenPicked(   multiple:false   ):Promise<  TSingleValue <T>|B>
+private async _whenPicked( ü_multiple:boolean ):Promise<TMultipleValues<T>|B|T> {
+    const ü_items = await this._whenItems;
   //
-    const ü_whenPicked = new Promise<TMultipleValues<T>|B|T>( (ü_resolve,ö_reject) => {
-      this._resolveItem = ü_resolve ;
-      this._multiple    = ö_multiple;
-    } );
+    this._multiple           =
+    this._pick.canSelectMany = ü_multiple;
   //
-    this._pick.canSelectMany = ö_multiple;
+    this._pick.show();
   //
-             this._pick.show();
     const ü_b = this._pick.buttons      ;
                 this._pick.buttons = ü_b;
   //await whenDelay( 2000 );
+    this._pick.items         = ü_items;
+    this._pick.selectedItems = ü_items.filter( ü_item => ü_item.picked );
   //
-    if ( this._items instanceof Promise ) {
-             this._pick.items = await this._items;
-    } else { this._pick.items =       this._items;
-    }
+  //if ( this._items instanceof Promise ) { } else { }
   //
     this._pick.busy    = false;
     this._pick.enabled = true ;
     this._pick.placeholder = this._hint;
   //
-    return ü_whenPicked;
+    return this._whenDone.promise;
 }
-//
-async whenItemsPicked():Promise<TMultipleValues<T>|B> { return this._whenPicked( true  ); }
-async whenItemPicked ():Promise<  TSingleValue <T>|B> { return this._whenPicked( false ); }
 //
 async whenItemsUpdated( ü_whenItems :() => TListItems<T> ):Promise<void> {
     this._pick.enabled = false;
     this._pick.busy    = true ;
-                               this._items = ü_whenItems();
+                               this._whenItems = ü_whenItems();
   //
-    this._pick.items   =       this._items instanceof Promise
-                       ? await this._items
-                       :       this._items
+    this._pick.items   =       this._whenItems instanceof Promise
+                       ? await this._whenItems
+                       :       this._whenItems
                        ;
     this._pick.busy    = false;
     this._pick.enabled = true ;

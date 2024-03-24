@@ -160,10 +160,10 @@ async updateShadow():Promise<boolean> {
 class CliArgs {
     private readonly _config                   = ß_getConfigSnapshot();
     private readonly _mode         :CETrigger
+    private          _return       :boolean = false;
   //
     private readonly _mainUri      :Uri
     private readonly _mainIsFolder :boolean    = false;
-  //private readonly _mainIsFs     :boolean
   //
     private readonly _ref          :VirtualDocumentView|null = null;
     private          _others       :Uri[]      = [];
@@ -182,7 +182,8 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[]|Virtu
 
         case CETrigger.PALETTE:
           if ( window.activeTextEditor === undefined )
-               { this._mode    = CETrigger.None                      ; }
+               {
+                 this._return  = true                                ; }
           else { this._mainUri = window.activeTextEditor.document.uri; }
           break;
         case CETrigger.EDITOR:
@@ -194,64 +195,76 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[]|Virtu
     }
 }
 
-private get _hasNoFileScheme():boolean {
-    return ! hasFileScheme( this._mainUri );
-}
-
 private _setShadow( ü_ref:VirtualDocumentView ):this {
-            ( this._ref     as TNotReadonly<VirtualDocumentView> ) = ü_ref; // silent without UI
-            ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.EDITOR;
-            ( this._mainUri as TNotReadonly<Uri                > ) = this._ref!.uri;
+            ( this._ref          as TNotReadonly<VirtualDocumentView> ) = ü_ref; // silent without UI
+            ( this._mode         as TNotReadonly<CETrigger          > ) = CETrigger.EDITOR;
+            ( this._mainUri      as TNotReadonly<Uri                > ) = this._ref!.uri;
+            ( this._mainIsFolder as TNotReadonly<boolean            > ) = false;
   //
     return this;
 }
 
 async whenReady():Promise<this> {
-    let ü_shadow = false;
+    let ü_shadowUri:Uri|null = null;
 
     switch ( this._mode ) {
 
-        case CETrigger.None:
-            window.showInformationMessage( LCDoIt.no_active_file() );
-            break;
-        case CETrigger.PALETTE:
-        case CETrigger.EDITOR:
-            ü_shadow = this._hasNoFileScheme;
-            break;
+      case CETrigger.PALETTE:
+          if ( this._return ) {
+              window.showInformationMessage( LCDoIt.no_active_file() );
+              break;
+          }
+      case CETrigger.EDITOR:
+          if ( ! hasFileScheme( this._mainUri ) ) { ü_shadowUri = this._mainUri; }
+          break;
 
-        case CETrigger.EXPLORER: // folders possible
+      case CETrigger.EXPLORER: // folders possible
           if ( await whenKnownAsFolder( this._mainUri ) ) {
               ( this._mainIsFolder as TNotReadonly<boolean> ) = true;
-          } else {
           }
-        //
+      //
           const ü_pattern = this._config.filesInFolderPattern;
-          if ( ü_pattern.length > 0 ) { // only go for files
-              
-              if ( 0 === await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit ) ) {
-            ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.None;
+          if ( ü_pattern.length > 0 ) {
+            // only go for files
+              const ü_hits = await this._whenPatternMatched( ü_pattern, this._config.matchingFilesLimit );
+              if ( ü_hits === 0 ) {
+                  this._return = true;
+                  return this;
               }
-              if ( this._config.openFolderAsWorkspace ) {} // ignored
+              const ü_fs = this._others.findIndex( hasFileScheme );
+              if ( ü_fs >= 0 ) { this._others = this._others.filter( hasFileScheme ); }
+              else {
+                  ü_shadowUri = this._others[0];
+              }
           } else {
+            // folders possible
               if ( this._config.openFolderAsWorkspace ) { this._asWorkspace = true; }
+            //const ü_others = this._others.filter( ü_uri => !hasFileScheme( ü_uri ) );
+              const ö_isFolder = await Promise.all( this._others.map(  async ( ü_uri, ü_indx )=>
+                      ü_indx > 0 ? await whenKnownAsFolder( ü_uri )
+                                 : this._mainIsFolder
+                  ) );
+              const ü_folders = this._others.filter( ( ü_uri, ü_indx )=> ! ö_isFolder[ ü_indx ] || hasFileScheme( ü_uri )  );
+            //
               if ( ! this._mainIsFolder ) {
-                  ü_shadow = this._hasNoFileScheme;
-                  if ( ü_shadow ) { this._others.length = 0; }
+                  if ( ! hasFileScheme( this._mainUri ) ) { ü_shadowUri = this._mainUri;
+                      this._others.length = 0;
+                  }
               }
           }
           break;
     }
   //
-    if ( ü_shadow ) {
-        const ü_doc  = await workspace.openTextDocument( this._mainUri );//. this._activeEditor!.document;
+    if ( ü_shadowUri ) {
+        const ü_doc  = await workspace.openTextDocument( ü_shadowUri );//his._activeEditor!.document;
         const ü_temp = await this._config.whenVirtualDocsDir;
         if ( ü_temp.length === 0 ) {
-              this._threadShadowDone( ü_doc, ü_temp );
-            ( this._mode    as TNotReadonly<CETrigger          > ) = CETrigger.None;
-        } else {
+            this._threadShadowDone( ü_doc, ü_temp );
+            this._return = true;
+            return this;
+        }
             this._setShadow( await this._whenShadowReady( ü_doc, ü_temp, true ) // silent without UI
                                                                               );// switch to Editor mode
-        }
     }
   //
     return this;
@@ -259,24 +272,12 @@ async whenReady():Promise<this> {
 
 private async _submit():Promise<number> {
   //
-    switch ( this._mode ) {
-
-      case CETrigger.None:
-          return CNotAPid;
-
-      case CETrigger.EXPLORER:
-          break;
-
-    }
+    if ( this._return ) { return CNotAPid; }
   //
     const ü_exe  = await this._config.whenExecutable;
     const ü_opts = await this._options();
   //
-    const ü_verbatim = !!ü_opts.windowsVerbatimArguments === true;
-    if ( ü_verbatim ) {
-      ß_trc&& ß_trc( `windowsVerbatimArguments: ${ ü_opts.windowsVerbatimArguments }` );
-    }
-    const ü_args = await this._arguments( ü_verbatim );
+    const ü_args = await this._arguments( ü_opts.windowsVerbatimArguments ?? false );
     if ( ü_args.length === 0 ) { return CNotAPid; }
   //
     try {
@@ -286,8 +287,6 @@ private async _submit():Promise<number> {
     } catch ( ü_eX ) {
       //ß_trc&& ß_trc( ü_eX );
         throw new ErrorMessage( LCDoIt.spawn_error,  ''+ü_eX  ).setReason( ü_eX );
-    //ß_showInformationMessage( ( ü_eX as Error ).message );
-      return CNotAPid;
     }
 }
 
@@ -316,8 +315,8 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
     if ( ü_silent ) {
         ü_docView.updateShadow();
     } else {
-        const ü_yes    = new MessageButton( 'YES' );
         const ü_create = LCDoIt.createShadow( ü_doc.fileName, ü_docView.fileName );
+        const ü_yes    = new MessageButton( 'YES' );
         const ü_todo = await window.showInformationMessage( ü_create, ü_yes );
         switch ( ü_todo ) {
           case ü_yes:
@@ -336,12 +335,7 @@ private async _compileCursorPosition( ü_args:string[], ü_others:Uri[] ):Promis
   //
     switch ( this._mode ) {
 
-        case CETrigger.EXPLORER:
-            const ü_indx = ü_others.findIndex( ü_uri => matchingUris( ü_uri, ü_uriWithCursor ) );
-            if ( ü_indx < 0 ) { return; }
-            putLastIndex( this._others, ü_indx );
-            break;
-
+        case CETrigger.PALETTE:
         case CETrigger.EDITOR:
             const ü_doc = await workspace.openTextDocument( ü_uriWithCursor );
             if ( ü_doc == this._ref?.doc ) {
@@ -349,6 +343,12 @@ private async _compileCursorPosition( ü_args:string[], ü_others:Uri[] ):Promis
             } 
             if ( ! matchingUris( ü_uriWithCursor, this._ref === null ? this._mainUri
                                                                      : this._ref.doc.uri ) ) { return; }
+            break;
+
+        case CETrigger.EXPLORER:
+            const ü_indx = ü_others.findIndex( ü_uri => matchingUris( ü_uri, ü_uriWithCursor ) );
+            if ( ü_indx < 0 ) { return; }
+            putLastIndex( ü_others, ü_indx );
             break;
 
     }
@@ -362,9 +362,18 @@ private async _compileCursorPosition( ü_args:string[], ü_others:Uri[] ):Promis
 }
 
 private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
-    if ( this._mode !== CETrigger.EXPLORER )
-       { this._others.push( this._mainUri ); }
-    const ü_others = this._others;
+  //
+    let ü_others:Uri[]
+    switch ( this._mode ) {
+        case CETrigger.EXPLORER:
+            ü_others = this._others.filter( hasFileScheme );
+            break;
+        case CETrigger.PALETTE:
+        case CETrigger.EDITOR:
+        default:
+            ü_others = [ this._mainUri ];
+            break;
+    }
   //
     const ü_args = [];
   //
@@ -375,14 +384,14 @@ private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
   //
     if ( this._asWorkspace                ) { ü_args.push( CECliArgument.openFoldersAsWorkspace ); }
     if ( this._config.preserveCursor ) {
-           await this._compileCursorPosition( ü_args, this._others ); }
+           await this._compileCursorPosition( ü_args, ü_others ); }
   //
                                               ü_args.push( ... this._config.commandLineArguments );
   //
-    const ü_items = this._others.filter( hasFileScheme ).map( uriToFile );
-    const ü_todo  = ( ü_verbatim ? wrapDoubleQuotes( ... ü_items )
-                                 :                       ü_items );
-                                              ü_args.push( ... ü_todo );
+    const ü_items = ü_verbatim ? wrapDoubleQuotes( ... ü_others.map( uriToFile ) )
+                               :                       ü_others.map( uriToFile )
+                               ;
+                                              ü_args.push( ... ü_items );
   //
     return ü_args;
 }
@@ -424,11 +433,11 @@ private async _cwd():Promise<string> {
 }
 
 private _folderOfMain():string {
-    return                       this._hasNoFileScheme
-         ? ''
-         :                       this._mainIsFolder
+    return        hasFileScheme( this._mainUri )
+         ? (                     this._mainIsFolder
            ?          uriToFile( this._mainUri )
-           : dirname( uriToFile( this._mainUri ) )
+           : dirname( uriToFile( this._mainUri ) ) )
+         : ''
          ;
 }
 
@@ -455,48 +464,46 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
     return ü_files.length;
 }
 
-private async _whenSelected( ü_files:Uri[], ü_limit:number ):Promise<boolean> {
+private async _whenSelected( ü_uris:Uri[], ö_limit:number ):Promise<boolean> {
   //
-    const ü_todo = ü_limit > 0
-                 ? await window.showInformationMessage( LCDoIt.max_items( ü_limit, ü_files.length )
-                       , { title: LCButton.OK    () , id: LCButton.OK     }
-                       , { title: LCButton.SELECT() , id: LCButton.SELECT }
-                       , { title: LCButton.ALL   () , id: LCButton.ALL    }
+    const ü_todo = ö_limit === 0
+                 ?               { titleId: 'SELECT' }
+                 : await window.showInformationMessage( LCDoIt.max_items( ö_limit, ü_uris.length )
+                       , new MessageButton( 'OK'     )
+                       , new MessageButton( 'SELECT' )
+                       , new MessageButton( 'ALL'    )
                        )
-                 : { id: LCButton.SELECT }
                  ;
-    if(ß_trc){ß_trc( `Button: ${ ü_todo }` );}
   //
-    switch ( ü_todo?.id ) {
+    switch ( ü_todo?.titleId ) {
 
-      case LCButton.SELECT:
-        const ü_list = ü_files.map( (ü_file,ü_indx) => new ListItem(     basename( ü_file.fsPath )
-                                                          , shortenText( dirname ( ü_file.fsPath ), 72 )
-                                                          ,                        ü_file
-                                                          ).setPicked( ü_indx < ü_limit ) );
-        ü_files.length = 0;
-        const ü_opts:TDropDownListOptions<never> =
-          { header: `${ ü_list.length } Files found`
-          };
-           const ü_items = await DropDownList.whenItemsPicked( ü_list, ü_opts );
-        switch ( ü_items ) {
-          case SCancelButtonId:
-            break;
-          default:
-            for ( const ü_item of ü_items ) { ü_files.push( ü_item ); }
-        }
-        return ü_files.length > 0;
-
-      case LCButton.OK:
-        ü_files.splice( ü_limit );
-        return true;
-      case LCButton.ALL:
-        return true;
-      case LCButton.CANCEL:
+      case 'SELECT': {
+          const ü_list = ü_uris.map( (ü_ri,ü_indx) => new ListItem(     basename( ü_ri.fsPath )
+                                                            , shortenText( dirname ( ü_ri.fsPath ), 72 )
+                                                            ,                        ü_ri
+                                                            ).setPicked( ü_indx < ö_limit ) );
+          ü_uris.length = 0;
+        //
+          const ü_opts:TDropDownListOptions<never> =
+            { header: LCDoIt.select()
+            };
+             const ü_items = await DropDownList.whenItemsPicked( ü_list, ü_opts );
+          switch ( ü_items ) {
+              case SCancelButtonId:
+                break;
+              default:
+                for ( const ü_item of ü_items ) { ü_uris.push( ü_item ); }
+          }
+        //
+          return ü_uris.length > 0;
+      }
+    //
+      case 'OK'      : ü_uris.length = ö_limit; return true;
+      case 'ALL'     :                          return true;
+    //
+      case 'CANCEL'  :
       case undefined :
-      default        :
-          ü_files.length = 0;
-          return false;
+      default        : ü_uris.length = 0; return false;
     }
 }
 
