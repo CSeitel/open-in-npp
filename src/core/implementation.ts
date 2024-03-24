@@ -63,6 +63,7 @@ https://code.visualstudio.com/api/references/vscode-api
   import { whenFilesFound
          , whenKnownAsFolder
          , hasFileScheme
+         , hasNoFileScheme
          , uriToFile
          , matchingUris
          } from '../vsc/fsUtil';
@@ -182,8 +183,7 @@ constructor( ü_mode:CETrigger         , ü_mainUri?:Uri, ü_others?:Uri[]|Virtu
 
         case CETrigger.PALETTE:
           if ( window.activeTextEditor === undefined )
-               {
-                 this._return  = true                                ; }
+               { this._return  = true                                ; }
           else { this._mainUri = window.activeTextEditor.document.uri; }
           break;
         case CETrigger.EDITOR:
@@ -205,17 +205,17 @@ private _setShadow( ü_ref:VirtualDocumentView ):this {
 }
 
 async whenReady():Promise<this> {
-    let ü_shadowUri:Uri|null = null;
+    let ü_refUri:Uri|null = null;
 
     switch ( this._mode ) {
 
       case CETrigger.PALETTE:
           if ( this._return ) {
               window.showInformationMessage( LCDoIt.no_active_file() );
-              break;
+              return this;
           }
       case CETrigger.EDITOR:
-          if ( ! hasFileScheme( this._mainUri ) ) { ü_shadowUri = this._mainUri; }
+          if ( hasNoFileScheme( this._mainUri ) ) { ü_refUri = this._mainUri; }
           break;
 
       case CETrigger.EXPLORER: // folders possible
@@ -231,40 +231,45 @@ async whenReady():Promise<this> {
                   this._return = true;
                   return this;
               }
-              const ü_fs = this._others.findIndex( hasFileScheme );
-              if ( ü_fs >= 0 ) { this._others = this._others.filter( hasFileScheme ); }
-              else {
-                  ü_shadowUri = this._others[0];
+              const ü_others = this._others.filter( hasFileScheme );
+              if ( ü_others.length > 0 ) {
+                                  this._others = ü_others;
+              } else { ü_refUri = this._others[0];
+                                  this._others.length = 0;
               }
           } else {
             // folders possible
               if ( this._config.openFolderAsWorkspace ) { this._asWorkspace = true; }
-            //const ü_others = this._others.filter( ü_uri => !hasFileScheme( ü_uri ) );
-              const ö_isFolder = await Promise.all( this._others.map(  async ( ü_uri, ü_indx )=>
-                      ü_indx > 0 ? await whenKnownAsFolder( ü_uri )
-                                 : this._mainIsFolder
-                  ) );
-              const ü_folders = this._others.filter( ( ü_uri, ü_indx )=> ! ö_isFolder[ ü_indx ] || hasFileScheme( ü_uri )  );
             //
-              if ( ! this._mainIsFolder ) {
-                  if ( ! hasFileScheme( this._mainUri ) ) { ü_shadowUri = this._mainUri;
-                      this._others.length = 0;
-                  }
+              const ü_others = this._others.filter( hasFileScheme );
+              if ( ü_others.length > 0 ) {
+                                  this._others = ü_others;
+              } else if ( this._mainIsFolder ) {
+                  const ö_isNoFolder = await Promise.all( this._others.map(  async ( ü_uri, ü_indx )=>
+                          ü_indx > 0 ? !( await whenKnownAsFolder( ü_uri ) )
+                                     : false
+                      ) );
+                       ü_refUri = this._others.find(  ( ü_uri, ü_indx )=>ö_isNoFolder[ ü_indx ]  ) ?? null;
+                                  this._others.length = 0;
+                  if ( ü_refUri === null ) { this._return = true;
+                                             return this; }
+              } else { ü_refUri = this._others[0];
+                                  this._others.length = 0;
               }
           }
           break;
     }
   //
-    if ( ü_shadowUri ) {
-        const ü_doc  = await workspace.openTextDocument( ü_shadowUri );//his._activeEditor!.document;
-        const ü_temp = await this._config.whenVirtualDocsDir;
+    if ( ü_refUri !== null ) {
+        const ü_refDoc = await workspace.openTextDocument( ü_refUri );
+        const ü_temp   = await this._config.whenVirtualDocsDir;
         if ( ü_temp.length === 0 ) {
-            this._threadShadowDone( ü_doc, ü_temp );
+            this._threadShadowDone( ü_refDoc, ü_temp );
             this._return = true;
             return this;
         }
-            this._setShadow( await this._whenShadowReady( ü_doc, ü_temp, true ) // silent without UI
-                                                                              );// switch to Editor mode
+            this._setShadow( await this._whenShadowReady( ü_refDoc, ü_temp, true ) // silent without UI
+                                                                                 );// switch to Editor mode
     }
   //
     return this;
@@ -366,11 +371,10 @@ private async _arguments( ü_verbatim:boolean ):Promise<string[]> {
     let ü_others:Uri[]
     switch ( this._mode ) {
         case CETrigger.EXPLORER:
-            ü_others = this._others.filter( hasFileScheme );
+            ü_others = this._others;
             break;
         case CETrigger.PALETTE:
         case CETrigger.EDITOR:
-        default:
             ü_others = [ this._mainUri ];
             break;
     }
@@ -433,11 +437,11 @@ private async _cwd():Promise<string> {
 }
 
 private _folderOfMain():string {
-    return        hasFileScheme( this._mainUri )
-         ? (                     this._mainIsFolder
+    return      hasNoFileScheme( this._mainUri )
+         ? ''
+         :                       this._mainIsFolder
            ?          uriToFile( this._mainUri )
-           : dirname( uriToFile( this._mainUri ) ) )
-         : ''
+           : dirname( uriToFile( this._mainUri ) )
          ;
 }
 
