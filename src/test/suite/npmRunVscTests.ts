@@ -5,11 +5,13 @@ https://code.visualstudio.com/api/working-with-extensions/testing-extension
          } from 'path';
   import { runTests as whenVscTestsRun
          } from '@vscode/test-electron';
-  import {
-         } from './vscTestsIndex';
+  import { ß_trc
+         , ß_err
+         , ß_RuntimeContext
+         } from '../../runtime/context';
 //--------------------------------------------------------------------
   main();
-//==============================================================================
+//====================================================================
 
 async function main():Promise<void> {
   //
@@ -17,16 +19,17 @@ async function main():Promise<void> {
       { extensionDevelopmentPath: join( __dirname, '../../../'       ) // the extension to load
       , extensionTestsPath      : join( __dirname, './vscTestsIndex' ) // the tests     to execute
       };
-    console.log( ü_opts.extensionTestsPath );
   //
     try {
 
-      const ü_count = await whenVscTestsRun( ü_opts );
-      console.log( `${ ü_count }` );
+        ß_trc&& ß_trc( ü_opts, 'ExtensionTest-Options' );
+        const ü_rc = await whenVscTestsRun( ü_opts );
+        ß_trc&& ß_trc( `rc=${ ü_rc }`, 'ExtensionTest-ExitCode' );
+        process.exit( ü_rc );
 
     } catch ( ü_eX ) {
-      console.error( `Failed to run tests ${ ü_eX }` );
-      process.exit(1);
+        ß_err( ü_eX, 'ExtensionTest-FatalError' );
+        process.exit( ß_RuntimeContext.fatalExitCode );
     }
 }
 

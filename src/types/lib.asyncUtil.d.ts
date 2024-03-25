@@ -12,10 +12,10 @@
 
 //====================================================================
 
-  export type TPromise<T> = {
-      promise: Promise<T>
-      resolve( value :T     ):void
-      reject ( reason:Error ):void
+  export type TPromise<T,R=any> = {
+      promise        :Promise<T>
+      resolve( value :T ):void
+      reject ( reason:R ):void
     }
 
 //====================================================================

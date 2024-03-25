@@ -19,13 +19,15 @@
 //====================================================================
 
 function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IRuntimeContext {
-    ü_rtCntxt. typeCode    = 'any';
-    ü_rtCntxt. tracePrefix = 'TST';
+    ü_rtCntxt. typeCode      = 'any';
+    ü_rtCntxt. tracePrefix   = 'TST';
+    ü_rtCntxt. fatalExitCode = 99;
+  //
     ü_rtCntxt. pathSep  = sep;
     ü_rtCntxt. lineSep  = sep === '/'
                         ?   '\n'
                         : '\r\n';
-
+  //
     ü_rtCntxt. self       = ü_rtCntxt  ;
     ü_rtCntxt. globalThis = globalThis ;
     ü_rtCntxt. globalData = {}         ;
@@ -38,8 +40,8 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IRuntimeContext {
 
 //====================================================================
 
-export const ß_trc:IRuntimeContext['devTrace'] = ß_that.devTrace;
-export const ß_err:TDeveloperTrace             = ß_that.errTrace;
+export const ß_trc:TDeveloperTrace|false = ß_that.devTrace;
+export const ß_err:TDeveloperTrace       = ß_that.errTrace;
 
 export function ß_stringify( ü_oref:any ):string {
     return format( '%o', ü_oref );
@@ -50,7 +52,8 @@ export function ß_writeStdOut( ü_text:string ):void {
 }
 
 export function ß_toggleDevTrace():void {
-    ( ß_trc as TInitialRuntimeContext['devTrace'] ) = ß_trc ? false : ß_that.devTrace;
+    ( ß_trc as TNotReadonly<TDeveloperTrace|false> ) = ß_trc ? false
+                                                             : ß_that.devTrace;
 }
 
 //====================================================================

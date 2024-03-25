@@ -154,7 +154,6 @@ vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
         });
     });
 }, (error: any) => {
-    console.error(error);
     debugger;
 });
     const ü_dummy_1 = new MementoFacade<'dummy',IHistoryData>( 'dummy', []    );

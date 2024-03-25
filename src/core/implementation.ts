@@ -115,13 +115,20 @@ get uri     ():Uri    { return Uri.file( this._docViewBE.file ); }
 get fileName():string { return           this._docViewBE.file  ; }
 
 private _compileFsStub():string {
+    const ü_sep = '\u2014'; //'-\u2e3a'
     const ü_uri      = this.doc.uri;
     const ü_wsName   = workspace.name;
     const ü_wsFolder = workspace.getWorkspaceFolder( ü_uri );
-      let ü_stub     = ( ü_wsName         ?? ' ' ) + '-';
-          ü_stub    += ( ü_wsFolder?.name ?? ' ' ) + '-';
-          ü_stub    +=   ü_wsFolder?.uri.toString().replace(':','-') ?? '';
-          ü_stub    += workspace.asRelativePath( ü_uri, false );
+      let ü_stub     = ( ü_wsName ?? ' ' ) + ü_sep;
+    if ( ü_wsFolder === undefined ) {
+          ü_stub    += ü_uri.toString().replace( ':', ü_sep )
+    } else {
+          ü_stub    += ü_wsFolder.name
+                     + ü_sep
+                     + ü_wsFolder.uri.toString().replace( ':', ü_sep )
+                     + workspace.asRelativePath( ü_uri, false )
+                     ;
+    }
     return escapeFF( CRgXp.fs_win32 )( ü_stub );
 }
 

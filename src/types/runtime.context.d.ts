@@ -25,8 +25,9 @@
 //====================================================================
 
   export interface IRuntimeContext<T extends object={}> {
-      readonly typeCode    :'xtn'|'njs'|'any'
-      readonly tracePrefix :string
+      readonly typeCode      :'xtn'|'njs'|'any'
+      readonly tracePrefix   :string
+      readonly fatalExitCode :number
     //
       readonly pathSep:TPathSeparator
       readonly lineSep:TLineSeparator
@@ -35,7 +36,7 @@
       readonly globalThis :typeof globalThis & { ßRuntimeContext$ ?:IRuntimeContext }
       readonly globalData :T
     //
-      readonly devTrace   :TDeveloperTrace|false
+      readonly devTrace   :TDeveloperTrace
       readonly errTrace   :TDeveloperTrace
   }
 
