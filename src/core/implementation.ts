@@ -114,12 +114,20 @@ constructor(
 get uri     ():Uri    { return Uri.file( this._docViewBE.file ); }
 get fileName():string { return           this._docViewBE.file  ; }
 
+private _compileFsStub():string {
+    const ü_uri      = this.doc.uri;
+    const ü_wsName   = workspace.name;
+    const ü_wsFolder = workspace.getWorkspaceFolder( ü_uri );
+      let ü_stub     = ( ü_wsName         ?? ' ' ) + '-';
+          ü_stub    += ( ü_wsFolder?.name ?? ' ' ) + '-';
+          ü_stub    +=   ü_wsFolder?.uri.toString().replace(':','-') ?? '';
+          ü_stub    += workspace.asRelativePath( ü_uri, false );
+    return escapeFF( CRgXp.fs_win32 )( ü_stub );
+}
+
 async whenReady():Promise<this> {
     if ( this._isInitial ) {
-        const ü_stub = escapeFF( CRgXp.fs_win32 )( (workspace.name??'')
-                     + '-'
-                     + this.doc.fileName );
-        this._docViewBE.file = await whenTempFile( ü_stub, '', this.tempDir, ! this.reuse  );
+        this._docViewBE.file = await whenTempFile( this._compileFsStub(), '', this.tempDir, ! this.reuse  );
     }
     return this;
 }
