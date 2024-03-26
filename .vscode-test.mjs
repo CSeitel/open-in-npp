@@ -1,7 +1,11 @@
 /*
 https://code.visualstudio.com/api/working-with-extensions/testing-extension
 */
-import { defineConfig } from '@vscode/test-cli';
+  import { defineConfig } from '@vscode/test-cli';
+/*
+  require('out/test/vscode-test' );
+  d.ß_cfg_1.mocha.timeout
+*/
 //--------------------------------------------------------------------
 
   let ß_files = 'out/test/suite/**/vsc*.spec.js';

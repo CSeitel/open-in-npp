@@ -29,7 +29,8 @@ async function main():Promise<void> {
 
     } catch ( ü_eX ) {
         ß_err( ü_eX, 'ExtensionTest-FatalError' );
-        process.exit( ß_RuntimeContext.fatalExitCode );
+        process.exitCode = ß_RuntimeContext.fatalExitCode;
+        process.exit();
     }
 }
 

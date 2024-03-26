@@ -5,7 +5,7 @@
          } from 'mocha';
 //--------------------------------------------------------------------
   import * as ß_glob  from 'glob' ;
-  import * as   ß_Mocha from 'mocha';
+  import * as ß_Mocha from 'mocha';
   import { join
          } from 'path';
   import { promisify
@@ -22,10 +22,16 @@
   const ß_timeout = 99;
 //====================================================================
 
-export async function run():Promise<void> {
-    if(ß_trc){ß_trc( `--extensionTestsPath="${ __filename }"` );}
+export async function run():Promise<number> {
+    ß_trc&& ß_trc( __filename, '' );
     const ü_specs = await ß_whenSpecsFound();
-    const ü_done  = await ß_whenSpecsRun( ü_specs );
+    const ü_rc    = await ß_whenSpecsRun( ü_specs );
+    ß_trc&& ß_trc( ü_rc, 'Mocha-ErrorCount' );
+    if ( ü_rc > 0 ) {
+        process.exit( ü_rc+1 )
+        throw new Error( `rc=${ ü_rc }` );
+    }
+    return ü_rc;
 }
 
 //====================================================================
@@ -59,9 +65,12 @@ async function ß_whenSpecsRun( ü_specs:string[] ):Promise<number> {
 function ß_whenRun( ö_mocha:globalThis.Mocha ):()=>Promise<number> {
     return ö_whenRun;
 function ö_whenRun():Promise<number> {
-           const ü_prms = createPromise<number>();
-    ö_mocha.run( ü_prms.resolve );
-          return ü_prms.promise;
+           const ä_prms = createPromise<number>();
+    ö_mocha.run( ä_onDone );
+          return ä_prms.promise;
+function ä_onDone( ü_errorCount:number ):void {
+    ä_prms.resolve( ü_errorCount );
+}
 }
 }
 

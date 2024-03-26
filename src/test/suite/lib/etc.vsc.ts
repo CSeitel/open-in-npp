@@ -31,7 +31,7 @@
 export async function tst_(){
     const ü_done = await whenPromiseSettled<1>( whenDoneWith( Promise.reject( new TypeError( 'Dummy Error' ) ), '{0}', 'a' ) );
   //ß_trc&& ß_trc( ü_done.reason )
-    testEqual( true, ü_done.rejected );
+    testEqual( true, !ü_done.rejected );
     testSummary();
 }
 

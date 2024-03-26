@@ -1,6 +1,15 @@
 {
   "version": "0.2.0",
   "configurations": [
+    {
+      "name": "Node.js Launch Program Default",
+      "program": "${workspaceFolder}/out/test/debug-test.js",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    },
  {
         "name": "Debug mocha 3333",
         "type": "node",
