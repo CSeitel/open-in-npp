@@ -24,7 +24,7 @@
   import { shortenText
          , expandEnvVariables
          } from '../lib/textUtil';
-  import { isExe
+  import { isWin32Executable
          , whenKnownAsFolder as fsWhenKnownAsFolder
          } from '../lib/fsUtil';
   import { ErrorMessage
@@ -40,7 +40,7 @@ export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string )
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
     if ( isAbsolute( ü_path ) ) {
-        if ( ! await isExe( ü_path ) ) {
+        if ( ! await isWin32Executable( ü_path ) ) {
             throw new ErrorMessage( LCConfig.noExeFile, ü_path );
         }
     } else {
@@ -73,10 +73,10 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
         } finally { ü_release(); }
     } else {
                            let ü_path:string
-             if ( await isExe( ü_path = expandEnvVariables( CEExecutable.x64_64bit  ) ) ) {}
-        else if ( await isExe( ü_path = expandEnvVariables( CEExecutable.x86_32bit  ) ) ) {}
-        else if ( await isExe( ü_path =                     CEExecutable.x64_64bit_   ) ) {}
-        else if ( await isExe( ü_path =                     CEExecutable.x86_32bit    ) ) {}
+             if ( await isWin32Executable( ü_path = expandEnvVariables( CEExecutable.x64_64bit  ) ) ) {}
+        else if ( await isWin32Executable( ü_path = expandEnvVariables( CEExecutable.x86_32bit  ) ) ) {}
+        else if ( await isWin32Executable( ü_path =                     CEExecutable.x64_64bit_   ) ) {}
+        else if ( await isWin32Executable( ü_path =                     CEExecutable.x86_32bit    ) ) {}
         else                 { ü_path =                     CEExecutable.path_env         ;}
                         return ü_path;
     }

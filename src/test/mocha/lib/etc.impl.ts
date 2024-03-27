@@ -7,8 +7,6 @@
 //--------------------------------------------------------------------
   import { CEFileType
          } from '../../../constants/vsc';
-/*
-*/
   import { ß_trc
      
          } from '../../../runtime/context';
@@ -31,11 +29,27 @@
 //====================================================================
 
 export async function tst_(){
-    const ü_whenResaon = Promise.reject( new TypeError( 'Dummy Error' ) );
-    const ü_done = await whenPromiseSettled( whenDoneWith( ü_whenResaon, 'Failure: {0}', '0.0' )
-                                           ) as IPromiseRejected<TypeError>;
-    testEqual( true, ü_done.rejected );
+    return tst_syntax();
+  //
+    const ü_n = null as null|Array<1>;
+  //
+  //const ü_whenResaon = Promise.reject( new TypeError( 'Dummy Error' ) );
+  //const ü_done = await whenPromiseSettled( whenDoneWith( ü_whenResaon, 'Failure: {0}', '0.0' )
+  //                                       ) as IPromiseRejected<TypeError>;
+    testEqual( 1, ü_n?.toString() || 1 );
     testSummary();
 }
 
 //====================================================================
+
+export async function tst_syntax(){
+    const ü_n = null as null|Array<1>;
+    
+    testEqual( null     , ü_n             );
+    testEqual( undefined, ü_n?.toString() );
+    testSummary( 'Syntax' );
+}
+
+//====================================================================
+/*
+*/

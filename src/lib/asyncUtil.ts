@@ -20,6 +20,25 @@
          , UiXMessage
          } from '../lib/errorUtil';
 //====================================================================
+  export const whenImmediate = setImmediate.__promisify__;
+  export const whenTimeout   = setTimeout  .__promisify__;
+
+export async function whenDelay( ü_delay:number ):Promise<number> {
+  //
+    const ö_oref  = createPromise<number>();
+    const ö_start = process.hrtime.bigint();
+    setTimeout( ö_later, ü_delay );
+  //
+    return ö_oref.promise;
+//
+function ö_later():void {
+                      const ü_end   = process.hrtime.bigint();
+                      const ü_delta = ( ü_end - ö_start ) / BigInt( 1000000 );
+    ö_oref.resolve( Number( ü_delta ) );
+}
+}
+
+//====================================================================
 
 export async function whenPromiseSettled<T,R=any>( ü_whenDone:PromiseLike<T> ):Promise<TPromiseSettled<T,R>> {
      const ü_done = ( await Promise.allSettled([ ü_whenDone ]) )[0] as TPromiseSettled<T,R>;
@@ -69,23 +88,6 @@ function ö_timer( ü_reset?:boolean ):number {
     }
   //
     return ü_diff ;
-}
-}
-
-//====================================================================
-
-export async function whenDelay( ü_delay:number ):Promise<number> {
-  //
-    const ö_oref  = createPromise<number>();
-    const ö_start = process.hrtime.bigint();
-    setTimeout( ö_later, ü_delay );
-  //
-    return ö_oref.promise;
-//
-function ö_later():void {
-                      const ü_end   = process.hrtime.bigint();
-                      const ü_delta = ( ü_end - ö_start ) / BigInt( 1000000 );
-    ö_oref.resolve( Number( ü_delta ) );
 }
 }
 

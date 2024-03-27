@@ -19,7 +19,7 @@
          , whenKnownAsFolder
          , whenKnownAsSymLink
          , whenKnownAsFile
-         , isExe
+         , isWin32Executable
          , isExecutable
          } from '../../../lib/fsUtil';
   import { testSrc
@@ -29,43 +29,6 @@
          , testEqual
          , bindArgs
          } from '../../../lib/testUtil';
-//====================================================================
-
-export async function tst_testEquals_1(){
-    testEqual( {}, {}, '9999' )
-    testEqual(  0,  0 )
-    testEqual(  0,  0 )
-    const ü_fref = bindArgs( ö_echo, { arrangeReal:[2] }, '_0','_1' )
-    testFunction( ü_fref, [['A_','_0\t_1\tA_']] as TResultArray<string,string> )
-    testSummary();
-    //strictEqual( 0, 1, ü_all.join('\r\n') )
-function ö_echo<T>( ...ü_args:T[] ):string {
-    return ü_args.join( '\t' );
-}
-}
-
-export async function tst_testEquals(){
-  //
-    const ü_data_ = new Map<string,boolean>( );
-          ü_data_.set( 'true' , true  );
-          ü_data_.set( 'false', false );
-          ü_data_.set( '_'    , false );
-  //
-    await testAsyncFunction( ö_someAsync, ü_data_ );
-    testSummary();
-  //
-async function ö_someAsync( ü_text:string ):Promise<boolean> {
-    await whenDelay( 1 );
-    switch ( ü_text ) {
-        case 'true' : return true ;
-        case 'false': return false;
-        default: throw new TypeError( `Not a boolean: ${ ü_text }` );
-    }
-  //
-}
-
-}
-
 //====================================================================
 
 export async function tst_whenFileInfoRead(){
@@ -137,7 +100,7 @@ export async function tst_isExe(){
       , [ '../..'   , false ]
       ] as TResultArray<string,boolean>;
   //
-    await testAsyncFunction( isExe, ü_data )
+    await testAsyncFunction( isWin32Executable, ü_data )
     testSummary();
 //await isExe( await ßß_impl.defaultNppExecutable()                 );
 }

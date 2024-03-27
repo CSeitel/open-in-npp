@@ -76,7 +76,6 @@ constructor(
     readonly vscContext   :ExtensionContext
 ){
     ß_trc&& ß_trc( 'Instance activated' );
-  //console.dir( this.context.globalState );
     getConfigSnapshot().developerTrace || ß_toggleDevTrace();
   //
     this.globalHistory =
