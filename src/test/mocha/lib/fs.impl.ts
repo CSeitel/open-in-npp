@@ -85,9 +85,6 @@ async function ö_whenCtime( ü_path:string ):Promise<string> {
 }
 
 export async function tst_whenKnownAsFolder():Promise<void> {
-    const ü_file = testSrc( '../node_modules/.bin/flat.cmd' );
-    const ü_info = await whenFileInfoRead( 'C:\\zzz_ProgramFiles\\SDIO_1.12.9.749\\SDIO_R749.exe' );
-    console.log( ü_info?.mode, isExecutable( ü_info?.mode ?? 0 ), ü_info );
   //
     const ü_data =
       [

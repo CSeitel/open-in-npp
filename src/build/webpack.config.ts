@@ -39,6 +39,7 @@ const ß_config =
       , util: 'node:util'
       , fs  : 'node:fs'
       , os  : 'node:os'
+      , crypto: 'node:crypto'
       }
     , resolve:
       { mainFields: ['browser', 'module', 'main'] // look for `browser` entry point in imported node modules

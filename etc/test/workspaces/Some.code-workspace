@@ -17,6 +17,7 @@
   "openInNpp.matchingFilesLimit": 2,
   "openInNpp.virtualDocumentsDirectory": "",
   "openInNpp.developerTrace": true,
-  "openInNpp.openFolderAsWorkspace": true
+  "openInNpp.openFolderAsWorkspace": true,
+  "openInNpp.Executable": "Notepd.exe"
   }
 }

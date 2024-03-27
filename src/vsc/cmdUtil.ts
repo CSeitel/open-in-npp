@@ -1,5 +1,7 @@
 /*
 */
+  import { type SpawnOptions
+         } from 'child_process';
   import { type TFileUri
          } from '../types/vsc.fsUtil.d';
   import { CEVscCommands

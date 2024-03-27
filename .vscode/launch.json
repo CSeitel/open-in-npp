@@ -3,11 +3,13 @@
   "configurations": [
     {
       "name": "Node.js Launch Program Default",
-      "program": "${workspaceFolder}/out/test/debug-test.js",
+    //"program": "${workspaceFolder}/out/test/debug-test.js",
+      "program": "${workspaceFolder}/src/test/debug-test.ts",
       "request": "launch",
       "skipFiles": [
         "<node_internals>/**"
       ],
+      "sourceMaps": true,
       "type": "node"
     },
  {

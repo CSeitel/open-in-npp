@@ -45,7 +45,7 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../l10n/i18n';
 //------------------------------------------------------------------------------
   import { whenChildProcessSpawned
-         } from '../lib/any';
+         } from '../lib/cpUtil';
   import { whenPromiseSettled
          } from '../lib/asyncUtil';
   import { straightenArray
@@ -121,11 +121,11 @@ private _compileFsStub():string {
     const ü_wsFolder = workspace.getWorkspaceFolder( ü_uri );
       let ü_stub     = ( ü_wsName ?? ' ' ) + ü_sep;
     if ( ü_wsFolder === undefined ) {
-          ü_stub    += ü_uri.toString().replace( ':', ü_sep )
+          ü_stub    += decodeURI(          ü_uri.toString().replace( ':', ü_sep ) )
     } else {
           ü_stub    += ü_wsFolder.name
                      + ü_sep
-                     + ü_wsFolder.uri.toString().replace( ':', ü_sep )
+                     + decodeURI( ü_wsFolder.uri.toString().replace( ':', ü_sep ) )
                      + workspace.asRelativePath( ü_uri, false )
                      ;
     }
@@ -303,8 +303,8 @@ private async _submit():Promise<number> {
   //
     try {
         ß_trc&& ß_trc( [ ü_exe, ü_args, ü_opts ], 'Child-process' );
-        const ü_pid = await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
-        return ü_pid;
+        const ü_cp = await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
+        return ü_cp.pid;
     } catch ( ü_eX ) {
       //ß_trc&& ß_trc( ü_eX );
         throw new ErrorMessage( LCDoIt.spawn_error,  ''+ü_eX  ).setReason( ü_eX );
