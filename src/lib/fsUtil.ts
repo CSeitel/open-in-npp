@@ -51,7 +51,7 @@ export function isExecutable( ü_mode:number ):boolean {
   const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
 export function isWin32ExecutableExtName( ü_path:string ):boolean {
     const ü_ext = extname( ü_path ).toLowerCase();
-    return ! ß_exe_exts.includes( ü_ext );
+    return ß_exe_exts.includes( ü_ext );
 }
 
 //====================================================================

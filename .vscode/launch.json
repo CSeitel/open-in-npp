@@ -1,31 +1,17 @@
 {
   "version": "0.2.0",
   "configurations": [
-    {
-      "name": "Node.js Launch Program Default",
-    //"program": "${workspaceFolder}/out/test/debug-test.js",
-      "program": "${workspaceFolder}/src/test/debug-test.ts",
+    { "name": "All"
+    , "presentation": { "group": "Mocha-Test", "order": 10, "hidden": false },
+      "type": "node",
       "request": "launch",
+    //"program": "${workspaceFolder}/src/test/mocha/all.spec.ts",
+      "program": "${workspaceFolder}/out/test/mocha/all.spec.js",
       "skipFiles": [
         "<node_internals>/**"
       ],
       "sourceMaps": true,
-      "type": "node"
-    },
- {
-        "name": "Debug mocha 3333",
-        "type": "node",
-        "request": "launch",
-        "runtimeArgs": ["C:\\Users\\CS\\AppData\\Roaming\\npm\\node_modules\\mocha\\bin\\_mocha"],
-        "program": "${workspaceRoot}\\test.js",
-        "stopOnEntry": false,
-        "args": [
-        ],
-        "cwd": "${workspaceRoot}",
-        "runtimeExecutable": null,
-        "env": {
-            "NODE_ENV": "development"
-        }
+      "outFiles": [ "${workspaceFolder}/out/**/*.js" ],
     },
 
 
@@ -135,6 +121,21 @@
     , "skipFiles": [
         "<node_internals>/**"
       ]
+    }
+  , { "name": "Debug mocha 3333"
+    , "presentation": { "group": "Test", "order": 11, "hidden": false },
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceRoot}\\test.js",
+        "runtimeExecutable": null,
+        "args": [
+        ],
+        "runtimeArgs": ["C:\\Users\\CS\\AppData\\Roaming\\npm\\node_modules\\mocha\\bin\\_mocha"],
+        "stopOnEntry": false,
+        "cwd": "${workspaceRoot}",
+        "env": {
+            "NODE_ENV": "development"
+        }
     },
 
   ]

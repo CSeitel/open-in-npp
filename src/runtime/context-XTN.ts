@@ -9,7 +9,6 @@
          , type TNotReadonly
          } from '../types/generic.d';
   import { type IXtnRuntimeContext
-         , type TDeveloperTrace
          } from '../types/runtime.context.d';
   type TInitialRuntimeContext = TWritable<IXtnRuntimeContext>
 //--------------------------------------------------------------------
@@ -45,7 +44,7 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IXtnRuntimeContext {
   //
     if ( ü_rtCntxt.typeCode === 'any' ) {
          ü_rtCntxt.typeCode    = 'xtn';
-         ü_rtCntxt.tracePrefix = 'Xtn';
+         ü_rtCntxt.tracePrefix = 'XTN';
       //
       //ü_rtCntxt .devTrace     = ( ß_trc as TNotReadonly<TDeveloperTrace> ) =   ß_devTrace   ;
         ü_rtCntxt .xtnOpenInNpp = ß_XtnOpenInNpp ;
@@ -65,12 +64,11 @@ export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):P
     if ( ß_XtnOpenInNpp === null ) {
         ü_vscXtnContext.subscriptions.push( ß_ViewErrorDetails );
         (ß_XtnOpenInNpp as TNotReadonly<XtnOpenInNpp> ) = await new XtnOpenInNpp( ü_vscXtnContext ).whenReady;
+    } else {
+        if ( ß_XtnOpenInNpp.vscContext === ü_vscXtnContext )
+             { ß_trc&& ß_trc( 'Old context', 'Re-Activation' ); }
+        else { ß_trc&& ß_trc( 'New Context', 'Re-Activation' ); }
     }
-  //
-    //ß_trc&& ß_trc( 'Re-Activation' );
-      if ( ß_XtnOpenInNpp.vscContext !== ü_vscXtnContext ) {
-        //ß_trc&& ß_trc( 'Re-Activation: new Context' );
-      }
   //
     return ß_XtnOpenInNpp;
 }

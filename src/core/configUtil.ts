@@ -25,6 +25,7 @@
          , expandEnvVariables
          } from '../lib/textUtil';
   import { isWin32Executable
+         , isWin32ExecutableExtName
          , whenKnownAsFolder as fsWhenKnownAsFolder
          } from '../lib/fsUtil';
   import { ErrorMessage
@@ -40,11 +41,10 @@ export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string )
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
     if ( isAbsolute( ü_path ) ) {
-        if ( ! await isWin32Executable( ü_path ) ) {
-            throw new ErrorMessage( LCConfig.noExeFile, ü_path );
-        }
+        if ( ! await isWin32Executable ( ü_path ) ) { throw new ErrorMessage( LCConfig.noExeFile, ü_path ); }
     } else {
-        console.warn( `Not a absolute Path: "${ ü_path }"` );
+        if ( ! isWin32ExecutableExtName( ü_path ) ) { throw new ErrorMessage( LCConfig.noExeFile, ü_path ); }
+        ß_trc&& ß_trc( `Not a absolute Path: "${ ü_path }"`, 'Executable' );
     }
     return ü_path;
 }

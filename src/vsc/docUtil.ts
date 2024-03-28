@@ -71,6 +71,7 @@ export class TextDocViewer extends Map<string,{content:string,indX:number}> impl
     readonly disposables = [] as IDisposableLike[];
 
 readonly dispose = ()=>{
+    ß_trc&& ß_trc( 'Disposing', 'TextDocViewer' );
     this.clear();
     this._metaDocs.length = 0;
 };
@@ -80,6 +81,7 @@ readonly onDidCloseTextDocument = ( ü_doc:TextDocument )=>{
       || ü_doc.uri.scheme !== this.scheme ) { return; }
   //
                const ü_id = ü_doc.uri.toString();
+    ß_trc&& ß_trc( `Closing ${ ü_id }`, 'TextDocViewer' );
     if ( ! this.has( ü_id ) ) { return; }
   //
     const ü_metaDoc = this.get( ü_id )!;

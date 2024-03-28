@@ -3,14 +3,12 @@
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
 //--------------------------------------------------------------------
-  import { strictEqual
-         } from 'assert';
   import { basename
          } from 'path';
 //--------------------------------------------------------------------
   import { expect
          } from '../../../lib/errorUtil';
-  import { whenDelay
+  import { whenPromiseSettled
          } from '../../../lib/asyncUtil';
   import { pickDuplet
          , projection
@@ -22,6 +20,8 @@
          , isWin32Executable
          , isExecutable
          } from '../../../lib/fsUtil';
+  import { whenChildProcessSpawned
+         } from '../../../lib/cpUtil';
   import { testSrc
          , testSummary
          , testAsyncFunction
@@ -105,9 +105,23 @@ export async function tst_isExe(){
 //await isExe( await ßß_impl.defaultNppExecutable()                 );
 }
 
-async function None(){
+export async function tst_win32Exe(){
+    const ü_data =
+      [ [ testSrc( 'cmd.cmd' ), true ]
+      , [ testSrc( 'bat.bat' ), true ]
+      , [ testSrc( 'lnk.lnk' ), true ]
+      ] as TResultArray<string,boolean>;
+    
+    await testAsyncFunction( isWin32Executable, ü_data );
+    await testAsyncFunction( ö_whenSpwaned    , ü_data );
+    testSummary();
   //a( ßß_assert.strictEqual )
+async function ö_whenSpwaned( ü_exe:string ):Promise<boolean> {
+    const ü_cp = await whenPromiseSettled( whenChildProcessSpawned( 'cmd.exe', ['/C',ü_exe] ) );
+    return ! ü_cp.rejected;
+}
 }
 
+//====================================================================
 /*
 */

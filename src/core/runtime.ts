@@ -11,14 +11,16 @@
          , type TShadowDoc
          , type IDisposableLike
          } from '../types/vsc.extension.d';
-//--------------------------------------------------------------------
   import { type TXtnConfigJSON
          } from '../constants/extension';
+//--------------------------------------------------------------------
   import { CExtensionUrl
          , CPrefix
          , CEXtnCommands
          , CXtnTxtScheme
          } from '../constants/extension';
+  import { CEUriScheme
+         } from '../constants/vsc';
 //--------------------------------------------------------------------
   import { workspace
          , commands
@@ -61,15 +63,17 @@ export class XtnOpenInNpp {
     readonly settings     :TXtnConfigJSON
 
 readonly dispose = ()=>{
+    ß_trc&& ß_trc( 'Disposing' );
     this.shadowDocsBfr.clear();
 }
 
-private _onDocViewClosed = ( ü_doc:TextDocument )=>{
-    if ( ! ü_doc.isClosed
-      ||   ü_doc.uri.scheme === 'file'
+private _onDidCloseTextDocument = ( ü_anyDoc:TextDocument )=>{
+    if ( ! ü_anyDoc.isClosed
+      ||   ü_anyDoc.uri.scheme === CEUriScheme.file
        ) { return; }
-    ß_trc&& ß_trc(  ü_doc.fileName  );
-    this.shadowDocsBfr.delete( ü_doc );
+    ß_trc&& ß_trc( `Closing ${ ü_anyDoc.fileName }`, 'Shadows' );
+    if ( this.shadowDocsBfr.has   ( ü_anyDoc ) )
+       { this.shadowDocsBfr.delete( ü_anyDoc ); }
 }
 
 constructor(
@@ -108,8 +112,8 @@ constructor(
     }
   //
       this.vscDisposables.push(             this
-      , workspace.onDidChangeConfiguration( configModificationSignalled )
-      , workspace.onDidCloseTextDocument  ( this._onDocViewClosed       )
+      , workspace.onDidChangeConfiguration( configModificationSignalled  )
+      , workspace.onDidCloseTextDocument  ( this._onDidCloseTextDocument )
       );
   //
     this.whenReady = this._whenActivationFinalized();

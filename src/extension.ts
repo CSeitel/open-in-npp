@@ -20,12 +20,6 @@ export async function activate( ü_vscXtnContext:ExtensionContext ):Promise<XtnO
 
 export async function deactivate():Promise<void> {
     ß_trc&& ß_trc( 'De-activation' );
-  /*
-    const ü_hist = ß_RuntimeContext.activeInstance.globalHistory;
-    ü_hist.dummy = [ Date.now() ];
-    await ü_hist.whenCommitted();
-    if(ß_trc){ß_trc( `Deactivation` );}
-  */
 }
 
 //====================================================================
