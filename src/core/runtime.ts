@@ -11,11 +11,11 @@
          , type TShadowDoc
          , type IDisposableLike
          } from '../types/vsc.extension.d';
-  import { type TXtnConfigJSON
+  import { type TXtnCfgJSON
          } from '../constants/extension';
 //--------------------------------------------------------------------
-  import { CExtensionUrl
-         , CPrefix
+  import { CXtnWebUrl
+         , CXtnCfgPrefix
          , CEXtnCommands
          , CXtnTxtScheme
          } from '../constants/extension';
@@ -60,10 +60,10 @@ export class XtnOpenInNpp {
     readonly extensionApi :Extension<XtnOpenInNpp>
     readonly version      :string
     readonly commands     :TExtensionCommand[]
-    readonly settings     :TXtnConfigJSON
+    readonly settings     :TXtnCfgJSON
 
 readonly dispose = ()=>{
-    ß_trc&& ß_trc( 'Disposing' );
+    ß_trc&& ß_trc( 'Disposing', 'Runtime' );
     this.shadowDocsBfr.clear();
 }
 
@@ -71,7 +71,7 @@ private _onDidCloseTextDocument = ( ü_anyDoc:TextDocument )=>{
     if ( ! ü_anyDoc.isClosed
       ||   ü_anyDoc.uri.scheme === CEUriScheme.file
        ) { return; }
-    ß_trc&& ß_trc( `Closing ${ ü_anyDoc.fileName }`, 'Shadows' );
+    ß_trc&& ß_trc( `Closing shadow ${ ü_anyDoc.fileName }`, 'Runtime' );
     if ( this.shadowDocsBfr.has   ( ü_anyDoc ) )
        { this.shadowDocsBfr.delete( ü_anyDoc ); }
 }
@@ -100,7 +100,7 @@ constructor(
         let ü_cmdImpl:TAnyFunction
         const ü_cmdId = ü_cmd.command;
         switch ( ü_cmdId ) {
-            case CEXtnCommands.oSettings : ü_cmdImpl = whenSettingsOpened.bind( null, CPrefix ); break;
+            case CEXtnCommands.oSettings : ü_cmdImpl = whenSettingsOpened.bind( null, CXtnCfgPrefix ); break;
             case CEXtnCommands.oActive   : ü_cmdImpl = openInNppActive   ; break;
             case CEXtnCommands.oEditor   : ü_cmdImpl = openInNppEditor   ; break;
             case CEXtnCommands.oExplorer : ü_cmdImpl = openInNppExplorer ; break;
@@ -137,7 +137,7 @@ async function ö_info( ü_newVersion:string ):Promise<void> {
     switch ( ü_show ) {
         case undefined: break;
         default:
-          whenUriOpened( CExtensionUrl + '/changelog' );
+          whenUriOpened( CXtnWebUrl + '/changelog' );
     }
 }
 }

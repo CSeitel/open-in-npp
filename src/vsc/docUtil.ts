@@ -57,7 +57,7 @@ export async function whenTextEditorOpened( ü_fileUri:TFileUri, ü_preview = fa
       };
   //
     const ü_doc = await workspace.openTextDocument( fileToUri( ü_fileUri ) );
-  //const ü_edt = await ßß_vsCode.window.showTextDocument( ü_doc, ßß_vsCode.ViewColumn.One, true );
+  //const ü_edt = await window.showTextDocument( ü_doc, ViewColumn.One, true );
     const ü_edt = await window.showTextDocument( ü_doc, ü_opts );
   //
     return ü_edt;
@@ -129,9 +129,7 @@ async whenNewDocumentShown( ü_content:string ):Promise<TextEditor> {
     const ü_opts:TextDocumentShowOptions =
       { preview:false
       };
-  //const ü_edt = await window.showTextDocument( ü_doc, ViewColumn.One, true );
     const ü_edt = await window.showTextDocument( ü_doc, ü_opts );
-  //window.
   //
     return ü_edt;
 }

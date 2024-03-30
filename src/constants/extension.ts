@@ -1,15 +1,10 @@
 /*
 */
-  export const SINITIAL = Symbol();
-  export type  TINITIAL = typeof SINITIAL
-//--------------------------------------------------------------------
-  export type TXtnConfigKeys = keyof typeof EConfigurationIds
-  export type TXtnConfigJSON = Record<TXtnConfigKeys,{ type:string }>
 //--------------------------------------------------------------------
   export const CXtnTxtScheme =         'open-in-npp-show-details';
   export const CXtnId        = 'CSeitel.open-in-npp';
-  export const CExtensionUrl = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
-//export const CExtensionUrl = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
+  export const CXtnWebUrl    = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
+//export const CXtnWebUrl    = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
 //====================================================================
   export const enum CEXtnCommands {
       oSettings = 'openInNpp.openSettings'
@@ -17,10 +12,31 @@
     , oEditor   = 'extension.openInNppX'
     , oExplorer = 'extension.openInNppY'
     };
+
+//====================================================================
+  export type TXtnCfgIds  = keyof typeof CXtnCfgId
+  export type TXtnCfgJSON = Record<TXtnCfgIds,{ type:string }>
 //--------------------------------------------------------------------
-  export const CPrefix = 'openInNpp';
-  export const EConfigurationIds = {
-      extendExplorerContextMenu : 'openInNpp.extendExplorerContextMenu'
+  export const CXtnCfgPrefix = 'openInNpp';
+
+  export const CXtnCfgIds:readonly TXtnCfgIds[] =
+      [ 'executable'
+      , 'spawnOptions'
+      , 'workingDirectory'
+      , 'decoupledExecution'
+      , 'commandLineArguments'
+      , 'multiInst'
+      , 'skipSessionHandling'
+      , 'openFolderAsWorkspace'
+      , 'filesInFolderPattern'
+      , 'matchingFilesLimit'
+      , 'preserveCursor'
+      , 'developerTrace'
+      , 'virtualDocumentsDirectory'
+      , 'virtualDocumentsFileReuse'
+      ];
+  export const CXtnCfgId =
+    { extendExplorerContextMenu : 'openInNpp.extendExplorerContextMenu'
     , extendEditorContextMenu   : 'openInNpp.extendEditorContextMenu'
     , extendEditorTitleMenu     : 'openInNpp.extendEditorTitleMenu'
   //
@@ -41,7 +57,9 @@
   //
     , developerTrace            : 'openInNpp.developerTrace'
     };
+
 //====================================================================
+
   export const enum CETrigger
     { PALETTE  = 0
     , EDITOR
@@ -61,6 +79,10 @@
     , skipSessionHandling    = '-nosession'
     ,   lineNumber           = '-n'
     , columnNumber           = '-c'
+    };
+//--------------------------------------------------------------------
+  export const enum CETraceIds
+    { shadowDoc              = 'Shadow'
     };
 //====================================================================
 /*

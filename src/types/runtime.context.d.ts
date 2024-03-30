@@ -1,7 +1,5 @@
 /*
 */
-  import { type ExtensionContext
-         } from 'vscode';
   import { type XtnOpenInNpp
          } from '../core/runtime';
 //--------------------------------------------------------------------
@@ -11,8 +9,8 @@
   export type TUnicodeReader  = (                moreThanAscii?:boolean )=>string
   export type TUnicodeWriter  = ( output:string, moreThanAscii?:boolean )=>void
   export type TInputReader    = ()=>string
-  export type TOutputWriter   = ( output:string )=>void
-  export type TDeveloperTrace = ( output:any, ü_intro ?:string )=>void
+  export type TOutputWriter   = ( output:string               )=>void
+  export type TDeveloperTrace = ( output:any, ü_intro?:string )=>void
   export type TInputDecoder   = (  input:string )=>string
   export type TOutputEncoder  = ( output:string )=>string
   export type TOutputTypeCode = 'abort'

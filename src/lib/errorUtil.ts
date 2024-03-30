@@ -33,6 +33,28 @@ export function expect<C extends string,T            >( ü_eX:any, ü_code:C|C[]
 
 //====================================================================
 
+export function toErrorMessage( ü_eX:any ):string {
+    if ( ü_eX instanceof Error ) {
+        return ü_eX.message;
+    }
+    return ''+ü_eX;
+}
+
+export function reduceErrorStack( ü_eX:Error ):string {
+    if ( ü_eX.stack === undefined ) { return ''; }
+      //
+        const ü_oldHeader = Error.prototype.toString.bind( ü_eX )();
+        const ü_newHeader = `Call Stack${ ü_eX.message.length > 0 ? ':'
+                                                                  : '' }`;
+        const ü_old = ü_eX.stack;
+        const ü_new = ü_old.replace( ü_oldHeader, ü_newHeader );
+                         //.replace( /^\r?\n/, '' )
+      //if ( ü_new !== ü_old ) { ü_eX.stack = ü_new; }
+    return ü_new;
+}
+
+//====================================================================
+
 export class UiXMessage<C=any> implements IUiXMessage<unknown> {
             readonly  type    :TUiXMessageType = CEUiXMessageType.info;
             readonly  text    :string
@@ -54,6 +76,7 @@ toString():string { return this.text; }
 export class ErrorMessage<R=any,C=any> extends Error implements IUiXMessage<R> {
             readonly  type    :TUiXMessageType = CEUiXMessageType.error;
             readonly  text    :string
+                      context?:string
                       reason ?:R
                      _context?:C
 constructor(   msgTmpl:string               , ...  vars:string[] );
@@ -61,6 +84,7 @@ constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] );
 constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
   //super( typeof( _message ) === 'string' ? _message : _message.name );
     super();
+  //reduceErrorStack( this );
   //
     this.name    = 'ErrorWithMessage';
     this.message =
@@ -68,13 +92,25 @@ constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
                  ? expandTemplateString( ü_msgTmpl            , ü_vars )
                  :                       ü_msgTmpl.apply( null, ü_vars )
                  ;
+  //
 }
 setReason ( ü_reason :R ):this { this.reason   = ü_reason ; return this; }
-setContext( ü_context:C ):this { this._context = ü_context; return this; }
+setContext( ü_context:C ):this { this._context = ü_context;
+                                 this.context  = ß_stringify( ü_context ); return this; }
 toString():string { return this.text; }
 
-get context():string {
-    return ß_stringify( this._context );
+static getReasonsStack( ü_cursor:any ):ErrorMessage[] {
+    const ü_stack = [] as ErrorMessage[];
+  //
+    if ( ü_cursor instanceof ErrorMessage ) {
+            ü_stack.push( ü_cursor );
+        while ( (ü_cursor = ü_cursor.reason) instanceof ErrorMessage ) {
+            const ü_stop = ü_stack.includes( ü_cursor );
+            ü_stack.push( ü_cursor );
+            if ( ü_stop ) { break; }
+        }
+    }
+    return ü_stack;
 }
 
 }

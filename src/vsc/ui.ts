@@ -23,6 +23,7 @@
   import { createPromise
          } from '../lib/asyncUtil';
   import { ErrorMessage
+         , reduceErrorStack
          } from '../lib/errorUtil';
 //--------------------------------------------------------------------
   type TIcons = 'close'
@@ -43,26 +44,43 @@ constructor(
 //====================================================================
 
 export async function threadShowError( ü_eX:any, ü_context:string ):Promise<void> {
+  //
     ß_err( ü_eX );
     const ü_more = new MessageButton( 'DETAILS' );
     const ü_info = `${ ü_context }: "${ ü_eX }"`;
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
     switch ( ü_done ) {
         case ü_more:
+            ü_eX = new ErrorMessage( 'An exception was caught' ).setReason( ü_eX ).setContext( ü_context );
+            const ü_content = [] as string[];
+            const ü_nice = ErrorMessage.getReasonsStack( ü_eX );
+            if ( ü_nice.length > 0 ) {
+                let ü_reason:ErrorMessage
+                for ( ü_reason of ü_nice ) {
+                    ü_content.push( ü_reason.text
+                                  , reduceErrorStack( ü_reason )
+                                  , format( { context: ü_reason.context
+                                          //, reason : ü_reason.reason
+                                            } )
+                                  , '', ''
+                    );
+                }
+                ü_eX = ü_reason!.reason;
+            } else {
+            }
+            if ( ü_eX !== undefined ) {
+            const ü_txt = format( ü_eX );
           //ü_eX.get
-          const ü_content = ü_eX instanceof Error
+                ü_content.push( ...( ü_eX instanceof Error
                           ? [ ü_eX.name
                             , ü_eX.message
                             , ''
-                            , format( '%o', ü_eX )
+                            , ü_txt
                             ]
-                          : [ format( ü_eX ) ]
-                          ;
-          if ( ü_eX instanceof ErrorMessage
-            && ü_eX.reason instanceof Error ) {
-              ü_content.push( '', '', format( '%o', ü_eX.reason ) )
-          }
-          ü_content.unshift( ü_context, '', '' );
+                          : [ ü_txt ]
+                          ));
+            }
+        //ü_content.unshift( ü_context, '', '' );
           ß_ViewErrorDetails.whenNewDocumentShown( ü_content.join( ß_RuntimeContext.lineSep ) );
           break;
     }

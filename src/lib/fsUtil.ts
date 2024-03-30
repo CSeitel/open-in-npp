@@ -16,18 +16,21 @@ https://nodejs.org/api/fs.html#fslstatpath-options-callback
          , extname
        //, w
          } from 'path';
-  import { promises  as ßß_fs_p
-         , constants as ßß_fs_c
+  import { promises  as ß_fs_p
+         , constants as ß_fs_c
          } from 'fs';
   import { expect
          } from '../lib/errorUtil';
+//--------------------------------------------------------------------
+  export const whenFileRead    = ß_fs_p.readFile ;
+  export const whenFileWritten = ß_fs_p.writeFile;
 //====================================================================
 
 export async function whenFileInfoRead( ü_path:PathLike, ü_slnk = false ):Promise<Stats|null> {
   //
     try {
-        return await ßß_fs_p[ ü_slnk ? 'lstat'
-                                     :  'stat' ]( ü_path );
+        return await ß_fs_p[ ü_slnk ? 'lstat'
+                                    :  'stat' ]( ü_path );
     } catch ( ü_eX ) {
         return expect<TNodeFSErrorCodes,null>( ü_eX, 'ENOENT', null );
     }
@@ -42,9 +45,9 @@ export async function whenKnownAsFile   ( ü_path:PathLike, ü_slnk = false ):Pr
 //====================================================================
 
 export function isExecutable( ü_mode:number ):boolean {
-    return ( ü_mode & ( ßß_fs_c.S_IXUSR
-                      | ßß_fs_c.S_IXGRP
-                      | ßß_fs_c.S_IXOTH ) ) > 0
+    return ( ü_mode & ( ß_fs_c.S_IXUSR
+                      | ß_fs_c.S_IXGRP
+                      | ß_fs_c.S_IXOTH ) ) > 0
                       ;
 }
 
@@ -74,7 +77,7 @@ export async function whenTempFile( ü_base:string, ü_tempStub = '', ü_tempDir
        { ü_tempDir = tmpdir(); }
   //
     if ( ü_tempStub.length > 0 )
-       { ü_tempDir = await ßß_fs_p.mkdtemp( join( ü_tempDir, ü_tempStub ) ); }
+       { ü_tempDir = await ß_fs_p.mkdtemp( join( ü_tempDir, ü_tempStub ) ); }
     
   //
     let ü_file = join( ü_tempDir, ü_base );

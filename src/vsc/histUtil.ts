@@ -6,7 +6,7 @@
   import { type IReleaseResource
          } from '../types/lib.asyncUtil.d';
   import { SINITIAL
-         } from '../constants/extension';
+         } from '../constants/generic';
 //--------------------------------------------------------------------
   import { UniqueResource
          } from '../lib/asyncUtil';

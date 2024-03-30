@@ -2,15 +2,12 @@
 */
   import { type SpawnOptions
          } from 'child_process';
-  import { type TAsyncFunctionSingleArg
-         } from '../types/generic.d';
-  import { type TINITIAL
+  import { type TXtnCfgIds
          } from '../constants/extension';
 //--------------------------------------------------------------------
-  import { SINITIAL
-         , EConfigurationIds
-         , TXtnConfigKeys
-         , CPrefix
+  import { CXtnCfgId
+         , CXtnCfgIds
+         , CXtnCfgPrefix
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { workspace
@@ -52,27 +49,13 @@ class ConfigProxy {
 constructor(
     private _vscConfig = workspace.getConfiguration()
 ){
-    for ( const ü_prop of [ 'executable'
-                          , 'spawnOptions'
-                          , 'workingDirectory'
-                          , 'decoupledExecution'
-                          , 'commandLineArguments'
-                          , 'multiInst'
-                          , 'skipSessionHandling'
-                          , 'openFolderAsWorkspace'
-                          , 'filesInFolderPattern'
-                          , 'matchingFilesLimit'
-                          , 'preserveCursor'
-                          , 'developerTrace'
-                          , 'virtualDocumentsDirectory'
-                          , 'virtualDocumentsFileReuse'
-                          ] as TXtnConfigKeys[] ) {
-        Object.defineProperty( this, ü_prop, { enumerable:true, get: ()=>{ return this._vscConfig.get<any>( EConfigurationIds[ ü_prop ] ); } } );
+    for ( const ü_cfgId of CXtnCfgIds ) {
+        Object.defineProperty( this, ü_cfgId, { enumerable:true, get: ()=>{ return this._vscConfig.get<any>( CXtnCfgId[ ü_cfgId ] ); } } );
     }
 }
   //
 set executable_( ü_executable:string ) {
-    this._vscConfig.update( EConfigurationIds.executable, ü_executable, ConfigurationTarget.Workspace );
+    this._vscConfig.update( CXtnCfgId.executable, ü_executable, ConfigurationTarget.Workspace );
 }
 }
 
@@ -95,7 +78,7 @@ get whenWorkingDir    ():PromiseLike<string> { return ( this._whenWorkingDir
                                                    || ( this._whenWorkingDir     = new AsyncCalculation( this.workingDirectory         , whenKnownAsFolder.bind( null, 'Working Directory'            ) ) ) ).whenY; }
 get whenVirtualDocsDir():PromiseLike<string> { return ( this._whenVirtualDocsDir
                                                    || ( this._whenVirtualDocsDir = new AsyncCalculation( this.virtualDocumentsDirectory, whenKnownAsFolder.bind( null, 'Virtual Documents Directory'  ) ) ) ).whenY; }
-clone( ü_what ?:TXtnConfigKeys ):ConfigSnapshot {
+clone( ü_what ?:TXtnCfgIds ):ConfigSnapshot {
     const ü_cfg = new ConfigSnapshot( this._whenExecutable
                                     , this._whenWorkingDir
                                     , this._whenVirtualDocsDir
@@ -112,7 +95,7 @@ clone( ü_what ?:TXtnConfigKeys ):ConfigSnapshot {
 
 //====================================================================
     let ß_cfgIsDirty  = true;
-    let ß_whatIsDirty = undefined as TXtnConfigKeys|undefined;
+    let ß_whatIsDirty = undefined as TXtnCfgIds|undefined;
     let ß_cfgSnapshot = undefined as unknown as ConfigSnapshot;
         ß_cfgSnapshot = getConfigSnapshot();
 //====================================================================
@@ -129,22 +112,22 @@ export function getConfigSnapshot():ConfigSnapshot {
 //--------------------------------------------------------------------
 
 export async function configModificationSignalled( ü_change:ConfigurationChangeEvent ):Promise<void> {
-    if ( ! ü_change.affectsConfiguration( CPrefix ) ) { return; }
+    if ( ! ü_change.affectsConfiguration( CXtnCfgPrefix ) ) { return; }
   //
     ß_trc&& ß_trc( `Event: Configuration changed` );
   //
-    if ( ü_change.affectsConfiguration( EConfigurationIds.extendExplorerContextMenu )
-      || ü_change.affectsConfiguration( EConfigurationIds.extendEditorContextMenu   )
-      || ü_change.affectsConfiguration( EConfigurationIds.extendEditorTitleMenu     )
+    if ( ü_change.affectsConfiguration( CXtnCfgId.extendExplorerContextMenu )
+      || ü_change.affectsConfiguration( CXtnCfgId.extendEditorContextMenu   )
+      || ü_change.affectsConfiguration( CXtnCfgId.extendEditorTitleMenu     )
        ) { return; }
   //
     ß_cfgIsDirty = true;
     ß_whatIsDirty = undefined;
   //
-           if ( ü_change.affectsConfiguration( EConfigurationIds.executable                ) ) { ß_whatIsDirty = 'executable'               ; onNewExecutable    ( getConfigSnapshot() );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; onNewWorkingDir    ( getConfigSnapshot() );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; onNewVirtualDocsDir( getConfigSnapshot() );
-    } else if ( ü_change.affectsConfiguration( EConfigurationIds.developerTrace            ) ) { ß_toggleDevTrace ();
+           if ( ü_change.affectsConfiguration( CXtnCfgId.executable                ) ) { ß_whatIsDirty = 'executable'               ; onNewExecutable    ( getConfigSnapshot() );
+    } else if ( ü_change.affectsConfiguration( CXtnCfgId.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; onNewWorkingDir    ( getConfigSnapshot() );
+    } else if ( ü_change.affectsConfiguration( CXtnCfgId.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; onNewVirtualDocsDir( getConfigSnapshot() );
+    } else if ( ü_change.affectsConfiguration( CXtnCfgId.developerTrace            ) ) { ß_toggleDevTrace ();
     } else {
     }
   //

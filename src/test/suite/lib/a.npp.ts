@@ -7,7 +7,7 @@
          } from '../../../types/vsc.extension.d';
   import { CXtnId
          , CEXtnCommands
-         , EConfigurationIds
+         , CXtnCfgId
          } from '../../../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
@@ -81,8 +81,8 @@ export async function tst_settings(){
   //
     testSummary();
   //
-function ö_setExe( ü_exe:string ):PromiseLike<void> { return workspace.getConfiguration().update( EConfigurationIds.executable      , ü_exe, ConfigurationTarget.Workspace ); }
-function ö_setDir( ü_dir:string ):PromiseLike<void> { return workspace.getConfiguration().update( EConfigurationIds.workingDirectory, ü_dir, ConfigurationTarget.Workspace ); }
+function ö_setExe( ü_exe:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.executable      , ü_exe, ConfigurationTarget.Workspace ); }
+function ö_setDir( ü_dir:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.workingDirectory, ü_dir, ConfigurationTarget.Workspace ); }
 }
 
 export async function tst_history(){
