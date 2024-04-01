@@ -8,9 +8,8 @@
   import { ß_trc
      
          } from '../../../runtime/context';
-  import { whenOpenedInOSDefaultApp
-         , whenShownInOSExplorer
-         } from '../../../vsc/cmdUtil';
+  import { threadShowError
+         } from '../../../vsc/ui';
   import { expect
          } from '../../../lib/errorUtil';
   import { whenShownInWindowsExplorer
@@ -19,6 +18,7 @@
   import { whenPromiseSettled
          , whenDoneWith
          } from '../../../lib/asyncUtil';
+//--------------------------------------------------------------------
   import { testSrc
          , testSummary
          , testAsyncFunction
@@ -43,6 +43,11 @@ export async function tst_(){
 //====================================================================
 
 export async function tst_show(){
+    try {
+        
+    } catch ( ü_eX ) {
+        threadShowError( ü_eX, 'Outer' );
+    }
 }
 
 //====================================================================

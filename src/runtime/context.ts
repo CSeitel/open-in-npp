@@ -44,7 +44,8 @@ export const ß_trc:TDeveloperTrace|false = ß_that.devTrace;
 export const ß_err:TDeveloperTrace       = ß_that.errTrace;
 
 export function ß_stringify( ü_oref:any ):string {
-    return format( '%o', ü_oref );
+  //return format( '%o', ü_oref );
+    return format(       ü_oref );
 }
 
 export function ß_writeStdOut( ü_text:string ):void {

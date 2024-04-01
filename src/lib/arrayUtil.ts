@@ -1,6 +1,7 @@
 /*
 */
-  import {} from '../types/generic.d'
+  import { IArrayPush
+         } from '../types/lib.arrayUtil.d'
 //====================================================================
 
 export function putFirst<T,P extends keyof T>(   list:T[],   item:  T[P],   prop :P ):number
@@ -38,6 +39,17 @@ export function putLastIndex<T>( ü_list:T[], ü_indx:number ):void {
     if ( ü_indx < ü_list.length - 1 ) {
         ü_list.push( ü_list.splice( ü_indx, 1 )[0] );
     }
+}
+
+//====================================================================
+
+export function extendArray<T>( ö_arry:T[] ):IArrayPush<T> {
+           ( ö_arry as IArrayPush<T> ).pushItems = ö_push;
+    return ( ö_arry as IArrayPush<T> );
+function ö_push( this:string[], ...ü_items:(T|void)[] ):number {
+  //const ü_super = Object.getPrototypeOf( this ) as string[];
+    return ö_arry.push( ...ü_items.filter( ü_item => ü_item != undefined ) as T[] );
+}
 }
 
 //====================================================================

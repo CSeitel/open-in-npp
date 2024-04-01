@@ -10,8 +10,11 @@
 //--------------------------------------------------------------------
   import { format
          } from 'util';
-  import { ß_stringify
+  import { ß_RuntimeContext
+         , ß_stringify
          } from '../runtime/context';
+  import { extendArray
+         } from '../lib/arrayUtil';
   import { expandTemplateString
          } from '../lib/textUtil';
 //====================================================================
@@ -40,17 +43,78 @@ export function toErrorMessage( ü_eX:any ):string {
     return ''+ü_eX;
 }
 
-export function reduceErrorStack( ü_eX:Error ):string {
+export function extractPureCallStack( ü_eX:Error, ü_header = 'Call Stack' ):string|void {
     if ( ü_eX.stack === undefined ) { return ''; }
       //
         const ü_oldHeader = Error.prototype.toString.bind( ü_eX )();
-        const ü_newHeader = `Call Stack${ ü_eX.message.length > 0 ? ':'
-                                                                  : '' }`;
+        const ü_newHeader = ü_header + ( ü_eX.message.length > 0 ? ':'
+                                                                 : '' );
         const ü_old = ü_eX.stack;
         const ü_new = ü_old.replace( ü_oldHeader, ü_newHeader );
-                         //.replace( /^\r?\n/, '' )
+      //
       //if ( ü_new !== ü_old ) { ü_eX.stack = ü_new; }
     return ü_new;
+}
+
+export function summarizeError( ü_eX:any, ü_context:string ):string {
+    const ü_indent_1 = '\t';
+    const ü_colon    = ':';
+    const ü_summary = extendArray( [] as string[] );
+    const ü_reasons = ErrorMessage.getReasonsStack( ü_eX );
+    const ü_finalEx = ü_reasons.finalReason;
+  //
+    ü_summary.push( 'An exception occurred in the following situation:'
+                  , ü_indent_1 + ü_context
+                  , ''
+                  , 'The following information about the issue has been provided:'
+                  , ''
+                  , ''
+                  );
+  //
+    const ü_lastIndx = ü_finalEx === undefined
+                     ? ü_reasons.length -1
+                     :                  -1;
+    ü_reasons.forEach(function( ü_reason, ü_indx ){
+        const ü_stack = extractPureCallStack( ü_reason );
+        const ü_core = Object.create( ü_reason );
+              ü_core.name    =
+              ü_core.message =
+              ü_core.text    =
+              ü_core.stack   =
+              ü_core.context = undefined;
+        ü_summary.push( ü_reason.name
+                      , ü_indent_1 + ü_reason.text );
+        ü_summary.pushItems( ü_stack );
+        ü_summary.push( 'Context:'
+                      , ü_indent_1 + ( ü_reason.context ?? '' )
+                    );
+        ü_summary.push( format( ü_reason ) );
+        if ( ü_lastIndx !== ü_indx ) {
+            ü_summary.push( 'Reason:'
+                          , ü_indent_1 + 'Additional Info below'
+                          , ''
+                          , ''
+                          );
+        }
+    });
+  //
+    if ( ü_finalEx !== undefined ) {
+        const ü_stack = ü_finalEx.stack;
+            let ü_all = format( ü_finalEx );
+        if ( ü_stack !== undefined ) {
+            ü_all = ü_all.replace( ü_stack, '' )
+                         .replace( /^[^\{]*\{/, 'Object:' )
+                         .replace( /\r?\n\}$/ , ''        )
+                         ;
+        }
+        ü_summary.pushItems( ü_finalEx.name + ü_colon
+                      , ü_finalEx.message
+                      , extractPureCallStack( ü_finalEx )
+                      , ü_all
+                      );
+    }
+  //
+    return ü_summary.join( ß_RuntimeContext.lineSep );
 }
 
 //====================================================================
@@ -72,7 +136,7 @@ setContext( ü_context:C ):this { this._context = ü_context; return this; }
 toString():string { return this.text; }
 
 }
-
+type TReasons = ErrorMessage[] & { finalReason?:Error }
 export class ErrorMessage<R=any,C=any> extends Error implements IUiXMessage<R> {
             readonly  type    :TUiXMessageType = CEUiXMessageType.error;
             readonly  text    :string
@@ -99,17 +163,24 @@ setContext( ü_context:C ):this { this._context = ü_context;
                                  this.context  = ß_stringify( ü_context ); return this; }
 toString():string { return this.text; }
 
-static getReasonsStack( ü_cursor:any ):ErrorMessage[] {
-    const ü_stack = [] as ErrorMessage[];
+static getReasonsStack( ü_cursor:any ):TReasons {
+    const ü_stack = [] as TReasons;
   //
     if ( ü_cursor instanceof ErrorMessage ) {
+        do {
             ü_stack.push( ü_cursor );
-        while ( (ü_cursor = ü_cursor.reason) instanceof ErrorMessage ) {
-            const ü_stop = ü_stack.includes( ü_cursor );
-            ü_stack.push( ü_cursor );
-            if ( ü_stop ) { break; }
-        }
+            ü_cursor = ü_cursor.reason;
+        } while ( ü_cursor instanceof ErrorMessage
+               && ! ü_stack.includes( ü_cursor )
+                );
+        if ( ü_cursor === undefined ) { return ü_stack; }
+  //         ü_stack.finalReason = ü_cursor;
+  //} else {
     }
+             ü_stack.finalReason = ü_cursor instanceof Error
+                                 ? ü_cursor
+                                 : new ErrorMessage( 'Object thrown: {0}', format( ü_cursor ) );
+
     return ü_stack;
 }
 
