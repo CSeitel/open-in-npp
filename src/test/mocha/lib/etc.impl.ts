@@ -15,6 +15,8 @@
   import { summarizeError
          , ErrorMessage
          } from '../../../lib/errorUtil';
+  import { isDirectInstanceOf
+         } from '../../../lib/objectUtil';
   import { whenPromiseSettled
          , whenDoneWith
          } from '../../../lib/asyncUtil';
@@ -42,7 +44,7 @@ export async function tst_(){
 }
 
 //====================================================================
-export class TstErr extends ErrorMessage {
+class TstErr extends ErrorMessage {
    public  more// = 'MORE';
 constructor(a:string, b:string){
     super(a,b);
@@ -53,6 +55,7 @@ constructor(a:string, b:string){
 export async function tst_error(){
     const ü_a = new TstErr('w','u')
     const ü_b = new ErrorMessage('w','u')
+    isDirectInstanceOf( ü_b, ErrorMessage );
     const ü_c = new Error('w')
         const ü_prot_a = Object.getPrototypeOf( ü_a );
         const ü_prot_b = Object.getPrototypeOf( ü_b );

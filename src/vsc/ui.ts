@@ -51,7 +51,7 @@ export async function threadShowError( ü_eX:any, ü_context:string ):Promise<vo
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
     switch ( ü_done ) {
         case ü_more:
-            ü_eX = new ErrorMessage( 'An exception occurred.' ).setReason( ü_eX ).setContext( ü_context );
+          //ü_eX = new ErrorMessage( 'An exception occurred.' ).setReason( ü_eX ).setContext( ü_context );
           ß_ViewErrorDetails.whenNewDocumentShown( summarizeError( ü_eX, ü_context ) );
           break;
     }

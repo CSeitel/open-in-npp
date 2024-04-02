@@ -6,6 +6,7 @@
          , type IExpandUiXMessageVars
          } from '../types/lib.errorUtil.d';
   import { CEUiXMessageType
+         , CEUiXText
          } from '../constants/error';
 //--------------------------------------------------------------------
   import { format
@@ -15,6 +16,8 @@
          } from '../runtime/context';
   import { extendArray
          } from '../lib/arrayUtil';
+  import { isDirectInstanceOf
+         } from '../lib/objectUtil';
   import { expandTemplateString
          } from '../lib/textUtil';
 //====================================================================
@@ -76,19 +79,26 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                      :                  -1;
     ü_reasons.forEach(function( ü_reason, ü_indx ){
         const ü_stack = extractPureCallStack( ü_reason );
-        const ü_core = Object.create( ü_reason );
-              ü_core.name    =
-              ü_core.message =
-              ü_core.text    =
-              ü_core.stack   =
-              ü_core.context = undefined;
         ü_summary.push( ü_reason.name
                       , ü_indent_1 + ü_reason.text );
         ü_summary.pushItems( ü_stack );
         ü_summary.push( 'Context:'
                       , ü_indent_1 + ( ü_reason.context ?? '' )
                     );
-        ü_summary.push( format( ü_reason ) );
+        if ( isDirectInstanceOf( ü_reason, ErrorMessage ) ) {
+        } else {
+        const ü_core = Object.assign( {}, ü_reason ) as any;
+        delete ü_core.name    ;
+        delete ü_core.message ;
+        delete ü_core.type    ;
+        delete ü_core.text    ;
+      //delete ü_core.stack   ;
+        delete ü_core.context ;
+        delete ü_core.reason  ;
+        ü_summary.push( format( ü_core ) );
+
+
+        }
         if ( ü_lastIndx !== ü_indx ) {
             ü_summary.push( 'Reason:'
                           , ü_indent_1 + 'Additional Info below'
@@ -163,23 +173,23 @@ setContext( ü_context:C ):this { this._context = ü_context;
                                  this.context  = ß_stringify( ü_context ); return this; }
 toString():string { return this.text; }
 
-static getReasonsStack( ü_cursor:any ):TReasons {
+static getReasonsStack( ü_reason:any ):TReasons {
     const ü_stack = [] as TReasons;
   //
-    if ( ü_cursor instanceof ErrorMessage ) {
+    if ( ü_reason instanceof ErrorMessage ) {
         do {
-            ü_stack.push( ü_cursor );
-            ü_cursor = ü_cursor.reason;
-        } while ( ü_cursor instanceof ErrorMessage
-               && ! ü_stack.includes( ü_cursor )
+            ü_stack.push( ü_reason );
+            ü_reason = ü_reason.reason;
+        } while ( ü_reason instanceof ErrorMessage
+               && ! ü_stack.includes( ü_reason )
                 );
-        if ( ü_cursor === undefined ) { return ü_stack; }
+        if ( ü_reason === undefined ) { return ü_stack; }
   //         ü_stack.finalReason = ü_cursor;
   //} else {
     }
-             ü_stack.finalReason = ü_cursor instanceof Error
-                                 ? ü_cursor
-                                 : new ErrorMessage( 'Object thrown: {0}', format( ü_cursor ) );
+             ü_stack.finalReason = ü_reason instanceof Error
+                                 ? ü_reason
+                                 : new TypeError( expandTemplateString( CEUiXText.isNotTypeError, format( ü_reason ) ) );
 
     return ü_stack;
 }
