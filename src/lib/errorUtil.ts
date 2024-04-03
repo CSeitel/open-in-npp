@@ -46,7 +46,7 @@ export function toErrorMessage( ü_eX:any ):string {
     return ''+ü_eX;
 }
 
-export function extractPureCallStack( ü_eX:Error, ü_header = 'Call Stack' ):string|void {
+export function extractPureCallStack( ü_eX:Error, ü_header = CEUiXText.callStack ):string {
     if ( ü_eX.stack === undefined ) { return ''; }
       //
         const ü_oldHeader = Error.prototype.toString.bind( ü_eX )();
@@ -62,66 +62,63 @@ export function extractPureCallStack( ü_eX:Error, ü_header = 'Call Stack' ):st
 export function summarizeError( ü_eX:any, ü_context:string ):string {
     const ü_indent_1 = '\t';
     const ü_colon    = ':';
-    const ü_summary = extendArray( [] as string[] );
+    const ü_reasonSep = [ '', CEUiXText.reason + ü_colon
+                        , '', ''
+                        ];
+    const ü_summary = [] as string[];
     const ü_reasons = ErrorMessage.getReasonsStack( ü_eX );
     const ü_finalEx = ü_reasons.finalReason;
   //
-    ü_summary.push( 'An exception occurred in the following situation:'
-                  , ü_indent_1 + ü_context
-                  , ''
-                  , 'The following information about the issue has been provided:'
-                  , ''
-                  , ''
-                  );
+    ü_summary.push( CEUiXText.errorOccurred + ü_colon
+                                            , ü_indent_1 + ü_context );
+    ü_summary.push( ... ü_reasonSep );
   //
     const ü_lastIndx = ü_finalEx === undefined
                      ? ü_reasons.length -1
                      :                  -1;
     ü_reasons.forEach(function( ü_reason, ü_indx ){
         const ü_stack = extractPureCallStack( ü_reason );
-        ü_summary.push( ü_reason.name
-                      , ü_indent_1 + ü_reason.text );
-        ü_summary.pushItems( ü_stack );
-        ü_summary.push( 'Context:'
-                      , ü_indent_1 + ( ü_reason.context ?? '' )
-                    );
+                            ü_summary.push( ü_reason.name     + ü_colon
+                                                              , ü_indent_1 + ü_reason.text    );
+        ü_reason.context && ü_summary.push( CEUiXText.context + ü_colon
+                                                              , ü_indent_1 + ü_reason.context );
         if ( isDirectInstanceOf( ü_reason, ErrorMessage ) ) {
         } else {
-        const ü_core = Object.assign( {}, ü_reason ) as any;
-        delete ü_core.name    ;
-        delete ü_core.message ;
-        delete ü_core.type    ;
-        delete ü_core.text    ;
-      //delete ü_core.stack   ;
-        delete ü_core.context ;
-        delete ü_core.reason  ;
-        ü_summary.push( format( ü_core ) );
-
-
+            const ü_core = Object.assign( {}, ü_reason ) as any;
+            delete ü_core.name    ;
+            delete ü_core.message ;
+            delete ü_core.type    ;
+            delete ü_core.text    ;
+          //delete ü_core.stack   ;
+            delete ü_core.context ;
+            delete ü_core.reason  ;
+            const ü_a = format( ü_core   );
+            const ü_b = format( ü_reason );
+                            ü_summary.push( CEUiXText.data    + ü_colon
+                                                              , ü_indent_1 + ü_a );
         }
-        if ( ü_lastIndx !== ü_indx ) {
-            ü_summary.push( 'Reason:'
-                          , ü_indent_1 + 'Additional Info below'
-                          , ''
-                          , ''
-                          );
-        }
+        ü_stack          && ü_summary.push( ü_stack );
+        if ( ü_lastIndx !== ü_indx )
+                          { ü_summary.push( ... ü_reasonSep ); }
     });
   //
     if ( ü_finalEx !== undefined ) {
-        const ü_stack = ü_finalEx.stack;
-            let ü_all = format( ü_finalEx );
-        if ( ü_stack !== undefined ) {
-            ü_all = ü_all.replace( ü_stack, '' )
-                         .replace( /^[^\{]*\{/, 'Object:' )
-                         .replace( /\r?\n\}$/ , ''        )
-                         ;
+        ü_summary.push( ü_finalEx.name + ü_colon
+                      ,                  ü_indent_1 + ü_finalEx.message );
+        const ü_stack = extractPureCallStack( ü_finalEx );
+        if ( ü_stack ) {
+                 let ü_core = format( ü_finalEx );
+            ü_core = ü_core.replace( ü_finalEx.stack!, '' )
+                           .replace( /^[^\{]*\{\r?\n?/, '' )
+                           .replace( /\r?\n\}$/ , '' )
+                           ;
+                            ü_summary.push( CEUiXText.context + ü_colon
+                                                              , ü_core );
+                            ü_summary.push( ü_stack );
+        } else {
+
         }
-        ü_summary.pushItems( ü_finalEx.name + ü_colon
-                      , ü_finalEx.message
-                      , extractPureCallStack( ü_finalEx )
-                      , ü_all
-                      );
+
     }
   //
     return ü_summary.join( ß_RuntimeContext.lineSep );

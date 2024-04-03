@@ -44,6 +44,7 @@ export async function tst_(){
 }
 
 //====================================================================
+class TstErr_ extends Error { aa = 12; }
 class TstErr extends ErrorMessage {
    public  more// = 'MORE';
 constructor(a:string, b:string){
@@ -68,6 +69,8 @@ export async function tst_error(){
     } catch ( ü_eX ) {
         ü_eX = new TstErr( '{0}', 'PREVIOUS' ).setReason( ü_eX );
         const ü_prot = Object.getPrototypeOf( ü_eX );
+        ü_txt = summarizeError( new Error(), 'TEST' );
+        ü_txt = summarizeError( new TstErr_(), 'TEST' );
         ü_txt = summarizeError( ü_eX, 'TEST' );
     }
     testEqual( ü_txt, '' );
