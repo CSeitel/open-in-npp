@@ -5,6 +5,8 @@
   import { CRgXp
          } from '../constants/text';
 //--------------------------------------------------------------------
+  import { ß_RuntimeContext
+         } from '../runtime/context';
 //====================================================================
 
 export function escapeFF( ö_rgXp:RegExp = CRgXp.js_escape ):TOutputEncoder {
@@ -75,6 +77,13 @@ export function wrapDoubleQuotes( ...ö_args:string[] ):string[]|string {
     return ö_args.length === 1 ? ö_args[0]
                                : ö_args
                                ;
+}
+
+//====================================================================
+
+export function indentLines( ü_lines:string, ü_indent = '\t' ):string {
+    return ü_indent + ü_lines.replace( CRgXp.crlf, ß_RuntimeContext.lineSep
+         + ü_indent );
 }
 
 //====================================================================

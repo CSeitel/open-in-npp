@@ -17,6 +17,7 @@
   import { isDirectInstanceOf
          } from '../lib/objectUtil';
   import { expandTemplateString
+         , indentLines
          } from '../lib/textUtil';
 //====================================================================
 
@@ -47,18 +48,21 @@ export function toErrorMessage( ü_eX:any ):string {
 export function formatWithoutError( ü_oref:any, ü_class:Function = Error ):string {
   //const ü_a = format( ü_errX );
   //
+    const ü_stack = [] as any[];
     let ü_cursor:any = ü_oref;
     do {
         const ü_prot = Object.getPrototypeOf( ü_cursor );
         if ( ü_prot === ü_class.prototype ) {
-            const ü_cons         = ü_cursor.constructor ;
+            const ü_constructor  = ü_cursor.constructor ;
                             delete ü_cursor.constructor ;//= function Redefined(){};
             Object.setPrototypeOf( ü_cursor, {}     );
             const ü_text = format( ü_oref );
             Object.setPrototypeOf( ü_cursor, ü_prot );
-                                   ü_cursor.constructor = ü_cons;
+                                   ü_cursor.constructor = ü_constructor;
             return ü_text;
         }
+        if ( ü_stack.includes( ü_prot ) ) { break; }
+             ü_stack.push    ( ü_prot );
               ü_cursor = ü_prot;
     } while ( ü_cursor !== null );
   //
@@ -89,7 +93,7 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
     const ü_finalEx = ü_reasons.finalReason;
   //
     ü_summary.push( CEUiXText.errorOccurred + ü_colon
-                                            , ü_indent_1 + ü_context );
+                  , indentLines( ü_context, ü_indent_1 ) );
     ü_summary.push( ... ü_reasonSep );
   //
     const ü_lastIndx = ü_finalEx === undefined
@@ -100,10 +104,10 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                             ü_summary.push( ü_reason.name     + ü_colon
                                                               , ü_indent_1 + ü_reason.text    );
         ü_reason.context && ü_summary.push( CEUiXText.context + ü_colon
-                                                              , ü_indent_1 + ü_reason.context );
+                                          , indentLines( ü_reason.context, ü_indent_1 ) );
         if ( isDirectInstanceOf( ü_reason, ErrorMessage ) ) {
         } else {
-            const ü_core = formatWithoutError( ü_reason, ErrorMessage );
+            const ü_core = indentLines( formatWithoutError( ü_reason, ErrorMessage ), ü_indent_1 );
                             ü_summary.push( CEUiXText.data    + ü_colon
                                                               , ü_indent_1 + ü_core );
         }
@@ -124,7 +128,7 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                            .replace( /\r?\n\}$/ , '' )
                            ;
           */
-               const ü_core = formatWithoutError( ü_finalEx );
+               const ü_core = indentLines( formatWithoutError( ü_finalEx ), ü_indent_1 );
                             ü_summary.push( CEUiXText.context + ü_colon
                                                               , ü_core );
                             ü_summary.push( ü_stack );
