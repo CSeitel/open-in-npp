@@ -44,37 +44,51 @@ export async function tst_(){
 }
 
 //====================================================================
-class TstErr_ extends Error { aa = 12; }
-class TstErr extends ErrorMessage {
-   public  more// = 'MORE';
-constructor(a:string, b:string){
-    super(a,b);
-    this.more = 'RRR'
-}
-     }
+class ErrorX        extends Error        { more = 12; }
+class ErrorMessageX extends ErrorMessage { more = 12; }
 
 export async function tst_error(){
-    const ü_a = new TstErr('w','u')
-    const ü_b = new ErrorMessage('w','u')
-    isDirectInstanceOf( ü_b, ErrorMessage );
-    const ü_c = new Error('w')
-        const ü_prot_a = Object.getPrototypeOf( ü_a );
-        const ü_prot_b = Object.getPrototypeOf( ü_b );
-        const ü_prot_c = Object.getPrototypeOf( ü_c );
+  //
+    const ü_errMsg  = new ErrorMessage ('w','u');
+    const ü_errMsgX = new ErrorMessageX('w','u');
+    const ü_err     = new Error        ('w')    ;
+    const ü_errX    = new ErrorX       ('w')    ;
+  //
+    const ü_errMsg_Y  = summarizeError( ü_errMsg , 'TEST' );
+    const ü_errMsgX_Y = summarizeError( ü_errMsgX, 'TEST' );
+    const ü_err_Y     = summarizeError( ü_err    , 'TEST' );
+    const ü_errX_Y    = summarizeError( ü_errX   , 'TEST' );
+  //
+    const ü_data =
+      [ [ ü_errMsg  , true  ]
+      , [ ü_errMsgX , false ]
+      , [ ü_err     , false ]
+      , [ ü_errX    , false ]
+      ] as TResultArray<object,boolean>;
+    testFunction( bindArgs( isDirectInstanceOf, { realFirst:true, arrangeBound:[1] }, ErrorMessage ), ü_data );
+  //
+        const ü_prot_a = Object.getPrototypeOf( ü_errMsgX );
+        const ü_prot_b = Object.getPrototypeOf( ü_errMsg );
+        const ü_prot_c = Object.getPrototypeOf( ü_err );
+  //
+    const ü_errX_Z_ = format(                        ü_errX       );
+    const ü_errX_Z  = format( Object.setPrototypeOf( ü_errX, {} ) );
+    const ü_err_Z_  = format(                        ü_err        );
+    const ü_err_Z   = format( Object.setPrototypeOf( ü_err , {} ) );
   //
     let ü_txt = ''
     try {
         throw 3;
       //ß_trc&& ß_trc( ü_i );
     } catch ( ü_eX ) {
-        ü_eX = new TstErr( '{0}', 'PREVIOUS' ).setReason( ü_eX );
+        ü_eX = new ErrorMessageX( '{0}', 'PREVIOUS' ).setReason( ü_eX );
         const ü_prot = Object.getPrototypeOf( ü_eX );
         ü_txt = summarizeError( new Error(), 'TEST' );
-        ü_txt = summarizeError( new TstErr_(), 'TEST' );
+        ü_txt = summarizeError( new ErrorX(), 'TEST' );
         ü_txt = summarizeError( ü_eX, 'TEST' );
     }
     testEqual( ü_txt, '' );
-    testSummary();
+    testSummary( 'Error' );
 }
 
 //====================================================================
@@ -92,6 +106,7 @@ export async function tst_syntax(){
       , [ {}   , '{}'       ]
       , [ {a:1}, '{ a: 1 }' ]
       ] as TResultArray<any,string>;
+  //
     testFunction( format, ü_data );
     testSummary( 'Syntax' );
 }

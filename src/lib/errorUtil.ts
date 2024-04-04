@@ -14,8 +14,6 @@
   import { ß_RuntimeContext
          , ß_stringify
          } from '../runtime/context';
-  import { extendArray
-         } from '../lib/arrayUtil';
   import { isDirectInstanceOf
          } from '../lib/objectUtil';
   import { expandTemplateString
@@ -44,6 +42,27 @@ export function toErrorMessage( ü_eX:any ):string {
         return ü_eX.message;
     }
     return ''+ü_eX;
+}
+
+export function formatWithoutError( ü_oref:any, ü_class:Function = Error ):string {
+  //const ü_a = format( ü_errX );
+  //
+    let ü_cursor:any = ü_oref;
+    do {
+        const ü_prot = Object.getPrototypeOf( ü_cursor );
+        if ( ü_prot === ü_class.prototype ) {
+            const ü_cons         = ü_cursor.constructor ;
+                            delete ü_cursor.constructor ;//= function Redefined(){};
+            Object.setPrototypeOf( ü_cursor, {}     );
+            const ü_text = format( ü_oref );
+            Object.setPrototypeOf( ü_cursor, ü_prot );
+                                   ü_cursor.constructor = ü_cons;
+            return ü_text;
+        }
+              ü_cursor = ü_prot;
+    } while ( ü_cursor !== null );
+  //
+    return format( ü_oref );
 }
 
 export function extractPureCallStack( ü_eX:Error, ü_header = CEUiXText.callStack ):string {
@@ -84,18 +103,9 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                                                               , ü_indent_1 + ü_reason.context );
         if ( isDirectInstanceOf( ü_reason, ErrorMessage ) ) {
         } else {
-            const ü_core = Object.assign( {}, ü_reason ) as any;
-            delete ü_core.name    ;
-            delete ü_core.message ;
-            delete ü_core.type    ;
-            delete ü_core.text    ;
-          //delete ü_core.stack   ;
-            delete ü_core.context ;
-            delete ü_core.reason  ;
-            const ü_a = format( ü_core   );
-            const ü_b = format( ü_reason );
+            const ü_core = formatWithoutError( ü_reason, ErrorMessage );
                             ü_summary.push( CEUiXText.data    + ü_colon
-                                                              , ü_indent_1 + ü_a );
+                                                              , ü_indent_1 + ü_core );
         }
         ü_stack          && ü_summary.push( ü_stack );
         if ( ü_lastIndx !== ü_indx )
@@ -107,18 +117,19 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                       ,                  ü_indent_1 + ü_finalEx.message );
         const ü_stack = extractPureCallStack( ü_finalEx );
         if ( ü_stack ) {
+          /*
                  let ü_core = format( ü_finalEx );
             ü_core = ü_core.replace( ü_finalEx.stack!, '' )
                            .replace( /^[^\{]*\{\r?\n?/, '' )
                            .replace( /\r?\n\}$/ , '' )
                            ;
+          */
+               const ü_core = formatWithoutError( ü_finalEx );
                             ü_summary.push( CEUiXText.context + ü_colon
                                                               , ü_core );
                             ü_summary.push( ü_stack );
         } else {
-
         }
-
     }
   //
     return ü_summary.join( ß_RuntimeContext.lineSep );

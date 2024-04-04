@@ -43,17 +43,6 @@ export function putLastIndex<T>( ü_list:T[], ü_indx:number ):void {
 
 //====================================================================
 
-export function extendArray<T>( ö_arry:T[] ):IArrayPush<T> {
-           ( ö_arry as IArrayPush<T> ).pushItems = ö_push;
-    return ( ö_arry as IArrayPush<T> );
-function ö_push( this:string[], ...ü_items:(T|void)[] ):number {
-  //const ü_super = Object.getPrototypeOf( this ) as string[];
-    return ö_arry.push( ...ü_items.filter( ü_item => ü_item != undefined ) as T[] );
-}
-}
-
-//====================================================================
-
 export function straightenArray<T>( ü_mixed: (T|readonly T[])[] ):T[] {
     const ü_done = [] as T[];
     ü_mixed.forEach( ü_elem => {
