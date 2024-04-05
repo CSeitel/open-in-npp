@@ -53,6 +53,13 @@ export function hasNoFileScheme( ü_uri:Uri ):boolean { return ü_uri.scheme !==
 export function uriToFile( ü_uri:Uri ):string {
     return ü_uri.fsPath;
 }
+export function formatUri( ü_uri:Uri ):string {
+    switch ( ü_uri.scheme ) {
+        case CEUriScheme.file: return ü_uri.fsPath;
+        default:
+    }
+    return decodeURI( ü_uri.toString() );
+}
 
 //====================================================================
 

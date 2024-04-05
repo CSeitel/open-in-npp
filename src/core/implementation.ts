@@ -5,16 +5,15 @@ https://code.visualstudio.com/api/references/vscode-api
   import { type SpawnOptions
          } from 'child_process';
   import { type TNotReadonly
-         , type TWritable
          } from '../types/generic.d';
   import { type TShadowDoc
          } from '../types/vsc.extension.d';
+  import { type TDropDownListOptions
+         } from '../vsc/uiUtil';
   import { CETrigger
          , CECliArgument
          , CETraceIds
          } from '../constants/extension';
-  import {
-         } from '../constants/vsc';
   import { CRgXp
          } from '../constants/text';
 //--------------------------------------------------------------------
@@ -67,17 +66,15 @@ https://code.visualstudio.com/api/references/vscode-api
          , hasNoFileScheme
          , uriToFile
          , matchingUris
+         , formatUri
          } from '../vsc/fsUtil';
 //--------------------------------------------------------------------
   import { MessageButton
          , threadShowError
-         } from '../vsc/ui';
-  import { TButtons
-         , TDropDownListOptions
          , SCancelButtonId
          , ListItem
          , DropDownList
-         } from '../vsc/ui';
+         } from '../vsc/uiUtil';
 //====================================================================
   const CNotAPid = -1;
 //====================================================================
@@ -492,7 +489,7 @@ async submit():Promise<number> {
         }
     } catch ( ü_eX ) {
         threadShowError( ü_eX
-                       , `When opening "${ this._mainUri }" in Notepad++` );
+                       , LCDoIt.context( formatUri( this._mainUri ) ) );
     }
     return CNotAPid;
 }

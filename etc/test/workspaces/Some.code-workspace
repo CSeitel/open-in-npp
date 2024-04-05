@@ -18,6 +18,6 @@
   "openInNpp.virtualDocumentsDirectory": "",
   "openInNpp.developerTrace": true,
   "openInNpp.openFolderAsWorkspace": true,
-  "openInNpp.Executable": "Notepd.exe"
+  "openInNpp.Executable": ""
   }
 }

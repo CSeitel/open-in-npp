@@ -6,7 +6,7 @@
          } from 'vscode';
   import { type TAnyFunction
          } from '../types/generic.d';
-  import { type TExtensionCommand
+  import { type TXtnCommand
          , type THistoryProxy
          , type TShadowDoc
          , type IDisposableLike
@@ -17,7 +17,6 @@
   import { CXtnWebUrl
          , CXtnCfgPrefix
          , CEXtnCommands
-         , CXtnTxtScheme
          } from '../constants/extension';
   import { CEUriScheme
          } from '../constants/vsc';
@@ -25,7 +24,6 @@
   import { workspace
          , commands
          , window
-         , Disposable
          } from 'vscode';
   import { ß_trc
          , ß_toggleDevTrace
@@ -34,10 +32,7 @@
          , getConfigSnapshot
          } from '../core/configContext';
   import { LCXtn
-         , LCDoIt
          } from '../l10n/i18n';
-  import { LCHeader
-         } from '../l10n/generic';
   import { openInNppActive
          , openInNppEditor
          , openInNppExplorer
@@ -50,7 +45,7 @@
          } from '../vsc/histUtil';
 //====================================================================
 
-export class XtnOpenInNpp {
+export default class XtnOpenInNpp {
     readonly whenReady:Promise<this>
   //
     readonly shadowDocsBfr = new Map<TextDocument,TShadowDoc>();
@@ -59,7 +54,7 @@ export class XtnOpenInNpp {
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
     readonly version      :string
-    readonly commands     :TExtensionCommand[]
+    readonly commands     :TXtnCommand[]
     readonly settings     :TXtnCfgJSON
 
 readonly dispose = ()=>{
@@ -105,10 +100,10 @@ constructor(
             case CEXtnCommands.oEditor   : ü_cmdImpl = openInNppEditor   ; break;
             case CEXtnCommands.oExplorer : ü_cmdImpl = openInNppExplorer ; break;
             default:
-                console.error( `Command "${ ü_cmdId }" not implemented.` );
+                ß_trc&& ß_trc( `Command "${ ü_cmdId }" not implemented.` );
                 continue;
         }
-      this.vscDisposables.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
+        this.vscDisposables.push(  commands.registerCommand( ü_cmdId, ü_cmdImpl )  );
     }
   //
       this.vscDisposables.push(             this
@@ -124,11 +119,13 @@ private async _whenActivationFinalized():Promise<this> {
     const ü_current = parseInt( this.version.replace( ü_versionToNumber, '' ) );
   //
     const ü_admin = this.globalHistory.admin;
+    ß_trc&& ß_trc( ü_admin.dataRef, 'Admin-History' );
     if ( ü_current > ü_admin.dataRef.version ) {
-    //ß_trc&& ß_trc( `Admin-History`, ü_admin );
-      ü_admin.dataRef.version= ü_current;
-      const ü_when = await this.globalHistory.admin.whenCommitted( );
-      ö_info( this.version );
+      //
+        ü_admin.dataRef.version = ü_current;
+        this.globalHistory.admin.whenCommitted();
+      //
+        ö_info( this.version );
     }
     return this;
   //

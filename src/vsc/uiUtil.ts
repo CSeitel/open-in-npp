@@ -1,30 +1,39 @@
 /*
 */
-  import * as ßß_vsCode from 'vscode';
+  import { type IUiXMessage
+         , type TUiXMessageType
+         , type TUiXMessageTemplate
+         } from '../types/lib.errorUtil.d';
+  import { type Disposable as vscDisposable
+         } from 'vscode';
+  import { CEUiXMessageType
+         } from '../constants/error';
+//--------------------------------------------------------------------
   import { ThemeIcon
          , window
-         , Disposable as vscDisposable
+         , StatusBarAlignment
          , QuickPickItem
          , QuickInputButton
          } from 'vscode';
-  import { format
-         } from 'util';
-//--------------------------------------------------------------------
   import { ß_trc
          , ß_err
-         , ß_RuntimeContext
          } from '../runtime/context';
   import { ß_ViewErrorDetails
          } from '../runtime/context-XTN';
   import { LCButton
          } from '../l10n/i18n';
-  import { whenNewTextEditorOpened
-         } from '../vsc/docUtil';
-  import { createPromise
-         } from '../lib/asyncUtil';
-  import { ErrorMessage
-         , summarizeError
+  import { summarizeError
          } from '../lib/errorUtil';
+  import { ß_stringify
+         } from '../runtime/context';
+  import { shortenText
+         } from '../lib/textUtil';
+  import { createPromise
+         , UniqueResource
+         , createTimer
+         , whenDelay
+         , whenDoneWithMessage
+         } from '../lib/asyncUtil';
 //--------------------------------------------------------------------
   type TIcons = 'close'
 //====================================================================
@@ -55,6 +64,63 @@ export async function threadShowError( ü_eX:any, ü_context:string ):Promise<vo
           ß_ViewErrorDetails.whenNewDocumentShown( summarizeError( ü_eX, ü_context ) );
           break;
     }
+}
+
+//====================================================================
+
+export class XtnStatusBarItem {
+    private readonly _duration = 5000;
+    private          _delay    = 0;
+    private readonly _timer    = createTimer( true );
+            readonly  item     = window.createStatusBarItem( StatusBarAlignment.Right );
+    private readonly _ur       = new UniqueResource( this.item ); 
+
+async echoPromise<T>( ü_whenDone:PromiseLike<T>, ü_msg:TUiXMessageTemplate ):Promise<void> {
+    const ü_done = await whenDoneWithMessage( ü_whenDone, ü_msg );
+    this.echoMessage( ü_done );
+}
+
+async echoMessage(   text :       IUiXMessage                                                                    ):Promise<void>
+async echoMessage( ü_text :string            , ü_type:TUiXMessageType                        , ü_tooltip?:string ):Promise<void>
+async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXMessageType.info, ü_tooltip?:string ):Promise<void> {
+    const ß_a =
+      { 'i': '\u24D8 ' // \u2139
+      , 'w': '\u26A0 '
+      , 'e': '\u274C ' // \u26A1
+      };
+  //
+    const ü_msg = typeof( ü_text_ ) === 'string'
+                ? { text: ü_text_
+                  , type: ü_type
+                  } as IUiXMessage
+                :         ü_text_ ;
+  //
+    this.item.text    = '\u{1F4DD}'+ ß_a[ ü_msg.type ]+ shortenText( ü_msg.text, 80 );
+    this.item.tooltip = ü_tooltip ?? 'Notepad++';
+  //
+    if ( this._ur.isPending() ) {
+                      this._timer() ; // reset
+        this._delay = this._duration; // reset
+        return;
+    }
+  //
+    const ü_release = await this._ur.whenAvailable();
+    try {
+        this.item.show();
+      //const ü_dura = createTimer();
+        
+                                            this._timer() ; // reset
+                             this._delay  = this._duration; // reset
+        while (            ( this._delay -= this._timer() ) > 0 ) {
+            await whenDelay( this._delay );
+          //ß_trc&& ß_trc( this._delay, 'Dela' )
+        }
+        this.item.hide();
+    } finally {
+        ü_release();
+    }
+}
+
 }
 
 //====================================================================

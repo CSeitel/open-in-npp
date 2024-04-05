@@ -5,8 +5,7 @@
   import { type ConfigSnapshot
          } from '../core/configContext';
 //--------------------------------------------------------------------
-  import { resolve
-         , normalize
+  import { normalize
          , isAbsolute
          } from 'path';
   import { FileSystemError
@@ -57,7 +56,7 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
         try {
 
             const ü_cfgData = ü_cfgHst.dataRef;
-            ß_trc&& ß_trc( ü_cfgData, `Config-History` );
+            ß_trc&& ß_trc( ü_cfgData, 'Config-History' );
             const ü_lastExe = ü_cfgData.executable;
             if ( ü_lastExe.length > 0 ) {
                 ß_trc&& ß_trc( `Executable stored: "${ ü_lastExe }"` );
@@ -72,13 +71,13 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
 
         } finally { ü_release(); }
     } else {
-                           let ü_path:string
+                                       let ü_path:string
              if ( await isWin32Executable( ü_path = expandEnvVariables( CEExecutable.x64_64bit  ) ) ) {}
         else if ( await isWin32Executable( ü_path = expandEnvVariables( CEExecutable.x86_32bit  ) ) ) {}
         else if ( await isWin32Executable( ü_path =                     CEExecutable.x64_64bit_   ) ) {}
         else if ( await isWin32Executable( ü_path =                     CEExecutable.x86_32bit    ) ) {}
-        else                 { ü_path =                     CEExecutable.path_env         ;}
-                        return ü_path;
+        else                             { ü_path =                     CEExecutable.path_env         ;}
+                                    return ü_path ;
     }
 }
 

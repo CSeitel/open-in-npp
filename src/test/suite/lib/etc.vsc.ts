@@ -6,10 +6,9 @@
   import { CEFileType
          } from '../../../constants/vsc';
   import { ß_trc
-     
          } from '../../../runtime/context';
   import { threadShowError
-         } from '../../../vsc/ui';
+         } from '../../../vsc/uiUtil';
   import { expect
          } from '../../../lib/errorUtil';
   import { whenShownInWindowsExplorer

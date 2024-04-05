@@ -1,7 +1,5 @@
 /*
 */
-  import { type XtnOpenInNpp
-         } from '../core/runtime';
 //--------------------------------------------------------------------
   export type TPathSeparator  = '/' |'\\'
   export type TLineSeparator  = '\n'|'\r\n'
@@ -36,10 +34,6 @@
     //
       readonly devTrace   :TDeveloperTrace
       readonly errTrace   :TDeveloperTrace
-  }
-
-  export interface IXtnRuntimeContext extends IRuntimeContext<{}> {
-      readonly xtnOpenInNpp:XtnOpenInNpp
   }
 
 //====================================================================

@@ -9,8 +9,7 @@
          , type TNotReadonly
          } from '../types/generic.d';
   import { type IXtnRuntimeContext
-         } from '../types/runtime.context.d';
-  type TInitialRuntimeContext = TWritable<IXtnRuntimeContext>
+         } from '../types/vsc.extension.d';
 //--------------------------------------------------------------------
   import { CXtnId
          , CXtnTxtScheme
@@ -29,15 +28,16 @@
   import { TextDocViewer
          } from '../vsc/docUtil';
   import { XtnStatusBarItem
-         } from '../core/gui';
+         } from '../vsc/uiUtil';
 //====================================================================
+  type TInitialRuntimeContext = TWritable<IXtnRuntimeContext>
   export const ß_XtnOpenInNpp      = null as unknown as XtnOpenInNpp;
   export const ß_getConfigSnapshot = getConfigSnapshot;
   export const ß_StatusBarItem     = new XtnStatusBarItem();
   export const ß_ViewErrorDetails  = new TextDocViewer( CXtnTxtScheme, LCHeader.DETAILS() );
          const ß_that              = ß_implement( ß_RuntimeContext as TInitialRuntimeContext );
-  import { XtnOpenInNpp
-         } from '../core/runtime';
+  import   XtnOpenInNpp
+           from '../core/xtnOpenInNpp';
 //====================================================================
 
 function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IXtnRuntimeContext {
@@ -46,7 +46,6 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IXtnRuntimeContext {
          ü_rtCntxt.typeCode    = 'xtn';
          ü_rtCntxt.tracePrefix = 'XTN';
       //
-      //ü_rtCntxt .devTrace     = ( ß_trc as TNotReadonly<TDeveloperTrace> ) =   ß_devTrace   ;
         ü_rtCntxt .xtnOpenInNpp = ß_XtnOpenInNpp ;
     }
     return ü_rtCntxt;

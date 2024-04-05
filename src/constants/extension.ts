@@ -1,7 +1,7 @@
 /*
 */
 //--------------------------------------------------------------------
-  export const CXtnTxtScheme =         'open-in-npp-show-details';
+  export const CXtnTxtScheme = 'OpenInNppDetails';
   export const CXtnId        = 'CSeitel.open-in-npp';
   export const CXtnWebUrl    = 'https://marketplace.visualstudio.com/items/CSeitel.open-in-npp';
 //export const CXtnWebUrl    = 'https://marketplace.visualstudio.com/items?itemName=CSeitel.open-in-npp';
