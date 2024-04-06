@@ -1,9 +1,12 @@
 /*
 */
-  import { CEExecutable
-         } from '../constants/extension';
   import { type ConfigSnapshot
          } from '../core/configContext';
+  import { type TUiXMessageTemplate
+         , type IExpandUiXMessageVars
+         } from '../types/lib.errorUtil.d';
+  import { CEExecutable
+         } from '../constants/extension';
 //--------------------------------------------------------------------
   import { normalize
          , isAbsolute
@@ -31,9 +34,9 @@
          } from '../lib/errorUtil';
 //====================================================================
 
-export async function onNewExecutable    ( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenExecutable    , LCConfig.executable     ); }
-export async function onNewWorkingDir    ( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenWorkingDir    , LCConfig.workingDir     ); }
-export async function onNewVirtualDocsDir( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenVirtualDocsDir, LCConfig.virtualDocsDir ); }
+export async function onNewExecutable    ( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenExecutable    , LCConfig.executable_Y       ); }
+export async function onNewWorkingDir    ( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenWorkingDir    , LCConfig.workingDir_Y     ); }
+export async function onNewVirtualDocsDir( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenVirtualDocsDir, LCConfig.virtualDocsDir_Y ); }
 
 export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string ):Promise<string> {
     if ( ü_cfgPath.length === 0 ) { return whenDefaultExecutable( ü_useHistory ); }
@@ -59,11 +62,11 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
             ß_trc&& ß_trc( ü_cfgData, 'Config-History' );
             const ü_lastExe = ü_cfgData.executable;
             if ( ü_lastExe.length > 0 ) {
-                ß_trc&& ß_trc( `Executable stored: "${ ü_lastExe }"` );
+                ß_trc&& ß_trc( `Stored: "${ ü_lastExe }"`, 'Executable' );
                 return ü_lastExe;
             } else {
                 const ü_nextExe = await whenDefaultExecutable( false );
-                ß_trc&& ß_trc( `Executable found: "${ ü_nextExe }"` );
+                ß_trc&& ß_trc( `Found: "${ ü_nextExe }"`, 'Executable' );
                                    ü_cfgData.executable = ü_nextExe;
                 ü_cfgHst.dataRef = ü_cfgData;
                 return ü_nextExe;
@@ -83,16 +86,15 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
 
 //====================================================================
 
-export async function whenKnownAsFolder( ü_dirDefinition:string, ü_cfgPath:string ):Promise<string> {
+export async function whenKnownAsFolder( ü_dirDefinition:TUiXMessageTemplate, ü_cfgPath:string ):Promise<string> {
     if ( ü_cfgPath.length === 0 ) { return ü_cfgPath; }
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
     if ( isAbsolute( ü_path ) ) {
-      if ( ! await fsWhenKnownAsFolder( ü_path ) ) {
-          throw new ErrorMessage( LCConfig.noFolder, ü_dirDefinition, ü_path );
-      }
+        if ( ! await fsWhenKnownAsFolder( ü_path ) ) {
+            throw new ErrorMessage( ü_dirDefinition as unknown as IExpandUiXMessageVars || LCConfig.noFolder, ü_path );
+        }
     }
-  //ß_trc&& ß_trc( `Directory found: "${ ü_path }"` );
     return ü_path;
 }
 

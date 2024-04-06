@@ -11,13 +11,9 @@
          } from './runtime/context-XTN';
 //====================================================================
 
-export async function activate( ü_vscXtnContext:ExtensionContext ):Promise<XtnOpenInNpp> {
-    ß_trc&& ß_trc( 'Welcome to `Open In Notepad++`', 'Activation' );
+export async function deactivate()                                  :Promise<void>         { ß_trc&& ß_trc( 'Bye!'                           , 'Deactivation' ); }
+export async function   activate( ü_vscXtnContext:ExtensionContext ):Promise<XtnOpenInNpp> { ß_trc&& ß_trc( 'Welcome to `Open In Notepad++`!',   'Activation' );
     return ß_whenXtnActivated( ü_vscXtnContext );
-}
-
-export async function deactivate():Promise<void> {
-    ß_trc&& ß_trc( 'Bye', 'Deactivation' );
 }
 
 //====================================================================

@@ -63,6 +63,7 @@ export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):P
     if ( ß_XtnOpenInNpp === null ) {
         ü_vscXtnContext.subscriptions.push( ß_ViewErrorDetails );
         (ß_XtnOpenInNpp as TNotReadonly<XtnOpenInNpp> ) = await new XtnOpenInNpp( ü_vscXtnContext ).whenReady;
+        ß_trc&& ß_trc( 'Done', 'Activation' );
     } else {
         if ( ß_XtnOpenInNpp.vscContext === ü_vscXtnContext )
              { ß_trc&& ß_trc( 'Old context', 'Re-Activation' ); }

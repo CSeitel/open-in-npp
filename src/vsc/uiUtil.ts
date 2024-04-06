@@ -4,9 +4,10 @@
          , type TUiXMessageType
          , type TUiXMessageTemplate
          } from '../types/lib.errorUtil.d';
-  import { type Disposable as vscDisposable
+  import { type Disposable as TDisposable
          } from 'vscode';
   import { CEUiXMessageType
+         , CUiXMessageTypeIcon
          } from '../constants/error';
 //--------------------------------------------------------------------
   import { ThemeIcon
@@ -60,7 +61,6 @@ export async function threadShowError( ü_eX:any, ü_context:string ):Promise<vo
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
     switch ( ü_done ) {
         case ü_more:
-          //ü_eX = new ErrorMessage( 'An exception occurred.' ).setReason( ü_eX ).setContext( ü_context );
           ß_ViewErrorDetails.whenNewDocumentShown( summarizeError( ü_eX, ü_context ) );
           break;
     }
@@ -69,11 +69,16 @@ export async function threadShowError( ü_eX:any, ü_context:string ):Promise<vo
 //====================================================================
 
 export class XtnStatusBarItem {
-    private readonly _duration = 5000;
     private          _delay    = 0;
     private readonly _timer    = createTimer( true );
             readonly  item     = window.createStatusBarItem( StatusBarAlignment.Right );
     private readonly _ur       = new UniqueResource( this.item ); 
+  //
+constructor(
+    private readonly _duration  = 5000
+  , private readonly _maxLength =   80
+){
+}
 
 async echoPromise<T>( ü_whenDone:PromiseLike<T>, ü_msg:TUiXMessageTemplate ):Promise<void> {
     const ü_done = await whenDoneWithMessage( ü_whenDone, ü_msg );
@@ -83,11 +88,6 @@ async echoPromise<T>( ü_whenDone:PromiseLike<T>, ü_msg:TUiXMessageTemplate ):P
 async echoMessage(   text :       IUiXMessage                                                                    ):Promise<void>
 async echoMessage( ü_text :string            , ü_type:TUiXMessageType                        , ü_tooltip?:string ):Promise<void>
 async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXMessageType.info, ü_tooltip?:string ):Promise<void> {
-    const ß_a =
-      { 'i': '\u24D8 ' // \u2139
-      , 'w': '\u26A0 '
-      , 'e': '\u274C ' // \u26A1
-      };
   //
     const ü_msg = typeof( ü_text_ ) === 'string'
                 ? { text: ü_text_
@@ -95,8 +95,9 @@ async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXM
                   } as IUiXMessage
                 :         ü_text_ ;
   //
-    this.item.text    = '\u{1F4DD}'+ ß_a[ ü_msg.type ]+ shortenText( ü_msg.text, 80 );
-    this.item.tooltip = ü_tooltip ?? 'Notepad++';
+    this.item.text    = CUiXMessageTypeIcon.verified[ ü_msg.type ]
+                      + shortenText( ü_msg.text, this._maxLength );//'\u{1F4DD}'+
+    this.item.tooltip = ü_tooltip ?? ü_msg.text;
   //
     if ( this._ur.isPending() ) {
                       this._timer() ; // reset
@@ -113,7 +114,6 @@ async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXM
                              this._delay  = this._duration; // reset
         while (            ( this._delay -= this._timer() ) > 0 ) {
             await whenDelay( this._delay );
-          //ß_trc&& ß_trc( this._delay, 'Dela' )
         }
         this.item.hide();
     } finally {
@@ -214,7 +214,7 @@ static async whenItemsPicked<T,B>( ü_items:TListItems<T>
 }
   //
     private readonly _whenDone                     = createPromise<TMultipleValues<T>|B|T>();
-    private readonly _disposables :vscDisposable[] = [];
+    private readonly _disposables :TDisposable[] = [];
     private readonly _pick                         = window.createQuickPick<ListItem<T>>();
     private readonly _hint       ?:string
     private          _selection   :readonly ListItem<T>[]|TNULL          = CNULL;

@@ -1,7 +1,5 @@
 /*
 */
-  import { type SpawnOptions
-         } from 'child_process';
   import { type TFileUri
          } from '../types/vsc.fsUtil.d';
   import { CEVscCommands
@@ -15,8 +13,6 @@
   import { ß_trc
          , ß_err
          } from '../runtime/context';
-  import { whenDoneWith
-         } from '../lib/asyncUtil';
   import { fileToUri
          , isContainedInWorkspace
          } from '../vsc/fsUtil';
@@ -42,7 +38,7 @@ export async function whenOpenedInOSDefaultApp( ü_fileUri:TFileUri ):Promise<bo
 
 export async function whenSettingsOpened( ü_prefix:string ):Promise<void> {
   //
-    const ü_done = await commands.executeCommand<null>( CEVscCommands.openWbSettings, ü_prefix );
+    const ü_done = await commands.executeCommand<null>( CEVscCommands.openWbSettings, ü_prefix.toLocaleLowerCase() );
 }
 
 export async function whenUriOpened( ü_realUri:Uri|string ):Promise<void> {

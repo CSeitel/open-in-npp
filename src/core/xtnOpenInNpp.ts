@@ -74,7 +74,6 @@ private _onDidCloseTextDocument = ( ü_anyDoc:TextDocument )=>{
 constructor(
     readonly vscContext   :ExtensionContext
 ){
-    ß_trc&& ß_trc( 'Instance activated' );
     getConfigSnapshot().developerTrace || ß_toggleDevTrace();
   //
     this.globalHistory =
@@ -120,25 +119,29 @@ private async _whenActivationFinalized():Promise<this> {
   //
     const ü_admin = this.globalHistory.admin;
     ß_trc&& ß_trc( ü_admin.dataRef, 'Admin-History' );
+  //ß_trc&& ß_trc( this.version, 'Admin-History' );
     if ( ü_current > ü_admin.dataRef.version ) {
       //
         ü_admin.dataRef.version = ü_current;
         this.globalHistory.admin.whenCommitted();
       //
-        ö_info( this.version );
+        ß_whenNewVersionInfoShown( this.version );
     }
     return this;
   //
-async function ö_info( ü_newVersion:string ):Promise<void> {
-    const ü_show = await window.showInformationMessage( LCXtn.welcome( ü_newVersion ), LCXtn.delta());
+}
+
+}
+
+//====================================================================
+
+async function ß_whenNewVersionInfoShown( ü_newVersion:string ):Promise<void> {
+    const ü_show = await window.showInformationMessage( LCXtn.welcome( ü_newVersion ), LCXtn.delta() );
     switch ( ü_show ) {
         case undefined: break;
         default:
           whenUriOpened( CXtnWebUrl + '/changelog' );
     }
-}
-}
-
 }
 
 //====================================================================

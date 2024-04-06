@@ -15,7 +15,7 @@
   "openInNpp.filesInFolderPattern": "",
   "openInNpp.limit": 0,
   "openInNpp.matchingFilesLimit": 2,
-  "openInNpp.virtualDocumentsDirectory": "",
+  "openInNpp.virtualDocumentsDirectory": "%TEMP%",
   "openInNpp.developerTrace": true,
   "openInNpp.openFolderAsWorkspace": true,
   "openInNpp.Executable": ""

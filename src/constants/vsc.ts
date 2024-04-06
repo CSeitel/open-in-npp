@@ -1,3 +1,5 @@
+/*
+*/
 //--------------------------------------------------------------------
 
   export const enum CELanguageId {
@@ -8,6 +10,7 @@
     , vscSettings = 'vscode-settings'
     , untitled    = 'untitled'
     }
+
 //====================================================================
 
   export const enum CEFileType {
@@ -27,3 +30,7 @@
     , revealInExplorer = 'revealInExplorer'
     , revealFileInOS   = 'revealFileInOS'
     }
+
+//====================================================================
+/*
+*/

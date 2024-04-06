@@ -511,13 +511,16 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
         ü_docView.updateShadow();
     } else {
         const ü_create = LCDoIt.createShadow( ü_doc.fileName, ü_docView.fileName );
-        const ü_yes    = new MessageButton( 'YES' );
-        const ü_todo = await window.showInformationMessage( ü_create, ü_yes );
+        const ü_yes    = new MessageButton( 'YES'    );
+        const ü_select = new MessageButton( 'SELECT' );
+        const ü_todo = await window.showInformationMessage( ü_create, ü_yes, ü_select );
         switch ( ü_todo ) {
-          case ü_yes:
-              ü_docView.updateShadow();
-              openInNppShadow( ü_docView );
-            break;
+            case ü_yes:
+                ü_docView.updateShadow();
+                openInNppShadow( ü_docView );
+                break;
+            case ü_select:
+                break;
         }
     }
     return ü_docView;

@@ -45,8 +45,7 @@ export function toErrorMessage( ü_eX:any ):string {
     return ''+ü_eX;
 }
 
-export function formatWithoutError( ü_oref:any, ü_class:Function = Error ):string {
-  //const ü_a = format( ü_errX );
+export function formatWithoutSuper( ü_oref:any, ü_class:Function = Error ):string {
   //
     const ü_stack = [] as any[];
     let ü_cursor:any = ü_oref;
@@ -107,7 +106,7 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                                           , indentLines( ü_reason.context, ü_indent_1 ) );
         if ( isDirectInstanceOf( ü_reason, ErrorMessage ) ) {
         } else {
-            const ü_core = indentLines( formatWithoutError( ü_reason, ErrorMessage ), ü_indent_1 );
+            const ü_core = indentLines( formatWithoutSuper( ü_reason, ErrorMessage ), ü_indent_1 );
                             ü_summary.push( CEUiXText.data    + ü_colon
                                                               , ü_indent_1 + ü_core );
         }
@@ -128,7 +127,7 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                            .replace( /\r?\n\}$/ , '' )
                            ;
           */
-               const ü_core = indentLines( formatWithoutError( ü_finalEx ), ü_indent_1 );
+               const ü_core = indentLines( formatWithoutSuper( ü_finalEx ), ü_indent_1 );
                             ü_summary.push( CEUiXText.context + ü_colon
                                                               , ü_core );
                             ü_summary.push( ü_stack );

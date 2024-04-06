@@ -11,15 +11,14 @@
          } from '../constants/extension';
 //--------------------------------------------------------------------
   import { workspace
-         , window
          , ConfigurationChangeEvent
          , ConfigurationTarget
          } from 'vscode';
   import { ß_trc
          , ß_toggleDevTrace
          } from '../runtime/context';
-  import { UiXMessage
-         } from '../lib/errorUtil';
+  import { LCConfig
+         } from '../l10n/i18n';
   import { AsyncCalculation
          } from '../lib/asyncUtil';
   import { whenExecutable
@@ -73,11 +72,11 @@ constructor(
 }
 //
 get whenExecutable    ():PromiseLike<string> { return ( this._whenExecutable
-                                                   || ( this._whenExecutable     = new AsyncCalculation( this.executable               , whenExecutable   .bind( null, true                           ) ) ) ).whenY; }
+                                                   || ( this._whenExecutable     = new AsyncCalculation( this.executable               , whenExecutable   .bind( null, true                      ) ) ) ).whenY; }
 get whenWorkingDir    ():PromiseLike<string> { return ( this._whenWorkingDir
-                                                   || ( this._whenWorkingDir     = new AsyncCalculation( this.workingDirectory         , whenKnownAsFolder.bind( null, 'Working Directory'            ) ) ) ).whenY; }
+                                                   || ( this._whenWorkingDir     = new AsyncCalculation( this.workingDirectory         , whenKnownAsFolder.bind( null, LCConfig.workingDir_N     ) ) ) ).whenY; }
 get whenVirtualDocsDir():PromiseLike<string> { return ( this._whenVirtualDocsDir
-                                                   || ( this._whenVirtualDocsDir = new AsyncCalculation( this.virtualDocumentsDirectory, whenKnownAsFolder.bind( null, 'Virtual Documents Directory'  ) ) ) ).whenY; }
+                                                   || ( this._whenVirtualDocsDir = new AsyncCalculation( this.virtualDocumentsDirectory, whenKnownAsFolder.bind( null, LCConfig.virtualDocsDir_N ) ) ) ).whenY; }
 clone( ü_what ?:TXtnCfgIds ):ConfigSnapshot {
     const ü_cfg = new ConfigSnapshot( this._whenExecutable
                                     , this._whenWorkingDir
@@ -114,7 +113,7 @@ export function getConfigSnapshot():ConfigSnapshot {
 export async function configModificationSignalled( ü_change:ConfigurationChangeEvent ):Promise<void> {
     if ( ! ü_change.affectsConfiguration( CXtnCfgPrefix ) ) { return; }
   //
-    ß_trc&& ß_trc( `Event: Configuration changed` );
+    ß_trc&& ß_trc( `Event: Configuration changed`, 'Configuration' );
   //
     if ( ü_change.affectsConfiguration( CXtnCfgId.extendExplorerContextMenu )
       || ü_change.affectsConfiguration( CXtnCfgId.extendEditorContextMenu   )
@@ -135,10 +134,4 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
 
 //====================================================================
 /*
-whenExecutable( ü_update = false ):PromiseLike<string> {
-         if (              this._whenExecutable === null )
-                         { this._whenExecutable   = new ValueCalcY( super.executable      , whenExecutable as unknown as TAsyncFunctionSingleArg<string> ); }
-    else if ( ü_update ) { this._whenExecutable.x =                 super.executable; }
-    return this._whenExecutable.whenY;
-}
 */

@@ -2,24 +2,16 @@
 */
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
-  import { type IPromiseRejected
-         } from '../../../types/lib.asyncUtil.d';
 //--------------------------------------------------------------------
-  import { format } from 'util';
-  import { CEFileType
-         } from '../../../constants/vsc';
+  import { format
+         } from 'util';
   import { ß_trc
          } from '../../../runtime/context';
-  import { whenOpenedInOSDefaultApp
-         } from '../../../vsc/cmdUtil';
   import { summarizeError
          , ErrorMessage
          } from '../../../lib/errorUtil';
   import { isDirectInstanceOf
          } from '../../../lib/objectUtil';
-  import { whenPromiseSettled
-         , whenDoneWith
-         } from '../../../lib/asyncUtil';
   import { testSrc
          , testSummary
          , testAsyncFunction
@@ -30,29 +22,22 @@
 //====================================================================
 
 export async function tst_(){
-    
   //
-    return tst_error();
+    return tst_class();
   //
-    const ü_n = null as null|Array<1>;
-  //
-  //const ü_whenResaon = Promise.reject( new TypeError( 'Dummy Error' ) );
-  //const ü_done = await whenPromiseSettled( whenDoneWith( ü_whenResaon, 'Failure: {0}', '0.0' )
-  //                                       ) as IPromiseRejected<TypeError>;
-    testEqual( 1, ü_n?.toString() || 1 );
     testSummary();
 }
 
 //====================================================================
-class ErrorX        extends Error        { more = 12; }
-class ErrorMessageX extends ErrorMessage { more = 12; }
 
 export async function tst_error(){
+class ö_ErrorX        extends Error        { more = 12; }
+class ö_ErrorMessageX extends ErrorMessage { more = 12; }
   //
-    const ü_errMsg  = new ErrorMessage ('w','u');
-    const ü_errMsgX = new ErrorMessageX('w','u');
-    const ü_err     = new Error        ('w')    ;
-    const ü_errX    = new ErrorX       ('w')    ;
+    const ü_errMsg  = new   ErrorMessage ('w','u');
+    const ü_errMsgX = new ö_ErrorMessageX('w','u');
+    const ü_err     = new   Error        ('w')    ;
+    const ü_errX    = new ö_ErrorX       ('w')    ;
   //
     const ü_errMsg_Y  = summarizeError( ü_errMsg , 'TEST' );
     const ü_errMsgX_Y = summarizeError( ü_errMsgX, 'TEST' );
@@ -81,10 +66,10 @@ export async function tst_error(){
         throw 3;
       //ß_trc&& ß_trc( ü_i );
     } catch ( ü_eX ) {
-        ü_eX = new ErrorMessageX( '{0}', 'PREVIOUS' ).setReason( ü_eX );
+        ü_eX = new ö_ErrorMessageX( '{0}', 'PREVIOUS' ).setReason( ü_eX );
         const ü_prot = Object.getPrototypeOf( ü_eX );
-        ü_txt = summarizeError( new Error(), 'TEST' );
-        ü_txt = summarizeError( new ErrorX(), 'TEST' );
+        ü_txt = summarizeError( new Error (), 'TEST' );
+        ü_txt = summarizeError( new ö_ErrorX(), 'TEST' );
         ü_txt = summarizeError( ü_eX, 'TEST' );
     }
     testEqual( ü_txt, '' );
@@ -109,6 +94,51 @@ export async function tst_syntax(){
   //
     testFunction( format, ü_data );
     testSummary( 'Syntax' );
+}
+
+//====================================================================
+
+export async function tst_class(){
+  //
+function ö_Class( this:any ):TClass {
+    Object.assign( this, ü_class );
+    return this;
+}
+class Ö_Class {
+    prop = ['Class']
+}
+  //
+    const ü_super = { super:['proto'] };
+    const ü_class = { prop :['class'] };
+    ö_Class.prototype = ü_super;
+    ü_super.constructor = ö_Class;
+    type TClass = typeof ü_class & typeof ü_super & Object
+  //
+    const ü_inst = new (<any> ö_Class)() as TClass;
+    const ü_Inst = new Ö_Class();
+    const ü_prot = Object.getPrototypeOf( ü_inst );
+    const ü_Prot = Object.getPrototypeOf( ü_Inst );
+    const ü_prt2 = Object.getPrototypeOf( ü_prot );
+  //
+    testEqual( ü_Inst.hasOwnProperty( 'prop'        ), true  );
+    testEqual( ü_inst.hasOwnProperty( 'prop'        ), true  );
+    testEqual( ü_inst.hasOwnProperty( 'super'       ), false );
+    testEqual( ü_inst.hasOwnProperty( 'constructor' ), false );
+    testEqual( ü_Inst.hasOwnProperty( 'constructor' ), false );
+    testEqual( ü_prot, ü_super           );
+    testEqual( ü_Prot, Ö_Class.prototype );
+    testEqual( ü_prot.hasOwnProperty( 'constructor' ), true  );
+    testEqual( ü_Prot.hasOwnProperty( 'constructor' ), true  );
+    testEqual( ü_prt2.hasOwnProperty( 'constructor' ), true  );
+    testEqual( ( ü_inst as any ).constructor, ö_Class );
+    testEqual(   ü_Inst         .constructor, Ö_Class );
+    testEqual(   ü_prot         .constructor, ö_Class );
+    testEqual(   ü_Prot         .constructor, Ö_Class );
+    testEqual(   ü_prt2         .constructor, Object  );
+    testEqual( ü_inst.super, ü_super.super );
+    testEqual( ü_inst.prop , ü_class.prop  );
+  //
+    testSummary( 'Class' );
 }
 
 //====================================================================
