@@ -16,6 +16,8 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../constants/extension';
   import { CRgXp
          } from '../constants/text';
+  import { CButton
+         } from '../constants/ui';
 //--------------------------------------------------------------------
   import { join
          , isAbsolute
@@ -40,6 +42,8 @@ https://code.visualstudio.com/api/references/vscode-api
   import { LCDoIt
          , LCButton as LCButton
          } from '../l10n/i18n';
+  import { LCButtonText as LCButton_
+         } from '../l10n/ui';
 //------------------------------------------------------------------------------
   import { whenChildProcessSpawned
          } from '../lib/cpUtil';
@@ -73,7 +77,7 @@ https://code.visualstudio.com/api/references/vscode-api
   import { MessageButton
          , threadShowError
          , SCancelButtonId
-         , openFolder
+         , whenFolderSelected
          , ListItem
          , DropDownList
          } from '../vsc/uiUtil';
@@ -84,7 +88,7 @@ https://code.visualstudio.com/api/references/vscode-api
 export async function openInNppActive  (                           ):Promise<number> { return new CliArgs( CETrigger.PALETTE                    ).submit(); }
 export async function openInNppEditor  ( ü_uri:Uri                 ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_uri            ).submit(); }
 export async function openInNppExplorer( ü_uri:Uri, ü_all:Uri[]    ):Promise<number> { return new CliArgs( CETrigger.EXPLORER, ü_uri    , ü_all ).submit(); }
-       async function openInNppShadow  ( ü_doc:VirtualDocumentView ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_doc.uri, ü_doc ).submit(); }
+       async function ß_openInNppShadow( ü_doc:VirtualDocumentView ):Promise<number> { return new CliArgs( CETrigger.EDITOR  , ü_doc.uri, ü_doc ).submit(); }
 
 //====================================================================
 
@@ -141,7 +145,7 @@ private async _whenReady( ü_shadowDir:string ):Promise<this> {
     return this;
 }
 
-async whenShadowUpToDate( ü_resetShadowDir?:string ):Promise<boolean> {
+async whenShadowUpToDate( ü_resetShadowDir?:string ):Promise<this> {
     if ( ü_resetShadowDir ) {
         await this._whenReady( ü_resetShadowDir );
     }
@@ -175,7 +179,8 @@ async whenShadowUpToDate( ü_resetShadowDir?:string ):Promise<boolean> {
     } else {
         this._docViewBE.hash = this._newHash;
     }
-    return ü_done;
+    return this;
+  //return ü_done;
 }
 
 }
@@ -448,17 +453,17 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
 private async _whenSelected( ü_uris:Uri[], ö_limit:number ):Promise<boolean> {
   //
     const ü_todo = ö_limit === 0
-                 ?               { titleId: 'SELECT' }
+                 ?               { _button: CButton.SELECT }
                  : await window.showInformationMessage( LCDoIt.max_items( ö_limit, ü_uris.length )
-                       , new MessageButton( 'OK'     )
-                       , new MessageButton( 'SELECT' )
-                       , new MessageButton( 'ALL'    )
+                       , new MessageButton( CButton.OK     )
+                       , new MessageButton( CButton.SELECT )
+                       , new MessageButton( CButton.ALL    )
                        )
                  ;
   //
-    switch ( ü_todo?.titleId ) {
+    switch ( ü_todo?._button ) {
 
-      case 'SELECT': {
+      case CButton.SELECT: {
           const ü_list = ü_uris.map( (ü_ri,ü_indx) => new ListItem(     basename( ü_ri.fsPath )
                                                             , shortenText( dirname ( ü_ri.fsPath ), 72 )
                                                             ,                        ü_ri
@@ -479,10 +484,10 @@ private async _whenSelected( ü_uris:Uri[], ö_limit:number ):Promise<boolean> {
           return ü_uris.length > 0;
       }
     //
-      case 'OK'      : ü_uris.length = ö_limit; return true;
-      case 'ALL'     :                          return true;
+      case CButton.OK      : ü_uris.length = ö_limit; return true;
+      case CButton.ALL     :                          return true;
     //
-      case 'CANCEL'  :
+      case CButton.CANCEL  :
       case undefined :
       default        : ü_uris.length = 0; return false;
     }
@@ -500,7 +505,7 @@ async submit():Promise<number> {
     return CNotAPid;
 }
 
-private async _threadShadowDone( ü_doc:TextDocument,):Promise<void> {
+private async _threadShadowDone( ü_doc:TextDocument ):Promise<void> {
     try {
         const ü_docView   = await this._whenShadowReady( ü_doc, '', false ); // not silent with UI
     } catch ( ü_eX ) {
@@ -521,42 +526,44 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
                                                    , ü_shadowDir
                                                    ).whenReady;
   //
-    if ( ü_silent ) {
-        ü_docView.whenShadowUpToDate();
-    } else {
+    if ( ü_silent ) { return ü_docView.whenShadowUpToDate(); }
+  //
         const ü_create = LCDoIt.createShadow( ü_doc.fileName, ü_docView.fileName );
-        const ü_yes    = new MessageButton( 'YES'    );
-        const ü_select = new MessageButton( 'SELECT' );
+        const ü_yes    = new MessageButton( CButton.YES    );
+        const ü_select = new MessageButton( CButton.SELECT );
         const ü_todo = await window.showInformationMessage( ü_create, ü_yes, ü_select );
         switch ( ü_todo ) {
-            case ü_yes:
-                           await ü_docView.whenShadowUpToDate();
-                openInNppShadow( ü_docView );
-                break;
+
             case ü_select:
-                const ü_new = await openFolder( ü_shadowDir, 'Folder for shadow copy creation' );
-                if ( ü_new.length > 0 ) {
-
-                    const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
-                               await ü_docView.whenShadowUpToDate( ü_new );
-                    openInNppShadow( ü_docView );
-                    const ü_release = await ü_cfgHist.whenDataRef();
-                    try {
-                     //const ü_cfgData = ü_cfgHist.dataRef;
-                        if ( ü_cfgHist.dataRef.shadowDir !== ü_new ) {
-                           //ü_cfgData.shadowDir          =  ü_new ;
-                             ü_cfgHist.dataRef.shadowDir  =  ü_new ;
-                             ü_cfgHist.triggerCommit();
-                        }
-                    } finally { ü_release(); }
-
+                const ü_selectedDir = await whenFolderSelected( ü_shadowDir, 'Folder for shadow copy creation' );
+                if ( ü_selectedDir.length > 0 ) {
+                    ß_whenHist( ü_selectedDir );
+                                 await ü_docView.whenShadowUpToDate( ü_selectedDir );
+                    ß_openInNppShadow( ü_docView );
                 }
                 break;
+
+            case ü_yes:
+                             await ü_docView.whenShadowUpToDate();
+                ß_openInNppShadow( ü_docView );
+                break;
         }
-    }
     return ü_docView;
 }
 
+}
+
+async function ß_whenHist( ü_resetShadowDir:string ):Promise<void> {
+                    const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
+                    const ü_release = await ü_cfgHist.whenDataRef();
+                    try {
+                     //const ü_cfgData = ü_cfgHist.dataRef;
+                        if ( ü_cfgHist.dataRef.shadowDir !== ü_resetShadowDir ) {
+                           //ü_cfgData.shadowDir          =  ü_selectedDir ;
+                             ü_cfgHist.dataRef.shadowDir  =  ü_resetShadowDir ;
+                             ü_cfgHist.triggerCommit();
+                        }
+                    } finally { ü_release(); }
 }
 
 //====================================================================

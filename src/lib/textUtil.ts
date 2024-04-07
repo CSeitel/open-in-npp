@@ -49,10 +49,11 @@ function ö_env_win32( ü_original:string, ü_name:string ):string {
 //--------------------------------------------------------------------
 
 	//args?: Array<string | number | boolean> | Record<string, any>;
-export function expandTemplateString(   tmpl:string,       vars:             Record<string|number,string>  ):string;
-export function expandTemplateString(   tmpl:string,       vars:             Array <              string>  ):string;
-export function expandTemplateString(   tmpl:string, ...   vars:      string[]                             ):string;
+export function expandTemplateString(   tmpl:string,       vars:                      Record<string|number,string>    ):string
+export function expandTemplateString(   tmpl:string,       vars:        Array<string>                                 ):string
+export function expandTemplateString(   tmpl:string, ...   vars: string                                            [] ):string
 export function expandTemplateString( ü_tmpl:string, ... ü_vars:(string|Array<string>|Record<string|number,string>)[] ):string {
+    if ( ü_vars.length === 0 ) { return ü_tmpl; }
   //
     const ü_oref = typeof( ü_vars[0] ) === 'object'
                  ?         ü_vars[0] as            Record<string|number,string>

@@ -140,6 +140,17 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
 
 //====================================================================
 
+export function expandTemplate(   msgTmpl:string               ,   vars:string[] ):string
+export function expandTemplate(   msgTmpl:IExpandUiXMessageVars,   vars:any   [] ):string
+export function expandTemplate( ü_msgTmpl:TUiXMessageTemplate  , ü_vars:any   [] ):string {
+    return               typeof( ü_msgTmpl ) === 'string'
+         ? expandTemplateString( ü_msgTmpl            , ü_vars )
+         :                       ü_msgTmpl.apply( null, ü_vars )
+         ;
+}
+
+//====================================================================
+
 export class UiXMessage<C=any> implements IUiXMessage<unknown> {
             readonly  type    :TUiXMessageType = CEUiXMessageType.info;
             readonly  text    :string
@@ -147,10 +158,13 @@ export class UiXMessage<C=any> implements IUiXMessage<unknown> {
 constructor(   msgTmpl:string               , ...  vars:string[] );
 constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] );
 constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
+    this.text = expandTemplate( ü_msgTmpl as IExpandUiXMessageVars, ü_vars );
+  /*
     this.text    =               typeof( ü_msgTmpl ) === 'string'
                  ? expandTemplateString( ü_msgTmpl            , ü_vars )
                  :                       ü_msgTmpl.apply( null, ü_vars )
                  ;
+  */
 }
 setContext( ü_context:C ):this { this._context = ü_context; return this; }
 
@@ -173,10 +187,7 @@ constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
   //
     this.name    = 'ErrorWithMessage';
     this.message =
-    this.text    =               typeof( ü_msgTmpl ) === 'string'
-                 ? expandTemplateString( ü_msgTmpl            , ü_vars )
-                 :                       ü_msgTmpl.apply( null, ü_vars )
-                 ;
+    this.text    = expandTemplate( ü_msgTmpl as IExpandUiXMessageVars, ü_vars );
   //
 }
 setReason ( ü_reason :R ):this { this.reason   = ü_reason ; return this; }

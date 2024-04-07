@@ -1,14 +1,19 @@
 /*
 */
+  import { type Disposable as TDisposable
+         } from 'vscode';
   import { type IUiXMessage
          , type TUiXMessageType
          , type TUiXMessageTemplate
+         , type IExpandUiXMessageVars
          } from '../types/lib.errorUtil.d';
-  import { type Disposable as TDisposable
-         } from 'vscode';
+  import { type TButton
+         } from '../types/vsc.uiUtil.d';
   import { CEUiXMessageType
          , CUiXMessageTypeIcon
          } from '../constants/error';
+  import { CButton
+         } from '../constants/ui';
 //--------------------------------------------------------------------
   import { ThemeIcon
          , window
@@ -25,6 +30,7 @@
   import { LCButton
          } from '../l10n/i18n';
   import { summarizeError
+        , expandTemplate
          } from '../lib/errorUtil';
   import { ß_stringify
          } from '../runtime/context';
@@ -47,11 +53,14 @@ export class MessageButton<T=unknown> {
     public readonly title  :string
     public readonly tooltip:string
 constructor(
-    public readonly titleId :keyof typeof LCButton
+    public readonly _button :TButton
   , public readonly dataRef?:T
 ){
-    this.title   = LCButton[ this.titleId ]();
-    this.tooltip = this.title;
+    this.title   = expandTemplate( _button.text    as IExpandUiXMessageVars, [] );
+    this.tooltip =                 _button.tooltip === undefined
+                 ? ''
+                 : expandTemplate( _button.tooltip as IExpandUiXMessageVars, [] );
+                 ;
 }
 }
 
@@ -60,7 +69,7 @@ constructor(
 export async function threadShowError( ü_eX:any, ü_context:string ):Promise<void> {
   //
     ß_err( ü_eX );
-    const ü_more = new MessageButton( 'DETAILS' );
+    const ü_more = new MessageButton( CButton.DETAILS );
     const ü_info = `${ ü_context }: "${ ü_eX }"`;
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
     switch ( ü_done ) {
@@ -129,17 +138,17 @@ async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXM
 
 //====================================================================
 
-export async function openFolder( ü_pre:string, ü_title:string ):Promise<string> {
-
+export async function whenFolderSelected( ü_previousFolder:string, ü_dialogTitle = '', ü_buttonName = '' ):Promise<string> {
+  //
     const ü_opts:OpenDialogOptions =
       { canSelectFolders: true
       , canSelectFiles  : false
       , canSelectMany   : false
-      , defaultUri      : fileToUri( ü_pre )
-      , title    : ü_title
-      , openLabel: 'Select'
+      , defaultUri      : fileToUri( ü_previousFolder )
+      , title    : ü_dialogTitle
+      , openLabel: ü_buttonName
       };
-   
+  //
     const ü_uris = await window.showOpenDialog( ü_opts );
     if ( ü_uris        === undefined
       || ü_uris.length === 0
