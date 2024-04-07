@@ -72,9 +72,13 @@ export async function isWin32Executable( ü_path:string, ü_enforceAbsolute = fa
 
 //====================================================================
 
+export function getTempFolder():string {
+    return tmpdir();
+}
+
 export async function whenTempFile( ü_base:string, ü_tempStub = '', ü_tempDir = '', ü_noReuse = false ):Promise<string> {
     if ( ü_tempDir.length === 0 )
-       { ü_tempDir = tmpdir(); }
+       { ü_tempDir = getTempFolder(); }
   //
     if ( ü_tempStub.length > 0 )
        { ü_tempDir = await ß_fs_p.mkdtemp( join( ü_tempDir, ü_tempStub ) ); }

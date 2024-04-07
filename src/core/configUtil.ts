@@ -54,11 +54,11 @@ export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string )
 export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<string> {
   //
     if ( ü_useHistory ) {
-        const ü_cfgHst = ß_XtnOpenInNpp.globalHistory.config;
-        const ü_release = await ü_cfgHst.whenDataRef<string>();
+        const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
+        const ü_release = await ü_cfgHist.whenDataRef<string>();
         try {
 
-            const ü_cfgData = ü_cfgHst.dataRef;
+            const ü_cfgData = ü_cfgHist.dataRef;
             ß_trc&& ß_trc( ü_cfgData, 'Config-History' );
             const ü_lastExe = ü_cfgData.executable;
             if ( ü_lastExe.length > 0 ) {
@@ -68,7 +68,7 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
                 const ü_nextExe = await whenDefaultExecutable( false );
                 ß_trc&& ß_trc( `Found: "${ ü_nextExe }"`, 'Executable' );
                                    ü_cfgData.executable = ü_nextExe;
-                ü_cfgHst.dataRef = ü_cfgData;
+                ü_cfgHist.dataRef = ü_cfgData;
                 return ü_nextExe;
             }
 

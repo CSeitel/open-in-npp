@@ -77,9 +77,9 @@ constructor(
     getConfigSnapshot().developerTrace || ß_toggleDevTrace();
   //
     this.globalHistory =
-      { admin  : new MementoFacade( this.vscContext, 'admin' , { version   : 0  } )
-      , config : new MementoFacade( this.vscContext, 'config', { executable: '' } )
-      , dummy  : new MementoFacade( this.vscContext, 'dummy' , []                 )
+      { admin  : new MementoFacade( this.vscContext, 'admin' , { version   : 0                 } )
+      , config : new MementoFacade( this.vscContext, 'config', { executable: '', shadowDir: '' } )
+      , dummy  : new MementoFacade( this.vscContext, 'dummy' , []                                )
       };
   //
     this.vscDisposables = this.vscContext.subscriptions

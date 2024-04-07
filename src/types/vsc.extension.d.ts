@@ -40,6 +40,7 @@
         }
       config:
         { executable :string
+        , shadowDir  :string
         }
     }
   type THistProxy<P extends string, T extends Record<P,object>> = {

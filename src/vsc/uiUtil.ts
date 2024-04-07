@@ -13,6 +13,7 @@
   import { ThemeIcon
          , window
          , StatusBarAlignment
+         , OpenDialogOptions
          , QuickPickItem
          , QuickInputButton
          } from 'vscode';
@@ -35,6 +36,9 @@
          , whenDelay
          , whenDoneWithMessage
          } from '../lib/asyncUtil';
+  import { fileToUri
+         , uriToFile
+         } from '../vsc/fsUtil';
 //--------------------------------------------------------------------
   type TIcons = 'close'
 //====================================================================
@@ -121,6 +125,26 @@ async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXM
     }
 }
 
+}
+
+//====================================================================
+
+export async function openFolder( ü_pre:string, ü_title:string ):Promise<string> {
+
+    const ü_opts:OpenDialogOptions =
+      { canSelectFolders: true
+      , canSelectFiles  : false
+      , canSelectMany   : false
+      , defaultUri      : fileToUri( ü_pre )
+      , title    : ü_title
+      , openLabel: 'Select'
+      };
+   
+    const ü_uris = await window.showOpenDialog( ü_opts );
+    if ( ü_uris        === undefined
+      || ü_uris.length === 0
+       ) { return ''; }
+           return uriToFile( ü_uris[0] );
 }
 
 //====================================================================
