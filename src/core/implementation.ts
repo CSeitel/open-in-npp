@@ -16,8 +16,6 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../constants/extension';
   import { CRgXp
          } from '../constants/text';
-  import { CButton
-         } from '../constants/ui';
 //--------------------------------------------------------------------
   import { join
          , isAbsolute
@@ -40,9 +38,9 @@ https://code.visualstudio.com/api/references/vscode-api
          } from '../runtime/context-XTN';
 //--------------------------------------------------------------------
   import { LCDoIt
-         , LCButton as LCButton
+         , LCHeader
          } from '../l10n/i18n';
-  import { LCButtonText as LCButton_
+  import { CButton
          } from '../l10n/ui';
 //------------------------------------------------------------------------------
   import { whenChildProcessSpawned
@@ -313,7 +311,9 @@ private async _submit():Promise<number> {
         ß_trc&& ß_trc( [ ü_exe, ü_args, ü_opts, ü_cp ], `ChildProcess[${ ü_cp.pid }]` );
         return ü_cp.pid;
     } catch ( ü_eX ) {
-        throw new ErrorMessage( LCDoIt.spawn_error, toErrorMessage( ü_eX ) ).setReason( ü_eX ).setContext( [ü_exe] );
+        throw new ErrorMessage( LCDoIt.spawn_error, toErrorMessage( ü_eX ) )
+                              .setReason( ü_eX )
+                              .setContext( { executable:ü_exe, arguments:ü_args, options:ü_opts } );
     }
 }
 
@@ -453,17 +453,17 @@ private async _whenPatternMatched( ö_pattern:string, ü_limit:number ):Promise<
 private async _whenSelected( ü_uris:Uri[], ö_limit:number ):Promise<boolean> {
   //
     const ü_todo = ö_limit === 0
-                 ?               { _button: CButton.SELECT }
+                 ?               { _button: CButton.selectFiles }
                  : await window.showInformationMessage( LCDoIt.max_items( ö_limit, ü_uris.length )
-                       , new MessageButton( CButton.OK     )
-                       , new MessageButton( CButton.SELECT )
-                       , new MessageButton( CButton.ALL    )
+                       , new MessageButton( CButton.OK          )
+                       , new MessageButton( CButton.selectFiles )
+                       , new MessageButton( CButton.selectAll   )
                        )
                  ;
   //
     switch ( ü_todo?._button ) {
 
-      case CButton.SELECT: {
+      case CButton.selectFiles: {
           const ü_list = ü_uris.map( (ü_ri,ü_indx) => new ListItem(     basename( ü_ri.fsPath )
                                                             , shortenText( dirname ( ü_ri.fsPath ), 72 )
                                                             ,                        ü_ri
@@ -471,7 +471,7 @@ private async _whenSelected( ü_uris:Uri[], ö_limit:number ):Promise<boolean> {
           ü_uris.length = 0;
         //
           const ü_opts:TDropDownListOptions<never> =
-            { header: LCDoIt.select()
+            { header: LCDoIt.confirmSelection()
             };
              const ü_items = await DropDownList.whenItemsPicked( ü_list, ü_opts );
           switch ( ü_items ) {
@@ -485,7 +485,7 @@ private async _whenSelected( ü_uris:Uri[], ö_limit:number ):Promise<boolean> {
       }
     //
       case CButton.OK      : ü_uris.length = ö_limit; return true;
-      case CButton.ALL     :                          return true;
+      case CButton.selectAll     :                          return true;
     //
       case CButton.CANCEL  :
       case undefined :
@@ -507,7 +507,7 @@ async submit():Promise<number> {
 
 private async _threadShadowDone( ü_doc:TextDocument ):Promise<void> {
     try {
-        const ü_docView   = await this._whenShadowReady( ü_doc, '', false ); // not silent with UI
+        const ü_docView = await this._whenShadowReady( ü_doc, '', false ); // not silent with UI
     } catch ( ü_eX ) {
         threadShowError( ü_eX, 'Shadow' );
     }
@@ -528,14 +528,13 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
   //
     if ( ü_silent ) { return ü_docView.whenShadowUpToDate(); }
   //
-        const ü_create = LCDoIt.createShadow( ü_doc.fileName, ü_docView.fileName );
-        const ü_yes    = new MessageButton( CButton.YES    );
-        const ü_select = new MessageButton( CButton.SELECT );
-        const ü_todo = await window.showInformationMessage( ü_create, ü_yes, ü_select );
-        switch ( ü_todo ) {
+        const ü_todo = await window.showInformationMessage( LCDoIt.createShadow( ü_doc.fileName, ü_docView.fileName )
+                                                          , new MessageButton( CButton.YES             )
+                                                          , new MessageButton( CButton.selectShadowDir ) );
+        switch ( ü_todo?._button ) {
 
-            case ü_select:
-                const ü_selectedDir = await whenFolderSelected( ü_shadowDir, 'Folder for shadow copy creation' );
+            case CButton.selectShadowDir:
+                const ü_selectedDir = await whenFolderSelected( ü_shadowDir, LCHeader.selectShadowDir() );
                 if ( ü_selectedDir.length > 0 ) {
                     ß_whenHist( ü_selectedDir );
                                  await ü_docView.whenShadowUpToDate( ü_selectedDir );
@@ -543,7 +542,7 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
                 }
                 break;
 
-            case ü_yes:
+            case CButton.YES:
                              await ü_docView.whenShadowUpToDate();
                 ß_openInNppShadow( ü_docView );
                 break;
@@ -553,17 +552,19 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
 
 }
 
+//--------------------------------------------------------------------
+
 async function ß_whenHist( ü_resetShadowDir:string ):Promise<void> {
-                    const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
-                    const ü_release = await ü_cfgHist.whenDataRef();
-                    try {
-                     //const ü_cfgData = ü_cfgHist.dataRef;
-                        if ( ü_cfgHist.dataRef.shadowDir !== ü_resetShadowDir ) {
-                           //ü_cfgData.shadowDir          =  ü_selectedDir ;
-                             ü_cfgHist.dataRef.shadowDir  =  ü_resetShadowDir ;
-                             ü_cfgHist.triggerCommit();
-                        }
-                    } finally { ü_release(); }
+    const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
+    const ü_release = await ü_cfgHist.whenDataRef();
+    try {
+           //const ü_cfgData = ü_cfgHist.dataRef;
+        if ( ü_cfgHist.dataRef.shadowDir !== ü_resetShadowDir ) {
+           //ü_cfgData.shadowDir          =  ü_selectedDir ;
+             ü_cfgHist.dataRef.shadowDir  =  ü_resetShadowDir ;
+             ü_cfgHist.triggerCommit();
+        }
+    } finally { ü_release(); }
 }
 
 //====================================================================

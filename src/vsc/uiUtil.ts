@@ -1,6 +1,7 @@
 /*
 */
-  import { type Disposable as TDisposable
+  import { type MessageItem
+         , type Disposable as TDisposable
          } from 'vscode';
   import { type IUiXMessage
          , type TUiXMessageType
@@ -13,7 +14,7 @@
          , CUiXMessageTypeIcon
          } from '../constants/error';
   import { CButton
-         } from '../constants/ui';
+         } from '../l10n/ui';
 //--------------------------------------------------------------------
   import { ThemeIcon
          , window
@@ -27,8 +28,6 @@
          } from '../runtime/context';
   import { ß_ViewErrorDetails
          } from '../runtime/context-XTN';
-  import { LCButton
-         } from '../l10n/i18n';
   import { summarizeError
         , expandTemplate
          } from '../lib/errorUtil';
@@ -49,7 +48,7 @@
   type TIcons = 'close'
 //====================================================================
 
-export class MessageButton<T=unknown> {
+export class MessageButton<T=unknown> implements MessageItem {
     public readonly title  :string
     public readonly tooltip:string
 constructor(
@@ -69,7 +68,7 @@ constructor(
 export async function threadShowError( ü_eX:any, ü_context:string ):Promise<void> {
   //
     ß_err( ü_eX );
-    const ü_more = new MessageButton( CButton.DETAILS );
+    const ü_more = new MessageButton( CButton.showDetails );
     const ü_info = `${ ü_context }: "${ ü_eX }"`;
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
     switch ( ü_done ) {
@@ -138,7 +137,7 @@ async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXM
 
 //====================================================================
 
-export async function whenFolderSelected( ü_previousFolder:string, ü_dialogTitle = '', ü_buttonName = '' ):Promise<string> {
+export async function whenFolderSelected( ü_previousFolder:string, ü_dialogTitle = '', ü_buttonText = '' ):Promise<string> {
   //
     const ü_opts:OpenDialogOptions =
       { canSelectFolders: true
@@ -146,7 +145,7 @@ export async function whenFolderSelected( ü_previousFolder:string, ü_dialogTit
       , canSelectMany   : false
       , defaultUri      : fileToUri( ü_previousFolder )
       , title    : ü_dialogTitle
-      , openLabel: ü_buttonName
+      , openLabel: ü_buttonText
       };
   //
     const ü_uris = await window.showOpenDialog( ü_opts );

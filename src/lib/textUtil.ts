@@ -47,18 +47,21 @@ function ö_env_win32( ü_original:string, ü_name:string ):string {
 }
 
 //--------------------------------------------------------------------
-
+  type TVarsObject = Record<string|number,string>
 	//args?: Array<string | number | boolean> | Record<string, any>;
-export function expandTemplateString(   tmpl:string,       vars:                      Record<string|number,string>    ):string
-export function expandTemplateString(   tmpl:string,       vars:        Array<string>                                 ):string
-export function expandTemplateString(   tmpl:string, ...   vars: string                                            [] ):string
-export function expandTemplateString( ü_tmpl:string, ... ü_vars:(string|Array<string>|Record<string|number,string>)[] ):string {
+export function expandTemplateString(   tmpl:string,       vars:                      TVarsObject    ):string
+export function expandTemplateString(   tmpl:string,       vars:        Array<string>                ):string
+export function expandTemplateString(   tmpl:string, ...   vars: string                           [] ):string
+export function expandTemplateString( ü_tmpl:string, ... ü_vars:(string|Array<string>|TVarsObject)[] ):string {
     if ( ü_vars.length === 0 ) { return ü_tmpl; }
   //
-    const ü_oref = typeof( ü_vars[0] ) === 'object'
-                 ?         ü_vars[0] as            Record<string|number,string>
-                 :         ü_vars    as unknown as Record<string|number,string>
-                 ;
+             const isNoSpread = typeof( ü_vars[0] ) === 'object'
+    const ü_oref = isNoSpread         ? ü_vars[0] as            Record<string|number,string>
+                                      : ü_vars    as unknown as Record<string|number,string>
+                                      ;
+    if ( isNoSpread && Array.isArray( ü_oref )
+                    &&                ü_oref.length === 0 ) { return ü_tmpl; }
+  //
     return ü_tmpl.replace( CRgXp.lx_template
                          , function( ü_all, ü_mKey ) { 
                              return ü_oref[ ü_mKey.trim() ] ?? ü_all ;
