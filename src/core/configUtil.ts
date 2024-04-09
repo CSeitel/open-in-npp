@@ -7,6 +7,8 @@
          } from '../types/lib.errorUtil.d';
   import { CEExecutable
          } from '../constants/extension';
+  import { CEUiXMessageType
+         } from '../constants/error';
 //--------------------------------------------------------------------
   import { normalize
          , isAbsolute
@@ -32,11 +34,23 @@
          } from '../lib/fsUtil';
   import { ErrorMessage
          } from '../lib/errorUtil';
+  import { whenPromiseMapped
+         } from '../lib/asyncUtil';
 //====================================================================
 
-export async function onNewExecutable    ( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenExecutable    , LCConfig.executable_Y       ); }
-export async function onNewWorkingDir    ( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenWorkingDir    , LCConfig.workingDir_Y     ); }
-export async function onNewVirtualDocsDir( ü_cfg:ConfigSnapshot ):Promise<void> { ß_StatusBarItem.echoPromise( ü_cfg.whenVirtualDocsDir, LCConfig.virtualDocsDir_Y ); }
+async function ß_whenPath( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMessageVars, ü_no = LCConfig.notAbsolute ):Promise<void> {
+  //
+    ß_StatusBarItem.echoPromise(
+        whenPromiseMapped( ü_whenPath, async function( ü_path ){
+            if ( ü_path.length === 0 ) { return ü_path; }
+            if ( isAbsolute( ü_path ) ) { throw new ErrorMessage( ü_yes, ü_path ).asInfo   (); }
+            else                        { throw new ErrorMessage( ü_no , ü_path ).asWarning(); }
+        }), ü_yes );
+}
+
+export async function onNewExecutable    ( ü_cfg:ConfigSnapshot ):Promise<void> { return ß_whenPath( ü_cfg.whenExecutable    , LCConfig.executable_Y     ); }
+export async function onNewWorkingDir    ( ü_cfg:ConfigSnapshot ):Promise<void> { return ß_whenPath( ü_cfg.whenWorkingDir    , LCConfig.workingDir_Y     ); }
+export async function onNewVirtualDocsDir( ü_cfg:ConfigSnapshot ):Promise<void> { return ß_whenPath( ü_cfg.whenVirtualDocsDir, LCConfig.virtualDocsDir_Y ); }
 
 export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string ):Promise<string> {
     if ( ü_cfgPath.length === 0 ) { return whenDefaultExecutable( ü_useHistory ); }

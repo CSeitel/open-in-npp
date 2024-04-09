@@ -3,6 +3,7 @@
   import { type IUiXMessage
          , type TUiXMessageType
          , type TUiXMessageTemplate
+         , type TTextTemplate
          , type IExpandUiXMessageVars
          } from '../types/lib.errorUtil.d';
   import { CEUiXMessageType
@@ -155,8 +156,8 @@ export class UiXMessage<C=any> implements IUiXMessage<unknown> {
             readonly  type    :TUiXMessageType = CEUiXMessageType.info;
             readonly  text    :string
     private          _context?:C
-constructor(   msgTmpl:string               , ...  vars:string[] );
 constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] );
+constructor(   msgTmpl:TTextTemplate        , ...  vars:string[] );
 constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
     this.text = expandTemplate( ü_msgTmpl as IExpandUiXMessageVars, ü_vars );
   /*
@@ -173,13 +174,13 @@ toString():string { return this.text; }
 }
 type TReasons = ErrorMessage[] & { finalReason?:Error }
 export class ErrorMessage<R=any,C=any> extends Error implements IUiXMessage<R> {
-            readonly  type    :TUiXMessageType = CEUiXMessageType.error;
+                      type    :TUiXMessageType = CEUiXMessageType.error;
             readonly  text    :string
                       context?:string
                       reason ?:R
                      _context?:C
-constructor(   msgTmpl:string               , ...  vars:string[] );
 constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] );
+constructor(   msgTmpl:TTextTemplate        , ...  vars:string[] );
 constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
   //super( typeof( _message ) === 'string' ? _message : _message.name );
     super();
@@ -190,9 +191,11 @@ constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
     this.text    = expandTemplate( ü_msgTmpl as IExpandUiXMessageVars, ü_vars );
   //
 }
-setReason ( ü_reason :R ):this { this.reason   = ü_reason ; return this; }
+asWarning              ():this { this.type     = CEUiXMessageType.warning; return this; }
+asInfo                 ():this { this.type     = CEUiXMessageType.info   ; return this; }
+setReason ( ü_reason :R ):this { this.reason   = ü_reason                ; return this; }
 setContext( ü_context:C ):this { this._context = ü_context;
-                                 this.context  = ß_stringify( ü_context ); return this; }
+                                               this.context  = ß_stringify( ü_context ); return this; }
 toString():string { return this.text; }
 
 static getReasonsStack( ü_reason:any ):TReasons {

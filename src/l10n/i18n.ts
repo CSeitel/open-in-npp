@@ -37,6 +37,7 @@
     , virtualDocsDir_Y: ( _0:string           )=>l10n.t(                    'Virtual Documents Diretory: "{0}"', _0 )
     , virtualDocsDir_N: ( _0:string           )=>l10n.t( 'Unknown or invalid Virtual Documents Diretory: "{0}"', _0 )
     , noFolder        : ( _0:string,_1:string )=>l10n.t( 'Unknown or invalid directory: "{0}"'                 , _0 )
+    , notAbsolute     : ( _0:string           )=>l10n.t( 'Relative path "{0}" cannot be checked.'              , _0 )
     };
 
 //====================================================================

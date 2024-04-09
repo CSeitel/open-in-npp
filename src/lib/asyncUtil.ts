@@ -1,6 +1,7 @@
 /*
 */
   import { type TAsyncFunctionSingleArg
+         , type TAnyFunctionSingleArg
          } from '../types/generic.d';
   import { type TPromise
          , type TPromiseSettled
@@ -45,6 +46,12 @@ export async function whenPromiseSettled<T,R=any>( ü_whenDone:PromiseLike<T> ):
            ü_done.rejected = ü_done.status === 'rejected';
     return ü_done;
 }
+
+export async function whenPromiseMapped<T,R>( ü_whenDone:PromiseLike<R>, ü_map:TAnyFunctionSingleArg<T,R> ):Promise<T> {
+    return ü_map( await ü_whenDone );
+}
+
+//====================================================================
 
 export async function whenDoneWithMessage( ü_whenDone:PromiseLike<unknown>, ü_msg:TUiXMessageTemplate ):Promise<IUiXMessage> {
     const ü_done = await whenPromiseSettled( ü_whenDone );
