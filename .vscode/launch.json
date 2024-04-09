@@ -27,13 +27,8 @@
       "env": {
           "CwdNotFound": "aaaa"
       },
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js"
-      ],
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "preLaunchTask": "npm: watch"
+      "outFiles": [ "${workspaceFolder}/out/**/*.js" ],
+      "skipFiles": [ "<node_internals>/**" ],
     }
 
   , { "name"                   : "CLI"

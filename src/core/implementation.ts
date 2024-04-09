@@ -516,7 +516,7 @@ private async _threadShadowDone( ü_doc:TextDocument ):Promise<void> {
 private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<VirtualDocumentView> {
   //
     if ( ! ü_silent ) {
-        const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
+        const ü_cfgHist = ß_XtnOpenInNpp.localHistory.config;
         ü_shadowDir = ü_cfgHist.dataRef.shadowDir || getTempFolder();
         ß_trc&& ß_trc( ü_shadowDir, 'History-Shadow-Folder' );
     }
@@ -555,7 +555,7 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
 //--------------------------------------------------------------------
 
 async function ß_whenHist( ü_resetShadowDir:string ):Promise<void> {
-    const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
+    const ü_cfgHist = ß_XtnOpenInNpp.localHistory.config;
     const ü_release = await ü_cfgHist.whenDataRef();
     try {
            //const ü_cfgData = ü_cfgHist.dataRef;

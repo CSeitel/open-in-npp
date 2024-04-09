@@ -33,7 +33,7 @@
     }
 //--------------------------------------------------------------------
 
-  export interface IHistoryData {
+  export interface IGlobalHistoryData {
       dummy :number[]
       admin :
         { version    :number
@@ -43,10 +43,17 @@
         , shadowDir  :string
         }
     }
-  type THistProxy<P extends string, T extends Record<P,object>> = {
-    [K in P] :MementoFacade<K,T>
+  export interface ILocalHistoryData {
+      config:
+        { shadowDir  :string
+        }
+    }
+
+  type THistoryProxy<P extends string,T extends Record<P,object>> = {
+      [K in P] :MementoFacade<K,T>
   }
-  export type THistoryProxy = THistProxy<keyof IHistoryData,IHistoryData>
+  export type TGlobalHistoryProxy = THistoryProxy<keyof IGlobalHistoryData,IGlobalHistoryData>
+  export type TLocalHistoryProxy  = THistoryProxy<keyof ILocalHistoryData ,ILocalHistoryData >
 
 //====================================================================
 /*

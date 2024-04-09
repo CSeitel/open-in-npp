@@ -7,7 +7,8 @@
   import { type TAnyFunction
          } from '../types/generic.d';
   import { type TXtnCommand
-         , type THistoryProxy
+         , type TGlobalHistoryProxy
+         , type TLocalHistoryProxy
          , type TShadowDoc
          , type IDisposableLike
          } from '../types/vsc.extension.d';
@@ -50,7 +51,8 @@ export default class XtnOpenInNpp {
   //
     readonly shadowDocsBfr = new Map<TextDocument,TShadowDoc>();
     readonly vscDisposables:ReadonlyArray<IDisposableLike> & { push:( ... item:IDisposableLike[] )=>void }
-    readonly globalHistory :THistoryProxy
+    readonly globalHistory :TGlobalHistoryProxy
+    readonly  localHistory :TLocalHistoryProxy
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
     readonly version      :string
@@ -77,9 +79,12 @@ constructor(
     getConfigSnapshot().developerTrace || ß_toggleDevTrace();
   //
     this.globalHistory =
-      { admin  : new MementoFacade( this.vscContext, 'admin' , { version   : 0                 } )
-      , config : new MementoFacade( this.vscContext, 'config', { executable: '', shadowDir: '' } )
-      , dummy  : new MementoFacade( this.vscContext, 'dummy' , []                                )
+      { admin  : new MementoFacade( this.vscContext, 'admin' , { version   : 0                 }, true )
+      , config : new MementoFacade( this.vscContext, 'config', { executable: '', shadowDir: '' }, true )
+      , dummy  : new MementoFacade( this.vscContext, 'dummy' , []                                      )
+      };
+    this.localHistory =
+      { config : new MementoFacade( this.vscContext, 'config', { shadowDir: '' }, false )
       };
   //
     this.vscDisposables = this.vscContext.subscriptions

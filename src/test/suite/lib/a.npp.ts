@@ -3,7 +3,7 @@
   import { type TTestResult
          } from '../../../types/lib.testUtil.d';
   import { type XtnOpenInNpp
-         , type IHistoryData
+         , type IGlobalHistoryData
          } from '../../../types/vsc.extension.d';
   import { CXtnId
          , CEXtnCommands
@@ -101,8 +101,8 @@ export async function tst_history(){
     const ü_dummyHist = ü_extn.globalHistory.dummy;
     ß_trc&& ß_trc( 'Hello'+ JSON.stringify( ü_dummyHist.dataRef ) );
   //testEqual( ü_dummyHist.dataRef[0], 2, 'DataRef[0]' );
-    const ü_dummyDat1 = [] as IHistoryData['dummy'];
-    const ü_dummyDat2 = [] as IHistoryData['dummy'];
+    const ü_dummyDat1 = [] as IGlobalHistoryData['dummy'];
+    const ü_dummyDat2 = [] as IGlobalHistoryData['dummy'];
     ü_dummyHist.dataRef = ü_dummyDat1;
     testEqual( ü_dummyHist.dataRef, ü_dummyDat1, 'DataRef' );
     ü_dummyDat1.push( 1 );

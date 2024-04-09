@@ -12,6 +12,7 @@
   ,
   "openInNpp.spawnOptions": {
     "a": true
-  }
+  },
+  "openInNpp.virtualDocumentsFileReuse": true
   },
 }
