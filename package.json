@@ -126,7 +126,7 @@
         "openInNpp.virtualDocumentsFileReuse": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "When file reuse is turned on different editor instances showing the same _virtual document_ [see](https://code.visualstudio.com/api/extension-guides/virtual-documents) will share a common file shadow for being opened in _Notepad++_. Note that this will have the consequence that the file contents will be overwritten."
+          "markdownDescription": "When file reuse is turned on different _VS-Code_ editor instances showing the same _virtual document_ [see](https://code.visualstudio.com/api/extension-guides/virtual-documents) will share a common file shadow for being opened in _Notepad++_. Note that this will have the consequence that the file contents will be overwritten."
         },
         "openInNpp.preserveCursorPosition": {
           "type": "boolean",
@@ -151,7 +151,7 @@
         "openInNpp.developerTrace": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "Echo information to _Developer Tools_ console"
+          "markdownDescription": "Log extended information to the _Developer Tools_ console"
         }
       }
     }
@@ -170,7 +170,7 @@
     "mocha": "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/**/all.spec.js",
     "testm": "( node.exe                                   ./out/test/mocha/all.spec.js ) & ( echo %ErrorLevel% )",
     "vscode:package": "vsce package",
-    "vscode:install": "code --install-extension open-in-npp-0.1.5.vsix",
+    "vscode:install": "code --install-extension open-in-npp-0.1.6.vsix",
     "vscode:pre_publish": "npm run compile",
     "buildBundle": "webpack -c ./out/build/webpack.config.js --mode development --env o.min_"
   },

@@ -516,7 +516,7 @@ private async _threadShadowDone( ü_doc:TextDocument ):Promise<void> {
 private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_silent:boolean ):Promise<VirtualDocumentView> {
   //
     if ( ! ü_silent ) {
-        const ü_cfgHist = ß_XtnOpenInNpp.localHistory.config;
+        const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
         ü_shadowDir = ü_cfgHist.dataRef.shadowDir || getTempFolder();
         ß_trc&& ß_trc( ü_shadowDir, 'History-Shadow-Folder' );
     }
@@ -536,7 +536,7 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
             case CButton.selectShadowDir:
                 const ü_selectedDir = await whenFolderSelected( ü_shadowDir, LCHeader.selectShadowDir() );
                 if ( ü_selectedDir.length > 0 ) {
-                    ß_whenHist( ü_selectedDir );
+                    ß_whenHistory( ü_selectedDir );
                                  await ü_docView.whenShadowUpToDate( ü_selectedDir );
                     ß_openInNppShadow( ü_docView );
                 }
@@ -554,8 +554,8 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
 
 //--------------------------------------------------------------------
 
-async function ß_whenHist( ü_resetShadowDir:string ):Promise<void> {
-    const ü_cfgHist = ß_XtnOpenInNpp.localHistory.config;
+async function ß_whenHistory( ü_resetShadowDir:string ):Promise<void> {
+    const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
     const ü_release = await ü_cfgHist.whenDataRef();
     try {
            //const ü_cfgData = ü_cfgHist.dataRef;

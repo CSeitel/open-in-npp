@@ -44,10 +44,12 @@ The following settings are provided and can conveniently be opened via command `
 * `openInNpp.filesInFolderPattern`: Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_; _Notepad++_'s default handling of a folder path likely corresponds to applying the pattern _``**/*.*``_ (i.e. subfolders are recursively taken into account, due to this the pattern ``*.*`` is possibly a good choice)
 #### Virtual Documents
 * `openInNpp.virtualDocumentsDirectory`: When a file does not exist as it is actually a [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) a _shadow_ copy of this file will automatically be created in the specified folder and then shown in _Notepad++_. If no folder is specified here a info message with the option to select a folder will be presented.
-* `openInNpp.virtualDocumentsFileReuse"`: When file reuse is turned on different editor instances showing the same [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) will share a common file _shadow_ for being opened in _Notepad++_. Note that this will have the consequence that the file contents will be overwritten.
+* `openInNpp.virtualDocumentsFileReuse"`: When file reuse is turned on each _VS-Code_ editor instance referring to the same [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) will share a common file _shadow_ for being opened in _Notepad++_. Note that _VS-Code_ editor instances may show different versions of the same _virtual document_ and hence their contents may not be identical. Reuse means that the contents of the shadow file will be overwritten.
 #### Expert Settings
 * `openInNpp.commandLineArguments`: Specifies additional arguments to be passed along to _Notepad++_; a comprehensive overview of the command line parameters of _Notepad++_ is available [here](https://npp-user-manual.org/docs/command-prompt/)
 * `openInNpp.spawnOptions`: Specifies additional options for child process creation; details are available [here](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options)
+* `openInNpp.developerTrace`: Specifies whether extended information is logged to the _Developer Tools_ console
+
 
 
 ## Known Issues
