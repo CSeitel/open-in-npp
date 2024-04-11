@@ -121,12 +121,12 @@
         },
         "openInNpp.virtualDocumentsDirectory": {
           "type": "string",
-          "markdownDescription": "When a file does not exist as it is actually a _virtual document_ [see](https://code.visualstudio.com/api/extension-guides/virtual-documents) a shadow copy for usage by _Notepad++_ will be created in this directory"
+          "markdownDescription": "When a file does not exist in the local filesystem as it is actually a [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) a _shadow_ copy of this document will automatically be created in the specified folder and then shown in _Notepad++_. If no folder is specified here a info message with the options to use a _Windows_ standard temporary folder or to launch a folder selection dialog will be presented."
         },
         "openInNpp.virtualDocumentsFileReuse": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "When file reuse is turned on different _VS-Code_ editor instances showing the same _virtual document_ [see](https://code.visualstudio.com/api/extension-guides/virtual-documents) will share a common file shadow for being opened in _Notepad++_. Note that this will have the consequence that the file contents will be overwritten."
+          "markdownDescription": "When file reuse is enabled all _VS-Code_ editor instances referring to the same [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) will share a common file _shadow_ for being opened in _Notepad++_. Note that _VS-Code_ editor instances may show different versions of the same _virtual document_ and hence their contents may not be identical. As a consequence the contents of the shadow file will be overwritten to always reflect the particular version to be opened in _Notepad++_."
         },
         "openInNpp.preserveCursorPosition": {
           "type": "boolean",
@@ -165,10 +165,10 @@
     "compile": "tsc -p ./src/",
     "pre_compile": "rimraf ./out/test",
     "pre_test": "npm run compile",
-    "test_": "node  ./out/test/suite/npmRunVscTests.js",
-    "test": "vscode-test",
-    "mocha": "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/**/all.spec.js",
-    "testm": "( node.exe                                   ./out/test/mocha/all.spec.js ) & ( echo %ErrorLevel% )",
+    "testVsc"      : "vscode-test",
+    "testVscLike"  : "node  ./out/test/suite/npmRunVscTests.js",
+    "testMocha"    : "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/all.spec.js",
+    "testMochaLike": "( node.exe                                 ./out/test/mocha/all.spec.js ) & ( echo %ErrorLevel% )",
     "vscode:package": "vsce package",
     "vscode:install": "code --install-extension open-in-npp-0.1.6.vsix",
     "vscode:pre_publish": "npm run compile",
