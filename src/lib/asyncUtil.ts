@@ -17,7 +17,7 @@
          , ß_err
          , ß_stringify
          } from '../runtime/context';
-  import { ErrorMessage
+  import { ErrorWithUixMessage
          , UiXMessage
          } from '../lib/errorUtil';
 //====================================================================
@@ -53,16 +53,20 @@ export async function whenPromiseMapped<T,R>( ü_whenDone:PromiseLike<R>, ü_map
 
 //====================================================================
 
-export async function whenDoneWithMessage( ü_whenDone:PromiseLike<unknown>, ü_msg:TUiXMessageTemplate ):Promise<IUiXMessage> {
+export async function whenDoneWithUiXMessage( ü_whenDone:PromiseLike<unknown>, ü_valueTmpl:TUiXMessageTemplate, ü_errorTmpl?:TUiXMessageTemplate ):Promise<IUiXMessage> {
     const ü_done = await whenPromiseSettled( ü_whenDone );
     if ( ü_done.rejected ) {
-        if ( ü_done.reason instanceof ErrorMessage )
-             { return ü_done.reason.setContext( ü_msg ); }
-        else { throw  ü_done.reason                    ; }
+        if ( ü_errorTmpl === undefined ) {
+            if ( ü_done.reason instanceof ErrorWithUixMessage )
+                 { return ü_done.reason; }
+            else { throw  ü_done.reason; }
+        } else {
+            return new ErrorWithUixMessage( ü_errorTmpl as TTextTemplate ).setReason( ü_done.reason );
+        }
     } else {
-        return         typeof( ü_msg ) === 'string'
-             ? new UiXMessage( ü_msg, ß_stringify( ü_done.value ) )
-             : new UiXMessage( ü_msg,              ü_done.value   )
+        return         typeof( ü_valueTmpl ) === 'string'
+             ? new UiXMessage( ü_valueTmpl, ß_stringify( ü_done.value ) )
+             : new UiXMessage( ü_valueTmpl,              ü_done.value   )
              ;
     }
 }
@@ -71,7 +75,7 @@ export async function whenDoneWith<T>( ü_whenDone:PromiseLike<T>, ü_txtTmpl:TT
     try {
         return await ü_whenDone;
     } catch ( ü_eX ) {
-        ß_err( new ErrorMessage( ü_txtTmpl, ...ü_vars ).setReason( ü_eX ), 'Caught' );
+        ß_err( new ErrorWithUixMessage( ü_txtTmpl, ...ü_vars ).setReason( ü_eX ), 'Caught' );
         throw ü_eX;
     }
 }

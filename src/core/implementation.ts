@@ -50,7 +50,7 @@ https://code.visualstudio.com/api/references/vscode-api
   import { straightenArray
          , putLastIndex
          } from '../lib/arrayUtil';
-  import { ErrorMessage
+  import { ErrorWithUixMessage
          , toErrorMessage
          } from '../lib/errorUtil';
   import { whenFileInfoRead
@@ -155,7 +155,7 @@ async whenShadowUpToDate( ü_resetShadowDir?:string ):Promise<this> {
             if ( ü_info === null ) {
                 ü_writeFlag = 'wx';
             } else {
-                if ( ! ü_info.isFile() ) { throw new ErrorMessage( '"{0}" exists, but is not a file', this._docViewBE.file ); }
+                if ( ! ü_info.isFile() ) { throw new ErrorWithUixMessage( '"{0}" exists, but is not a file', this._docViewBE.file ); }
                 const ü_content = await whenFileRead( this._docViewBE.file, this._encoding );
                 const ü_oldHash = createHash( 'sha1' ).update(  ü_content  ).digest('hex');
                 if ( ü_oldHash === this._newHash ) { ü_writeFlag = ''; }
@@ -311,7 +311,7 @@ private async _submit():Promise<number> {
         ß_trc&& ß_trc( [ ü_exe, ü_args, ü_opts, ü_cp ], `ChildProcess[${ ü_cp.pid }]` );
         return ü_cp.pid;
     } catch ( ü_eX ) {
-        throw new ErrorMessage( LCDoIt.spawn_error, toErrorMessage( ü_eX ) )
+        throw new ErrorWithUixMessage( LCDoIt.spawn_error, toErrorMessage( ü_eX ) )
                               .setReason( ü_eX )
                               .setContext( { executable:ü_exe, arguments:ü_args, options:ü_opts } );
     }
@@ -402,7 +402,7 @@ private async _cwd():Promise<string> {
     let ü_cwd = '';
     const ü_whenCwd = await whenPromiseSettled( this._config.whenWorkingDir );
     if ( ü_whenCwd.rejected ) {
-        if ( ü_whenCwd.reason instanceof ErrorMessage ) { window.showWarningMessage( ü_whenCwd.reason.text ); }
+        if ( ü_whenCwd.reason instanceof ErrorWithUixMessage ) { window.showWarningMessage( ü_whenCwd.reason.text ); }
         else                                            {                      throw ü_whenCwd.reason       ; }
     } else { ü_cwd = ü_whenCwd.value; }
   //

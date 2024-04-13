@@ -39,7 +39,7 @@
          , UniqueResource
          , createTimer
          , whenDelay
-         , whenDoneWithMessage
+         , whenDoneWithUiXMessage
          } from '../lib/asyncUtil';
   import { fileToUri
          , uriToFile
@@ -92,8 +92,8 @@ constructor(
 ){
 }
 
-async echoPromise<T>( ü_whenDone:PromiseLike<T>, ü_msg:TUiXMessageTemplate ):Promise<void> {
-    const ü_done = await whenDoneWithMessage( ü_whenDone, ü_msg );
+async echoWhenDone<T>( ü_whenDone:PromiseLike<T>, ü_valueTmpl:TUiXMessageTemplate, ü_errorTmpl?:TUiXMessageTemplate ):Promise<void> {
+    const ü_done = await whenDoneWithUiXMessage( ü_whenDone, ü_valueTmpl, ü_errorTmpl );
     this.echoMessage( ü_done );
 }
 

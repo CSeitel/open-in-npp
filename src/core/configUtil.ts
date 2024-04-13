@@ -32,19 +32,20 @@
          , isWin32ExecutableExtName
          , whenKnownAsFolder as fsWhenKnownAsFolder
          } from '../lib/fsUtil';
-  import { ErrorMessage
+  import { ErrorWithUixMessage
          } from '../lib/errorUtil';
   import { whenPromiseMapped
          } from '../lib/asyncUtil';
 //====================================================================
 
-async function ß_whenPath( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMessageVars, ü_no = LCConfig.notAbsolute ):Promise<void> {
+async function ß_whenPath( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMessageVars, ü_warn = LCConfig.notAbsolute ):Promise<void> {
   //
-    ß_StatusBarItem.echoPromise(
+    ß_StatusBarItem.echoWhenDone(
         whenPromiseMapped( ü_whenPath, async function( ü_path ){
             if ( ü_path.length === 0 ) { return ü_path; }
-            if ( isAbsolute( ü_path ) ) { throw new ErrorMessage( ü_yes, ü_path ).asInfo   (); }
-            else                        { throw new ErrorMessage( ü_no , ü_path ).asWarning(); }
+            if ( isAbsolute( ü_path ) ) {
+                   // throw new ErrorWithUixMessage( ü_yes, ü_path ).asInfo   ();
+             } else { throw new ErrorWithUixMessage( ü_warn , ü_path ).asWarning(); }
         }), ü_yes );
 }
 
@@ -57,9 +58,9 @@ export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string )
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
     if ( isAbsolute( ü_path ) ) {
-        if ( ! await isWin32Executable ( ü_path ) ) { throw new ErrorMessage( LCConfig.noExeFile, ü_path ); }
+        if ( ! await isWin32Executable ( ü_path ) ) { throw new ErrorWithUixMessage( LCConfig.noExeFile, ü_path ); }
     } else {
-        if ( ! isWin32ExecutableExtName( ü_path ) ) { throw new ErrorMessage( LCConfig.noExeFile, ü_path ); }
+        if ( ! isWin32ExecutableExtName( ü_path ) ) { throw new ErrorWithUixMessage( LCConfig.noExeFile, ü_path ); }
         ß_trc&& ß_trc( `Not a absolute Path: "${ ü_path }"`, 'Executable' );
     }
     return ü_path;
@@ -106,7 +107,7 @@ export async function whenKnownAsFolder( ü_dirDefinition:TUiXMessageTemplate, �
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
     if ( isAbsolute( ü_path ) ) {
         if ( ! await fsWhenKnownAsFolder( ü_path ) ) {
-            throw new ErrorMessage( ü_dirDefinition as unknown as IExpandUiXMessageVars || LCConfig.noFolder, ü_path );
+            throw new ErrorWithUixMessage( ü_dirDefinition as unknown as IExpandUiXMessageVars || LCConfig.noFolder, ü_path );
         }
     }
     return ü_path;

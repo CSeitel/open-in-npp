@@ -7,7 +7,8 @@
          } from 'util';
   import { ß_trc
          } from '../../../runtime/context';
-  import { summarizeError
+  import { stringifyUpToSuper
+         , summarizeError
          , ErrorWithUixMessage
          } from '../../../lib/errorUtil';
   import { isDirectInstanceOf
@@ -23,12 +24,31 @@
 
 export async function tst_(){
   //
-    return tst_class();
+    return tst_print();
   //
     testSummary();
 }
 
 //====================================================================
+
+export async function tst_print(){
+class ö_ClassA extends Object   { aaa = 12; }
+class ö_ClassB extends ö_ClassA { bbb = 12; }
+    const ü_ss =   new ö_ClassB()
+    const ü_c = stringifyUpToSuper( ü_ss );
+  //
+    const ü_oref_a = new TypeError( 'ABC' );
+    const ü_a = stringifyUpToSuper( ü_oref_a );
+    const ü_oref_b = Object.create( { name:'TypeError', message:'' } )
+          ü_oref_b.message = 'ABC'
+          ü_oref_b.stack = ü_oref_a.stack;
+    const ü_b = stringifyUpToSuper( ü_oref_b );
+  //
+    let s = '';
+    for ( const ü_mKey in ü_oref_a ) { s += ü_mKey; }
+  //
+    testSummary();
+}
 
 export async function tst_error(){
 class ö_ErrorX        extends Error        { more = 12; }
@@ -74,71 +94,6 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
     }
     testEqual( ü_txt, '' );
     testSummary( 'Error' );
-}
-
-//====================================================================
-
-export async function tst_syntax(){
-    const ü_n = null as null|Array<1>;
-    
-    testEqual( null     , ü_n             );
-    testEqual( undefined, ü_n?.toString() );
-  //
-    const ü_data =
-      [ [ '', '' ]
-      , [ `"${1}"`, '"1"' ]
-      , [ '\n', '\n' ]
-      , [ {}   , '{}'       ]
-      , [ {a:1}, '{ a: 1 }' ]
-      ] as TResultArray<any,string>;
-  //
-    testFunction( format, ü_data );
-    testSummary( 'Syntax' );
-}
-
-//====================================================================
-
-export async function tst_class(){
-  //
-function ö_Class( this:any ):TClass {
-    Object.assign( this, ü_class );
-    return this;
-}
-class Ö_Class {
-    prop = ['Class']
-}
-  //
-    const ü_super = { super:['proto'] };
-    const ü_class = { prop :['class'] };
-    ö_Class.prototype = ü_super;
-    ü_super.constructor = ö_Class;
-    type TClass = typeof ü_class & typeof ü_super & Object
-  //
-    const ü_inst = new (<any> ö_Class)() as TClass;
-    const ü_Inst = new Ö_Class();
-    const ü_prot = Object.getPrototypeOf( ü_inst );
-    const ü_Prot = Object.getPrototypeOf( ü_Inst );
-    const ü_prt2 = Object.getPrototypeOf( ü_prot );
-  //
-    testEqual( ü_Inst.hasOwnProperty( 'prop'        ), true  );
-    testEqual( ü_inst.hasOwnProperty( 'prop'        ), true  );
-    testEqual( ü_inst.hasOwnProperty( 'super'       ), false );
-    testEqual( ü_inst.hasOwnProperty( 'constructor' ), false );
-    testEqual( ü_Inst.hasOwnProperty( 'constructor' ), false );
-    testEqual( ü_prot, ü_super           );
-    testEqual( ü_Prot, Ö_Class.prototype );
-    testEqual( ü_prot.hasOwnProperty( 'constructor' ), true  );
-    testEqual( ü_Prot.hasOwnProperty( 'constructor' ), true  );
-    testEqual( ü_prt2.hasOwnProperty( 'constructor' ), true  );
-    testEqual( ( ü_inst as any ).constructor, ö_Class );
-    testEqual(   ü_Inst         .constructor, Ö_Class );
-    testEqual(   ü_prot         .constructor, ö_Class );
-    testEqual(   ü_Prot         .constructor, Ö_Class );
-    testEqual(   ü_prt2         .constructor, Object  );
-    testEqual( ü_inst.super, ü_super.super );
-    testEqual( ü_inst.prop , ü_class.prop  );
-  //
-    testSummary( 'Class' );
 }
 
 //====================================================================

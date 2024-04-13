@@ -5,9 +5,11 @@
 //====================================================================
   export type TUiXMessageType = CEUiXMessageType
 
-  export interface IUiXMessage<R=any> {
-      readonly type     :CEUiXMessageType
-      readonly text     :string
+  export interface IUiXMessage {
+      readonly type:CEUiXMessageType
+      readonly text:string
+  }
+  export interface IEnhancedUiXMessage<R=any> extends IUiXMessage {
       readonly context ?:string
       readonly reason  ?:R
   }

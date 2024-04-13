@@ -1,6 +1,7 @@
 /*
 */
   import { type IUiXMessage
+         , type IEnhancedUiXMessage
          , type TUiXMessageType
          , type TUiXMessageTemplate
          , type TTextTemplate
@@ -46,7 +47,7 @@ export function toErrorMessage( ü_eX:any ):string {
     return ''+ü_eX;
 }
 
-export function formatWithoutSuper( ü_oref:any, ü_class:Function = Error ):string {
+export function stringifyUpToSuper( ü_oref:any, ü_class:Function = Error ):string {
   //
     const ü_stack = [] as any[];
     let ü_cursor:any = ü_oref;
@@ -56,7 +57,7 @@ export function formatWithoutSuper( ü_oref:any, ü_class:Function = Error ):str
             const ü_constructor  = ü_cursor.constructor ;
                             delete ü_cursor.constructor ;//= function Redefined(){};
             Object.setPrototypeOf( ü_cursor, {}     );
-            const ü_text = format( ü_oref );
+            const ü_text = ß_stringify( ü_oref );
             Object.setPrototypeOf( ü_cursor, ü_prot );
                                    ü_cursor.constructor = ü_constructor;
             return ü_text;
@@ -66,7 +67,7 @@ export function formatWithoutSuper( ü_oref:any, ü_class:Function = Error ):str
               ü_cursor = ü_prot;
     } while ( ü_cursor !== null );
   //
-    return format( ü_oref );
+    return ß_stringify( ü_oref );
 }
 
 export function extractPureCallStack( ü_eX:Error, ü_header = CEUiXText.callStack ):string {
@@ -89,7 +90,7 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                         , '', ''
                         ];
     const ü_summary = [] as string[];
-    const ü_reasons = ErrorMessage.getReasonsStack( ü_eX );
+    const ü_reasons = ErrorWithUixMessage.getReasonsStack( ü_eX );
     const ü_finalEx = ü_reasons.finalReason;
   //
     ü_summary.push( CEUiXText.errorOccurred + ü_colon
@@ -105,9 +106,9 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                                                               , ü_indent_1 + ü_reason.text    );
         ü_reason.context && ü_summary.push( CEUiXText.context + ü_colon
                                           , indentLines( ü_reason.context, ü_indent_1 ) );
-        if ( isDirectInstanceOf( ü_reason, ErrorMessage ) ) {
+        if ( isDirectInstanceOf( ü_reason, ErrorWithUixMessage ) ) {
         } else {
-            const ü_core = indentLines( formatWithoutSuper( ü_reason, ErrorMessage ), ü_indent_1 );
+            const ü_core = indentLines( stringifyUpToSuper( ü_reason, ErrorWithUixMessage ), ü_indent_1 );
                             ü_summary.push( CEUiXText.data    + ü_colon
                                                               , ü_indent_1 + ü_core );
         }
@@ -128,7 +129,7 @@ export function summarizeError( ü_eX:any, ü_context:string ):string {
                            .replace( /\r?\n\}$/ , '' )
                            ;
           */
-               const ü_core = indentLines( formatWithoutSuper( ü_finalEx ), ü_indent_1 );
+               const ü_core = indentLines( stringifyUpToSuper( ü_finalEx ), ü_indent_1 );
                             ü_summary.push( CEUiXText.context + ü_colon
                                                               , ü_core );
                             ü_summary.push( ü_stack );
@@ -152,33 +153,29 @@ export function expandTemplate( ü_msgTmpl:TUiXMessageTemplate  , ü_vars:any   
 
 //====================================================================
 
-export class UiXMessage<C=any> implements IUiXMessage<unknown> {
-            readonly  type    :TUiXMessageType = CEUiXMessageType.info;
-            readonly  text    :string
-    private          _context?:C
-constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] );
-constructor(   msgTmpl:TTextTemplate        , ...  vars:string[] );
+export class UiXMessage implements IUiXMessage {
+               type:TUiXMessageType
+      readonly text:string
+constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] )
+constructor(   msgTmpl:TTextTemplate        , ...  vars:string[] )
 constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
+    this.type = CEUiXMessageType.info;
     this.text = expandTemplate( ü_msgTmpl as IExpandUiXMessageVars, ü_vars );
-  /*
-    this.text    =               typeof( ü_msgTmpl ) === 'string'
-                 ? expandTemplateString( ü_msgTmpl            , ü_vars )
-                 :                       ü_msgTmpl.apply( null, ü_vars )
-                 ;
-  */
 }
-setContext( ü_context:C ):this { this._context = ü_context; return this; }
-
-toString():string { return this.text; }
+asWarning():this   { this.type = CEUiXMessageType.warning; return this; }
+asError  ():this   { this.type = CEUiXMessageType.error  ; return this; }
+toString ():string {                                       return this.text; }
 
 }
-type TReasons = ErrorMessage[] & { finalReason?:Error }
-export class ErrorMessage<R=any,C=any> extends Error implements IUiXMessage<R> {
+
+//--------------------------------------------------------------------
+type TReasons = ErrorWithUixMessage[] & { finalReason?:Error }
+
+export class ErrorWithUixMessage<R=any,C=any> extends Error implements IEnhancedUiXMessage<R> {
                       type    :TUiXMessageType = CEUiXMessageType.error;
             readonly  text    :string
                       context?:string
                       reason ?:R
-                     _context?:C
 constructor(   msgTmpl:IExpandUiXMessageVars, ...  vars:any   [] );
 constructor(   msgTmpl:TTextTemplate        , ...  vars:string[] );
 constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
@@ -186,35 +183,36 @@ constructor( ü_msgTmpl:TUiXMessageTemplate  , ...ü_vars:any   [] ){
     super();
   //reduceErrorStack( this );
   //
-    this.name    = 'ErrorWithMessage';
+    this.name    = 'Error-with-Message';
     this.message =
     this.text    = expandTemplate( ü_msgTmpl as IExpandUiXMessageVars, ü_vars );
   //
 }
-asWarning              ():this { this.type     = CEUiXMessageType.warning; return this; }
-asInfo                 ():this { this.type     = CEUiXMessageType.info   ; return this; }
-setReason ( ü_reason :R ):this { this.reason   = ü_reason                ; return this; }
-setContext( ü_context:C ):this { this._context = ü_context;
-                                               this.context  = ß_stringify( ü_context ); return this; }
-toString():string { return this.text; }
+asWarning():this   { this.type = CEUiXMessageType.warning; return this; }
+asInfo   ():this   { this.type = CEUiXMessageType.info   ; return this; }
+toString ():string {                                       return this.text; }
+
+setContext( ü_context:C ):this { this.context = ß_stringify( ü_context ); return this; }
+setReason ( ü_reason :R ):this { this.reason  =              ü_reason   ; return this; }
 
 static getReasonsStack( ü_reason:any ):TReasons {
     const ü_stack = [] as TReasons;
   //
-    if ( ü_reason instanceof ErrorMessage ) {
+    if ( ü_reason instanceof ErrorWithUixMessage ) {
         do {
             ü_stack.push( ü_reason );
             ü_reason = ü_reason.reason;
-        } while ( ü_reason instanceof ErrorMessage
+        } while ( ü_reason instanceof ErrorWithUixMessage
                && ! ü_stack.includes( ü_reason )
                 );
         if ( ü_reason === undefined ) { return ü_stack; }
   //         ü_stack.finalReason = ü_cursor;
   //} else {
     }
-             ü_stack.finalReason = ü_reason instanceof Error
-                                 ? ü_reason
-                                 : new TypeError( expandTemplateString( CEUiXText.isNotTypeError, format( ü_reason ) ) );
+  //
+    ü_stack.finalReason = ü_reason instanceof Error
+                        ? ü_reason
+                        : new TypeError( expandTemplateString( CEUiXText.isNotTypeError, ß_stringify( ü_reason ) ) );
 
     return ü_stack;
 }
