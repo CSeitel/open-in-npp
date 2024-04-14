@@ -47,26 +47,31 @@ export async function whenPromiseSettled<T,R=any>( ü_whenDone:PromiseLike<T> ):
     return ü_done;
 }
 
-export async function whenPromiseMapped<T,R>( ü_whenDone:PromiseLike<R>, ü_map:TAnyFunctionSingleArg<T,R> ):Promise<T> {
-    return ü_map( await ü_whenDone );
+export async function whenPromiseMapped<Tz,Ty>( ü_whenDone:PromiseLike<Ty>, ü_map:TAnyFunctionSingleArg<Tz,Ty> ):Promise<Tz> {
+  //return ü_map( await ü_whenDone );
+    return ü_whenDone.then( ü_map );
 }
 
 //====================================================================
 
-export async function whenDoneWithUiXMessage( ü_whenDone:PromiseLike<unknown>, ü_valueTmpl:TUiXMessageTemplate, ü_errorTmpl?:TUiXMessageTemplate ):Promise<IUiXMessage> {
+export async function whenDoneWithUiXMessage( ü_whenDone:PromiseLike<unknown>, ü_valueTmpl:TUiXMessageTemplate, ü_errorTmpl?:TUiXMessageTemplate|true ):Promise<IUiXMessage> {
     const ü_done = await whenPromiseSettled( ü_whenDone );
     if ( ü_done.rejected ) {
-        if ( ü_errorTmpl === undefined ) {
-            if ( ü_done.reason instanceof ErrorWithUixMessage )
-                 { return ü_done.reason; }
-            else { throw  ü_done.reason; }
-        } else {
-            return new ErrorWithUixMessage( ü_errorTmpl as TTextTemplate ).setReason( ü_done.reason );
+        if ( ü_done.reason instanceof ErrorWithUixMessage ) { return ü_done.reason; }
+        switch ( ü_errorTmpl ) {
+            case true:
+                if ( ü_done.reason instanceof Error ) { return new UiXMessage( ''+ü_done.reason ).asError(); }
+            case undefined: throw ü_done.reason;
+            default:
+        return         typeof( ü_errorTmpl ) === 'string'
+             ? new UiXMessage( ü_errorTmpl, ''+( ü_done.reason ) )
+             : new UiXMessage( ü_errorTmpl,      ü_done.reason   )
+             ;
         }
     } else {
         return         typeof( ü_valueTmpl ) === 'string'
-             ? new UiXMessage( ü_valueTmpl, ß_stringify( ü_done.value ) )
-             : new UiXMessage( ü_valueTmpl,              ü_done.value   )
+             ? new UiXMessage( ü_valueTmpl, ''+( ü_done.value ) )
+             : new UiXMessage( ü_valueTmpl,      ü_done.value   )
              ;
     }
 }

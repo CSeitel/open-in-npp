@@ -5,6 +5,8 @@
 //--------------------------------------------------------------------
   import { promises as ß_fs_p
          } from 'fs';
+  import { ß_trc
+         } from '../../../runtime/context';
   import { expandEnvVariables
          , expandTemplateString
          , escapeFF
@@ -14,15 +16,14 @@
   import { whenTempFile
          , whenKnownAsFile
          } from '../../../lib/fsUtil';
+  import { bindArguments
+         } from '../../../lib/functionUtil';
   import { testSrc
          , testSummary
-         , testAsyncFunction
+         , whenAsyncFunctionTested
          , testFunction
          , testEqual
-         , bindArgs
          } from '../../../lib/testUtil';
-  import { ß_trc
-         } from '../../../runtime/context';
 //====================================================================
 
 export async function tst_expandEnvVariables(){
@@ -40,11 +41,11 @@ export async function tst_expandEnvVariables(){
       , [ 'a-${ hugo}', 'a-HUGO'  ]
       ] as TResultArray<string,string>;
     const ü_vars = ['00','11'];
-    const ö_expandTemplateString_o = bindArgs( expandTemplateString, { arrangeBound:[1], realFirst:true }
+    const ö_expandTemplateString_o = bindArguments( expandTemplateString, { arrangeBound:[1], realFirst:true }
                                            , Object.assign( ü_vars, {hugo : 'HUGO'} ) );
     testFunction( ö_expandTemplateString_o, ü_temp );
   //
-    const ö_expandTemplateString_a = bindArgs( expandTemplateString, { arrangeBound:[1], realFirst:true }
+    const ö_expandTemplateString_a = bindArguments( expandTemplateString, { arrangeBound:[1], realFirst:true }
                                            , ...            ü_vars                    );
     testFunction( ö_expandTemplateString_a, ü_temp );
   //

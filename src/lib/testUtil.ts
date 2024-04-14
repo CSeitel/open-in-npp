@@ -1,13 +1,9 @@
 /*
 */
-  import { type TAssert
-         , type TTestResult
+  import { type TTestResult
          , type TResultArray
-         , type TAnyFunction
          , type TAsyncTestFunction
          , type TTestSuite
-         , type TArgMap
-         , type TArgumentsInfo
          } from '../types/lib.testUtil.d';
 //--------------------------------------------------------------------
   import { join
@@ -119,28 +115,6 @@ function ß_testChain( ö_chain:Promise<number>[] ) {
 
 //====================================================================
 
-export function bindArgs<T>( ö_fref:TAnyFunction<T>, ö_map:TArgumentsInfo, ...ö_baseArgs:readonly any[] ):TAnyFunction<T> {
-    return ö_bound;
-//
-function ö_bound( ...ü_realArgs:any[] ):T {
-  //
-    const ü_args = ö_map.realFirst === true ? ü_realArgs.concat( ö_baseArgs )
-                                            : ö_baseArgs.concat( ü_realArgs );
-    if ( ö_map.arrangeBound !== undefined ) { ö_map.arrangeBound.forEach(function( ü_new, ü_old ){ ü_args[ ü_new ] = ö_baseArgs[ ü_old ]; }); }
-    if ( ö_map.arrangeReal  !== undefined ) { ö_map.arrangeReal .forEach(function( ü_new, ü_old ){ ü_args[ ü_new ] = ü_realArgs[ ü_old ]; }); }
-  //
-    if ( ö_map.refine !== undefined ) {
-        for ( const ü_indx in ö_map.refine ) {
-            ü_args[ ü_indx ] = ö_map.refine[ ü_indx ]( ü_args[ ü_indx ] );
-        }
-    }
-  //
-    return ö_fref.apply( ö_map.that, ü_args );
-}
-}
-
-//====================================================================
-
 export function testSummary( ü_series?:string ):void {
   //
     const ü_results = CSeriesOfTests;
@@ -184,7 +158,7 @@ export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:un
 
 //====================================================================
 
-export async function testAsyncFunction<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<Ty>
+export async function whenAsyncFunctionTested<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<Ty>
                                                  , ö_expData:          Map<Tx,Ty|Tz>
                                                             | TResultArray<Tx,Ty|Tz>
                                                  , ö_expectError?:(x:Tx,reason:any)=>boolean

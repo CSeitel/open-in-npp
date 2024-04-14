@@ -46,7 +46,7 @@ async function ß_whenPath( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMe
             if ( isAbsolute( ü_path ) ) {
                    // throw new ErrorWithUixMessage( ü_yes, ü_path ).asInfo   ();
              } else { throw new ErrorWithUixMessage( ü_warn , ü_path ).asWarning(); }
-        }), ü_yes );
+        }), ü_yes, 'Unknown {0}' );
 }
 
 export async function onNewExecutable    ( ü_cfg:ConfigSnapshot ):Promise<void> { return ß_whenPath( ü_cfg.whenExecutable    , LCConfig.executable_Y     ); }

@@ -3,8 +3,6 @@
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
 //--------------------------------------------------------------------
-  import { basename
-         } from 'path';
 //--------------------------------------------------------------------
   import { expect
          } from '../../../lib/errorUtil';
@@ -22,12 +20,13 @@
          } from '../../../lib/fsUtil';
   import { whenChildProcessSpawned
          } from '../../../lib/cpUtil';
+  import { bindArguments
+         } from '../../../lib/functionUtil';
   import { testSrc
          , testSummary
-         , testAsyncFunction
+         , whenAsyncFunctionTested
          , testFunction
          , testEqual
-         , bindArgs
          } from '../../../lib/testUtil';
 //====================================================================
 
@@ -35,7 +34,7 @@ export async function tst_whenFileInfoRead(){
     const ö_info = ( await whenFileInfoRead( testSrc( 'real_1' ) ) )!;
     const ü_data = [ 'virtual_2_d'
                    , 'virtual_1_d' ].map( ü_name => [testSrc( ü_name ), '0.1' ] as [string,string] )
-    await testAsyncFunction( ö_whenCtime, ü_data );
+    await whenAsyncFunctionTested( ö_whenCtime, ü_data );
     testSummary();
 
 async function ö_whenCtime( ü_path:string ):Promise<string> {
@@ -73,16 +72,16 @@ export async function tst_whenKnownAsFolder():Promise<void> {
     const ü_05 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 5 ) );
     const ü_06 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 6 ) );
   //
-    const ü_LFolder  = bindArgs( whenKnownAsFolder , { realFirst:true }, true );
-    const ü_LSymLink = bindArgs( whenKnownAsSymLink, { realFirst:true }, true );
-    const ü_LFile    = bindArgs( whenKnownAsFile   , { realFirst:true }, true );
+    const ü_LFolder  = bindArguments( whenKnownAsFolder , { realFirst:true }, true );
+    const ü_LSymLink = bindArguments( whenKnownAsSymLink, { realFirst:true }, true );
+    const ü_LFile    = bindArguments( whenKnownAsFile   , { realFirst:true }, true );
   //
-    await testAsyncFunction( whenKnownAsFolder , ü_01, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
-    await testAsyncFunction( ü_LFolder         , ü_02  );
-    await testAsyncFunction( whenKnownAsSymLink, ü_03, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
-    await testAsyncFunction( ü_LSymLink        , ü_04  );
-    await testAsyncFunction( whenKnownAsFile   , ü_05, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
-    await testAsyncFunction( ü_LFile           , ü_06  );
+    await whenAsyncFunctionTested( whenKnownAsFolder , ü_01, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
+    await whenAsyncFunctionTested( ü_LFolder         , ü_02  );
+    await whenAsyncFunctionTested( whenKnownAsSymLink, ü_03, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
+    await whenAsyncFunctionTested( ü_LSymLink        , ü_04  );
+    await whenAsyncFunctionTested( whenKnownAsFile   , ü_05, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
+    await whenAsyncFunctionTested( ü_LFile           , ü_06  );
     testSummary();
 }
 
@@ -100,7 +99,7 @@ export async function tst_isExe(){
       , [ '../..'   , false ]
       ] as TResultArray<string,boolean>;
   //
-    await testAsyncFunction( isWin32Executable, ü_data )
+    await whenAsyncFunctionTested( isWin32Executable, ü_data )
     testSummary();
 //await isExe( await ßß_impl.defaultNppExecutable()                 );
 }
@@ -112,8 +111,8 @@ export async function tst_win32Exe(){
       , [ testSrc( 'lnk.lnk' ), true ]
       ] as TResultArray<string,boolean>;
     
-    await testAsyncFunction( isWin32Executable, ü_data );
-    await testAsyncFunction( ö_whenSpwaned    , ü_data );
+    await whenAsyncFunctionTested( isWin32Executable, ü_data );
+    await whenAsyncFunctionTested( ö_whenSpwaned    , ü_data );
     testSummary();
   //a( ßß_assert.strictEqual )
 async function ö_whenSpwaned( ü_exe:string ):Promise<boolean> {

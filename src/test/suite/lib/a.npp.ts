@@ -1,7 +1,5 @@
 /*
 */
-  import { type TTestResult
-         } from '../../../types/lib.testUtil.d';
   import { type XtnOpenInNpp
          , type IGlobalHistoryData
          } from '../../../types/vsc.extension.d';
@@ -27,8 +25,6 @@
          } from '../../../runtime/context-XTN';
   import { ß_trc
          } from '../../../runtime/context';
-  import { MementoFacade
-         } from '../../../vsc/histUtil';
   import { CVscFs
          , fileToUri
          } from '../../../vsc/fsUtil';

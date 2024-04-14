@@ -18,12 +18,13 @@
          , whenDoneWith
          } from '../../../lib/asyncUtil';
 //--------------------------------------------------------------------
+  import { bindArguments
+         } from '../../../lib/functionUtil';
   import { testSrc
          , testSummary
-         , testAsyncFunction
+         , whenAsyncFunctionTested
          , testFunction
          , testEqual
-         , bindArgs
          } from '../../../lib/testUtil';
 //====================================================================
 

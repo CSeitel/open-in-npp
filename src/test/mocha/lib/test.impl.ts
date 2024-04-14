@@ -3,18 +3,31 @@
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
 //--------------------------------------------------------------------
-  import { testSrc
-         , testSummary
-         , testAsyncFunction
-         , testFunction
-         , testEqual
-         , bindArgs
-         } from '../../../lib/testUtil';
+  import { ß_trc
+         } from '../../../runtime/context';
   import { whenDelay
          , whenTimeout
          } from '../../../lib/asyncUtil';
-  import { ß_trc
-         } from '../../../runtime/context';
+  import { bindArguments
+         } from '../../../lib/functionUtil';
+  import { testSrc
+         , testSummary
+         , whenAsyncFunctionTested
+         , testFunction
+         , testEqual
+         } from '../../../lib/testUtil';
+//====================================================================
+
+export async function tst_bindArgs(){
+    testEqual( bindArguments( ö_sorted, { realFirst:false }, 'b1','b2' )( 'r1','r2' ), 'b1b2r1r2' );
+    testEqual( bindArguments( ö_sorted, { realFirst:true  }, 'b1','b2' )( 'r1','r2' ), 'r1r2b1b2' );
+    testEqual( bindArguments( ö_sorted, { realFirst:true , arrangeBound:[1], arrangeReal:[0,2] }, 'b1','b2' )( 'r1','r2' ), 'r1b1r2b2' );
+    testSummary( 'Complex-Bind' );
+function ö_sorted( ...ü_args:string[] ):string {
+    return ü_args.join( '' );
+}
+}
+
 //====================================================================
 
 export async function tst_a(){
@@ -40,7 +53,7 @@ export async function tst_testEquals_1(){
     testEqual( {}, {}, '9999' )
     testEqual(  0,  0 )
     testEqual(  0,  0 )
-    const ü_fref = bindArgs( ö_echo, { arrangeReal:[2] }, '_0','_1' )
+    const ü_fref = bindArguments( ö_echo, { arrangeReal:[2] }, '_0','_1' )
     testFunction( ü_fref, [['A_','_0\t_1\tA_']] as TResultArray<string,string> )
     testSummary();
     //strictEqual( 0, 1, ü_all.join('\r\n') )
@@ -56,7 +69,7 @@ export async function tst_testEquals(){
           ü_data.set( 'false', false );
           ü_data.set( '_'    , false );
   //
-    await testAsyncFunction( ö_someAsync, ü_data );
+    await whenAsyncFunctionTested( ö_someAsync, ü_data );
     testSummary();
   //
 async function ö_someAsync( ü_text:string ):Promise<boolean> {

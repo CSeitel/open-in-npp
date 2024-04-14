@@ -2,6 +2,8 @@
 */
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
+  import { type IUiXMessage
+         } from '../../../types/lib.errorUtil.d';
 //--------------------------------------------------------------------
   import { format
          } from 'util';
@@ -11,20 +13,23 @@
          , summarizeError
          , ErrorWithUixMessage
          } from '../../../lib/errorUtil';
+  import { whenDoneWithUiXMessage
+         } from '../../../lib/asyncUtil';
   import { isDirectInstanceOf
          } from '../../../lib/objectUtil';
+  import { bindArguments
+         } from '../../../lib/functionUtil';
   import { testSrc
          , testSummary
-         , testAsyncFunction
+         , whenAsyncFunctionTested
          , testFunction
          , testEqual
-         , bindArgs
          } from '../../../lib/testUtil';
 //====================================================================
 
 export async function tst_(){
   //
-    return tst_print();
+    return tst_UiX();
   //
     testSummary();
 }
@@ -50,6 +55,20 @@ class ö_ClassB extends ö_ClassA { bbb = 12; }
     testSummary();
 }
 
+export async function tst_UiX(){
+    const ü_data =
+      [ [ Promise.resolve( 1 )  , 'YES:1'  ]
+      , [ Promise.reject ( 1 )  , 'NO:1' ]
+      ] as TResultArray<object,string>;
+    const ö_finalize = (uix:Promise<IUiXMessage>)=>uix.then(function(val){  
+      return val.text;
+     })
+    const ö_oref = bindArguments( whenDoneWithUiXMessage, { realFirst:true, arrangeBound:[1], finalize:ö_finalize }, 'YES:{0}', 'NO:{0}' );
+    await whenAsyncFunctionTested( ö_oref, ü_data );
+  //
+    testSummary();
+}
+
 export async function tst_error(){
 class ö_ErrorX        extends Error        { more = 12; }
 class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
@@ -70,7 +89,7 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
       , [ ü_err     , false ]
       , [ ü_errX    , false ]
       ] as TResultArray<object,boolean>;
-    testFunction( bindArgs( isDirectInstanceOf, { realFirst:true, arrangeBound:[1] }, ErrorWithUixMessage ), ü_data );
+    testFunction( bindArguments( isDirectInstanceOf, { realFirst:true, arrangeBound:[1] }, ErrorWithUixMessage ), ü_data );
   //
         const ü_prot_a = Object.getPrototypeOf( ü_errMsgX );
         const ü_prot_b = Object.getPrototypeOf( ü_errMsg );

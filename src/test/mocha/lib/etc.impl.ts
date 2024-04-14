@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------
   import { format
          } from 'util';
+//--------------------------------------------------------------------
   import { ß_trc
          } from '../../../runtime/context';
   import { summarizeError
@@ -12,12 +13,13 @@
          } from '../../../lib/errorUtil';
   import { isDirectInstanceOf
          } from '../../../lib/objectUtil';
+  import { bindArguments
+         } from '../../../lib/functionUtil';
   import { testSrc
          , testSummary
-         , testAsyncFunction
+         , whenAsyncFunctionTested
          , testFunction
          , testEqual
-         , bindArgs
          } from '../../../lib/testUtil';
 //====================================================================
 
@@ -50,7 +52,7 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
       , [ ü_err     , false ]
       , [ ü_errX    , false ]
       ] as TResultArray<object,boolean>;
-    testFunction( bindArgs( isDirectInstanceOf, { realFirst:true, arrangeBound:[1] }, ErrorWithUixMessage ), ü_data );
+    testFunction( bindArguments( isDirectInstanceOf, { realFirst:true, arrangeBound:[1] }, ErrorWithUixMessage ), ü_data );
   //
         const ü_prot_a = Object.getPrototypeOf( ü_errMsgX );
         const ü_prot_b = Object.getPrototypeOf( ü_errMsg );

@@ -14,5 +14,12 @@ export function isDirectInstanceOf( ü_oref:object, ü_class:Function ):boolean 
 }
 
 //====================================================================
+
+export function pickProperty<T,P extends keyof T>( ü_oref:T, ü_mKey:P ):T[P] {
+  //( ü_oref as Object ).hasOwnProperty
+    return ü_oref[ ü_mKey ];
+}
+
+//====================================================================
 /*
 */

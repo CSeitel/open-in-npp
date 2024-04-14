@@ -15,8 +15,12 @@
   const ß_skipTests =  true; // = except single test
   whenAllTestsRun([
       [ 'Single', [ 
-                //ß_fs   .tst_win32Exe
-                  ß_error.tst_
+                  ß_test
+                         .tst_bindArgs
+                //ß_fs   
+                //       .tst_win32Exe
+                //ß_error
+                //       .tst_
                         ], !ß_skipTests ]
     , [ 'Array' , ß_array,  ß_skipTests ]
     , [ 'Async' , ß_async,  ß_skipTests ]
