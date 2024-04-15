@@ -3,15 +3,16 @@
   import { TAnyFunctionSingleArg
          } from './generic.d'
 //====================================================================
+  export type TBind = typeof Function.prototype.bind
 
   export type TIndexMapping = number[]|Record<number,number>
-  export type TArgumentsInfo<Ty=any,Tz=Ty> = {
+  export type TProcessingInfo<Ty=any,Tz=Ty> = {
       that        ?:any
       realFirst   ?:boolean
       arrangeReal ?:TIndexMapping
       arrangeBound?:TIndexMapping
-      refine      ?:Record<number,TAnyFunctionSingleArg<any,any>>
-      finalize    ?:              TAnyFunctionSingleArg<Tz ,Ty >
+      prepare     ?:Record<number,TAnyFunctionSingleArg<any,any>>
+      refine      ?:              TAnyFunctionSingleArg<Tz ,Ty >
     }
 
 //====================================================================

@@ -63,7 +63,7 @@ export async function tst_UiX(){
     const ö_finalize = (uix:Promise<IUiXMessage>)=>uix.then(function(val){  
       return val.text;
      })
-    const ö_oref = bindArguments( whenDoneWithUiXMessage, { realFirst:true, arrangeBound:[1], finalize:ö_finalize }, 'YES:{0}', 'NO:{0}' );
+    const ö_oref = bindArguments( whenDoneWithUiXMessage, { realFirst:true, arrangeBound:[1], refine:ö_finalize }, 'YES:{0}', 'NO:{0}' );
     await whenAsyncFunctionTested( ö_oref, ü_data );
   //
     testSummary();

@@ -102,7 +102,7 @@ export async function tst_whenWS(){
       , [ testSrc( '../etc/test/workspaceFolder/temp' ), true ]
       , [ testSrc( 'virtual_6_d' ), false ]
       ] as TResultArray<string,boolean>;
-    testFunction( bindArguments( isContainedInWorkspace, { refine: {0:fileToUri} } ), ü_data )
+    testFunction( bindArguments( isContainedInWorkspace, { prepare: {0:fileToUri} } ), ü_data )
     testSummary();
 }
 

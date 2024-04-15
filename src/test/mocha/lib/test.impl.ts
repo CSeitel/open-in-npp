@@ -2,13 +2,17 @@
 */
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
+  import { type TBind
+         } from '../../../types/lib.functionUtil.d';
 //--------------------------------------------------------------------
   import { ß_trc
          } from '../../../runtime/context';
   import { whenDelay
          , whenTimeout
+         , whenPromiseMapped
          } from '../../../lib/asyncUtil';
   import { bindArguments
+         , bindAppending
          } from '../../../lib/functionUtil';
   import { testSrc
          , testSummary
@@ -19,12 +23,28 @@
 //====================================================================
 
 export async function tst_bindArgs(){
+  //const ö_whenMapped = bindArguments( whenPromiseMapped<number,string>, { realFirst:true }, parseInt );
+    const ö_whenMapped = bindAppending( whenPromiseMapped<number,string>                    , parseInt );
+  //
     testEqual( bindArguments( ö_sorted, { realFirst:false }, 'b1','b2' )( 'r1','r2' ), 'b1b2r1r2' );
+    testEqual( bindArguments( ö_sorted, { realFirst:false  , arrangeReal :[1]
+                                                           , arrangeBound:{1:2} }
+                                                           , 'b1','b2' )( 'r1','r2' ), 'b1r1b2r2' );
     testEqual( bindArguments( ö_sorted, { realFirst:true  }, 'b1','b2' )( 'r1','r2' ), 'r1r2b1b2' );
-    testEqual( bindArguments( ö_sorted, { realFirst:true , arrangeBound:[1], arrangeReal:[0,2] }, 'b1','b2' )( 'r1','r2' ), 'r1b1r2b2' );
+    testEqual( bindArguments( ö_sorted, { realFirst:true   , arrangeBound:[1]
+                                                           , arrangeReal :{1:2} }
+                                                           , 'b1','b2' )( 'r1','r2' ), 'r1b1r2b2' );
+  //
+    testEqual( await bindArguments( ö_whenDone, { prepare:{0:parseInt}, refine:ö_whenMapped }, '1' )(), 1 );
+  //
     testSummary( 'Complex-Bind' );
 function ö_sorted( ...ü_args:string[] ):string {
     return ü_args.join( '' );
+}
+async function ö_whenDone( ü_nmbr:number ):Promise<number>{
+  //await whenTimeout(  'w' );
+    await whenDelay( 1 );
+    return ü_nmbr;
 }
 }
 
