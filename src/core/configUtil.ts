@@ -34,14 +34,14 @@
          } from '../lib/fsUtil';
   import { ErrorWithUixMessage
          } from '../lib/errorUtil';
-  import { whenPromiseMapped
+  import {
          } from '../lib/asyncUtil';
 //====================================================================
 
 async function ß_whenPath( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMessageVars, ü_warn = LCConfig.notAbsolute ):Promise<void> {
   //
     ß_StatusBarItem.echoWhenDone(
-        whenPromiseMapped( ü_whenPath, async function( ü_path ){
+        ü_whenPath.then( function( ü_path ){
             if ( ü_path.length === 0 ) { return ü_path; }
             if ( isAbsolute( ü_path ) ) {
                    // throw new ErrorWithUixMessage( ü_yes, ü_path ).asInfo   ();

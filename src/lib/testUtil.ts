@@ -1,5 +1,7 @@
 /*
 */
+  import { TAnyFunctionSingleArg
+         } from '../types/generic.d';
   import { type TTestResult
          , type TResultArray
          , type TAsyncTestFunction
@@ -158,11 +160,11 @@ export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:un
 
 //====================================================================
 
-export async function whenAsyncFunctionTested<Tx,Ty,Tz>( ö_aFref  : (x:Tx)=>Promise<Ty>
-                                                 , ö_expData:          Map<Tx,Ty|Tz>
-                                                            | TResultArray<Tx,Ty|Tz>
-                                                 , ö_expectError?:(x:Tx,reason:any)=>boolean
-                                                 ):Promise<boolean> {
+export async function whenAsyncFunctionTested<Tx,Ty,Tz>( ö_aFref  :TAnyFunctionSingleArg<Ty,Tx> //(x:Tx)=>PromiseLike<Ty>
+                                                       , ö_expData:         Map<Tx,Ty|Tz>
+                                                                  |TResultArray<Tx,Ty|Tz>
+                                                       , ö_expectError?:(x:Tx,reason:any)=>boolean
+                                                       ):Promise<boolean> {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
     const ü_keys = Array.from( ö_expData.keys() );

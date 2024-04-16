@@ -2,14 +2,16 @@
 */
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
-  import { type TBind
+  import {
          } from '../../../types/lib.functionUtil.d';
 //--------------------------------------------------------------------
   import { ß_trc
+         , ß_stringify
          } from '../../../runtime/context';
   import { whenDelay
          , whenTimeout
-         , whenPromiseMapped
+         , whenChained
+         , chainAsync
          } from '../../../lib/asyncUtil';
   import { bindArguments
          , bindAppending
@@ -24,7 +26,8 @@
 
 export async function tst_bindArgs(){
   //const ö_whenMapped = bindArguments( whenPromiseMapped<number,string>, { realFirst:true }, parseInt );
-    const ö_whenMapped = bindAppending( whenPromiseMapped<number,string>                    , parseInt );
+  //const ö_whenMapped = bindAppending( whenPromiseMapped<number,string>                    , ß_stringify );
+    
   //
     testEqual( bindArguments( ö_sorted, { realFirst:false }, 'b1','b2' )( 'r1','r2' ), 'b1b2r1r2' );
     testEqual( bindArguments( ö_sorted, { realFirst:false  , arrangeReal :[1]
@@ -35,7 +38,9 @@ export async function tst_bindArgs(){
                                                            , arrangeReal :{1:2} }
                                                            , 'b1','b2' )( 'r1','r2' ), 'r1b1r2b2' );
   //
-    testEqual( await bindArguments( ö_whenDone, { prepare:{0:parseInt}, refine:ö_whenMapped }, '1' )(), 1 );
+    testEqual( await                             bindArguments( ö_whenDone, { prepare:{0:parseInt}, refine:whenChained( ß_stringify ) }, '1' )               (     )  , '1' );
+    testEqual( await whenChained( ß_stringify )( bindArguments( ö_whenDone, { prepare:{0:parseInt}                                    }      )               ( '2' ) ), '2' );
+    testEqual( await     chainAsync            ( bindArguments( ö_whenDone, { prepare:{0:parseInt}                                    }      ), ß_stringify )( '1' )  , '1' );
   //
     testSummary( 'Complex-Bind' );
 function ö_sorted( ...ü_args:string[] ):string {

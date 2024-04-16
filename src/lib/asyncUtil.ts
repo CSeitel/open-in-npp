@@ -1,6 +1,7 @@
 /*
 */
   import { type TAsyncFunctionSingleArg
+         , type TAsyncFunction
          , type TAnyFunctionSingleArg
          } from '../types/generic.d';
   import { type TPromise
@@ -47,9 +48,20 @@ export async function whenPromiseSettled<T,R=any>( ü_whenDone:PromiseLike<T> ):
     return ü_done;
 }
 
-export async function whenPromiseMapped<Tz,Ty>( ü_whenDone:PromiseLike<Ty>, ü_map:TAnyFunctionSingleArg<Tz,Ty> ):Promise<Tz> {
-  //return ü_map( await ü_whenDone );
-    return ü_whenDone.then( ü_map );
+export function whenChained<Tz,Ty>( ö_map:TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunction<Tz> {
+    return ö_chain;
+function ö_chain( ü_whenDone:PromiseLike<Ty> ):PromiseLike<Tz> {
+    return ü_whenDone.then( ö_map );
+}
+}
+
+export function chainAsync<Tz,Ty,Tx=Ty>( ö_whenDone:TAsyncFunctionSingleArg<Ty,Tx>, ö_map:TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunctionSingleArg<Tz,Tx> {
+    return ö_chain;
+function ö_chain( ü_arg0:Tx ):PromiseLike<Tz> {
+    return ö_whenDone( ü_arg0 ).then( ö_map );
+  //const ü_done = await ö_whenDone( ü_arg0 );
+  //return ö_map( ü_done );
+}
 }
 
 //====================================================================
