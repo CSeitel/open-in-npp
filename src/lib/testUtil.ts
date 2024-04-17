@@ -1,6 +1,7 @@
 /*
 */
   import { TAnyFunctionSingleArg
+         , TAsyncFunctionSingleArg
          } from '../types/generic.d';
   import { type TTestResult
          , type TResultArray
@@ -160,23 +161,24 @@ export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:un
 
 //====================================================================
 
-export async function whenAsyncFunctionTested<Tx,Ty,Tz>( ö_aFref  :TAnyFunctionSingleArg<Ty,Tx> //(x:Tx)=>PromiseLike<Ty>
+export async function whenAsyncFunctionTested<Tx,Ty,Tz>( ö_aFref  :TAsyncFunctionSingleArg<Ty,Tx> //(x:Tx)=>PromiseLike<Ty>
                                                        , ö_expData:         Map<Tx,Ty|Tz>
                                                                   |TResultArray<Tx,Ty|Tz>
                                                        , ö_expectError?:(x:Tx,reason:any)=>boolean
                                                        ):Promise<boolean> {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
-    const ü_keys = Array.from( ö_expData.keys() );
-  //
-    const ü_done = await Promise.allSettled( ü_keys.map(function( ü_x ){
+    const ü_allX = Array.from( ö_expData.keys() );
+    const ü_allWhenY = ü_allX.map(function( ü_x ){
         return ö_aFref( ü_x );
-      }) );
+      });
+  //
+    const ü_allY = await Promise.allSettled( ü_allWhenY );
   //
     let ü_all:boolean = true;
-    ü_keys.forEach(function( ü_x, ü_indx ){
+    ü_allX.forEach(function( ü_x, ü_indx ){
         const ü_count = `[${ ü_indx }] ${ echo( ü_x, 50 ) }`;
-        const ü_act_y = ü_done[ ü_indx ];
+        const ü_act_y = ü_allY[ ü_indx ];
         const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x );
         if ( ü_act_y.status === 'fulfilled' ) {
                     testEqual( ü_act_y.value, ü_exp_y, ü_count )||( ü_all = false );

@@ -14,7 +14,7 @@
          , ErrorWithUixMessage
          } from '../../../lib/errorUtil';
   import { whenDoneWithUiXMessage
-         , chainAsync
+         , whenDoneAndPostProcessed
          } from '../../../lib/asyncUtil';
   import { isDirectInstanceOf
          } from '../../../lib/objectUtil';
@@ -29,11 +29,8 @@
          } from '../../../lib/testUtil';
 //====================================================================
 
-export async function tst_(){
-  //
-    return tst_UiX();
-  //
-    testSummary();
+export async function tst_dispatch(){
+    tst_UiX();
 }
 
 //====================================================================
@@ -62,16 +59,23 @@ class ö_ClassB extends ö_ClassA { bbb = 12; }
 export async function tst_UiX(){
     const ü_data =
       [ [ Promise.resolve( 1 )  , 'YES:1'  ]
+    /*
       , [ Promise.reject ( 1 )  , 'NO:1' ]
+      , [ Promise.resolve( 1 ).then(()=>{ throw new Error('1'); })  , 'NO:Error: 1' ]
+    */
       ] as TResultArray<object,string>;
-    const ö_finalize = function(val:IUiXMessage):string {  
-      return val.text;
-     }
-    const ö_oref = //bindAppending( whenPromiseMapped)
-                  chainAsync( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', 'NO:{0}' ), ö_finalize  );
-    await whenAsyncFunctionTested( ö_oref, ü_data );
+    const ü_with = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', 'NO:{0}' ), ö_finalize  );
+    const ü_true = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', ''       ), ö_finalize  );
   //
-    testSummary();
+    await whenAsyncFunctionTested( ü_with, ü_data );
+    testSummary( '1' );
+    await whenAsyncFunctionTested( ü_true, ü_data );
+    testSummary( '2' );
+  //
+function ö_finalize( val:IUiXMessage ):string {
+    ß_trc&& ß_trc( val.text );
+    return val.text;
+}
 }
 
 export async function tst_error(){

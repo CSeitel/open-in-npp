@@ -48,17 +48,18 @@ export async function whenPromiseSettled<T,R=any>( ü_whenDone:PromiseLike<T> ):
     return ü_done;
 }
 
-export function whenChained<Tz,Ty>( ö_map:TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunction<Tz> {
-    return ö_chain;
-function ö_chain( ü_whenDone:PromiseLike<Ty> ):PromiseLike<Tz> {
-    return ü_whenDone.then( ö_map );
+export function createAsyncPostProcessor<Tz,Ty>( ö_y_to_z:TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunction<Tz> {
+    return ö_concat;
+function ö_concat( ü_whenDone:PromiseLike<Ty> ):PromiseLike<Tz> {
+    return ü_whenDone.then( ö_y_to_z );
 }
 }
 
-export function chainAsync<Tz,Ty,Tx=Ty>( ö_whenDone:TAsyncFunctionSingleArg<Ty,Tx>, ö_map:TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunctionSingleArg<Tz,Tx> {
-    return ö_chain;
-function ö_chain( ü_arg0:Tx ):PromiseLike<Tz> {
-    return ö_whenDone( ü_arg0 ).then( ö_map );
+export function whenDoneAndPostProcessed<Tz,Ty,Tx=Ty>( ö_whenDone:TAsyncFunctionSingleArg<Ty,Tx>
+                                                     , ö_y_to_z  :  TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunctionSingleArg<Tz,Tx> {
+    return ö_concat;
+function ö_concat( ü_arg0:Tx ):PromiseLike<Tz> {
+    return ö_whenDone( ü_arg0 ).then( ö_y_to_z );
   //const ü_done = await ö_whenDone( ü_arg0 );
   //return ö_map( ü_done );
 }

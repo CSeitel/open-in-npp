@@ -10,8 +10,8 @@
          } from '../../../runtime/context';
   import { whenDelay
          , whenTimeout
-         , whenChained
-         , chainAsync
+         , createAsyncPostProcessor
+         , whenDoneAndPostProcessed
          } from '../../../lib/asyncUtil';
   import { bindArguments
          , bindAppending
@@ -24,10 +24,14 @@
          } from '../../../lib/testUtil';
 //====================================================================
 
+export async function tst_dispatch(){
+    return tst_self();
+}
+
 export async function tst_bindArgs(){
   //const ö_whenMapped = bindArguments( whenPromiseMapped<number,string>, { realFirst:true }, parseInt );
   //const ö_whenMapped = bindAppending( whenPromiseMapped<number,string>                    , ß_stringify );
-    
+    const ü_whenStringified = createAsyncPostProcessor( ß_stringify );
   //
     testEqual( bindArguments( ö_sorted, { realFirst:false }, 'b1','b2' )( 'r1','r2' ), 'b1b2r1r2' );
     testEqual( bindArguments( ö_sorted, { realFirst:false  , arrangeReal :[1]
@@ -38,9 +42,9 @@ export async function tst_bindArgs(){
                                                            , arrangeReal :{1:2} }
                                                            , 'b1','b2' )( 'r1','r2' ), 'r1b1r2b2' );
   //
-    testEqual( await                             bindArguments( ö_whenDone, { prepare:{0:parseInt}, refine:whenChained( ß_stringify ) }, '1' )               (     )  , '1' );
-    testEqual( await whenChained( ß_stringify )( bindArguments( ö_whenDone, { prepare:{0:parseInt}                                    }      )               ( '2' ) ), '2' );
-    testEqual( await     chainAsync            ( bindArguments( ö_whenDone, { prepare:{0:parseInt}                                    }      ), ß_stringify )( '1' )  , '1' );
+    testEqual( await                             bindArguments( ö_whenDone, { prepare:{0:parseInt}, refine:ü_whenStringified }, '1' )               (     )  , '1' );
+    testEqual( await ü_whenStringified         ( bindArguments( ö_whenDone, { prepare:{0:parseInt}                           }      )               ( '2' ) ), '2' );
+    testEqual( await   whenDoneAndPostProcessed( bindArguments( ö_whenDone, { prepare:{0:parseInt}                           }      ), ß_stringify )( '3' )  , '3' );
   //
     testSummary( 'Complex-Bind' );
 function ö_sorted( ...ü_args:string[] ):string {
@@ -51,6 +55,17 @@ async function ö_whenDone( ü_nmbr:number ):Promise<number>{
     await whenDelay( 1 );
     return ü_nmbr;
 }
+}
+
+//====================================================================
+
+export async function tst_self(){
+    const ü_data =
+       [[ 0,0 ]] as TResultArray<number,number>;
+    await whenAsyncFunctionTested( whenDelay, ü_data );
+    testSummary( '1' );
+    await whenAsyncFunctionTested( whenDelay, ü_data );
+    testSummary( '2' );
 }
 
 //====================================================================
