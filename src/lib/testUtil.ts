@@ -13,7 +13,8 @@
          } from 'path';
   import { inspect
          } from 'util';
-  import { ß_writeStdOut
+  import { ß_trc
+         , ß_writeStdOut
          } from '../runtime/context';
   import { shortenText
          } from './textUtil';
@@ -53,6 +54,8 @@ export async function whenAllTestsRun( ü_suites:[string,TTestSuite,boolean|unde
     while ( ü_suites.length > 0 ) {
         const ü_suite = ü_suites.shift()!;
         await whenTestSuite( ... ü_suite );
+      //ß_trc&& ß_trc( ü_suite[0]);
+        
     }
   //
     return suiteSummary();
@@ -104,7 +107,8 @@ function ö_suiteRecord():void {
 
 function ß_testChain( ö_chain:Promise<number>[] ) {
  return function ö_testChain( ü_title:string, ü_impl:TAsyncTestFunction ):void {
-    ö_chain[0] = ö_chain[0].then(function( ö_rc ){
+    ö_chain[0] = ö_chain[0].then( ö_test_1 );
+function ö_test_1 ( ö_rc:number ){
         ß_writeStdOut( ü_title );
         return ü_impl().then( function(){ return ö_rc; }
                             , function( ü_err ){
@@ -112,7 +116,7 @@ function ß_testChain( ö_chain:Promise<number>[] ) {
             return ö_rc + 1;
         }
                             )
-    });
+    }
  };
 }
 

@@ -26,6 +26,7 @@
 
 export async function tst_dispatch(){
     return tst_self();
+    await  tst_self();
 }
 
 export async function tst_bindArgs(){
