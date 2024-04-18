@@ -99,8 +99,17 @@ function ö_suiteArray():void {
     for ( const ü_testImpl of ö_tests as TAsyncTestFunction[] ) {
         ö_testApi( ü_testImpl.name
                //, whenDoneAndPostProcessed<void,void,void>( ü_testImpl, testSummary as TAnyFunctionWithoutArg<void> )
-                 , ü_testImpl
+               //, ü_testImpl
+                 , ä_testImpl
                  );
+        async function ö_testImpl():Promise<void> {
+            await ü_testImpl();
+            testSummary();
+        }
+        function ä_testImpl():PromiseLike<void> {
+            return      whenDoneAndPostProcessed<void,void,void>( ü_testImpl, testSummary as TAnyFunctionWithoutArg<void> )()
+            return ü_testImpl().then( testSummary as any );
+        }
     }
 }
 function ö_suiteRecord():void {

@@ -69,10 +69,10 @@ export async function tst_UiX(){
     const ü_with = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', 'NO:{0}' ), ö_finalize  );
     const ü_true = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', true     ), ö_finalize  );
   //
-    await whenAsyncFunctionTested( ü_true, ü_data );
     await whenAsyncFunctionTested( ü_with, ü_data );
+    await whenAsyncFunctionTested( ü_true, ü_data );
   //
-    testSummary( '2' );
+  //testSummary( '2' );
   //
 function ö_finalize( val:IUiXMessage ):string {
   //ß_trc&& ß_trc( val.text );
