@@ -2,6 +2,7 @@
 */
   import { type TAsyncFunctionSingleArg
          , type TAsyncFunction
+         , type TAsyncFunctionWithoutArg
          , type TAnyFunctionSingleArg
          } from '../types/generic.d';
   import { type TPromise
@@ -55,8 +56,9 @@ function ö_concat( ü_whenDone:PromiseLike<Ty> ):PromiseLike<Tz> {
 }
 }
 
-export function whenDoneAndPostProcessed<Tz,Ty,Tx=Ty>( ö_whenDone:TAsyncFunctionSingleArg<Ty,Tx>
-                                                     , ö_y_to_z  :  TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunctionSingleArg<Tz,Tx> {
+export function whenDoneAndPostProcessed<Tz,Ty,Tx=Ty>( ö_whenDone:TAsyncFunctionSingleArg <Ty,Tx>
+                                                                 |TAsyncFunctionWithoutArg<Ty>
+                                                     , ö_y_to_z  :   TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunctionSingleArg<Tz,Tx> {
     return ö_concat;
 function ö_concat( ü_arg0:Tx ):PromiseLike<Tz> {
     return ö_whenDone( ü_arg0 ).then( ö_y_to_z );

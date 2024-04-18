@@ -12,9 +12,10 @@
 //====================================================================
 
   export type TAnyFunction            <Ty=any>   = ( ...args:any[] )=>            Ty
-  export type TAnyFunctionSingleArg   <Ty,Tx=Ty> = (    arg0:Tx    )=>            Ty
   export type TAsyncFunction          <Ty=any>   = ( ...args:any[] )=>PromiseLike<Ty>
+  export type TAnyFunctionSingleArg   <Ty,Tx=Ty> = (    arg0:Tx    )=>            Ty
   export type TAsyncFunctionSingleArg <Ty,Tx=Ty> = (    arg0:Tx    )=>PromiseLike<Ty>
+  export type TAnyFunctionWithoutArg  <Ty      > = (               )=>PromiseLike<Ty>
   export type TAsyncFunctionWithoutArg<Ty      > = (               )=>PromiseLike<Ty>
 
 //====================================================================

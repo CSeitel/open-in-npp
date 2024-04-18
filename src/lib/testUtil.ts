@@ -1,6 +1,6 @@
 /*
 */
-  import { TAnyFunctionSingleArg
+  import { TAnyFunctionWithoutArg
          , TAsyncFunctionSingleArg
          } from '../types/generic.d';
   import { type TTestResult
@@ -18,6 +18,8 @@
          } from '../runtime/context';
   import { shortenText
          } from './textUtil';
+  import { whenDoneAndPostProcessed
+         } from './asyncUtil';
 //--------------------------------------------------------------------
   export const successSymbol = String.fromCharCode( 0x2705 ); // 0x221a
   export const failureSymbol = String.fromCharCode( 0x274c );
@@ -53,9 +55,9 @@ export function echo( ü_oref:any, ü_length:number ):string {
 export async function whenAllTestsRun( ü_suites:[string,TTestSuite,boolean|undefined][] ):Promise<number> {
     while ( ü_suites.length > 0 ) {
         const ü_suite = ü_suites.shift()!;
-        await whenTestSuite( ... ü_suite );
+      //await whenTestSuite(          ...ü_suite );
+        await whenTestSuite( ü_suite[0], ü_suite[1], ü_suite[2] );
       //ß_trc&& ß_trc( ü_suite[0]);
-        
     }
   //
     return suiteSummary();
@@ -95,12 +97,19 @@ export function suiteSummary():number {
   //
 function ö_suiteArray():void {
     for ( const ü_testImpl of ö_tests as TAsyncTestFunction[] ) {
-        ö_testApi( ü_testImpl.name, ü_testImpl );
+        ö_testApi( ü_testImpl.name
+               //, whenDoneAndPostProcessed<void,void,void>( ü_testImpl, testSummary as TAnyFunctionWithoutArg<void> )
+                 , ü_testImpl
+                 );
     }
 }
 function ö_suiteRecord():void {
     for ( const ü_testName in ö_tests ) {
-        ö_testApi( ü_testName, ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ] );
+                         const ü_testImpl = ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ];
+        ö_testApi( ü_testName
+               //, whenDoneAndPostProcessed<void,void,void>( ü_testImpl, testSummary as TAnyFunctionWithoutArg<void> )
+                 , ü_testImpl
+                 );
     }
 }
 }
@@ -120,7 +129,7 @@ function ö_test_1 ( ö_rc:number ){
  };
 }
 
-//====================================================================
+//--------------------------------------------------------------------
 
 export function testSummary( ü_series?:string ):void {
   //
@@ -141,6 +150,8 @@ export function testSummary( ü_series?:string ):void {
     if ( ü_ok === ü_all ) {  }
     else                  { throw new Error( `${ ü_all - ü_ok } Failures` ); }
 }
+
+//====================================================================
 
 export function testFailed<T=any>( ü_reason:any, ü_message?:string ):false {
                                                          const ü_echo = 'Exception caught: '+ echo( ü_reason, 200 );
