@@ -17,6 +17,7 @@
          } from 'util';
   import { ß_trc
          , ß_writeStdOut
+         , ß_stringify
          } from '../runtime/context';
   import { shortenText
          } from './textUtil';
@@ -44,12 +45,8 @@ export function testSrc( ...ü_segs:string[] ):string {
     return join( CTestDirName, ...ü_segs );
 }
 
-export function identity<T>( ü_x:T ):T {
-    return ü_x;
-}
-
-export function echo( ü_oref:any, ü_length:number ):string {
-    return shortenText( inspect( ü_oref ), ü_length );
+function echo( ü_oref:any, ü_length:number ):string {
+    return shortenText( ß_stringify( ü_oref ), ü_length ).replace( /[\n\r\t]/g, escape );
 }
 
 //====================================================================
@@ -89,7 +86,7 @@ export function suiteSummary():number {
     } else {
     }
   //
-    ß_writeStdOut( ü_title );
+    ß_writeStdOut( `Suite: ${ ü_title }` );
     if ( ü_isArray ) { ö_suiteArray (); }
     else             { ö_suiteRecord(); }
   //
@@ -132,6 +129,8 @@ function ö_test_1 ( ö_rc:number ){
 //--------------------------------------------------------------------
 
 export function testSummary_( ü_series?:string ):void {
+    ß_trc&& ß_trc( 'testSummary_' );
+  //testSummary();
 }
 function testSummary( ü_series?:string ):void {
   //
@@ -144,7 +143,7 @@ function testSummary( ü_series?:string ):void {
   //
     const ü_head = ü_series === undefined ? ''
                                           : ü_series + ': ';
-    ü_results.unshift(  `${ ü_head }Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%` );
+    ü_results.unshift( `${ ü_head }Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%` );
     const ü_echo = ü_results.join( ü_crlf ) + ü_crlf;
   //
     CSeriesOfTests.length = 0;
@@ -156,7 +155,7 @@ function testSummary( ü_series?:string ):void {
 //====================================================================
 
 export function testFailed<T=any>( ü_reason:any, ü_message?:string ):false {
-                                                         const ü_echo = 'Exception caught: '+ echo( ü_reason, 200 );
+                                                             const ü_echo = 'Exception caught: '+ echo( ü_reason, 200 );
     CSeriesOfTests.push( failurePrefix
                        + ( ü_message === undefined ?               ü_echo
                                                  : ü_message +' '+ ü_echo ) );
@@ -179,9 +178,9 @@ export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:un
 //====================================================================
 
 export async function whenAsyncFunctionTested<Tx,Ty,Tz>( ö_aFref  :TAsyncFunctionSingleArg<Ty,Tx> //(x:Tx)=>PromiseLike<Ty>
-                                                       , ö_expData:         Map<Tx,Ty|Tz>
-                                                                  |TResultArray<Tx,Ty|Tz>
-                                                       , ö_expectError?:(x:Tx,reason:any)=>boolean
+                                                       , ö_expData:         Map<Tx,Ty>
+                                                                  |TResultArray<Tx,Ty>
+                                                       , ö_expectError?:(x:Tx,reason:any,y:Ty)=>Ty
                                                        ):Promise<boolean> {
   //
     if (!( ö_expData instanceof Map )) { ö_expData = new Map( ö_expData ); }
@@ -196,16 +195,21 @@ export async function whenAsyncFunctionTested<Tx,Ty,Tz>( ö_aFref  :TAsyncFuncti
     ü_allX.forEach(function( ü_x, ü_indx ){
         const ü_count = `[${ ü_indx }] ${ echo( ü_x, 50 ) }`;
         const ü_act_y = ü_allY[ ü_indx ];
-        const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x );
+        const ü_exp_y = (ö_expData as Map<Tx,Ty>).get( ü_x )!;
         if ( ü_act_y.status === 'fulfilled' ) {
                     testEqual( ü_act_y.value, ü_exp_y, ü_count )||( ü_all = false );
         } else {
-            if ( ö_expectError !== undefined ) {
+            if ( typeof( ö_expectError ) === 'function' ) {
                 try {
-                  if ( ö_expectError( ü_x, ü_act_y.reason ) === true ) {
-                    testEqual( ü_exp_y, ü_exp_y, ü_count )||( ü_all = false );
+                                  const ü_act_y_value = ö_expectError( ü_x, ü_act_y.reason, ü_exp_y );
+                    testEqual( ü_exp_y, ü_act_y_value, ü_count )||( ü_all = false );
                     return;
-                  }
+                  /*
+                    if ( ö_expectError( ü_x, ü_act_y.reason, ü_exp_y ) === true ) {
+                        testEqual( ü_exp_y, ü_exp_y, ü_count )||( ü_all = false );
+                        return;
+                    }
+                  */
                 } catch ( ü_eX ) {
                 }
             }

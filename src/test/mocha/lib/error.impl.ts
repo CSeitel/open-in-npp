@@ -59,10 +59,11 @@ class ö_ClassB extends ö_ClassA { bbb = 12; }
 export async function tst_UiX(){
     const ü_data_true =
       [
-        [ Promise.reject ( new Error('A') )                       , 'Error: A' ]
-      , [ Promise.resolve( 2 ).then(()=>{ throw new Error('B'); }), 'Error: B' ]
-      , [ Promise.reject ( 3 )  , '3' ]
-      , [ Promise.resolve( 1 )  , 'YES:1'  ]
+        [ Promise.reject (                      new Error('A')     ), 'Error: A' ]
+      , [ Promise.resolve( 2 ).then(()=>{ throw new Error('B'); }  ), 'Error: B' ]
+      , [ Promise.reject ( 3 )                                      , '3'        ]
+      , [ Promise.reject ( new ErrorWithUixMessage( 'X:{0}', 'C' ) ), 'X:C'      ]
+      , [ Promise.resolve( 1 )                                      , 'YES:1'    ]
     /*
     */
       ] as TResultArray<object,string>;
@@ -70,25 +71,26 @@ export async function tst_UiX(){
           ü_data_with[0][1] = 'NO:' + ü_data_with[0][1] ;
           ü_data_with[1][1] = 'NO:' + ü_data_with[1][1] ;
           ü_data_with[2][1] = 'NO:' + ü_data_with[2][1] ;
+          ü_data_true[2][1] = 'ß'   + ü_data_true[2][1] ;
+    const ü_data_none = ü_data_true.slice(0).map(function(row){  return row.slice(0);  }) as TResultArray<object,string>;
+          ü_data_none[0][1] = 'ß'   + ü_data_true[0][1] ;
+          ü_data_none[1][1] = 'ß'   + ü_data_true[1][1] ;
   //
     const ü_with = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', 'NO:{0}' ), ö_finalize );
     const ü_true = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', true     ), ö_finalize );
+    const ü_none = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}'           ), ö_finalize );
   //
     await whenAsyncFunctionTested( ü_with, ü_data_with          );
     await whenAsyncFunctionTested( ü_true, ü_data_true, ö_error );
+    await whenAsyncFunctionTested( ü_none, ü_data_none, ö_error );
   //
     testSummary_();
   //
 function ö_finalize( val:IUiXMessage ):string {
     return val.text;
 }
-function ö_error( ü_data_0:object, ü_eX:any ):boolean {
-    switch ( ü_data_0 ) {
-        case ü_data_with[2][0]:
-          ß_trc&& ß_trc( ü_eX );
-          return ü_data_true[2][1] === (''+ü_eX);
-    }
-    return false;
+function ö_error( ü_x:object, ü_eX:any, ü_y:string ):string {
+    return 'ß' + ü_eX;
 }
 }
 

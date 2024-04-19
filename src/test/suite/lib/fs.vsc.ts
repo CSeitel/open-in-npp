@@ -29,6 +29,12 @@
          } from '../../../lib/testUtil';
 //====================================================================
 
+export async function tst_dispatch(){
+    return tst_whenFileTypeKnown();
+}
+
+//====================================================================
+
 export async function tst_whenFileInfoRead(){
     const ö_info = ( await whenFileInfoRead( testSrc( 'real_1' ) ) )!;
     const ü_data = [ 'virtual_2_d'
@@ -79,17 +85,20 @@ export async function tst_whenFileTypeKnown(){
       , [ testSrc( 'virtual_1_j' ), CEFileType.SymLinkFolder  , true  ]
       , [ testSrc( 'virtual_1_d' ), CEFileType.SymLinkFolder  , true  ]
       , [ testSrc( 'virtual_2_d' ), CEFileType.SymLinkFolder  , true  ]
-      , [ testSrc( 'virtual_3_d' ), null                      , true  ]
+      , [ testSrc( 'virtual_3_d' ), -9                        , true  ]
       , [ testSrc( 'virtual_6_d' ), CEFileType.SymLinkUnknown , false ]
       ];
-    const ü_01 = ü_data.map( pickDuplet<string,CEFileType|null,boolean>( 0, 1 ) );
-    const ü_02 = ü_data.map( pickDuplet<string,boolean,CEFileType|null>( 0, 2 ) );
+    const ü_01 = ü_data.map( pickDuplet<string,CEFileType|-9  ,boolean   |-9  >( 0, 1 ) );
+    const ü_02 = ü_data.map( pickDuplet<string,boolean   |-9  ,CEFileType|-9  >( 0, 2 ) );
     
     await whenAsyncFunctionTested( whenFileTypeKnown, ü_01, ö_err );
     await whenAsyncFunctionTested( whenKnownAsFolder, ü_02, ö_err );
     testSummary_();
-function ö_err( ü_x:string, ü_eX:any ):boolean {
-    return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'Unknown', true );
+function ö_err( ü_x:string, ü_eX:any ):-9      {
+    return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'Unknown', true )
+         ? -6 as -9
+         : -5 as -9
+         ;
 }
 }
 

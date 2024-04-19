@@ -7,6 +7,14 @@
          } from '../types/lib.functionUtil.d';
 //====================================================================
 
+export function nullOperation():void {}
+
+export function identityMap<Tx>( ü_x:Tx ):Tx {
+    return ü_x;
+}
+
+//====================================================================
+
 export function bindAppending<Ty>( ö_fref:TAnyFunction<Ty>, ...ö_baseArgs:readonly any[] ):TAnyFunction<Ty> {
     return ö_bound;
 //
