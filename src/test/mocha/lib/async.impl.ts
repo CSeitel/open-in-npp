@@ -2,7 +2,7 @@
 */
   import { ß_trc
          } from '../../../runtime/context';
-  import { testSummary
+  import { testSummary_
          , testEqual
          } from '../../../lib/testUtil';
 //--------------------------------------------------------------------
@@ -48,7 +48,7 @@ export async function tst_UR(){
     await whenDelay( 5 * 100 );
     testEqual( ö_some, 1  );
   //
-    testSummary( 'UniqueResource' );
+    testSummary_( 'UniqueResource' );
 //
 async function ö_access( ü_secs:number ):Promise<void> {
     const ü_done = await ö_usrc.whenAvailable( ''+ü_secs );
@@ -74,7 +74,7 @@ export async function tst_XY(){
         ü_y = 0;
     }
     testEqual( ü_y, 0, 'Reached'+ ü_calc.lazy );
-    testSummary( 'AsyncCalculation' );
+    testSummary_( 'AsyncCalculation' );
   }
 //
 async function ö_whenY( ü_x:number ):Promise<number> {

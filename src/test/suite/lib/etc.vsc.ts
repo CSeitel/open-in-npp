@@ -21,7 +21,7 @@
   import { bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary
+         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
@@ -37,7 +37,7 @@ export async function tst_(){
   //whenShownInOSExplorer( __filename );
   //
     testEqual( true, ü_done.rejected );
-    testSummary();
+    testSummary_();
 }
 
 //====================================================================

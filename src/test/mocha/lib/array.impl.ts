@@ -2,7 +2,7 @@
 */
   import { ß_trc
          } from '../../../runtime/context';
-  import { testSummary
+  import { testSummary_
          , testEqual
          } from '../../../lib/testUtil';
 //--------------------------------------------------------------------
@@ -22,7 +22,7 @@ export async function tst_basic(){
     putFirst ( ü_list_2   , ü_item_2.a, 'a' );
     testEqual( ü_list_2[0], ü_item_2        );
   //
-    testSummary();
+    testSummary_();
 }
 
 //====================================================================

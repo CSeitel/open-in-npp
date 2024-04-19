@@ -22,7 +22,7 @@
   import { bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary
+         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
@@ -42,7 +42,7 @@ export async function tst_whenFileInfoRead(){
     
     testEqual( ü_a!.mtime, ü_b!.mtime );
   //
-    testSummary();
+    testSummary_();
 
 async function ö_whenCtime( ü_path:string ):Promise<string> {
     const ü_info = ( await whenFileInfoRead( ü_path ) )!;
@@ -58,7 +58,7 @@ async function ö_whenCtime( ü_path:string ):Promise<string> {
 export async function tst_whenFilesFound(){
     const ü_files = await whenFilesFound( testSrc(), '**/*e*.txt' );
     testEqual( ü_files.length, 5 );
-    testSummary();
+    testSummary_();
 }
 
 //====================================================================
@@ -87,7 +87,7 @@ export async function tst_whenFileTypeKnown(){
     
     await whenAsyncFunctionTested( whenFileTypeKnown, ü_01, ö_err );
     await whenAsyncFunctionTested( whenKnownAsFolder, ü_02, ö_err );
-    testSummary();
+    testSummary_();
 function ö_err( ü_x:string, ü_eX:any ):boolean {
     return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'Unknown', true );
 }
@@ -103,7 +103,7 @@ export async function tst_whenWS(){
       , [ testSrc( 'virtual_6_d' ), false ]
       ] as TResultArray<string,boolean>;
     testFunction( bindArguments( isContainedInWorkspace, { prepare: {0:fileToUri} } ), ü_data )
-    testSummary();
+    testSummary_();
 }
 
 //====================================================================

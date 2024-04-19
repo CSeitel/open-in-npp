@@ -65,13 +65,21 @@ function ö_concat( ü_arg0:Tx ):PromiseLike<Tz> {
   //return ö_whenDone( ü_arg0 ).then( ö_y_to_z );
     const ü_whenDone = ö_whenDone( ü_arg0 );
     return ü_whenDone.then( ö_y_to_z );
-function ä_err( ü_eX:any ) {
-                             throw ü_eX;
-}
 }
 async function ö_concat_( ü_arg0:Tx ):Promise<Tz> {
     const ü_done = await ö_whenDone( ü_arg0 );
     return ö_y_to_z( ü_done );
+}
+}
+
+function ß_whenDoneAndPostProcessed<Tz,Ty>( ö_whenDone:TAsyncFunctionWithoutArg   <Ty>
+                                          , ö_y_to_z  :   TAnyFunctionSingleArg<Tz,Ty>
+                                                     ):TAsyncFunctionWithoutArg<Tz> {
+    return ö_concat;
+function ö_concat( ü_arg0?:any ):PromiseLike<Tz> {
+  //return ö_whenDone( ü_arg0 ).then( ö_y_to_z );
+    const ü_whenDone = ö_whenDone();
+    return ü_whenDone.then( ö_y_to_z );
 }
 }
 

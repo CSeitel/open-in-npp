@@ -22,7 +22,7 @@
          , bindAppending
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary
+         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
@@ -51,32 +51,44 @@ class ö_ClassB extends ö_ClassA { bbb = 12; }
     let s = '';
     for ( const ü_mKey in ü_oref_a ) { s += ü_mKey; }
   //
-    testSummary();
+    testSummary_();
 }
 
 //====================================================================
 
 export async function tst_UiX(){
-    const ü_data =
+    const ü_data_true =
       [
         [ Promise.reject ( new Error('A') )                       , 'Error: A' ]
       , [ Promise.resolve( 2 ).then(()=>{ throw new Error('B'); }), 'Error: B' ]
-    /*
+      , [ Promise.reject ( 3 )  , '3' ]
       , [ Promise.resolve( 1 )  , 'YES:1'  ]
-      , [ Promise.reject ( 1 )  , 'NO:1' ]
+    /*
     */
       ] as TResultArray<object,string>;
-    const ü_with = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', 'NO:{0}' ), ö_finalize  );
-    const ü_true = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', true     ), ö_finalize  );
+    const ü_data_with = ü_data_true.slice(0).map(function(row){  return row.slice(0);  }) as TResultArray<object,string>;
+          ü_data_with[0][1] = 'NO:' + ü_data_with[0][1] ;
+          ü_data_with[1][1] = 'NO:' + ü_data_with[1][1] ;
+          ü_data_with[2][1] = 'NO:' + ü_data_with[2][1] ;
   //
-    await whenAsyncFunctionTested( ü_with, ü_data );
-    await whenAsyncFunctionTested( ü_true, ü_data );
+    const ü_with = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', 'NO:{0}' ), ö_finalize );
+    const ü_true = whenDoneAndPostProcessed( bindAppending( whenDoneWithUiXMessage, 'YES:{0}', true     ), ö_finalize );
   //
-  //testSummary( '2' );
+    await whenAsyncFunctionTested( ü_with, ü_data_with          );
+    await whenAsyncFunctionTested( ü_true, ü_data_true, ö_error );
+  //
+    testSummary_();
   //
 function ö_finalize( val:IUiXMessage ):string {
-  //ß_trc&& ß_trc( val.text );
     return val.text;
+}
+function ö_error( ü_data_0:object, ü_eX:any ):boolean {
+    switch ( ü_data_0 ) {
+        case ü_data_with[2][0]:
+          ß_trc&& ß_trc( ü_eX );
+          return ü_data_true[2][1] === (''+ü_eX);
+    }
+    return false;
 }
 }
 
@@ -123,7 +135,7 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
         ü_txt = summarizeError( ü_eX, 'TEST' );
     }
     testEqual( ü_txt, '' );
-    testSummary( 'Error' );
+    testSummary_( 'Error' );
 }
 
 //====================================================================

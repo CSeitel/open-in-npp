@@ -19,7 +19,7 @@
   import { bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary
+         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
@@ -49,7 +49,7 @@ export async function tst_expandEnvVariables(){
                                            , ...            ü_vars                    );
     testFunction( ö_expandTemplateString_a, ü_temp );
   //
-    testSummary( 'expand' );
+    testSummary_( 'expand' );
 }
 
 //====================================================================
@@ -67,7 +67,7 @@ export async function tst_escape(){
     testFunction( escapeFF(), ü_2 );
     testFunction( escape, ü_chars );
   //
-    testSummary( 'escape' );
+    testSummary_( 'escape' );
 }
 
 export async function tst_win32Names(){
@@ -101,7 +101,7 @@ export async function tst_win32Names(){
         testEqual( true, await whenKnownAsFile( ü_file ), ü_file );
       //break;
     } while ( ü_indx ++ < 0x100 );
-    testSummary( 'File Names' );
+    testSummary_( 'File Names' );
 async function ö_rename( ü_file:string, ü_char:string ):Promise<string> {
     const ü_done = ö_stub+ü_char+'.txt';
     await ß_fs_p.rename( ü_file, ü_done );

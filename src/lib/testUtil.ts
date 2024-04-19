@@ -1,6 +1,8 @@
 /*
 */
   import { TAnyFunctionWithoutArg
+         , TAsyncFunctionWithoutArg
+         , TAnyFunctionSingleArg
          , TAsyncFunctionSingleArg
          } from '../types/generic.d';
   import { type TTestResult
@@ -96,28 +98,17 @@ export function suiteSummary():number {
     return ü_rc;
   //
 function ö_suiteArray():void {
-    for ( const ü_testImpl of ö_tests as TAsyncTestFunction[] ) {
-        ö_testApi( ü_testImpl.name
-               //, whenDoneAndPostProcessed<void,void,void>( ü_testImpl, testSummary as TAnyFunctionWithoutArg<void> )
-               //, ü_testImpl
-                 , ä_testImpl
+    for ( const ö_testImpl of ö_tests as TAsyncTestFunction[] ) {
+        ö_testApi( ö_testImpl.name
+                 , function(){ return ö_testImpl().then( testSummary as any ); }
                  );
-        async function ö_testImpl():Promise<void> {
-            await ü_testImpl();
-            testSummary();
-        }
-        function ä_testImpl():PromiseLike<void> {
-            return      whenDoneAndPostProcessed<void,void,void>( ü_testImpl, testSummary as TAnyFunctionWithoutArg<void> )()
-            return ü_testImpl().then( testSummary as any );
-        }
     }
 }
 function ö_suiteRecord():void {
     for ( const ü_testName in ö_tests ) {
-                         const ü_testImpl = ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ];
+                                const ö_testImpl = ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ];
         ö_testApi( ü_testName
-               //, whenDoneAndPostProcessed<void,void,void>( ü_testImpl, testSummary as TAnyFunctionWithoutArg<void> )
-                 , ü_testImpl
+                 , function(){ return ö_testImpl().then( testSummary as any ); }
                  );
     }
 }
@@ -140,7 +131,9 @@ function ö_test_1 ( ö_rc:number ){
 
 //--------------------------------------------------------------------
 
-export function testSummary( ü_series?:string ):void {
+export function testSummary_( ü_series?:string ):void {
+}
+function testSummary( ü_series?:string ):void {
   //
     const ü_results = CSeriesOfTests;
     const ü_crlf = '\r\n';

@@ -16,7 +16,7 @@
   import { bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary
+         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
@@ -27,7 +27,7 @@ export async function tst_(){
   //
     return tst_class();
   //
-    testSummary();
+    testSummary_();
 }
 
 //====================================================================
@@ -75,7 +75,7 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
         ü_txt = summarizeError( ü_eX, 'TEST' );
     }
     testEqual( ü_txt, '' );
-    testSummary( 'Error' );
+    testSummary_( 'Error' );
 }
 
 //====================================================================
@@ -95,7 +95,7 @@ export async function tst_syntax(){
       ] as TResultArray<any,string>;
   //
     testFunction( format, ü_data );
-    testSummary( 'Syntax' );
+    testSummary_( 'Syntax' );
 }
 
 //====================================================================
@@ -140,7 +140,7 @@ class Ö_Class {
     testEqual( ü_inst.super, ü_super.super );
     testEqual( ü_inst.prop , ü_class.prop  );
   //
-    testSummary( 'Class' );
+    testSummary_( 'Class' );
 }
 
 //====================================================================

@@ -36,7 +36,7 @@
   import { expandEnvVariables
          } from '../../../lib/textUtil';
   import { testSrc
-         , testSummary
+         , testSummary_
          , testEqual
          , testNotEqual
          , testCondition
@@ -75,7 +75,7 @@ export async function tst_settings(){
     const ü_cfg_1 = ß_getConfigSnapshot();
     const ü_dir = await ü_cfg_1.whenWorkingDir;
   //
-    testSummary();
+    testSummary_();
   //
 function ö_setExe( ü_exe:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.executable      , ü_exe, ConfigurationTarget.Workspace ); }
 function ö_setDir( ü_dir:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.workingDirectory, ü_dir, ConfigurationTarget.Workspace ); }
@@ -120,7 +120,7 @@ export async function tst_history(){
     testEqual( ü_cfgData.executable, '', 'Executable' );
   //
   //
-    testSummary();
+    testSummary_();
     return;
   //
 }
@@ -138,7 +138,7 @@ export async function tst_b(){
   //
     testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
   //
-    testSummary( 'tst_' );
+    testSummary_( 'tst_' );
   //
     return;
   /*
@@ -189,7 +189,7 @@ export async function tst_a(){
     await whenNewTextEditorOpened( { content:'{"a":33}' } );
     const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
   //
-    testSummary( 'tst_' );
+    testSummary_( 'tst_' );
   //
 }
 

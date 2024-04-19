@@ -17,7 +17,7 @@
          , bindAppending
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary
+         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
@@ -47,7 +47,7 @@ export async function tst_bindArgs(){
     testEqual( await ü_whenStringified         ( bindArguments( ö_whenDone, { prepare:{0:parseInt}                           }      )               ( '2' ) ), '2' );
     testEqual( await   whenDoneAndPostProcessed( bindArguments( ö_whenDone, { prepare:{0:parseInt}                           }      ), ß_stringify )( '3' )  , '3' );
   //
-    testSummary( 'Complex-Bind' );
+    testSummary_( 'Complex-Bind' );
 function ö_sorted( ...ü_args:string[] ):string {
     return ü_args.join( '' );
 }
@@ -64,9 +64,9 @@ export async function tst_self(){
     const ü_data =
        [[ 0,0 ]] as TResultArray<number,number>;
     await whenAsyncFunctionTested( whenDelay, ü_data );
-    testSummary( '1' );
+    testSummary_( '1' );
     await whenAsyncFunctionTested( whenDelay, ü_data );
-    testSummary( '2' );
+    testSummary_( '2' );
 }
 
 //====================================================================
@@ -77,7 +77,7 @@ export async function tst_a(){
     await whenDelay( 1500 );
 
     ß_trc&& ß_trc( 'A '+Date.now() );
-    testSummary( 'Aaa' );
+    testSummary_( 'Aaa' );
 }
 
 export async function tst_b(){
@@ -85,7 +85,7 @@ export async function tst_b(){
     testEqual( 2 , 0 );
     await whenDelay( 100 );
     ß_trc&& ß_trc( 'B '+Date.now() );
-    testSummary( 'Bbb' );
+    testSummary_( 'Bbb' );
 }
 
 //====================================================================
@@ -96,7 +96,7 @@ export async function tst_testEquals_1(){
     testEqual(  0,  0 )
     const ü_fref = bindArguments( ö_echo, { arrangeReal:[2] }, '_0','_1' )
     testFunction( ü_fref, [['A_','_0\t_1\tA_']] as TResultArray<string,string> )
-    testSummary();
+    testSummary_();
     //strictEqual( 0, 1, ü_all.join('\r\n') )
 function ö_echo<T>( ...ü_args:T[] ):string {
     return ü_args.join( '\t' );
@@ -111,7 +111,7 @@ export async function tst_testEquals(){
           ü_data.set( '_'    , false );
   //
     await whenAsyncFunctionTested( ö_someAsync, ü_data );
-    testSummary();
+    testSummary_();
   //
 async function ö_someAsync( ü_text:string ):Promise<boolean> {
     await whenTimeout();

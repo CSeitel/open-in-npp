@@ -23,7 +23,7 @@
   import { bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary
+         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
@@ -35,7 +35,7 @@ export async function tst_whenFileInfoRead(){
     const ü_data = [ 'virtual_2_d'
                    , 'virtual_1_d' ].map( ü_name => [testSrc( ü_name ), '0.1' ] as [string,string] )
     await whenAsyncFunctionTested( ö_whenCtime, ü_data );
-    testSummary();
+    testSummary_();
 
 async function ö_whenCtime( ü_path:string ):Promise<string> {
     const ü_info = ( await whenFileInfoRead( ü_path ) )!;
@@ -82,7 +82,7 @@ export async function tst_whenKnownAsFolder():Promise<void> {
     await whenAsyncFunctionTested( ü_LSymLink        , ü_04  );
     await whenAsyncFunctionTested( whenKnownAsFile   , ü_05, (ü_x,ü_eX)=>{ return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'ELOOP', true ); } );
     await whenAsyncFunctionTested( ü_LFile           , ü_06  );
-    testSummary();
+    testSummary_();
 }
 
 export async function tst_isExe(){
@@ -100,7 +100,7 @@ export async function tst_isExe(){
       ] as TResultArray<string,boolean>;
   //
     await whenAsyncFunctionTested( isWin32Executable, ü_data )
-    testSummary();
+    testSummary_();
 //await isExe( await ßß_impl.defaultNppExecutable()                 );
 }
 
@@ -113,7 +113,7 @@ export async function tst_win32Exe(){
     
     await whenAsyncFunctionTested( isWin32Executable, ü_data );
     await whenAsyncFunctionTested( ö_whenSpwaned    , ü_data );
-    testSummary();
+    testSummary_();
   //a( ßß_assert.strictEqual )
 async function ö_whenSpwaned( ü_exe:string ):Promise<boolean> {
     const ü_cp = await whenPromiseSettled( whenChildProcessSpawned( 'cmd.exe', ['/C',ü_exe] ) );
