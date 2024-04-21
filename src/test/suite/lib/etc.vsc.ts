@@ -2,9 +2,9 @@
 */
   import { type TResultArray
          } from '../../../types/lib.testUtil.d';
-//--------------------------------------------------------------------
   import { CEFileType
          } from '../../../constants/vsc';
+//--------------------------------------------------------------------
   import { ß_trc
          } from '../../../runtime/context';
   import { threadShowError
