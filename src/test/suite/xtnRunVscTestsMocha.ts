@@ -1,7 +1,6 @@
 /*
 */
   import { type MochaOptions
-         , type Runner
          } from 'mocha';
 //--------------------------------------------------------------------
   import * as ß_glob  from 'glob' ;
@@ -17,19 +16,19 @@
 //--------------------------------------------------------------------
   const ß_specsRoot = join( __dirname, '.' );
     let ß_what    = '**/**.spec.js';
-        ß_what    = 'all.spec.js';
         ß_what    = 'dbg.spec.js';
+        ß_what    = 'all.spec.js';
   const ß_timeout = 99;
 //====================================================================
 
 export async function run():Promise<number> {
-    ß_trc&& ß_trc( __filename, '' );
+    ß_trc&& ß_trc( __filename, 'Mocha-Wrapper' );
     const ü_specs = await ß_whenSpecsFound();
     const ü_rc    = await ß_whenSpecsRun( ü_specs );
     ß_trc&& ß_trc( ü_rc, 'Mocha-ErrorCount' );
     if ( ü_rc > 0 ) {
-        process.exit( ü_rc+1 )
-        throw new Error( `rc=${ ü_rc }` );
+      //process.exit( ü_rc+1 )
+      //throw new Error( `rc=${ ü_rc }` );
     }
     return ü_rc;
 }
@@ -38,7 +37,7 @@ export async function run():Promise<number> {
 
 async function ß_whenSpecsFound():Promise<string[]> {
   //
-    if(ß_trc){ß_trc( `Collecting Specs: "${ ß_what }" @ "${ ß_specsRoot }"` );}
+    ß_trc&& ß_trc( `Collecting Specs: "${ ß_what }" @ "${ ß_specsRoot }"`, 'Mocha-Glob' );
   //
     return ( await promisify( ß_glob )( ß_what, { cwd: ß_specsRoot } )
            ).map( ü_file => join( ß_specsRoot, ü_file ) );

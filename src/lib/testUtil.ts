@@ -9,6 +9,9 @@
          , type TResultArray
          , type TAsyncTestFunction
          , type TTestSuite
+         , type TTestSuites
+         , type TTDDSuite
+         , type TTDDTest
          } from '../types/lib.testUtil.d';
 //--------------------------------------------------------------------
   import { join
@@ -21,6 +24,8 @@
          } from '../runtime/context';
   import { shortenText
          } from './textUtil';
+  import { forEach
+         } from './objectUtil';
   import { whenDoneAndPostProcessed
          } from './asyncUtil';
 //--------------------------------------------------------------------
@@ -51,11 +56,61 @@ function echo( ü_oref:any, ü_length:number ):string {
 
 //====================================================================
 
-export async function whenAllTestsRun( ü_suites:[string,TTestSuite,boolean|undefined][] ):Promise<number> {
+export function more( ü_tddSuite :TTDDSuite, ü_tddTest  :TTDDTest ):void {
+    const ü_todo = ['Test__s',function(){}] as [string,()=>void]
+    ü_tddSuite( 'More', function(){ 
+        ü_tddTest(  ü_todo[0], ü_todo[1] );
+       } )
+}
+
+export function expandTestSuite( ü_title    :string
+                               , ö_tests    :TTestSuite
+                               , ü_tddSuite :TTDDSuite = suite
+                               , ü_tddTest  :TTDDTest  = test ):void {
+    ü_tddSuite( ü_title, Array.isArray( ö_tests ) ? ö_suiteArray
+                                                  : ö_suiteRecord );
+  //
+function ö_suiteArray():void {
+    for ( const ö_testImpl of ö_tests as TAsyncTestFunction[] ) {
+        ü_tddTest( ö_testImpl.name
+                 , function(){ return ö_testImpl().then( testSummary as any ); }
+                 );
+    }
+}
+function ö_suiteRecord():void {
+    for ( const ü_testName in ö_tests ) {
+                                const ö_testImpl = ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ];
+        ü_tddTest( ü_testName
+                 , function(){ return ö_testImpl().then( testSummary as any ); }
+                 );
+    }
+}
+}
+
+//====================================================================
+
+export async function whenAllTestsRun( ü_suites    :TTestSuites
+                                     , ü_tddSuite ?:TTDDSuite
+                                     , ü_tddTest  ?:TTDDTest ):Promise<number> {
+  /*
+        const ü_suite = ü_suites.shift()!;
+              whenTestSuite( ü_suite[0], ü_suite[1], ü_suite[2] );
+    return 0;
+  */
+    if ( CWithMocha ) {
+        ü_suites.forEach(function( ü_suite ){  ü_suite[2] || expandTestSuite( ü_suite[0], ü_suite[1], ü_tddSuite!, ü_tddTest! ); });
+        return 0;
+    }
+  //
+    if ( ü_tddSuite === undefined && CWithMocha )
+       { ü_tddSuite = suite;
+         ü_tddTest  = test ; }
+  //
     while ( ü_suites.length > 0 ) {
         const ü_suite = ü_suites.shift()!;
+        if ( ü_suite[2] ) { continue; }
       //await whenTestSuite(          ...ü_suite );
-        await whenTestSuite( ü_suite[0], ü_suite[1], ü_suite[2] );
+        await whenTestSuite( ü_suite[0], ü_suite[1] );
       //ß_trc&& ß_trc( ü_suite[0]);
     }
   //
@@ -72,47 +127,31 @@ export function suiteSummary():number {
     return ü_rc;
 }
 
- async function whenTestSuite( ü_title:string, ö_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[], ü_skip = false ):Promise<number> {
-    if ( ü_skip ) { return 0; }
+ async function whenTestSuite( ü_title:string, ö_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):Promise<number> {
   //
-    const ü_chain = [ Promise.resolve(0) ];
     const ü_isArray = Array.isArray( ö_tests );
-    const ö_testApi  = CWithMocha ? test
-                                  : ß_testChain( ü_chain );
-    if ( CWithMocha ) {
-        suite( ü_title, ü_isArray ? ö_suiteArray
-                                  : ö_suiteRecord );
-        return 0;
-    } else {
-    }
+    const ü_chain = [ Promise.resolve(0) ];
+    const ö_tddTest  = ß_testChain( ü_chain );
   //
     ß_writeStdOut( `Suite: ${ ü_title }` );
-    if ( ü_isArray ) { ö_suiteArray (); }
-    else             { ö_suiteRecord(); }
+    if ( ü_isArray ) {          ö_tests.forEach( ö_suiteTest ); }
+    else             { forEach( ö_tests        , ö_suiteTest ); }
   //
     const ü_rc = await ü_chain[0];
     ß_errorCount += ü_rc;
     return ü_rc;
   //
-function ö_suiteArray():void {
-    for ( const ö_testImpl of ö_tests as TAsyncTestFunction[] ) {
-        ö_testApi( ö_testImpl.name
-                 , function(){ return ö_testImpl().then( testSummary as any ); }
-                 );
-    }
-}
-function ö_suiteRecord():void {
-    for ( const ü_testName in ö_tests ) {
-                                const ö_testImpl = ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ];
-        ö_testApi( ü_testName
-                 , function(){ return ö_testImpl().then( testSummary as any ); }
-                 );
-    }
+function ö_suiteTest( ä_testImpl:TAsyncTestFunction, ü_testName:string|number ):void {
+    ö_tddTest( typeof( ü_testName ) === 'string' ? ü_testName
+                                                 : ä_testImpl.name
+             , function(){ return ä_testImpl().then( testSummary as any ); }
+             );
 }
 }
 
 function ß_testChain( ö_chain:Promise<number>[] ) {
- return function ö_testChain( ü_title:string, ü_impl:TAsyncTestFunction ):void {
+    return ö_testChain;
+function ö_testChain( ü_title:string, ü_impl:TAsyncTestFunction ):void {
     ö_chain[0] = ö_chain[0].then( ö_test_1 );
 function ö_test_1 ( ö_rc:number ){
         ß_writeStdOut( ü_title );
@@ -132,7 +171,7 @@ export function testSummary_( ü_series?:string ):void {
     ß_trc&& ß_trc( 'testSummary_' );
   //testSummary();
 }
-function testSummary( ü_series?:string ):void {
+export function testSummary( ü_series?:string ):void {
   //
     const ü_results = CSeriesOfTests;
     const ü_crlf = '\r\n';

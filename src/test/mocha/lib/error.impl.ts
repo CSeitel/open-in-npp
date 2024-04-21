@@ -94,6 +94,7 @@ function ö_error( ü_x:object, ü_eX:any, ü_y:string ):string {
 }
 }
 
+//--------------------------------------------------------------------
 export async function tst_error(){
 class ö_ErrorX        extends Error        { more = 12; }
 class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }

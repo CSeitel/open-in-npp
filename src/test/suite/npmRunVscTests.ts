@@ -14,10 +14,13 @@ https://code.visualstudio.com/api/working-with-extensions/testing-extension
 //====================================================================
 
 async function main():Promise<void> {
+    const ß_file = './xtnRunVscTestsMocha';
+  //    ß_trc&& ß_trc( process.argv, 'Cli-Arguments' );
+    const ü_fileName = process.argv[2] ?? ß_file;
   //
     const ü_opts =
-      { extensionDevelopmentPath: join( __dirname, '../../../'       ) // the extension to load
-      , extensionTestsPath      : join( __dirname, './vscTestsIndex' ) // the tests     to execute
+      { extensionDevelopmentPath: join( __dirname, '../../../' ) // the extension to load
+      , extensionTestsPath      : join( __dirname, ü_fileName  ) // the tests     to execute
       };
   //
     try {
