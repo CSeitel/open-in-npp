@@ -9,8 +9,6 @@ https://code.visualstudio.com/api/working-with-extensions/testing-extension
 //--------------------------------------------------------------------
 
   let ß_files = 'out/test/suite/**/vsc*.spec.js';
-      ß_files = 'out/test/suite/npp.spec.js';
-      ß_files = 'out/test/suite/dbg.spec.js';
       ß_files = 'out/test/suite/all.spec.js';
   const ß_cfg_1 =
     { label: 'unitTests'
