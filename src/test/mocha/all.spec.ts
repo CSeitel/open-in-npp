@@ -17,8 +17,8 @@
       [ 'Single', [ 
                   //ß_error
                   //ß_fs
-                  //ß_test
-                    ß_error
+                    ß_test
+                  //ß_error
                            .tst_dispatch
                         ], !ß_skipTests ]
     , [ 'Array' , ß_array,  ß_skipTests ]

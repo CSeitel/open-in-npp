@@ -64,9 +64,7 @@ export async function tst_self(){
     const ü_data =
        [[ 0,0 ]] as TResultArray<number,number>;
     await whenAsyncFunctionTested( whenDelay, ü_data );
-    testSummary_( '1' );
     await whenAsyncFunctionTested( whenDelay, ü_data );
-    testSummary_( '2' );
 }
 
 //====================================================================

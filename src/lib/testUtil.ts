@@ -25,6 +25,7 @@
   import { shortenText
          } from './textUtil';
   import { forEach
+         , map
          } from './objectUtil';
   import { whenDoneAndPostProcessed
          } from './asyncUtil';
@@ -127,42 +128,37 @@ export function suiteSummary():number {
     return ü_rc;
 }
 
- async function whenTestSuite( ü_title:string, ö_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):Promise<number> {
-  //
-    const ü_isArray = Array.isArray( ö_tests );
-    const ü_chain = [ Promise.resolve(0) ];
-    const ö_tddTest  = ß_testChain( ü_chain );
+ async function whenTestSuite( ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):Promise<number> {
   //
     ß_writeStdOut( `Suite: ${ ü_title }` );
-    if ( ü_isArray ) {          ö_tests.forEach( ö_suiteTest ); }
-    else             { forEach( ö_tests        , ö_suiteTest ); }
+    let ö_whenDone = Promise.resolve(0);
+    if ( Array.isArray( ü_tests ) ) { ü_tests.forEach(          ö_getWhenTested ); }
+    else                            {         forEach( ü_tests, ö_getWhenTested ); }
   //
-    const ü_rc = await ü_chain[0];
+              const ü_rc = await ö_whenDone;
     ß_errorCount += ü_rc;
-    return ü_rc;
+             return ü_rc;
   //
-function ö_suiteTest( ä_testImpl:TAsyncTestFunction, ü_testName:string|number ):void {
-    ö_tddTest( typeof( ü_testName ) === 'string' ? ü_testName
-                                                 : ä_testImpl.name
-             , function(){ return ä_testImpl().then( testSummary as any ); }
-             );
-}
-}
-
-function ß_testChain( ö_chain:Promise<number>[] ) {
-    return ö_testChain;
-function ö_testChain( ü_title:string, ü_impl:TAsyncTestFunction ):void {
-    ö_chain[0] = ö_chain[0].then( ö_test_1 );
-function ö_test_1 ( ö_rc:number ){
-        ß_writeStdOut( ü_title );
-        return ü_impl().then( function(){ return ö_rc; }
+function ö_getWhenTested( ä_testImpl:TAsyncTestFunction, ä_testName:string|number ):void {
+    if ( typeof( ä_testName ) === 'number' ) { ä_testName = ä_testImpl.name; }
+    ö_whenDone = ö_whenDone.then( ä_whenTested );
+  //
+function ä_whenTested( ü_rc:number ):PromiseLike<number> {
+    return ä_testImpl().then(function(){
+        try {
+            testSummary( ä_testName as string );
+        } catch ( ü_eX ) {
+            ü_rc ++ ;
+        }
+            return ü_rc;
+                     }).then( function(){ return ü_rc; }
                             , function( ü_err ){
             ß_writeStdOut( echo( ü_err, 300 ) );
-            return ö_rc + 1;
-        }
-                            )
-    }
- };
+            return ü_rc + 1;
+        });
+}
+}
+  //
 }
 
 //--------------------------------------------------------------------

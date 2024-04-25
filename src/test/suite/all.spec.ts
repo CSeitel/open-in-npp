@@ -9,8 +9,6 @@
          } from '../../types/generic.d';
 //--------------------------------------------------------------------
   import '../../runtime/context-XTN';
-  import { createArray
-         } from '../../lib/arrayUtil';
   import { whenAllTestsRun
          , testSummary
          } from '../../lib/testUtil';
@@ -30,7 +28,7 @@
     } as TTestSuite;
 //--------------------------------------------------------------------
   const ß_proxy     = [] as TAsyncTestFunction[][];
-  const ß_debugUI   =                      true;
+  const ß_debugUI   =                     !true;
   const ß_skipTests = ß_debugUI ? false :  true; // = except single test
   const ß_SKIPTests = ß_debugUI ? false : !ß_skipTests;
   const ß_suites =
