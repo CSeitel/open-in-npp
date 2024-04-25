@@ -57,34 +57,22 @@ function echo( ü_oref:any, ü_length:number ):string {
 
 //====================================================================
 
-export function more( ü_tddSuite :TTDDSuite, ü_tddTest  :TTDDTest ):void {
-    const ü_todo = ['Test__s',function(){}] as [string,()=>void]
-    ü_tddSuite( 'More', function(){ 
-        ü_tddTest(  ü_todo[0], ü_todo[1] );
-       } )
-}
-
 export function expandTestSuite( ü_title    :string
                                , ö_tests    :TTestSuite
                                , ü_tddSuite :TTDDSuite = suite
                                , ü_tddTest  :TTDDTest  = test ):void {
-    ü_tddSuite( ü_title, Array.isArray( ö_tests ) ? ö_suiteArray
-                                                  : ö_suiteRecord );
+    ü_tddSuite( ü_title, ö_expandTests );
   //
-function ö_suiteArray():void {
-    for ( const ö_testImpl of ö_tests as TAsyncTestFunction[] ) {
-        ü_tddTest( ö_testImpl.name
-                 , function(){ return ö_testImpl().then( testSummary as any ); }
-                 );
-    }
+function ö_expandTests():void {
+    if ( Array.isArray( ö_tests ) ) { ö_tests.forEach(          ä_addWhenTested ); }
+    else                            {         forEach( ö_tests, ä_addWhenTested ); }
+  //
+function ä_addWhenTested( ü_testImpl:TAsyncTestFunction, ü_testName:string|number ):void {
+    if ( typeof( ü_testName ) === 'number' ) { ü_testName = ü_testImpl.name; }
+    ü_tddTest( ü_testName
+             , function(){ return ü_testImpl().then(  testSummary.bind( null, ü_testName ) ); }
+             );
 }
-function ö_suiteRecord():void {
-    for ( const ü_testName in ö_tests ) {
-                                const ö_testImpl = ( ö_tests as Record<string,TAsyncTestFunction> )[ ü_testName ];
-        ü_tddTest( ü_testName
-                 , function(){ return ö_testImpl().then( testSummary as any ); }
-                 );
-    }
 }
 }
 
@@ -93,11 +81,6 @@ function ö_suiteRecord():void {
 export async function whenAllTestsRun( ü_suites    :TTestSuites
                                      , ü_tddSuite ?:TTDDSuite
                                      , ü_tddTest  ?:TTDDTest ):Promise<number> {
-  /*
-        const ü_suite = ü_suites.shift()!;
-              whenTestSuite( ü_suite[0], ü_suite[1], ü_suite[2] );
-    return 0;
-  */
     if ( CWithMocha ) {
         ü_suites.forEach(function( ü_suite ){  ü_suite[2] || expandTestSuite( ü_suite[0], ü_suite[1], ü_tddSuite!, ü_tddTest! ); });
         return 0;
@@ -107,39 +90,31 @@ export async function whenAllTestsRun( ü_suites    :TTestSuites
        { ü_tddSuite = suite;
          ü_tddTest  = test ; }
   //
-    while ( ü_suites.length > 0 ) {
-        const ü_suite = ü_suites.shift()!;
-        if ( ü_suite[2] ) { continue; }
-      //await whenTestSuite(          ...ü_suite );
-        await whenTestSuite( ü_suite[0], ü_suite[1] );
-      //ß_trc&& ß_trc( ü_suite[0]);
-    }
+    let ö_whenDone = Promise.resolve( 0 );
+    ü_suites.forEach(function( ü_suite ){
+        if ( ü_suite[2] ) { return; }
+        ö_whenDone = ö_whenDone.then(function( ü_rc ){
+            return ß_whenTestSuite( ü_rc, ü_suite[0], ü_suite[1] );
+        });
+    });
   //
-    return suiteSummary();
+    const ü_rc = await ö_whenDone;
+    ß_writeStdOut( `Overall result: ${ ü_rc } failed tests` );
+    process.exit( ü_rc );
 }
 
-export function suiteSummary():number {
-    const ü_rc = ß_errorCount;
-                 ß_errorCount = 0;
-    if ( ! CWithMocha ) {
-        ß_writeStdOut( `Overall result: ${ ü_rc } failed tests` );
-        process.exit( ü_rc );
-    }
-    return ü_rc;
-}
-
- async function whenTestSuite( ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):Promise<number> {
+function ß_whenTestSuite( ü_rc:number, ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):PromiseLike<number> {
   //
     ß_writeStdOut( `Suite: ${ ü_title }` );
-    let ö_whenDone = Promise.resolve(0);
-    if ( Array.isArray( ü_tests ) ) { ü_tests.forEach(          ö_getWhenTested ); }
-    else                            {         forEach( ü_tests, ö_getWhenTested ); }
+    let ö_whenDone = Promise.resolve( ü_rc );
+    if ( Array.isArray( ü_tests ) ) { ü_tests.forEach(          ö_addWhenTested ); }
+    else                            {         forEach( ü_tests, ö_addWhenTested ); }
   //
-              const ü_rc = await ö_whenDone;
-    ß_errorCount += ü_rc;
-             return ü_rc;
+  //          const ü_rc = await ö_whenDone;
+  //ß_errorCount += ü_rc;
+             return ö_whenDone;
   //
-function ö_getWhenTested( ä_testImpl:TAsyncTestFunction, ä_testName:string|number ):void {
+function ö_addWhenTested( ä_testImpl:TAsyncTestFunction, ä_testName:string|number ):void {
     if ( typeof( ä_testName ) === 'number' ) { ä_testName = ä_testImpl.name; }
     ö_whenDone = ö_whenDone.then( ä_whenTested );
   //

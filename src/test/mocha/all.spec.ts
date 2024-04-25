@@ -20,6 +20,7 @@
                     ß_test
                   //ß_error
                            .tst_dispatch
+                , ß_test   .tst_dispatch
                         ], !ß_skipTests ]
     , [ 'Array' , ß_array,  ß_skipTests ]
     , [ 'Async' , ß_async,  ß_skipTests ]
