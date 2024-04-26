@@ -63,17 +63,43 @@ async function ö_whenDone( ü_nmbr:number ):Promise<number>{
 
 export async function tst_self(){
   //
-    const ü_data =
-      [ [ 0, 0 ]
-      , [ 1, 1 ]
+    const ö_data_1 =
+      [ [  0, 0 ]
+      , [  1, 1 ]
       ] as TOrderedPairArray<number,number>;
+    const ö_data_2 =
+      [ [ {}, 0 ]
+      , [ {}, 1 ]
+      ] as TOrderedPairArray<{}    ,number>;
+    const ö_map = new Map( ö_data_2 );
   //
-    const ü_map = new Map( ü_data );
-    testFunction( identityMap, ü_map );
+    testFunction( identityMap, new Map( ö_data_1 ) );
+    testFunction( ö_throw_1    ,          ö_data_1, function( ü_x_y, ü_eX ){
+        const ü_indx = ö_data_1.findIndex( x_y => x_y === ü_x_y );
+        const ü_jndx = parseInt( (ü_eX as Error).message );
+        return ü_indx === ü_jndx ? ü_indx : -1;
+    });
+    testFunction( ö_throw_2    , ö_map, function( ü_x_y, ü_eX ){
+        const ü_indx = ö_map.get( ü_x_y[0] );
+      //const ü_jndx = parseInt( (ü_eX as Error).message );
+        return ü_indx!;
+    }
+  );
   //
-    await whenAsyncFunctionTested( whenValuePassedBack, ü_data );
+    await whenAsyncFunctionTested( whenValuePassedBack, ö_data_1 );
   //await whenAsyncFunctionTested( whenDelay, ü_data );
   //const ü_whenDone = whenDoneAndPostProcessed( whenDelay, identityMap.bind( null, 1 ) );
+  //
+function ö_throw_1( ü_indx:number ):never {
+    switch ( ü_indx ) {
+        case 0: throw new Error( '0' );
+        case 1: throw new Error( '1' );
+        default: throw new Error( '_' );
+    }
+}
+function ö_throw_2( ü_indx:{} ):never {
+    ö_throw_1( 0 )
+}
 }
 
 export async function tst_testEquals(){

@@ -14,6 +14,7 @@
          , type TTDDTest
          } from '../types/lib.testUtil.d';
   import { type TOrderedPairArray
+         , type TOrderedPairRArray
          } from '../types/lib.arrayUtil.d';
 //--------------------------------------------------------------------
   import { join
@@ -179,27 +180,34 @@ export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:un
 }
 
 //====================================================================
-  type TExpectError<Tx,Ty> = ( x:[Tx,Ty], reason:any )=>Ty
+  type TExpectError<Tx,Ty> = ( x_y:[Tx,Ty], reason:any )=>Ty
 
-export function testFunction<Tx,Ty>( ö_fref   :TAnyFunctionSingleArg<Ty,Tx>
-                                   , ö_expData:                  Map<Tx,Ty>
-                                              |    TOrderedPairArray<Tx,Ty>
-                                   , ö_expectError?:    TExpectError<Tx,Ty>
+export function testFunction<Tx,Ty>( ö_fref        :TAnyFunctionSingleArg<Ty,Tx>
+                                   , ö_expData     :                  Map<Tx,Ty>
+                                                   |   TOrderedPairRArray<Tx,Ty>
+                                   , ö_expectError?:         TExpectError<Tx,Ty>
                                    ):boolean {
   //
     if ( ö_expData instanceof Map )
        { ö_expData = toOrderedPairArray( ö_expData ); }
   //
+    const ö_name = ö_fref.name;
     let ö_overall = true;
     ö_expData.forEach(function( ü_x_y, ü_indx ){
-        const ü_count = `@${ ü_indx }: "${ ß_echo( ü_x_y, 50 ) }"`;
+        const ü_count = `${ ö_name }-${ ü_indx }(${ ß_echo( ü_x_y[0], 50 ) })`;
+        let ü_act_y:Ty
         try {
-                 const ü_act_y = ö_fref( ü_x_y[0] );
-            testEqual( ü_act_y ,         ü_x_y[1] , ü_count )||( ö_overall = false );
+                ü_act_y = ö_fref( ü_x_y[0] );
         } catch ( ü_eX ) {
-            CSeriesOfTests.push(  failurePrefix +'Function threw: '+ ß_echo( ü_eX, 200 )  );
-            ö_overall = false;
+            if ( typeof( ö_expectError ) === 'function' ) {
+                ü_act_y = ö_expectError( ü_x_y, ü_eX );
+            } else {
+                CSeriesOfTests.push(  failurePrefix +'Function threw: '+ ß_echo( ü_eX, 200 )  );
+                ö_overall = false;
+                return;
+            }
         }
+        testEqual( ü_act_y, ü_x_y[1], ü_count )||( ö_overall = false );
     });
     return ö_overall;
 }
