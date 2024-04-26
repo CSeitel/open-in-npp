@@ -15,7 +15,6 @@
   export type TTestSuite = Record<string,TAsyncTestFunction>
                          |               TAsyncTestFunction[]
 
-  export type TResultArray<A,B> = [A,B][]
 //====================================================================
 /*
 */

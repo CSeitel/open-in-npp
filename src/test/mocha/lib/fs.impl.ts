@@ -1,7 +1,7 @@
 /*
 */
-  import { type TResultArray
-         } from '../../../types/lib.testUtil.d';
+  import { type TOrderedPairArray
+         } from '../../../types/lib.arrayUtil.d';
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------
   import { expect
@@ -97,7 +97,7 @@ export async function tst_isExe(){
       , [ '.'       , false ]
       , [ '..'      , false ]
       , [ '../..'   , false ]
-      ] as TResultArray<string,boolean>;
+      ] as TOrderedPairArray<string,boolean>;
   //
     await whenAsyncFunctionTested( isWin32Executable, ü_data )
     testSummary_();
@@ -109,7 +109,7 @@ export async function tst_win32Exe(){
       [ [ testSrc( 'cmd.cmd' ), true ]
       , [ testSrc( 'bat.bat' ), true ]
       , [ testSrc( 'lnk.lnk' ), true ]
-      ] as TResultArray<string,boolean>;
+      ] as TOrderedPairArray<string,boolean>;
     
     await whenAsyncFunctionTested( isWin32Executable, ü_data );
     await whenAsyncFunctionTested( ö_whenSpwaned    , ü_data );

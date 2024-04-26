@@ -1,6 +1,6 @@
 /*
 */
-  import { IArrayPush
+  import { TOrderedPairArray
          } from '../types/lib.arrayUtil.d'
 //====================================================================
 
@@ -68,6 +68,16 @@ export function pickDuplet<U,V,W=any>( ü_indx:number, ü_jndx:number ):((row:(U
                , ü_row[ ü_jndx ] as V
                ];
       };
+}
+
+//====================================================================
+
+export function toOrderedPairArray<Tx,Ty>( ü_data:Map<Tx,Ty> ):TOrderedPairArray<Tx,Ty> {
+    const ö_arry = [] as TOrderedPairArray<Tx,Ty>;
+    ü_data.forEach(function( ü_y, ü_x ){
+        ö_arry.push([ ü_x, ü_y ]);
+    });
+    return ö_arry;
 }
 
 //====================================================================

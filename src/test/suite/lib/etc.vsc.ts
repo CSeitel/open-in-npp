@@ -1,7 +1,7 @@
 /*
 */
-  import { type TResultArray
-         } from '../../../types/lib.testUtil.d';
+  import { type TOrderedPairArray
+         } from '../../../types/lib.arrayUtil.d';
   import { CEFileType
          } from '../../../constants/vsc';
 //--------------------------------------------------------------------

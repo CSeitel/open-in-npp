@@ -1,7 +1,7 @@
 /*
 */
-  import { type TResultArray
-         } from '../../../types/lib.testUtil.d';
+  import { type TOrderedPairArray
+         } from '../../../types/lib.arrayUtil.d';
 //--------------------------------------------------------------------
   import { promises as ß_fs_p
          } from 'fs';
@@ -33,13 +33,13 @@ export async function tst_expandEnvVariables(){
       , [ '%Temp%', ü_env[ 'Temp' ] ]
       , [ '%TEMP$',       '%TEMP$'  ]
       , [ '%T__P%',       '%T__P%'  ]
-      ] as TResultArray<string,string>;
+      ] as TOrderedPairArray<string,string>;
     testFunction( expandEnvVariables, ü_data );
   //
     const ü_temp =
       [ [ 'a-${ 0 } ${1}'  , 'a-00 11'   ]
       , [ 'a-${ hugo}', 'a-HUGO'  ]
-      ] as TResultArray<string,string>;
+      ] as TOrderedPairArray<string,string>;
     const ü_vars = ['00','11'];
     const ö_expandTemplateString_o = bindArguments( expandTemplateString, { arrangeBound:[1], realFirst:true }
                                            , Object.assign( ü_vars, {hugo : 'HUGO'} ) );
@@ -62,7 +62,7 @@ export async function tst_escape(){
     const ü_temp =
       [ 
       , [ 'a-${ hugo}', 'a-HUGO'  ]
-      ] as TResultArray<string,string>;
+      ] as TOrderedPairArray<string,string>;
   //
     testFunction( escapeFF(), ü_2 );
     testFunction( escape, ü_chars );

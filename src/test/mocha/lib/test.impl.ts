@@ -1,7 +1,7 @@
 /*
 */
-  import { type TResultArray
-         } from '../../../types/lib.testUtil.d';
+  import { type TOrderedPairArray
+         } from '../../../types/lib.arrayUtil.d';
   import {
          } from '../../../types/lib.functionUtil.d';
 //--------------------------------------------------------------------
@@ -15,6 +15,8 @@
          } from '../../../lib/asyncUtil';
   import { bindArguments
          , bindAppending
+         , identityMap
+         , whenValuePassedBack
          } from '../../../lib/functionUtil';
   import { testSrc
          , testSummary_
@@ -29,7 +31,7 @@ export async function tst_dispatch(){
     await  tst_self();
 }
 
-export async function tst_bindArgs(){
+export async function tst_bindArguments(){
   //const ö_whenMapped = bindArguments( whenPromiseMapped<number,string>, { realFirst:true }, parseInt );
   //const ö_whenMapped = bindAppending( whenPromiseMapped<number,string>                    , ß_stringify );
     const ü_whenStringified = createAsyncPostProcessor( ß_stringify );
@@ -47,7 +49,6 @@ export async function tst_bindArgs(){
     testEqual( await ü_whenStringified         ( bindArguments( ö_whenDone, { prepare:{0:parseInt}                           }      )               ( '2' ) ), '2' );
     testEqual( await   whenDoneAndPostProcessed( bindArguments( ö_whenDone, { prepare:{0:parseInt}                           }      ), ß_stringify )( '3' )  , '3' );
   //
-    testSummary_( 'Complex-Bind' );
 function ö_sorted( ...ü_args:string[] ):string {
     return ü_args.join( '' );
 }
@@ -61,10 +62,40 @@ async function ö_whenDone( ü_nmbr:number ):Promise<number>{
 //====================================================================
 
 export async function tst_self(){
+  //
     const ü_data =
-       [[ 0,0 ]] as TResultArray<number,number>;
-    await whenAsyncFunctionTested( whenDelay, ü_data );
-    await whenAsyncFunctionTested( whenDelay, ü_data );
+      [ [ 0, 0 ]
+      , [ 1, 1 ]
+      ] as TOrderedPairArray<number,number>;
+  //
+    const ü_map = new Map( ü_data );
+    testFunction( identityMap, ü_map );
+  //
+    await whenAsyncFunctionTested( whenValuePassedBack, ü_data );
+  //await whenAsyncFunctionTested( whenDelay, ü_data );
+  //const ü_whenDone = whenDoneAndPostProcessed( whenDelay, identityMap.bind( null, 1 ) );
+}
+
+export async function tst_testEquals(){
+  //
+    const ü_data = new Map<string,boolean>( );
+          ü_data.set( 'true' , true  );
+          ü_data.set( 'false', false );
+          ü_data.set( '_'    , false );
+  //
+    await whenAsyncFunctionTested( ö_someAsync, ü_data );
+    testSummary_();
+  //
+async function ö_someAsync( ü_text:string ):Promise<boolean> {
+    await whenTimeout();
+    switch ( ü_text ) {
+        case 'true' : return true ;
+        case 'false': return false;
+        default: throw new TypeError( `Not a boolean: ${ ü_text }` );
+    }
+  //
+}
+
 }
 
 //====================================================================
@@ -93,34 +124,12 @@ export async function tst_testEquals_1(){
     testEqual(  0,  0 )
     testEqual(  0,  0 )
     const ü_fref = bindArguments( ö_echo, { arrangeReal:[2] }, '_0','_1' )
-    testFunction( ü_fref, [['A_','_0\t_1\tA_']] as TResultArray<string,string> )
+    testFunction( ü_fref, [['A_','_0\t_1\tA_']] as TOrderedPairArray<string,string> )
     testSummary_();
     //strictEqual( 0, 1, ü_all.join('\r\n') )
 function ö_echo<T>( ...ü_args:T[] ):string {
     return ü_args.join( '\t' );
 }
-}
-
-export async function tst_testEquals(){
-  //
-    const ü_data = new Map<string,boolean>( );
-          ü_data.set( 'true' , true  );
-          ü_data.set( 'false', false );
-          ü_data.set( '_'    , false );
-  //
-    await whenAsyncFunctionTested( ö_someAsync, ü_data );
-    testSummary_();
-  //
-async function ö_someAsync( ü_text:string ):Promise<boolean> {
-    await whenTimeout();
-    switch ( ü_text ) {
-        case 'true' : return true ;
-        case 'false': return false;
-        default: throw new TypeError( `Not a boolean: ${ ü_text }` );
-    }
-  //
-}
-
 }
 
 //====================================================================

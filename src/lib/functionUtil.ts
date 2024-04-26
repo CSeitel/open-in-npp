@@ -12,6 +12,9 @@ export function nullOperation():void {}
 export function identityMap<Tx>( ü_x:Tx ):Tx {
     return ü_x;
 }
+export function whenValuePassedBack<Tx>( ü_x:Tx ):PromiseLike<Tx> {
+    return Promise.resolve( ü_x );
+}
 
 //====================================================================
 
