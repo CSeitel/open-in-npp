@@ -134,6 +134,9 @@ function ö_timer( ü_reset?:boolean ):number {
 
 //====================================================================
 
+export function createWhenResolved<T>( ü_value:T ):PromiseLike<T> {
+    return Promise.resolve( ü_value );
+}
 export function createWhenRejected<T,R=any>( ü_reason:R ):Promise<T> {
     return Promise.reject( ü_reason );
 }

@@ -17,10 +17,10 @@
       [ 'Single', [ 
                   //ß_error
                   //ß_fs
-                    ß_test
-                  //ß_error
+                  //ß_test
+                    ß_text
                            .tst_dispatch
-                , ß_test   .tst_dispatch
+              //, ß_test   .tst_dispatch
                         ], !ß_skipTests ]
     , [ 'Array' , ß_array,  ß_skipTests ]
     , [ 'Async' , ß_async,  ß_skipTests ]

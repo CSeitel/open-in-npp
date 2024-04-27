@@ -15,6 +15,8 @@
          } from '../../../lib/arrayUtil';
   import { whenTempFile
          , whenKnownAsFile
+         , whenFileWritten
+         , whenItemRenamed
          } from '../../../lib/fsUtil';
   import { bindArguments
          } from '../../../lib/functionUtil';
@@ -24,6 +26,13 @@
          , testFunction
          , testEqual
          } from '../../../lib/testUtil';
+//====================================================================
+
+export async function tst_dispatch(){
+  //return;
+    return tst_js_escape();
+    await  tst_js_escape();
+}
 //====================================================================
 
 export async function tst_expandEnvVariables(){
@@ -49,31 +58,36 @@ export async function tst_expandEnvVariables(){
                                            , ...            ü_vars                    );
     testFunction( ö_expandTemplateString_a, ü_temp );
   //
-    testSummary_( 'expand' );
 }
 
 //====================================================================
 
-export async function tst_escape(){
+export async function tst_encodeURI(){
     const ü_chars = createArray( 256, function(ü_indx){
         const ü_c = String.fromCharCode( ü_indx ); return [ ü_c, encodeURI( ü_c ) ] as [string,string]; });
   //
-    const ü_2 = ü_chars.map((ü_item)=>[ü_item[0],escape(ü_item[0])] as [string,string])
     const ü_temp =
       [ 
       , [ 'a-${ hugo}', 'a-HUGO'  ]
       ] as TOrderedPairArray<string,string>;
   //
-    testFunction( escapeFF(), ü_2 );
     testFunction( escape, ü_chars );
-  //
-    testSummary_( 'escape' );
 }
+
+export async function tst_js_escape(){
+    const ü_data = createArray( 256, function( ü_indx ){
+           const ü_char = String.fromCharCode( ü_indx );
+        return [ ü_char, escape( ü_char ) ] as [string,string];
+    });
+    testFunction( escapeFF(), ü_data );
+}
+
+//====================================================================
 
 export async function tst_win32Names(){
     const ö_stub = await whenTempFile( 'qqqqqq' );
     let ü_file = ö_stub+'.txt';
-                   await ß_fs_p.writeFile( ü_file, '' );
+                   await whenFileWritten( ü_file, '' );
     let ü_indx = 0x21;
     do {
         const ü_char = String.fromCharCode( ü_indx );
@@ -104,7 +118,7 @@ export async function tst_win32Names(){
     testSummary_( 'File Names' );
 async function ö_rename( ü_file:string, ü_char:string ):Promise<string> {
     const ü_done = ö_stub+ü_char+'.txt';
-    await ß_fs_p.rename( ü_file, ü_done );
+    await whenItemRenamed( ü_file, ü_done );
     return ü_done;
 }
 }

@@ -12,9 +12,6 @@ export function nullOperation():void {}
 export function identityMap<Tx>( ü_x:Tx ):Tx {
     return ü_x;
 }
-export function whenValuePassedBack<Tx>( ü_x:Tx ):PromiseLike<Tx> {
-    return Promise.resolve( ü_x );
-}
 
 //====================================================================
 
@@ -25,6 +22,8 @@ function ö_bound( ...ü_realArgs:any[] ):Ty {
     return ö_fref.apply( null, ü_realArgs.concat( ö_baseArgs ) );
 }
 }
+
+//--------------------------------------------------------------------
 
 export function bindArguments<Ty,Tz=Ty>( ö_fref:TAnyFunction<Ty>, ö_todo:TProcessingInfo<Ty,Tz>, ...ö_baseArgs:readonly any[] ):TAnyFunction<Tz> {
     const ö_baseMap = ö_todo.arrangeBound === undefined ? {} : ö_todo.arrangeBound ;
@@ -38,8 +37,6 @@ function ö_bound( ...ü_realArgs:any[] ):Tz {
   //
     for ( const ü_old in ö_baseMap ) { ü_args[ ö_baseMap[ ü_old ] ] = ö_baseArgs[ ü_old ]; }
     for ( const ü_old in ö_realMap ) { ü_args[ ö_realMap[ ü_old ] ] = ü_realArgs[ ü_old ]; }
-    // ö_baseMap.forEach(function( ü_new, ü_old ){ ü_args[ ü_new ] = ö_baseArgs[ ü_old ]; });
-    //if ( ö_map.arrangeReal  !== undefined ) { ö_map.arrangeReal .forEach(function( ü_new, ü_old ){ ü_args[ ü_new ] = ü_realArgs[ ü_old ]; }); }
   //
     if ( ö_todo.prepare !== undefined ) {
         for ( const ü_indx in ö_todo.prepare ) {

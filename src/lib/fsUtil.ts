@@ -22,8 +22,9 @@ https://nodejs.org/api/fs.html#fslstatpath-options-callback
   import { expect
          } from '../lib/errorUtil';
 //--------------------------------------------------------------------
-  export const whenFileRead    = ß_fs_p.readFile ;
-  export const whenFileWritten = ß_fs_p.writeFile;
+  export const whenFileRead    = ß_fs_p.readFile  ;
+  export const whenFileWritten = ß_fs_p.writeFile ;
+  export const whenItemRenamed = ß_fs_p.rename    ;
 //====================================================================
 
 export async function whenFileInfoRead( ü_path:PathLike, ü_slnk = false ):Promise<Stats|null> {

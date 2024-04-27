@@ -6,11 +6,12 @@
   // unescape('    %22         %25             %2a %2f %3a     %3c     %3e %3f     %5c                 %7c')
   //                "                           *   /   :       <       >   ?       \                   |
   export const CRgXp =
-    { js_escape  : /[\x00-\x29\x2c\x3a-\x3f\x5b-\x5e\x60\x7b-\x7f\x80-\xff]/g
-    , lx_template: /\{([^}]+)\}/g
+    { specialChars: /[\x00-\x1f\x25\x7f-\x9f]/g
+    , js_escape   : /[\x00-\x29\x2c\x3a-\x3f\x5b-\x5e\x60\x7b-\x7f\x80-\xff]/g
+    , lx_template : /\{([^}]+)\}/g
     , js_template_: /\$\{([^}]+)\}/g
-    , fs_win32   : /[\x22\x25\x2a\x2f\x3a\x3c\x3e\x3f\x5c\x7c]/g
-    , env_win32  : /%([^%]+)%/g
+    , fs_win32    : /[\x22\x25\x2a\x2f\x3a\x3c\x3e\x3f\x5c\x7c]/g
+    , env_win32   : /%([^%]+)%/g
     , crlf : /\r?\n/g
     };
 //====================================================================

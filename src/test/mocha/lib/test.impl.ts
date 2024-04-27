@@ -10,31 +10,31 @@
   import { ß_trc
          , ß_stringify
          } from '../../../runtime/context';
+  import { includes
+         } from '../../../lib/arrayUtil';
   import { whenDelay
-         , whenTimeout
-         , createWhenRejected
+         , createWhenResolved
          , createAsyncPostProcessor
          , whenDoneAndPostProcessed
          } from '../../../lib/asyncUtil';
-  import { includes
-         } from '../../../lib/arrayUtil';
   import { bindArguments
          , bindAppending
          , identityMap
-         , whenValuePassedBack
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary_
-         , whenAsyncFunctionTested
-         , testFunction
          , testEqual
+         , testFunction
+         , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
 
 export async function tst_dispatch(){
-    return tst_self();
-    await  tst_self();
+  //return;
+    return tst_function();
+    await  tst_function();
 }
+
+//====================================================================
 
 export async function tst_bindArguments(){
   //const ö_whenMapped = bindArguments( whenPromiseMapped<number,string>, { realFirst:true }, parseInt );
@@ -66,7 +66,7 @@ async function ö_whenDone( ü_nmbr:number ):Promise<number>{
 
 //====================================================================
 
-export async function tst_self(){
+export async function tst_function(){
   //
     const ö_data_1 =
       [ [  0, 0 ]
@@ -78,25 +78,25 @@ export async function tst_self(){
       ] as TOrderedPairArray<{}    ,number>;
     const ö_map_1 = new Map( ö_data_1 );
     const ö_map_2 = new Map( ö_data_2 );
-    let ü_expErr_1:any
   //
     testFunction( identityMap, ö_map_1              );
     testFunction( ö_throw_1  , ö_data_1, ö_expErr_1 );
     testFunction( ö_throw_2  , ö_map_2 , ö_expErr_2 );
+  //testFunction( ö_throw_2  , ö_map_2 , ö_throw_2  );
   //
-    const ü_throw_3 = whenDoneAndPostProcessed( whenValuePassedBack<number>, ö_throw_1 );
-    const ü_throw_4 = whenDoneAndPostProcessed( whenValuePassedBack<{}>    , ö_throw_2 );
+    const ü_throw_3 = whenDoneAndPostProcessed( createWhenResolved<number>, ö_throw_1 );
+    const ü_throw_4 = whenDoneAndPostProcessed( createWhenResolved<{}>    , ö_throw_2 );
     const ü_throw_5 = ö_throw_2 as TAsyncFunctionSingleArg<number,{}>
-    await whenAsyncFunctionTested( whenValuePassedBack, ö_map_1              );
+    await whenAsyncFunctionTested( createWhenResolved , ö_map_1              );
     await whenAsyncFunctionTested( ü_throw_3          , ö_data_1, ö_expErr_1 );
     await whenAsyncFunctionTested( ü_throw_4          , ö_map_2 , ö_expErr_2 );
+  //await whenAsyncFunctionTested( ü_throw_4          , ö_map_2 , ö_throw_2  );
     await whenAsyncFunctionTested( ü_throw_5          , ö_map_2 , ö_expErr_2 );
-  //await whenAsyncFunctionTested( whenDelay, ü_data );
   //
 function ö_throw_1( ü_indx:number ):never {
     switch ( ü_indx ) {
-        case 0: throw new Error( '0' );
-        case 1: throw new Error( '1' );
+        case  0: throw new Error( '0' );
+        case  1: throw new Error( '1' );
         default: throw new Error( '_' );
     }
 }
@@ -113,62 +113,6 @@ function ö_expErr_2( ü_x:{}, ü_eX:any ):number {
         const ü_indx = ö_map_2.get( ü_x )!;
         return ü_x === ü_eX
              ? ü_indx : -1;
-}
-}
-
-export async function tst_testEquals(){
-  //
-    const ü_data = new Map<string,boolean>( );
-          ü_data.set( 'true' , true  );
-          ü_data.set( 'false', false );
-          ü_data.set( '_'    , false );
-  //
-    await whenAsyncFunctionTested( ö_someAsync, ü_data );
-    testSummary_();
-  //
-async function ö_someAsync( ü_text:string ):Promise<boolean> {
-    await whenTimeout();
-    switch ( ü_text ) {
-        case 'true' : return true ;
-        case 'false': return false;
-        default: throw new TypeError( `Not a boolean: ${ ü_text }` );
-    }
-  //
-}
-
-}
-
-//====================================================================
-
-export async function tst_a(){
-    ß_trc&& ß_trc( 'A '+Date.now() );
-    testEqual( 1 , 0 );
-    await whenDelay( 1500 );
-
-    ß_trc&& ß_trc( 'A '+Date.now() );
-    testSummary_( 'Aaa' );
-}
-
-export async function tst_b(){
-    ß_trc&& ß_trc( 'B '+Date.now() );
-    testEqual( 2 , 0 );
-    await whenDelay( 100 );
-    ß_trc&& ß_trc( 'B '+Date.now() );
-    testSummary_( 'Bbb' );
-}
-
-//====================================================================
-
-export async function tst_testEquals_1(){
-    testEqual( {}, {}, '9999' )
-    testEqual(  0,  0 )
-    testEqual(  0,  0 )
-    const ü_fref = bindArguments( ö_echo, { arrangeReal:[2] }, '_0','_1' )
-    testFunction( ü_fref, [['A_','_0\t_1\tA_']] as TOrderedPairArray<string,string> )
-    testSummary_();
-    //strictEqual( 0, 1, ü_all.join('\r\n') )
-function ö_echo<T>( ...ü_args:T[] ):string {
-    return ü_args.join( '\t' );
 }
 }
 

@@ -16,6 +16,8 @@
   import { type TOrderedPairArray
          , type TOrderedPairRArray
          } from '../types/lib.arrayUtil.d';
+  import { CRgXp
+         } from '../constants/text';
 //--------------------------------------------------------------------
   import { join
          } from 'path';
@@ -25,6 +27,7 @@
          , ß_stringify
          } from '../runtime/context';
   import { shortenText
+         , escapeFF
          } from './textUtil';
   import { toOrderedPairArray
          } from './arrayUtil';
@@ -44,11 +47,14 @@
   export const CWithMocha = typeof( suite ) !== 'undefined'
                          && typeof( test  ) !== 'undefined';
   export const CTestDirName = join( __dirname, '../../.vscode-temp' );
+//--------------------------------------------------------------------
+  const ß_escape = escapeFF( CRgXp.specialChars );
   const CSeriesOfTests = [] as TTestResult[];
   //process.stdout.write.bind( process.stdout );
+
 //====================================================================
 function ß_echo( ü_oref:any, ü_length:number ):string {
-    return shortenText( ß_stringify( ü_oref ), ü_length ).replace( /[\n\r\t]/g, escape );
+    return shortenText( ß_escape( ß_stringify( ü_oref ) ), ü_length );//.replace( /[\n\r\t]/g, escape );
 }
 
 export function testSrc( ...ü_segs:string[] ):string {
@@ -93,7 +99,8 @@ export async function whenAllTestsRun( ü_suites:TTestSuites ):Promise<void> {
     });
   //
     const ü_rc = await ö_whenDone;
-    ß_writeStdOut( `Overall result: ${ ü_rc } failed tests` );
+    ß_writeStdOut( ü_rc > 0 ? `Overall result: ${ ü_rc } tests have failed`
+                            : 'Overall result: All tests have been passed successfully' );
     process.exit( ü_rc );
 }
 
@@ -104,8 +111,6 @@ function ß_whenTestSuite( ü_rc:number, ü_title:string, ü_tests:Record<string
     if ( Array.isArray( ü_tests ) ) { ü_tests.forEach(          ö_addWhenTested ); }
     else                            {         forEach( ü_tests, ö_addWhenTested ); }
   //
-  //          const ü_rc = await ö_whenDone;
-  //ß_errorCount += ü_rc;
              return ö_whenDone;
   //
 function ö_addWhenTested( ä_testImpl:TAsyncTestFunction, ä_testName:string|number ):void {
@@ -202,15 +207,16 @@ export function testFunction<Tx,Ty>( ö_fref:TAnyFunctionSingleArg<Ty,Tx>, ö_ex
                 ü_act_y = ö_fref( ü_x_y[0] );
         } catch ( ü_eX ) {
             if ( typeof( ö_expectError ) === 'function' ) {
-                try {
-                } catch ( ü_eX ) {
-                }
+              try {
                 ü_act_y = ö_isMap ? ö_expectError( ü_x_y[0], ü_eX, ü_x_y[1] )
                                   : ö_expectError( ü_x_y[0], ü_eX, ü_x_y    )
                                   ;
+              } catch ( ü_eX_user ) {
+                ö_overall = testFailed( ü_eX, ü_count );
+                return;
+              }
             } else {
-                testFailed( ü_eX, ü_count );
-                ö_overall = false;
+                ö_overall = testFailed( ü_eX, ü_count );
                 return;
             }
         }
@@ -230,7 +236,7 @@ export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSin
        { ö_expData = toOrderedPairArray( ö_expData );
          ö_isMap = true; }
   //
-    const ü_allWhenY = ö_expData.map(function( ü_x_y ){
+    const ü_all_whenY = ö_expData.map(function( ü_x_y ){
         try {
             return ö_aFref( ü_x_y[0] );
         } catch ( ü_eX ) {
@@ -238,25 +244,27 @@ export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSin
         }
     });
   //
-    const ö_allY = await Promise.allSettled( ü_allWhenY );
+    const ö_all_Y = await Promise.allSettled( ü_all_whenY );
   //
     const ö_name = ö_aFref.name;
     let ö_overall = true;
     ö_expData.forEach(function( ü_x_y, ü_indx ){
         const ü_count = `${ ö_name }-${ ü_indx }(${ ß_echo( ü_x_y[0], 50 ) })`;
         const ü_exp_y = ü_x_y[1];
-        const ü_act_Y = ö_allY[ ü_indx ];
+        const ü_act_Y = ö_all_Y[ ü_indx ];
         let ü_act_y:Ty
         if ( ü_act_Y.status === 'fulfilled' ) {
             ü_act_y = ü_act_Y.value;
         } else {
             if ( typeof( ö_expectError ) === 'function' ) {
+              try {
                 ü_act_y = ö_isMap ? ö_expectError( ü_x_y[0], ü_act_Y.reason, ü_exp_y )
                                   : ö_expectError( ü_x_y[0], ü_act_Y.reason, ü_x_y   )
                                   ;
-                try {
-                } catch ( ü_eX ) {
-                }
+              } catch ( ü_eX_user ) {
+                ö_overall = testFailed( ü_act_Y.reason, ü_count );
+                return;
+              }
             } else {
                 ö_overall = testFailed( ü_act_Y.reason, ü_count );
                 return;
