@@ -62,9 +62,7 @@ export function whenDoneAndPostProcessed<Tz,Ty,Tx=Ty>( ö_whenDone:TAsyncFunctio
                                                                 ):TAsyncFunctionSingleArg <Tz,Tx> {
     return ö_concat;
 function ö_concat( ü_arg0:Tx ):PromiseLike<Tz> {
-  //return ö_whenDone( ü_arg0 ).then( ö_y_to_z );
-    const ü_whenDone = ö_whenDone( ü_arg0 );
-    return ü_whenDone.then( ö_y_to_z );
+    return ö_whenDone( ü_arg0 ).then( ö_y_to_z );
 }
 }
 
@@ -135,6 +133,10 @@ function ö_timer( ü_reset?:boolean ):number {
 }
 
 //====================================================================
+
+export function createWhenRejected<T,R=any>( ü_reason:R ):Promise<T> {
+    return Promise.reject( ü_reason );
+}
 
 export function createPromise<T>():TPromise<T> {
     const ö_oref = {} as TPromise<T>;

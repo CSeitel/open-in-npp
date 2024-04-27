@@ -4,6 +4,12 @@
          } from '../types/lib.arrayUtil.d'
 //====================================================================
 
+export function includes<T>( ü_list:T[], ö_item:T ):number {
+    return ü_list.findIndex( ü_item => ü_item === ö_item );
+}
+
+//====================================================================
+
 export function putFirst<T,P extends keyof T>(   list:T[],   item:  T[P],   prop :P ):number
 export function putFirst<T,P extends keyof T>(   list:T[],   item:T                 ):number
 export function putFirst<T,P extends keyof T>( ü_list:T[], ö_item:T|T[P], ö_prop?:P ):number {

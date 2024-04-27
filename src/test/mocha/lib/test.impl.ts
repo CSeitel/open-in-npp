@@ -4,15 +4,20 @@
          } from '../../../types/lib.arrayUtil.d';
   import {
          } from '../../../types/lib.functionUtil.d';
+  import { TAsyncFunctionSingleArg
+         } from '../../../types/generic.d';
 //--------------------------------------------------------------------
   import { ß_trc
          , ß_stringify
          } from '../../../runtime/context';
   import { whenDelay
          , whenTimeout
+         , createWhenRejected
          , createAsyncPostProcessor
          , whenDoneAndPostProcessed
          } from '../../../lib/asyncUtil';
+  import { includes
+         } from '../../../lib/arrayUtil';
   import { bindArguments
          , bindAppending
          , identityMap
@@ -71,24 +76,22 @@ export async function tst_self(){
       [ [ {}, 0 ]
       , [ {}, 1 ]
       ] as TOrderedPairArray<{}    ,number>;
-    const ö_map = new Map( ö_data_2 );
+    const ö_map_1 = new Map( ö_data_1 );
+    const ö_map_2 = new Map( ö_data_2 );
+    let ü_expErr_1:any
   //
-    testFunction( identityMap, new Map( ö_data_1 ) );
-    testFunction( ö_throw_1    ,          ö_data_1, function( ü_x_y, ü_eX ){
-        const ü_indx = ö_data_1.findIndex( x_y => x_y === ü_x_y );
-        const ü_jndx = parseInt( (ü_eX as Error).message );
-        return ü_indx === ü_jndx ? ü_indx : -1;
-    });
-    testFunction( ö_throw_2    , ö_map, function( ü_x_y, ü_eX ){
-        const ü_indx = ö_map.get( ü_x_y[0] );
-      //const ü_jndx = parseInt( (ü_eX as Error).message );
-        return ü_indx!;
-    }
-  );
+    testFunction( identityMap, ö_map_1              );
+    testFunction( ö_throw_1  , ö_data_1, ö_expErr_1 );
+    testFunction( ö_throw_2  , ö_map_2 , ö_expErr_2 );
   //
-    await whenAsyncFunctionTested( whenValuePassedBack, ö_data_1 );
+    const ü_throw_3 = whenDoneAndPostProcessed( whenValuePassedBack<number>, ö_throw_1 );
+    const ü_throw_4 = whenDoneAndPostProcessed( whenValuePassedBack<{}>    , ö_throw_2 );
+    const ü_throw_5 = ö_throw_2 as TAsyncFunctionSingleArg<number,{}>
+    await whenAsyncFunctionTested( whenValuePassedBack, ö_map_1              );
+    await whenAsyncFunctionTested( ü_throw_3          , ö_data_1, ö_expErr_1 );
+    await whenAsyncFunctionTested( ü_throw_4          , ö_map_2 , ö_expErr_2 );
+    await whenAsyncFunctionTested( ü_throw_5          , ö_map_2 , ö_expErr_2 );
   //await whenAsyncFunctionTested( whenDelay, ü_data );
-  //const ü_whenDone = whenDoneAndPostProcessed( whenDelay, identityMap.bind( null, 1 ) );
   //
 function ö_throw_1( ü_indx:number ):never {
     switch ( ü_indx ) {
@@ -97,8 +100,19 @@ function ö_throw_1( ü_indx:number ):never {
         default: throw new Error( '_' );
     }
 }
-function ö_throw_2( ü_indx:{} ):never {
-    ö_throw_1( 0 )
+function ö_throw_2( ü_reason:{} ):never {
+    throw ü_reason;
+}
+function ö_expErr_1( ü_x:number, ü_eX:any, ü_x_y:[number,number] ):number {
+        const ü_indx = includes( ö_data_1, ü_x_y );
+        const ü_jndx = parseInt( (ü_eX as Error).message );
+        return ü_indx === ü_jndx && ü_indx === ü_x
+             ? ü_indx : -1;
+}
+function ö_expErr_2( ü_x:{}, ü_eX:any ):number {
+        const ü_indx = ö_map_2.get( ü_x )!;
+        return ü_x === ü_eX
+             ? ü_indx : -1;
 }
 }
 

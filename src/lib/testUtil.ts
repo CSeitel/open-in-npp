@@ -180,16 +180,18 @@ export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:un
 }
 
 //====================================================================
-  type TExpectError<Tx,Ty> = ( x_y:[Tx,Ty], reason:any )=>Ty
+  type TExpectErrorArr<Tx,Ty> = ( x:Tx, reason:any, x_y:[Tx,Ty]    )=>Ty
+  type TExpectErrorMap<Tx,Ty> = ( x:Tx, reason:any,   y:        Ty )=>Ty
+  type TExpectErrorAll<Tx,Ty> = ( x:Tx, reason:any, mix:[Tx,Ty]|Ty )=>Ty
 
-export function testFunction<Tx,Ty>( ö_fref        :TAnyFunctionSingleArg<Ty,Tx>
-                                   , ö_expData     :                  Map<Tx,Ty>
-                                                   |   TOrderedPairRArray<Tx,Ty>
-                                   , ö_expectError?:         TExpectError<Tx,Ty>
-                                   ):boolean {
+export function testFunction<Tx,Ty>(   fref:TAnyFunctionSingleArg<Ty,Tx>,   expData:Map<Tx,Ty>                          ,   expectError?:TExpectErrorMap<Tx,Ty> ):boolean
+export function testFunction<Tx,Ty>(   fref:TAnyFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairRArray<Tx,Ty>,   expectError?:TExpectErrorArr<Tx,Ty> ):boolean
+export function testFunction<Tx,Ty>( ö_fref:TAnyFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairRArray<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):boolean {
   //
+     let ö_isMap = false;
     if ( ö_expData instanceof Map )
-       { ö_expData = toOrderedPairArray( ö_expData ); }
+       { ö_expData = toOrderedPairArray( ö_expData );
+         ö_isMap = true; }
   //
     const ö_name = ö_fref.name;
     let ö_overall = true;
@@ -200,9 +202,14 @@ export function testFunction<Tx,Ty>( ö_fref        :TAnyFunctionSingleArg<Ty,Tx
                 ü_act_y = ö_fref( ü_x_y[0] );
         } catch ( ü_eX ) {
             if ( typeof( ö_expectError ) === 'function' ) {
-                ü_act_y = ö_expectError( ü_x_y, ü_eX );
+                try {
+                } catch ( ü_eX ) {
+                }
+                ü_act_y = ö_isMap ? ö_expectError( ü_x_y[0], ü_eX, ü_x_y[1] )
+                                  : ö_expectError( ü_x_y[0], ü_eX, ü_x_y    )
+                                  ;
             } else {
-                CSeriesOfTests.push(  failurePrefix +'Function threw: '+ ß_echo( ü_eX, 200 )  );
+                testFailed( ü_eX, ü_count );
                 ö_overall = false;
                 return;
             }
@@ -214,14 +221,14 @@ export function testFunction<Tx,Ty>( ö_fref        :TAnyFunctionSingleArg<Ty,Tx
 
 //====================================================================
 
-export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref  :TAsyncFunctionSingleArg<Ty,Tx>
-                                                    , ö_expData:                    Map<Tx,Ty>
-                                                               |      TOrderedPairArray<Tx,Ty>
-                                                    , ö_expectError?:(x:Tx,reason:any,y:Ty)=>Ty
-                                                    ):Promise<boolean> {
+export async function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:Map<Tx,Ty>                         , ö_expectError?:TExpectErrorMap<Tx,Ty> ):Promise<boolean>
+export async function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairArray<Tx,Ty>, ö_expectError?:TExpectErrorArr<Tx,Ty> ):Promise<boolean>
+export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairArray<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):Promise<boolean> {
   //
+     let ö_isMap = false;
     if ( ö_expData instanceof Map )
-       { ö_expData = toOrderedPairArray( ö_expData ); }
+       { ö_expData = toOrderedPairArray( ö_expData );
+         ö_isMap = true; }
   //
     const ü_allWhenY = ö_expData.map(function( ü_x_y ){
         try {
@@ -233,29 +240,32 @@ export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref  :TAsyncFunctionS
   //
     const ö_allY = await Promise.allSettled( ü_allWhenY );
   //
-    let ü_all:boolean = true;
+    const ö_name = ö_aFref.name;
+    let ö_overall = true;
     ö_expData.forEach(function( ü_x_y, ü_indx ){
-        const ü_count = `[${ ü_indx }] ${ ß_echo( ü_x_y, 50 ) }`;
+        const ü_count = `${ ö_name }-${ ü_indx }(${ ß_echo( ü_x_y[0], 50 ) })`;
         const ü_exp_y = ü_x_y[1];
-        const ü_act_y = ö_allY[ ü_indx ];
-        if ( ü_act_y.status === 'fulfilled' ) {
-                    testEqual( ü_act_y.value, ü_exp_y, ü_count )||( ü_all = false );
-            return;
-        }
-        if ( typeof( ö_expectError ) === 'function' ) {
+        const ü_act_Y = ö_allY[ ü_indx ];
+        let ü_act_y:Ty
+        if ( ü_act_Y.status === 'fulfilled' ) {
+            ü_act_y = ü_act_Y.value;
+        } else {
+            if ( typeof( ö_expectError ) === 'function' ) {
+                ü_act_y = ö_isMap ? ö_expectError( ü_x_y[0], ü_act_Y.reason, ü_exp_y )
+                                  : ö_expectError( ü_x_y[0], ü_act_Y.reason, ü_x_y   )
+                                  ;
                 try {
-                                  const ü_act_y_value = ö_expectError( ü_x_y[0], ü_act_y.reason, ü_exp_y );
-                    testEqual( ü_exp_y, ü_act_y_value, ü_count )||( ü_all = false );
-                    return;
-                  /*
-                  */
                 } catch ( ü_eX ) {
                 }
+            } else {
+                ö_overall = testFailed( ü_act_Y.reason, ü_count );
+                return;
+            }
         }
-            testFailed( ü_act_y.reason, ü_count )||( ü_all = false );
+        testEqual( ü_act_y, ü_exp_y, ü_count )||( ö_overall = false );
     });
   //
-    return ü_all;
+    return ö_overall;
 }
 
 //====================================================================
