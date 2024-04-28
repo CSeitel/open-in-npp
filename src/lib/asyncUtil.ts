@@ -101,15 +101,6 @@ export async function whenDoneWithUiXMessage( ü_whenDone:PromiseLike<unknown>, 
     }
 }
 
-export async function whenDoneWith<T>( ü_whenDone:PromiseLike<T>, ü_txtTmpl:TTextTemplate, ... ü_vars:string[] ):Promise<T> {
-    try {
-        return await ü_whenDone;
-    } catch ( ü_eX ) {
-        ß_err( new ErrorWithUixMessage( ü_txtTmpl, ...ü_vars ).setReason( ü_eX ), 'Caught' );
-        throw ü_eX;
-    }
-}
-
 //====================================================================
 
 export function createTimer( ö_reset = false, ü_then?:Date ):TTimer {

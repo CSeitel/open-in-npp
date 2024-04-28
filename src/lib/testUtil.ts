@@ -239,7 +239,8 @@ export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSin
   //
     const ü_all_whenY = ö_expData.map(function( ü_x_y ){
         try {
-            return ö_aFref( ü_x_y[0] );
+            return Promise.resolve( ü_x_y[0] ).then(  ö_aFref );
+          //return ö_aFref( ü_x_y[0] );
         } catch ( ü_eX ) {
             return Promise.reject( ü_eX );
         }

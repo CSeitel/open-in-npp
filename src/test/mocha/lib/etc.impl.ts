@@ -1,7 +1,7 @@
 /*
 */
-  import { type TOrderedPair
-         } from '../../../types/lib.arrayUtil.d';
+  import { type TOrderedPairs
+         } from '../../../types/generic.d';
 //--------------------------------------------------------------------
   import { format
          } from 'util';
@@ -51,7 +51,7 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
       , [ ü_errMsgX , false ]
       , [ ü_err     , false ]
       , [ ü_errX    , false ]
-      ] as TOrderedPair<object,boolean>;
+      ] as TOrderedPairs<object,boolean>;
     testFunction( bindArguments( isDirectInstanceOf, { realFirst:true, arrangeBound:[1] }, ErrorWithUixMessage ), ü_data );
   //
         const ü_prot_a = Object.getPrototypeOf( ü_errMsgX );
@@ -92,7 +92,7 @@ export async function tst_syntax(){
       , [ '\n', '\n' ]
       , [ {}   , '{}'       ]
       , [ {a:1}, '{ a: 1 }' ]
-      ] as TOrderedPair<any,string>;
+      ] as TOrderedPairs<any,string>;
   //
     testFunction( format, ü_data );
     testSummary_( 'Syntax' );

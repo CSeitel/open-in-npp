@@ -1,7 +1,7 @@
 /*
 */
-  import { type TOrderedPair
-         } from '../../../types/lib.arrayUtil.d';
+  import { type TOrderedPairs
+         } from '../../../types/generic.d';
   import {
          } from '../../../types/lib.functionUtil.d';
   import { TAsyncFunctionSingleArg
@@ -71,11 +71,11 @@ export async function tst_function(){
     const ö_data_1 =
       [ [  0, 0 ]
       , [  1, 1 ]
-      ] as TOrderedPair<number,number>;
+      ] as TOrderedPairs<number,number>;
     const ö_data_2 =
       [ [ {}, 0 ]
       , [ {}, 1 ]
-      ] as TOrderedPair<{}    ,number>;
+      ] as TOrderedPairs<{}    ,number>;
     const ö_map_1 = new Map( ö_data_1 );
     const ö_map_2 = new Map( ö_data_2 );
   //
