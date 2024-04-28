@@ -9,6 +9,10 @@
   export type TOther<T,U> = {
       [K in keyof T]:T[K] & U
     }
+
+  export type TOrderedPairs  <Tx,Ty> =               [Tx,Ty][]
+  export type TOrderedPairsRO<Tx,Ty> = ReadonlyArray<[Tx,Ty]>
+
 //====================================================================
 
   export type TAnyFunction            <Ty=any>   = ( ...args:any[] )=>            Ty

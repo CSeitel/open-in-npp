@@ -1,6 +1,6 @@
 /*
 */
-  import { type TOrderedPairArray
+  import { type TOrderedPair
          } from '../../../types/lib.arrayUtil.d';
   import {
          } from '../../../types/lib.functionUtil.d';
@@ -71,11 +71,11 @@ export async function tst_function(){
     const ö_data_1 =
       [ [  0, 0 ]
       , [  1, 1 ]
-      ] as TOrderedPairArray<number,number>;
+      ] as TOrderedPair<number,number>;
     const ö_data_2 =
       [ [ {}, 0 ]
       , [ {}, 1 ]
-      ] as TOrderedPairArray<{}    ,number>;
+      ] as TOrderedPair<{}    ,number>;
     const ö_map_1 = new Map( ö_data_1 );
     const ö_map_2 = new Map( ö_data_2 );
   //

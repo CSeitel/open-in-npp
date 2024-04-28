@@ -1,6 +1,6 @@
 /*
 */
-  import { type TOrderedPairArray
+  import { type TOrderedPair
          } from '../../../types/lib.arrayUtil.d';
   import { CEFileType
          } from '../../../constants/vsc';

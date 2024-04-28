@@ -1,7 +1,7 @@
 /*
 */
-  import { type TOrderedPairArray
-         } from '../../../types/lib.arrayUtil.d';
+  import { type TOrderedPairs
+         } from '../../../types/generic.d';
   import { type IUiXMessage
          } from '../../../types/lib.errorUtil.d';
 //--------------------------------------------------------------------
@@ -66,13 +66,13 @@ export async function tst_UiX(){
       , [ Promise.resolve( 1 )                                      , 'YES:1'    ]
     /*
     */
-      ] as TOrderedPairArray<object,string>;
-    const ü_data_with = ü_data_true.slice(0).map(function(row){  return row.slice(0);  }) as TOrderedPairArray<object,string>;
+      ] as TOrderedPairs<object,string>;
+    const ü_data_with = ü_data_true.slice(0).map(function(row){  return row.slice(0);  }) as TOrderedPairs<object,string>;
           ü_data_with[0][1] = 'NO:' + ü_data_with[0][1] ;
           ü_data_with[1][1] = 'NO:' + ü_data_with[1][1] ;
           ü_data_with[2][1] = 'NO:' + ü_data_with[2][1] ;
           ü_data_true[2][1] = 'ß'   + ü_data_true[2][1] ;
-    const ü_data_none = ü_data_true.slice(0).map(function(row){  return row.slice(0);  }) as TOrderedPairArray<object,string>;
+    const ü_data_none = ü_data_true.slice(0).map(function(row){  return row.slice(0);  }) as TOrderedPairs<object,string>;
           ü_data_none[0][1] = 'ß'   + ü_data_true[0][1] ;
           ü_data_none[1][1] = 'ß'   + ü_data_true[1][1] ;
   //
@@ -89,7 +89,7 @@ export async function tst_UiX(){
 function ö_finalize( val:IUiXMessage ):string {
     return val.text;
 }
-function ö_error( ü_x:object, ü_eX:any, ü_y:string ):string {
+function ö_error( ü_x:object, ü_eX:any ):string {
     return 'ß' + ü_eX;
 }
 }
@@ -114,7 +114,7 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
       , [ ü_errMsgX , false ]
       , [ ü_err     , false ]
       , [ ü_errX    , false ]
-      ] as TOrderedPairArray<object,boolean>;
+      ] as TOrderedPairs<object,boolean>;
     testFunction( bindArguments( isDirectInstanceOf, { realFirst:true, arrangeBound:[1] }, ErrorWithUixMessage ), ü_data );
   //
         const ü_prot_a = Object.getPrototypeOf( ü_errMsgX );

@@ -1,7 +1,10 @@
 /*
 */
-  import { TOrderedPairArray
-         } from '../types/lib.arrayUtil.d'
+  import { type TAnyFunctionSingleArg
+         , type TOrderedPairs
+         } from '../types/generic.d';
+  import { type TCreateOrderedPair
+         } from '../types/lib.arrayUtil.d';
 //====================================================================
 
 export function includes<T>( ü_list:T[], ö_item:T ):number {
@@ -78,8 +81,8 @@ export function pickDuplet<U,V,W=any>( ü_indx:number, ü_jndx:number ):((row:(U
 
 //====================================================================
 
-export function toOrderedPairArray<Tx,Ty>( ü_data:Map<Tx,Ty> ):TOrderedPairArray<Tx,Ty> {
-    const ö_arry = [] as TOrderedPairArray<Tx,Ty>;
+export function toOrderedPair<Tx,Ty>( ü_data:Map<Tx,Ty> ):TOrderedPairs<Tx,Ty> {
+    const ö_arry = [] as TOrderedPairs<Tx,Ty>;
     ü_data.forEach(function( ü_y, ü_x ){
         ö_arry.push([ ü_x, ü_y ]);
     });
@@ -88,9 +91,9 @@ export function toOrderedPairArray<Tx,Ty>( ü_data:Map<Tx,Ty> ):TOrderedPairArra
 
 //====================================================================
 
-export function createArray   (   length:number                                 ):number[]    ;
-export function createArray<T>(   length:number,   createItem :(indx:number)=>T ):         T[];
-export function createArray<T>( ü_length:number, ü_createItem?:(indx:number)=>T ):number[]|T[] {
+export function createArray   (   length:number                                                ):number[]
+export function createArray<T>(   length:number,   createItem :TAnyFunctionSingleArg<T,number> ):         T[]
+export function createArray<T>( ü_length:number, ü_createItem?:TAnyFunctionSingleArg<T,number> ):number[]|T[] {
     const ü_done = [] as (number|T)[];
       let ü_indx = 0;
     if ( ü_createItem === undefined )
@@ -99,8 +102,14 @@ export function createArray<T>( ü_length:number, ü_createItem?:(indx:number)=>
     return ü_done as number[]|T[];
 }
 
+export function createOrderedPairs<Tx,Ty>( ü_count:number, createX:TAnyFunctionSingleArg<Tx,number>, createY:TCreateOrderedPair<Tx,Ty> ):TOrderedPairs<Tx,Ty> {
+    return createArray( ü_count, function( ü_indx ){
+                    const ü_x = createX( ü_indx );
+        return [          ü_x
+               , createY( ü_x, ü_indx ) ];
+      });
+}
+
 //====================================================================
 /*
-export function forEach<T>( ü_oref:T[]|Record<PropertyKey,T> ):void {
-}
 */

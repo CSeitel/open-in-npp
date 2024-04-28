@@ -1,10 +1,12 @@
 /*
 */
-  import { type TOrderedPairArray
+  import { type TOrderedPairs
+         } from '../../../types/generic.d';
+  import { type TCreateOrderedPair
          } from '../../../types/lib.arrayUtil.d';
 //--------------------------------------------------------------------
-  import { promises as ß_fs_p
-         } from 'fs';
+  import { format
+         } from 'util';
   import { ß_trc
          } from '../../../runtime/context';
   import { expandEnvVariables
@@ -12,14 +14,16 @@
          , escapeFF
          } from '../../../lib/textUtil';
   import { createArray
+         , createOrderedPairs
          } from '../../../lib/arrayUtil';
+  import { bindArguments
+         , identityMap
+         } from '../../../lib/functionUtil';
   import { whenTempFile
          , whenKnownAsFile
          , whenFileWritten
          , whenItemRenamed
          } from '../../../lib/fsUtil';
-  import { bindArguments
-         } from '../../../lib/functionUtil';
   import { testSrc
          , testSummary_
          , whenAsyncFunctionTested
@@ -30,7 +34,7 @@
 
 export async function tst_dispatch(){
   //return;
-    return tst_js_escape();
+    return tst_encodeURIC();
     await  tst_js_escape();
 }
 //====================================================================
@@ -42,13 +46,13 @@ export async function tst_expandEnvVariables(){
       , [ '%Temp%', ü_env[ 'Temp' ] ]
       , [ '%TEMP$',       '%TEMP$'  ]
       , [ '%T__P%',       '%T__P%'  ]
-      ] as TOrderedPairArray<string,string>;
+      ] as TOrderedPairs<string,string>;
     testFunction( expandEnvVariables, ü_data );
   //
     const ü_temp =
       [ [ 'a-${ 0 } ${1}'  , 'a-00 11'   ]
       , [ 'a-${ hugo}', 'a-HUGO'  ]
-      ] as TOrderedPairArray<string,string>;
+      ] as TOrderedPairs<string,string>;
     const ü_vars = ['00','11'];
     const ö_expandTemplateString_o = bindArguments( expandTemplateString, { arrangeBound:[1], realFirst:true }
                                            , Object.assign( ü_vars, {hugo : 'HUGO'} ) );
@@ -62,25 +66,10 @@ export async function tst_expandEnvVariables(){
 
 //====================================================================
 
-export async function tst_encodeURI(){
-    const ü_chars = createArray( 256, function(ü_indx){
-        const ü_c = String.fromCharCode( ü_indx ); return [ ü_c, encodeURI( ü_c ) ] as [string,string]; });
-  //
-    const ü_temp =
-      [ 
-      , [ 'a-${ hugo}', 'a-HUGO'  ]
-      ] as TOrderedPairArray<string,string>;
-  //
-    testFunction( escape, ü_chars );
-}
-
-export async function tst_js_escape(){
-    const ü_data = createArray( 256, function( ü_indx ){
-           const ü_char = String.fromCharCode( ü_indx );
-        return [ ü_char, escape( ü_char ) ] as [string,string];
-    });
-    testFunction( escapeFF(), ü_data );
-}
+export async function tst_encodeURIC(){ testFunction( encodeURIComponent , createOrderedPairs( 129, String.fromCharCode.bind( String ), encodeURI           ) ); }
+export async function tst_encodeURI (){ testFunction( encodeURI          , createOrderedPairs( 129, String.fromCharCode.bind( String ), escape              ) ); }
+export async function tst_js_escape (){ testFunction( escapeFF()         , createOrderedPairs( 256, String.fromCharCode.bind( String ), escape              ) ); }
+export async function tst_js_format (){ testFunction( format             , createOrderedPairs( 256, String.fromCharCode.bind( String ), identityMap<string> ) ); }
 
 //====================================================================
 

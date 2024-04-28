@@ -4,6 +4,8 @@
          , TAsyncFunctionWithoutArg
          , TAnyFunctionSingleArg
          , TAsyncFunctionSingleArg
+         , type TOrderedPairs
+         , type TOrderedPairsRO
          } from '../types/generic.d';
   import { type TTestResult
          , type TAsyncTestFunction
@@ -13,8 +15,7 @@
          , type TTDDSuite
          , type TTDDTest
          } from '../types/lib.testUtil.d';
-  import { type TOrderedPairArray
-         , type TOrderedPairRArray
+  import {
          } from '../types/lib.arrayUtil.d';
   import { CRgXp
          } from '../constants/text';
@@ -29,7 +30,7 @@
   import { shortenText
          , escapeFF
          } from './textUtil';
-  import { toOrderedPairArray
+  import { toOrderedPair
          } from './arrayUtil';
   import { forEach
          } from './objectUtil';
@@ -48,13 +49,13 @@
                          && typeof( test  ) !== 'undefined';
   export const CTestDirName = join( __dirname, '../../.vscode-temp' );
 //--------------------------------------------------------------------
-  const ß_escape = escapeFF( CRgXp.specialChars );
+//const ß_escape = escapeFF( CRgXp.specialChars );
   const CSeriesOfTests = [] as TTestResult[];
-  //process.stdout.write.bind( process.stdout );
-
 //====================================================================
+
 function ß_echo( ü_oref:any, ü_length:number ):string {
-    return shortenText( ß_escape( ß_stringify( ü_oref ) ), ü_length );//.replace( /[\n\r\t]/g, escape );
+    const ü_json = JSON.stringify( ß_stringify( ü_oref ) );
+    return shortenText( ü_json.slice( 1, ü_json.length-1 ), ü_length );
 }
 
 export function testSrc( ...ü_segs:string[] ):string {
@@ -190,12 +191,12 @@ export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:un
   type TExpectErrorAll<Tx,Ty> = ( x:Tx, reason:any, mix:[Tx,Ty]|Ty )=>Ty
 
 export function testFunction<Tx,Ty>(   fref:TAnyFunctionSingleArg<Ty,Tx>,   expData:Map<Tx,Ty>                          ,   expectError?:TExpectErrorMap<Tx,Ty> ):boolean
-export function testFunction<Tx,Ty>(   fref:TAnyFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairRArray<Tx,Ty>,   expectError?:TExpectErrorArr<Tx,Ty> ):boolean
-export function testFunction<Tx,Ty>( ö_fref:TAnyFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairRArray<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):boolean {
+export function testFunction<Tx,Ty>(   fref:TAnyFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairsRO<Tx,Ty>,   expectError?:TExpectErrorArr<Tx,Ty> ):boolean
+export function testFunction<Tx,Ty>( ö_fref:TAnyFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairsRO<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):boolean {
   //
      let ö_isMap = false;
     if ( ö_expData instanceof Map )
-       { ö_expData = toOrderedPairArray( ö_expData );
+       { ö_expData = toOrderedPair( ö_expData );
          ö_isMap = true; }
   //
     const ö_name = ö_fref.name;
@@ -228,12 +229,12 @@ export function testFunction<Tx,Ty>( ö_fref:TAnyFunctionSingleArg<Ty,Tx>, ö_ex
 //====================================================================
 
 export async function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:Map<Tx,Ty>                         , ö_expectError?:TExpectErrorMap<Tx,Ty> ):Promise<boolean>
-export async function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairArray<Tx,Ty>, ö_expectError?:TExpectErrorArr<Tx,Ty> ):Promise<boolean>
-export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairArray<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):Promise<boolean> {
+export async function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairs<Tx,Ty>, ö_expectError?:TExpectErrorArr<Tx,Ty> ):Promise<boolean>
+export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairs<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):Promise<boolean> {
   //
      let ö_isMap = false;
     if ( ö_expData instanceof Map )
-       { ö_expData = toOrderedPairArray( ö_expData );
+       { ö_expData = toOrderedPair( ö_expData );
          ö_isMap = true; }
   //
     const ü_all_whenY = ö_expData.map(function( ü_x_y ){
