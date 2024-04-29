@@ -237,16 +237,28 @@ export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSin
        { ö_expData = toOrderedPair( ö_expData );
          ö_isMap = true; }
   //
-    const ü_all_whenY = ö_expData.map(function( ü_x_y ){
-        try {
-            return Promise.resolve( ü_x_y[0] ).then(  ö_aFref );
-          //return ö_aFref( ü_x_y[0] );
-        } catch ( ü_eX ) {
-            return Promise.reject( ü_eX );
-        }
+      let ö_whenDone = Promise.resolve() as any as PromiseLike<Ty>;
+    const ü_all_whenY = ö_expData.map(function( ü_x_y, ö_indx ){
+        return ö_whenDone = ö_whenDone.then(function(){  return ö_aFref( ü_x_y[0] );  }
+                                           ,function(){  return ö_aFref( ü_x_y[0] );  }
+                                         //, ö_indx < ö_last ? function( ü_reason ){ ü_failed[ ö_indx -1 ] = ü_reason; }
+                                         //                  : undefined
+                                           );
     });
+/*
+    const ü_failed = {} as Record<number,any>;
+    const ö_last = ö_expData.length -1;
+    //let ö_all_Y:PromiseSettledResult<Awaited<Ty>>[] = [];
+            try {
+                return Promise.resolve( ü_x_y[0] ).then(  ö_aFref );
+              //return ö_aFref( ü_x_y[0] );
+            } catch ( ü_eX ) {
+                return Promise.reject( ü_eX );
+            }
+    forEach( ü_failed, function( ü_reason, ü_mKey ){ ö_all_Y[ ü_mKey] = { status:'rejected' , reason:  ü_reason }; });
+*/
   //
-    const ö_all_Y = await Promise.allSettled( ü_all_whenY );
+     const ö_all_Y = await Promise.allSettled( ü_all_whenY );
   //
     const ö_name = ö_aFref.name;
     let ö_overall = true;

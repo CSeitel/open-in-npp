@@ -1,7 +1,7 @@
 /*
 */
-  import { type TOrderedPair
-         } from '../../../types/lib.arrayUtil.d';
+  import { type TOrderedPairs
+         } from '../../../types/generic.d';
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------
   import { expect
@@ -97,7 +97,7 @@ export async function tst_isExe(){
       , [ '.'       , false ]
       , [ '..'      , false ]
       , [ '../..'   , false ]
-      ] as TOrderedPair<string,boolean>;
+      ] as TOrderedPairs<string,boolean>;
   //
     await whenAsyncFunctionTested( isWin32Executable, ü_data )
     testSummary_();
@@ -109,7 +109,7 @@ export async function tst_win32Exe(){
       [ [ testSrc( 'cmd.cmd' ), true ]
       , [ testSrc( 'bat.bat' ), true ]
       , [ testSrc( 'lnk.lnk' ), true ]
-      ] as TOrderedPair<string,boolean>;
+      ] as TOrderedPairs<string,boolean>;
     
     await whenAsyncFunctionTested( isWin32Executable, ü_data );
     await whenAsyncFunctionTested( ö_whenSpwaned    , ü_data );

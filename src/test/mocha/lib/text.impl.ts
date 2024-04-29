@@ -80,18 +80,11 @@ export async function tst_win32Names(){
     const ü_count = 64//256;
     const ö_stub = await whenTempFile( 'qqqqqq' );
                                                                                 let ö_file =  ö_stub +          '.txt';
-    const ü_data = createOrderedPairs( ü_count, String.fromCharCode.bind( String ), ü_char => ö_stub + ü_char + '.txt' ).slice( 0x21 );
+    const ö_data = createOrderedPairs( ü_count, String.fromCharCode.bind( String ), ü_char => ö_stub + ü_char + '.txt' ).slice( 0x20 );
                    await whenFileWritten( ö_file, '' );
-  //ß_trc&& ß_trc( ''+ö_file, 'Temp-File' );
   //
-    await whenAsyncFunctionTested( ö_whenRenamed, ü_data );
-  /*
-    let ü_indx = 0x21;
-    do {
-        const ü_char = String.fromCharCode( ü_indx );
-        try {
-            ö_file = await ö_whenRenamed( ö_file, ü_char );
-        } catch ( error ) {
+    await whenAsyncFunctionTested( ö_whenRenamed, ö_data, function(ü_char,ü_eX,x_y){
+      //ß_trc&& ß_trc( ü_char+' '+ü_eX.message, 'Temp-File' );
             switch ( ü_char ) {
                 case '"': //\x22
                 case '*': //\x2a
@@ -102,23 +95,15 @@ export async function tst_win32Names(){
                 case '?': //\x3f
                 case '\\'://\x5c
                 case '|': //\x7c
-                  testEqual( ü_char, ü_char, ü_indx.toString(16) );
-                  break;
-                default:
-                  testEqual( ü_indx.toString(16), ü_char );
+                  return x_y[1];
             }
-            continue;
-        }
-        
-        testEqual( true, await whenKnownAsFile( ö_file ), ö_file );
-      //break;
-    } while ( ü_indx ++ < 0x100 );
-  */
+        return '';
+    });
   //
 async function ö_whenRenamed( ü_char:string ):Promise<string> {
-                             const ü_file = ü_data.find( ü_row => ü_row[0] === ü_char )!;
-    ß_trc&& ß_trc( ''+ö_file, 'Temp-File' );
-    await whenItemRenamed( ö_file, ü_file[1] );
+                             const ü_file = ö_data.find( ü_row => ü_row[0] === ü_char );
+    if ( ü_file === undefined ) { throw new TypeError( ü_char ); }
+        await whenItemRenamed( ö_file, ü_file[1] );
                     return ö_file= ü_file[1]  ;
 }
 }

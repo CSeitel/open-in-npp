@@ -1,7 +1,7 @@
 /*
 */
-  import { type TOrderedPair
-         } from '../../../types/lib.arrayUtil.d';
+  import { type TOrderedPairs
+         } from '../../../types/generic.d';
   import { CEFileType
          } from '../../../constants/vsc';
 //--------------------------------------------------------------------
@@ -110,7 +110,7 @@ export async function tst_whenWS(){
         [ __filename, true ]
       , [ testSrc( '../etc/test/workspaceFolder/temp' ), true ]
       , [ testSrc( 'virtual_6_d' ), false ]
-      ] as TOrderedPair<string,boolean>;
+      ] as TOrderedPairs<string,boolean>;
     testFunction( bindArguments( isContainedInWorkspace, { prepare: {0:fileToUri} } ), ü_data )
     testSummary_();
 }
