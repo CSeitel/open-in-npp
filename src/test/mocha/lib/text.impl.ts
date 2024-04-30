@@ -4,6 +4,8 @@
          } from '../../../types/generic.d';
   import { type TCreateOrderedPair
          } from '../../../types/lib.arrayUtil.d';
+  import { CCharSet
+         } from '../../../constants/text';
 //--------------------------------------------------------------------
   import { format
          } from 'util';
@@ -17,8 +19,8 @@
   import { createArray
          , createOrderedPairs
          } from '../../../lib/arrayUtil';
-  import { whenPromiseSettled
-         } from '../../../lib/asyncUtil';
+  import { expectErrorCode
+         } from '../../../lib/errorUtil';
   import { bindArguments
          , identityMap
          } from '../../../lib/functionUtil';
@@ -28,14 +30,14 @@
          , whenItemRenamed
          } from '../../../lib/fsUtil';
   import { testSrc
-         , testSummary_
-         , whenAsyncFunctionTested
-         , testFunction
          , testEqual
+         , testFunction
+         , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
 
 export async function tst_dispatch(){
+  //return tst_encodeURIC();
     return tst_win32Names();
     await  tst_js_escape();
 }
@@ -83,28 +85,19 @@ export async function tst_win32Names(){
     const ö_data = createOrderedPairs( ü_count, String.fromCharCode.bind( String ), ü_char => ö_stub + ü_char + '.txt' ).slice( 0x20 );
                    await whenFileWritten( ö_file, '' );
   //
-    await whenAsyncFunctionTested( ö_whenRenamed, ö_data, function(ü_char,ü_eX,x_y){
+    await whenAsyncFunctionTested( ö_whenRenamed, ö_data, function( ü_char, ü_eX, x_y ){
+        expectErrorCode( ü_eX, 'ENOENT' );
+        return CCharSet.fs_win32.includes( ü_char.charCodeAt(0) )
+             ? x_y[1]
+             : '';
       //ß_trc&& ß_trc( ü_char+' '+ü_eX.message, 'Temp-File' );
-            switch ( ü_char ) {
-                case '"': //\x22
-                case '*': //\x2a
-                case '/': //\x2f
-                case ':': //\x3a
-                case '<': //\x3c
-                case '>': //\x3e
-                case '?': //\x3f
-                case '\\'://\x5c
-                case '|': //\x7c
-                  return x_y[1];
-            }
-        return '';
     });
   //
 async function ö_whenRenamed( ü_char:string ):Promise<string> {
-                             const ü_file = ö_data.find( ü_row => ü_row[0] === ü_char );
+                                 const ü_file = ö_data.find( ü_row => ü_row[0] === ü_char );
     if ( ü_file === undefined ) { throw new TypeError( ü_char ); }
         await whenItemRenamed( ö_file, ü_file[1] );
-                    return ö_file= ü_file[1]  ;
+                        return ö_file= ü_file[1]  ;
 }
 }
 

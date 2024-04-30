@@ -19,7 +19,7 @@
          , workspace
          , RelativePattern
          } from 'vscode';
-  import { expect
+  import { expectErrorCode
          } from '../lib/errorUtil';
 //--------------------------------------------------------------------
   export const CVscFs = workspace.fs;
@@ -68,7 +68,7 @@ export async function whenFileInfoRead( ü_fileUri:TFileUri ):Promise<FileStat|n
     try {
         return await CVscFs.stat(  fileToUri( ü_fileUri ) );
     } catch ( ü_eX ) {
-        return expect<TVscFSErrorCodes|TNodeFSErrorCodes,null>( ü_eX, 'FileNotFound', null ); // ['ELOOP','ENOENT'] realpath
+        return expectErrorCode<TVscFSErrorCodes|TNodeFSErrorCodes,null>( ü_eX, 'FileNotFound', null ); // ['ELOOP','ENOENT'] realpath
     }
 }
 

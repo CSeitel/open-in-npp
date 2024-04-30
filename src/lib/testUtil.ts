@@ -1,9 +1,7 @@
 /*
 */
-  import { TAnyFunctionWithoutArg
-         , TAsyncFunctionWithoutArg
-         , TAnyFunctionSingleArg
-         , TAsyncFunctionSingleArg
+  import { type TAnyFunctionSingleArg
+         , type TAsyncFunctionSingleArg
          , type TOrderedPairs
          , type TOrderedPairsRO
          } from '../types/generic.d';
@@ -11,14 +9,7 @@
          , type TAsyncTestFunction
          , type TTestSuites
          , type TTestSuiteDefinition
-         , type TTestSuite
-         , type TTDDSuite
-         , type TTDDTest
          } from '../types/lib.testUtil.d';
-  import {
-         } from '../types/lib.arrayUtil.d';
-  import { CRgXp
-         } from '../constants/text';
 //--------------------------------------------------------------------
   import { join
          } from 'path';
@@ -27,13 +18,12 @@
          , ß_writeStdOut
          , ß_stringify
          } from '../runtime/context';
-  import { shortenText
-         , escapeFF
-         } from './textUtil';
   import { toOrderedPair
          } from './arrayUtil';
   import { forEach
          } from './objectUtil';
+  import { shortenText
+         } from './textUtil';
 //--------------------------------------------------------------------
   export const successSymbol = String.fromCharCode( 0x2705 ); // 0x221a
   export const failureSymbol = String.fromCharCode( 0x274c );
@@ -76,7 +66,7 @@ function ö_expandTests():void {
 function ä_expandTest( ü_testImpl:TAsyncTestFunction, ü_testName:string|number ):void {
     if ( typeof( ü_testName ) === 'number' ) { ü_testName = ü_testImpl.name; }
     test( ü_testName
-        , function(){ return ü_testImpl().then(  testSummary.bind( null, ü_testName as string )  ); }
+        , function(){  return ü_testImpl().then(  testSummary.bind( null, ü_testName as string )  );  }
         );
 }
 }
@@ -84,25 +74,26 @@ function ä_expandTest( ü_testImpl:TAsyncTestFunction, ü_testName:string|numbe
 
 //====================================================================
 
-export async function whenAllTestsRun( ü_suites:TTestSuites ):Promise<void> {
+export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<void> {
   //
     if ( CWithMocha ) {
         ü_suites.forEach( expandTestSuite );
-        return;
+        return Promise.resolve();
     }
   //
     let ö_whenDone = Promise.resolve( 0 );
     ü_suites.forEach(function( ü_suite ){
         if ( ü_suite[2] ) { return; }
-        ö_whenDone = ö_whenDone.then(function( ü_rc ){
-            return ß_whenTestSuite( ü_rc, ü_suite[0], ü_suite[1] );
+        ö_whenDone = ö_whenDone.then(function( ü_errCount ){
+            return ß_whenTestSuite( ü_errCount, ü_suite[0], ü_suite[1] );
         });
     });
   //
-    const ü_rc = await ö_whenDone;
-    ß_writeStdOut( ü_rc > 0 ? `Overall result: ${ ü_rc } tests have failed`
-                            : 'Overall result: All tests have been passed successfully' );
-    process.exit( ü_rc );
+    return ö_whenDone.then(function( ü_errCount ){
+        ß_writeStdOut( ü_errCount > 0 ? `Overall result: ${ ü_errCount } tests have failed.`
+                                      : 'Overall result: All tests have been passed successfully.' );
+        process.exit( ü_errCount );
+    });
 }
 
 function ß_whenTestSuite( ü_rc:number, ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):PromiseLike<number> {
@@ -190,7 +181,7 @@ export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:un
   type TExpectErrorMap<Tx,Ty> = ( x:Tx, reason:any,   y:        Ty )=>Ty
   type TExpectErrorAll<Tx,Ty> = ( x:Tx, reason:any, mix:[Tx,Ty]|Ty )=>Ty
 
-export function testFunction<Tx,Ty>(   fref:TAnyFunctionSingleArg<Ty,Tx>,   expData:Map<Tx,Ty>                          ,   expectError?:TExpectErrorMap<Tx,Ty> ):boolean
+export function testFunction<Tx,Ty>(   fref:TAnyFunctionSingleArg<Ty,Tx>,   expData:Map<Tx,Ty>                       ,   expectError?:TExpectErrorMap<Tx,Ty> ):boolean
 export function testFunction<Tx,Ty>(   fref:TAnyFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairsRO<Tx,Ty>,   expectError?:TExpectErrorArr<Tx,Ty> ):boolean
 export function testFunction<Tx,Ty>( ö_fref:TAnyFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairsRO<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):boolean {
   //
@@ -228,23 +219,43 @@ export function testFunction<Tx,Ty>( ö_fref:TAnyFunctionSingleArg<Ty,Tx>, ö_ex
 
 //====================================================================
 
-export async function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:Map<Tx,Ty>                         , ö_expectError?:TExpectErrorMap<Tx,Ty> ):Promise<boolean>
-export async function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairs<Tx,Ty>, ö_expectError?:TExpectErrorArr<Tx,Ty> ):Promise<boolean>
-export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairs<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):Promise<boolean> {
+export function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:Map<Tx,Ty>                     , ö_expectError?:TExpectErrorMap<Tx,Ty> ):PromiseLike<boolean>
+export function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairs<Tx,Ty>, ö_expectError?:TExpectErrorArr<Tx,Ty> ):PromiseLike<boolean>
+export function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairs<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):PromiseLike<boolean> {
+    const ö_name = ö_aFref.name;
+      let ö_overall = 0;
   //
      let ö_isMap = false;
     if ( ö_expData instanceof Map )
        { ö_expData = toOrderedPair( ö_expData );
          ö_isMap = true; }
   //
-      let ö_whenDone = Promise.resolve() as any as PromiseLike<Ty>;
-    const ü_all_whenY = ö_expData.map(function( ü_x_y, ö_indx ){
-        return ö_whenDone = ö_whenDone.then(function(){  return ö_aFref( ü_x_y[0] );  }
-                                           ,function(){  return ö_aFref( ü_x_y[0] );  }
-                                         //, ö_indx < ö_last ? function( ü_reason ){ ü_failed[ ö_indx -1 ] = ü_reason; }
-                                         //                  : undefined
-                                           );
+      let ö_whenDone = Promise.resolve();
+    const ü_all_whenY = ö_expData.map(function( ä_x_y, ä_indx ){
+        const ä_count = `${ ö_name }-${ ä_indx }(${ ß_echo( ä_x_y[0], 50 ) })`;
+        const ä_x     = ä_x_y[0];
+        const ä_exp_y = ä_x_y[1];
+           let ü_whenDone = ö_whenDone.then( function(){  return ö_aFref( ä_x );  });
+        if ( typeof( ö_expectError ) === 'function' )
+             { ü_whenDone = ü_whenDone.then( undefined  , ä_expectError ); }
+        return ö_whenDone = ü_whenDone.then( ä_fulfilled, ä_rejected    );
+  //
+function ä_expectError( ü_reason:any ):Ty {
+    return ö_isMap ? ö_expectError!( ä_x, ü_reason, ä_exp_y )
+                   : ö_expectError!( ä_x, ü_reason, ä_x_y   )
+                   ;
+}
+function ä_fulfilled( ü_act_Y:Ty ):void {
+    testEqual( ü_act_Y, ä_exp_y, ä_count )||( ö_overall ++ );
+}
+function ä_rejected( ü_reason:any ):void {
+    ö_overall ++ ;
+    testFailed( ü_reason, ä_count );
+}
     });
+    return ö_whenDone.then( ()=> ö_overall === 0 );
+}
+
 /*
     const ü_failed = {} as Record<number,any>;
     const ö_last = ö_expData.length -1;
@@ -256,12 +267,9 @@ export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSin
                 return Promise.reject( ü_eX );
             }
     forEach( ü_failed, function( ü_reason, ü_mKey ){ ö_all_Y[ ü_mKey] = { status:'rejected' , reason:  ü_reason }; });
-*/
   //
      const ö_all_Y = await Promise.allSettled( ü_all_whenY );
   //
-    const ö_name = ö_aFref.name;
-    let ö_overall = true;
     ö_expData.forEach(function( ü_x_y, ü_indx ){
         const ü_count = `${ ö_name }-${ ü_indx }(${ ß_echo( ü_x_y[0], 50 ) })`;
         const ü_exp_y = ü_x_y[1];
@@ -288,7 +296,7 @@ export async function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSin
     });
   //
     return ö_overall;
-}
+*/
 
 //====================================================================
 /*

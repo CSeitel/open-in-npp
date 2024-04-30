@@ -9,7 +9,7 @@
          } from '../../../runtime/context';
   import { threadShowError
          } from '../../../vsc/uiUtil';
-  import { expect
+  import { expectErrorCode
          } from '../../../lib/errorUtil';
   import { whenShownInWindowsExplorer
          , whenChildProcessSpawned

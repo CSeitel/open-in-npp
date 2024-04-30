@@ -17,7 +17,7 @@
 //--------------------------------------------------------------------
   import { pickDuplet
          } from '../../../lib/arrayUtil';
-  import { expect
+  import { expectErrorCode
          } from '../../../lib/errorUtil';
   import { bindArguments
          } from '../../../lib/functionUtil';
@@ -95,7 +95,7 @@ export async function tst_whenFileTypeKnown(){
     await whenAsyncFunctionTested( whenKnownAsFolder, ü_02, ö_err );
     testSummary_();
 function ö_err( ü_x:string, ü_eX:any ):-9      {
-    return ü_x.endsWith( 'virtual_3_d' ) && expect( ü_eX, 'Unknown', true )
+    return ü_x.endsWith( 'virtual_3_d' ) && expectErrorCode( ü_eX, 'Unknown', true )
          ? -6 as -9
          : -5 as -9
          ;

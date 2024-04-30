@@ -19,7 +19,7 @@ https://nodejs.org/api/fs.html#fslstatpath-options-callback
   import { promises  as ß_fs_p
          , constants as ß_fs_c
          } from 'fs';
-  import { expect
+  import { expectErrorCode
          } from '../lib/errorUtil';
 //--------------------------------------------------------------------
   export const whenFileRead    = ß_fs_p.readFile  ;
@@ -33,7 +33,7 @@ export async function whenFileInfoRead( ü_path:PathLike, ü_slnk = false ):Prom
         return await ß_fs_p[ ü_slnk ? 'lstat'
                                     :  'stat' ]( ü_path );
     } catch ( ü_eX ) {
-        return expect<TNodeFSErrorCodes,null>( ü_eX, 'ENOENT', null );
+        return expectErrorCode<TNodeFSErrorCodes,null>( ü_eX, 'ENOENT', null );
     }
 }
 

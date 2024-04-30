@@ -16,9 +16,9 @@
   whenAllTestsRun([
       [ 'Single', [ 
                   //ß_error
-                  //ß_fs
+                    ß_fs
                   //ß_test
-                    ß_text
+                  //ß_text
                            .tst_dispatch
               //, ß_test   .tst_dispatch
                         ], !ß_skipTests ]
