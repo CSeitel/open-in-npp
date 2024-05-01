@@ -28,8 +28,8 @@
   import { shortenText
          , expandEnvVariables
          } from '../lib/textUtil';
-  import { isWin32Executable
-         , isWin32ExecutableExtName
+  import { isWin32ShellExecutable
+         , hasWin32ShellExecutableExtension
          , whenKnownAsFolder as fsWhenKnownAsFolder
          } from '../lib/fsUtil';
   import { ErrorWithUixMessage
@@ -58,9 +58,9 @@ export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string )
   //
     const ü_path = normalize( expandEnvVariables( ü_cfgPath ) );
     if ( isAbsolute( ü_path ) ) {
-        if ( ! await isWin32Executable ( ü_path ) ) { throw new ErrorWithUixMessage( LCConfig.noExeFile, ü_path ); }
+        if ( ! await isWin32ShellExecutable ( ü_path ) ) { throw new ErrorWithUixMessage( LCConfig.noExeFile, ü_path ); }
     } else {
-        if ( ! isWin32ExecutableExtName( ü_path ) ) { throw new ErrorWithUixMessage( LCConfig.noExeFile, ü_path ); }
+        if ( ! hasWin32ShellExecutableExtension( ü_path ) ) { throw new ErrorWithUixMessage( LCConfig.noExeFile, ü_path ); }
         ß_trc&& ß_trc( `Not a absolute Path: "${ ü_path }"`, 'Executable' );
     }
     return ü_path;
@@ -90,12 +90,12 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
         } finally { ü_release(); }
     } else {
                                        let ü_path:string
-             if ( await isWin32Executable( ü_path = expandEnvVariables( CEExecutable.x64_64bit  ) ) ) {}
-        else if ( await isWin32Executable( ü_path = expandEnvVariables( CEExecutable.x86_32bit  ) ) ) {}
-        else if ( await isWin32Executable( ü_path =                     CEExecutable.x64_64bit_   ) ) {}
-        else if ( await isWin32Executable( ü_path =                     CEExecutable.x86_32bit    ) ) {}
-        else                             { ü_path =                     CEExecutable.path_env         ;}
-                                    return ü_path ;
+             if ( await isWin32ShellExecutable( ü_path = expandEnvVariables( CEExecutable.x64_64bit  ) ) ) {}
+        else if ( await isWin32ShellExecutable( ü_path = expandEnvVariables( CEExecutable.x86_32bit  ) ) ) {}
+        else if ( await isWin32ShellExecutable( ü_path =                     CEExecutable.x64_64bit_   ) ) {}
+        else if ( await isWin32ShellExecutable( ü_path =                     CEExecutable.x86_32bit    ) ) {}
+        else                                  { ü_path =                     CEExecutable.path_env         ;}
+                                         return ü_path ;
     }
 }
 

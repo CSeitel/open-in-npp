@@ -74,11 +74,11 @@ function ä_expandTest( ü_testImpl:TAsyncTestFunction, ü_testName:string|numbe
 
 //====================================================================
 
-export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<void> {
+export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<number> {
   //
     if ( CWithMocha ) {
         ü_suites.forEach( expandTestSuite );
-        return Promise.resolve();
+        return Promise.resolve( -1 );
     }
   //
     let ö_whenDone = Promise.resolve( 0 );
@@ -92,7 +92,9 @@ export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<void> {
     return ö_whenDone.then(function( ü_errCount ){
         ß_writeStdOut( ü_errCount > 0 ? `Overall result: ${ ü_errCount } tests have failed.`
                                       : 'Overall result: All tests have been passed successfully.' );
+        process.exitCode = ü_errCount;
         process.exit( ü_errCount );
+        return ü_errCount;
     });
 }
 

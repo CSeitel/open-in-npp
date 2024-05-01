@@ -7,6 +7,8 @@ https://nodejs.org/api/fs.html#fslstatpath-options-callback
   import { type TFSError
          , type TNodeFSErrorCodes
          } from '../types/lib.errorUtil.d';
+  import { CWin32ShellExecutableExtensions
+         } from '../constants/fs';
 //--------------------------------------------------------------------
   import { tmpdir
          } from 'os';
@@ -52,23 +54,22 @@ export function isExecutable( ü_mode:number ):boolean {
                       ;
 }
 
-  const ß_exe_exts = ['.exe','.cmd','.bat','.lnk'];
-export function isWin32ExecutableExtName( ü_path:string ):boolean {
+export function hasWin32ShellExecutableExtension( ü_path:string ):boolean {
     const ü_ext = extname( ü_path ).toLowerCase();
-    return ß_exe_exts.includes( ü_ext );
+    return CWin32ShellExecutableExtensions.includes( ü_ext );
 }
 
 //====================================================================
 
-export async function isWin32Executable( ü_path:string, ü_enforceAbsolute = false ):Promise<boolean> {
+export async function isWin32ShellExecutable( ü_path:string, ü_enforceAbsolute = false ):Promise<boolean> {
   //
     if ( ü_enforceAbsolute
       && ! isAbsolute( ü_path ) ) { return false; }
   //
     const ü_info = await whenFileInfoRead( ü_path );
     if ( ü_info !== null
-      && ü_info.isFile() ) { return isWin32ExecutableExtName( ü_path ); }
-    else                   { return false                             ; }
+      && ü_info.isFile() ) { return hasWin32ShellExecutableExtension( ü_path ); }
+    else                   { return false                                ; }
 }
 
 //====================================================================

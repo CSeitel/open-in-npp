@@ -15,7 +15,7 @@
          , whenFilesFound
          } from '../../../vsc/fsUtil';
 //--------------------------------------------------------------------
-  import { pickDuplet
+  import { pickPair
          } from '../../../lib/arrayUtil';
   import { expectErrorCode
          } from '../../../lib/errorUtil';
@@ -88,8 +88,8 @@ export async function tst_whenFileTypeKnown(){
       , [ testSrc( 'virtual_3_d' ), -9                        , true  ]
       , [ testSrc( 'virtual_6_d' ), CEFileType.SymLinkUnknown , false ]
       ];
-    const ü_01 = ü_data.map( pickDuplet<string,CEFileType|-9  ,boolean   |-9  >( 0, 1 ) );
-    const ü_02 = ü_data.map( pickDuplet<string,boolean   |-9  ,CEFileType|-9  >( 0, 2 ) );
+    const ü_01 = ü_data.map( pickPair<string,CEFileType|-9  ,boolean   |-9  >( 0, 1 ) );
+    const ü_02 = ü_data.map( pickPair<string,boolean   |-9  ,CEFileType|-9  >( 0, 2 ) );
     
     await whenAsyncFunctionTested( whenFileTypeKnown, ü_01, ö_err );
     await whenAsyncFunctionTested( whenKnownAsFolder, ü_02, ö_err );

@@ -63,14 +63,14 @@ export function straightenArray<T>( ü_mixed: (T|readonly T[])[] ):T[] {
 
 //====================================================================
 
-export function projection<U,V>(   row:(U|V)[],  colX1:number, colX2:number ):[U,V]
-export function projection<T>  (   row:T[], ...  colXs:number[] ):T[]
-export function projection<T>  ( ü_row:T[], ...ü_colXs:number[] ):T[] {
+export function pickSubset<U,V>(   row:(U|V)[],  colX1:number, colX2:number ):[U,V]
+export function pickSubset<T>  (   row:T[], ...  colXs:number[] ):T[]
+export function pickSubset<T>  ( ü_row:T[], ...ü_colXs:number[] ):T[] {
     return ü_colXs.map( ü_colX => ü_row[ ü_colX ] );
 }
 
 //type 
-export function pickDuplet<U,V,W=any>( ü_indx:number, ü_jndx:number ):((row:(U|V|W)[])=>[U,V]) {
+export function pickPair<U,V,W=any>( ü_indx:number, ü_jndx:number ):((row:(U|V|W)[])=>[U,V]) {
   //const ü_01 = ü_data.map( ü_row => projection<string,boolean|null>( ü_row, 0, 1 ) );
     return function( ü_row:(U|V|W)[] ):[U,V] {
         return [ ü_row[ ü_indx ] as U
