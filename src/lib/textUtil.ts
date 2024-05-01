@@ -72,15 +72,8 @@ export function expandTemplateString( ü_tmpl:string, ... ü_vars:(string|Array<
 
 //====================================================================
 
-export function wrapDoubleQuotes(      arg0:string   ):         string
-export function wrapDoubleQuotes( ...  args:string[] ):string[]
-export function wrapDoubleQuotes( ...ö_args:string[] ):string[]|string {
-    ö_args.forEach(function( ü_arg, ü_indx ){
-           ö_args[ ü_indx ] = `"${ ü_arg }"`;
-    });
-    return ö_args.length === 1 ? ö_args[0]
-                               : ö_args
-                               ;
+export function wrapDoubleQuotes( ü_arg0:string ):string {
+    return `"${ ü_arg0 }"`;
 }
 
 //====================================================================

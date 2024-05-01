@@ -23,7 +23,7 @@
     };
 //====================================================================
 
-export async function whenChildProcessSpawned( ü_exe:string, ü_args:readonly string[], ü_opts?:SpawnOptions ):Promise<TChildProcess> {
+export function whenChildProcessSpawned( ü_exe:string, ü_args:readonly string[], ü_opts?:SpawnOptions ):Promise<TChildProcess> {
     const ö_prms = createPromise<TChildProcess>();
   //
     const ö_cp = spawn( ü_exe, ü_args, ü_opts ?? {} );

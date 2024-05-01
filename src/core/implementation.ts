@@ -343,8 +343,8 @@ private _arguments( ü_verbatim:boolean ):string[] {
   //
                                               ü_args.push( ... this._config.commandLineArguments );
   //
-    const ü_items = ü_verbatim ? wrapDoubleQuotes( ... ü_others.map( uriToFile ) )
-                               :                       ü_others.map( uriToFile )
+    const ü_items = ü_verbatim ? ü_others.map( uriToFile ).map( wrapDoubleQuotes )
+                               : ü_others.map( uriToFile )
                                ;
                                               ü_args.push( ... ü_items );
   //
@@ -403,7 +403,7 @@ private async _cwd():Promise<string> {
     const ü_whenCwd = await whenPromiseSettled( this._config.whenWorkingDir );
     if ( ü_whenCwd.rejected ) {
         if ( ü_whenCwd.reason instanceof ErrorWithUixMessage ) { window.showWarningMessage( ü_whenCwd.reason.text ); }
-        else                                            {                      throw ü_whenCwd.reason       ; }
+        else                                                   {                      throw ü_whenCwd.reason       ; }
     } else { ü_cwd = ü_whenCwd.value; }
   //
     if ( ü_cwd.length > 0 ) {

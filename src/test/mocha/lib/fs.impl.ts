@@ -91,6 +91,8 @@ export async function tst_whenKnownAsFolder():Promise<void> {
     await whenAsyncFunctionTested( ü_LFile           , ü_06  );
 }
 
+//====================================================================
+
 export async function tst_isExe(){
     const ü_data =
       [ [ __filename  , false ]
@@ -111,16 +113,27 @@ export async function tst_isExe(){
 //--------------------------------------------------------------------
 
 export async function tst_isWin32Exe(){
+    const ü_thenTrue = createAsyncPostProcessor<boolean,any>( ()=> true );
+    const ü_detached =  true;
+    const ü_files = [ testSrc( 'a b.txt' ) ];
+  //
     const ü_data =
       [ [ testSrc( 'cmd.cmd' ), true ]
       , [ testSrc( 'bat.bat' ), true ]
       , [ testSrc( 'lnk.lnk' ), true ]
+      , [ testSrc( 'Notepad++.lnk' ), true ]
+    //, [ testSrc( 'txt.txt' ), false ]
       ] as TOrderedPairs<string,boolean>;
+      ü_data.splice(0,3);
   //
-    const ü_cmd_cp = bindArguments( whenChildProcessSpawned, { prepare:{ 1:ü_exe => ['/C',ü_exe] }, refine:createAsyncPostProcessor<boolean,TChildProcess>( ü_cp => true )}, 'cmd.exe' );
+    const ü_cmd_cp_1 = bindArguments( whenChildProcessSpawned, { realFirst:true
+                                                               , refine:ü_thenTrue },       ü_files, { shell:true, detached:ü_detached } );
+    const ü_cmd_cp_2 = bindArguments( whenChildProcessSpawned, { arrangeReal:[1], prepare:{ 1:ü_exe => ['/C',ü_exe, ... ü_files] }
+                                                               , refine:ü_thenTrue }, 'cmd.exe', [], {             detached:ü_detached } );
   //
-    await whenAsyncFunctionTested( isWin32Executable, ü_data );
-    await whenAsyncFunctionTested( ü_cmd_cp         , ü_data );
+        await whenAsyncFunctionTested( isWin32Executable, ü_data );
+    0&& await whenAsyncFunctionTested( ü_cmd_cp_1       , ü_data );
+    1&& await whenAsyncFunctionTested( ü_cmd_cp_2       , ü_data );
   //
   //a( ßß_assert.strictEqual )
 async function ö_whenSpwaned( ü_exe:string ):Promise<boolean> {

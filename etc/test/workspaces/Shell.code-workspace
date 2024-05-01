@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "../workspaceFolder"
+    }
+  ],
+  "settings": {
+    "openInNpp.Executable": "C:/zzz_Dev/node_modules/open-in-npp/.vscode-temp/Notepad++.lnk"
+  , "openInNpp.spawnOptions": {
+      "shell": true,
+      "windowsVerbatimArguments": true
+    }
+  }
+}
