@@ -1,4 +1,5 @@
 /*
+https://nodejs.org/api/child_process.html#child_processspawncommand-args-options
 */
   import { type SpawnOptions
          , type ChildProcess

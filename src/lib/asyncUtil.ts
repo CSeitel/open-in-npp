@@ -46,23 +46,26 @@ function ö_later():void {
 export async function whenPromiseSettled<T,R=any>( ü_whenDone:PromiseLike<T> ):Promise<TPromiseSettled<T,R>> {
      const ü_done = ( await Promise.allSettled([ ü_whenDone ]) )[0] as TPromiseSettled<T,R>;
            ü_done.rejected = ü_done.status === 'rejected';
+           ü_done.status === 'rejected' && ü_done.reason
     return ü_done;
 }
 
-export function createAsyncPostProcessor<Tz,Ty>( ö_y_to_z:TAnyFunctionSingleArg<Tz,Ty> ):TAsyncFunction<Tz> {
+export function createAsyncPostProcessor<Tz,Ty>( ö_y_to_z  :TAnyFunctionSingleArg<Tz,Ty>
+                                               , ö_eX_to_z?:TAnyFunctionSingleArg<Tz,any> ):TAsyncFunction<Tz> {
     return ö_concat;
 function ö_concat( ü_whenDone:PromiseLike<Ty> ):PromiseLike<Tz> {
-    return ü_whenDone.then( ö_y_to_z );
+    return ü_whenDone.then( ö_y_to_z, ö_eX_to_z );
 }
 }
 
 export function whenDoneAndPostProcessed<Tz,Ty,Tx=Ty>( ö_whenDone:TAsyncFunctionSingleArg <Ty,Tx>
                                                                  |TAsyncFunctionWithoutArg<Ty>
                                                      , ö_y_to_z  :   TAnyFunctionSingleArg<Tz,Ty>
+                                                     , ö_eX_to_z?:   TAnyFunctionSingleArg<Tz,any>
                                                                 ):TAsyncFunctionSingleArg <Tz,Tx> {
     return ö_concat;
 function ö_concat( ü_arg0:Tx ):PromiseLike<Tz> {
-    return ö_whenDone( ü_arg0 ).then( ö_y_to_z );
+    return ö_whenDone( ü_arg0 ).then( ö_y_to_z, ö_eX_to_z );
 }
 }
 

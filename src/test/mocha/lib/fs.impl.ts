@@ -16,6 +16,7 @@
   import { whenChildProcessSpawned
          } from '../../../lib/cpUtil';
   import { expectErrorCode
+         , hasErrorCode
          } from '../../../lib/errorUtil';
   import { whenFileInfoRead
          , whenKnownAsFolder
@@ -113,17 +114,21 @@ export async function tst_whenKnownAsFolder():Promise<void> {
 //====================================================================
 
 export async function tst_isWin32Exe(){
-    const ü_thenTrue = createAsyncPostProcessor<boolean,any>( ()=> true );
+    const ü_thenTrue   = createAsyncPostProcessor<boolean       ,any>( ()=> true                                            );
+    const ü_thenNoMsg  = createAsyncPostProcessor<boolean|string,any>( ()=> true , ü_err => ''+ü_err                        );
+    const ü_thenENOENT = createAsyncPostProcessor<boolean       ,any>( ()=> false, ü_err => hasErrorCode( ü_err, 'ENOENT' ) );
     const ü_detached = !true;
-    const ü_files = [ testSrc( 'a b.txt' ) ];
+    const ü_files_n = [] as string[];
+    const ü_files_v = [ testSrc( 'a b.txt' ) ];
+    const ü_files_q = ü_files_v.map( wrapDoubleQuotes );
     const ü_npp = expandEnvVariables( CEExecutable.x64_64bit );
   //
     const ü_data_cmd =
-      [ [ testSrc( 'cmd.cmd' ), true ]
-      , [ testSrc( 'bat.bat' ), true ]
-    //, [ testSrc( 'lnk.lnk' ), true ]
+      [ [ testSrc( 'cmd.cmd'       ), true ]
+      , [ testSrc( 'bat.bat'       ), true ]
+    //, [ testSrc( 'lnk.lnk'       ), true ]
       , [ testSrc( 'Notepad++.lnk' ), true ]
-      , [ testSrc( 'txt.json' ), false ]
+      , [ testSrc( 'txt.json'      ),!true ]
       ] as TOrderedPairs<string,boolean>;
     const ü_data = ü_data_cmd.concat(
       [ [ __filename  , false ]
@@ -137,26 +142,27 @@ export async function tst_isWin32Exe(){
       , [ '..'      , false ]
       , [ '../..'   , false ]
       ] as TOrderedPairs<string,boolean> );
+  //
     1&& await whenAsyncFunctionTested( isWin32ShellExecutable, ü_data );
+    ü_data_cmd[3][1] = true; // json
+    0&& ü_data_cmd.splice(0,2) && ü_data_cmd.splice(1,1);
   //
     const ü_cmd_cp_1 = bindArguments( whenChildProcessSpawned, { realFirst:true
-                                                               , refine:ü_thenTrue },       []     , { shell:true, detached:ü_detached } );
-    const ü_cmd_cp_2 = bindArguments( whenChildProcessSpawned, { arrangeReal:[1], prepare:{ 1:ü_exe => ['/C',ü_exe, ... ü_files] }
-                                                               , refine:ü_thenTrue }, 'cmd.exe', [], {             detached:ü_detached } );
+                                                               , refine:ü_thenTrue },            ü_files_q, { shell:true, detached:ü_detached } );
+    const ü_cmd_cp_2 = bindArguments( whenChildProcessSpawned, { arrangeReal:[1], prepare:{ 1:ü_exe => ['/C',ü_exe, ... ü_files_v] }
+                                                               , refine:ü_thenTrue }, 'cmd.exe', ü_files_n, {             detached:ü_detached } );
   //
-    ü_data_cmd[3][1] = true;
-  //ü_data_cmd.splice( 0, 4 );
-    0&& await whenAsyncFunctionTested( ü_cmd_cp_1, ü_data_cmd );
-    0&& await whenAsyncFunctionTested( ü_cmd_cp_2, ü_data_cmd );
+    1&& await whenAsyncFunctionTested( ü_cmd_cp_1, ü_data_cmd );
+    1&& await whenAsyncFunctionTested( ü_cmd_cp_2, ü_data_cmd );
   //
-    const ü_npp_run_1 = await whenPromiseSettled( whenChildProcessSpawned(                   ü_npp, ü_files, { detached:ü_detached } ) );
-    testEqual( ü_npp_run_1.rejected, false );
-    const ü_npp_run_2 = await whenPromiseSettled( whenChildProcessSpawned( wrapDoubleQuotes( ü_npp ),    [], { detached:ü_detached, windowsVerbatimArguments:true } ) );
-    testEqual( ü_npp_run_2.rejected, true  , 'Verbatim & quoted exe fails' );
-    const ü_npp_run_3 = await whenPromiseSettled( whenChildProcessSpawned(                   ü_npp
-                                                                         , ü_files.map( wrapDoubleQuotes ) , { detached:ü_detached, windowsVerbatimArguments:true } ) );
-    testEqual( ü_npp_run_3.rejected, false );
+    const ü_npp_run_1 = await ü_thenNoMsg ( whenChildProcessSpawned(                   ü_npp  , ü_files_v, { detached:ü_detached                                } ) );
+    const ü_npp_run_2 = await ü_thenENOENT( whenChildProcessSpawned( wrapDoubleQuotes( ü_npp ), ü_files_q, { detached:ü_detached, windowsVerbatimArguments:true } ) );
+    const ü_npp_run_3 = await ü_thenNoMsg ( whenChildProcessSpawned(                   ü_npp  , ü_files_q, { detached:ü_detached, windowsVerbatimArguments:true } ) );
+    testEqual( ü_npp_run_1, true , 'quoting as Service' );
+    testEqual( ü_npp_run_2, true , 'Verbatim & quoted exe fails' );
+    testEqual( ü_npp_run_3, true , 'But opens unquoted exe part' );
   /*
+indowsVerbatimArguments: No quoting ... is set to true automatically when shell is specified and is CMD.
   */
 }
 
