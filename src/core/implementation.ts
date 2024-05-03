@@ -301,23 +301,24 @@ private async whenReady():Promise<boolean> {
 private async _submit():Promise<number> {
   //
     const ü_opts = await this._options();
-    const ü_exe  = await this._config.whenExecutable;
+                               let ü_exe = await this._config.whenExecutable;
+    if ( ü_opts.shell === true ) { ü_exe = wrapDoubleQuotes( ü_exe ); }
   //
-    const ü_args = this._arguments( ü_opts.windowsVerbatimArguments ?? false );
+    const ü_args = this._arguments( ü_opts.windowsVerbatimArguments! );
     if ( ü_args.length === 0 ) { return CNotAPid; }
   //
     try {
         const ü_cp = await whenChildProcessSpawned( ü_exe, ü_args, ü_opts );
-        ß_trc&& ß_trc( [ ü_exe, ü_args, ü_opts, ü_cp ], `ChildProcess[${ ü_cp.pid }]` );
+        ß_trc&& ß_trc({ commandLine:ü_cp.spawnargs, opts:ü_opts }, `ChildProcess[${ ü_cp.pid }]` );
         return ü_cp.pid;
     } catch ( ü_eX ) {
         throw new ErrorWithUixMessage( LCDoIt.spawn_error, toErrorMessage( ü_eX ) )
-                              .setReason( ü_eX )
-                              .setContext( { executable:ü_exe, arguments:ü_args, options:ü_opts } );
+                                     .setReason( ü_eX )
+                                     .setContext( { executable:ü_exe, arguments:ü_args, options:ü_opts } );
     }
 }
 
-private _arguments( ü_verbatim:boolean ):string[] {
+private _arguments( ü_verbatimArgs:boolean ):string[] {
   //
     let ü_others:Uri[]
     switch ( this._mode ) {
@@ -343,9 +344,9 @@ private _arguments( ü_verbatim:boolean ):string[] {
   //
                                               ü_args.push( ... this._config.commandLineArguments );
   //
-    const ü_items = ü_verbatim ? ü_others.map( uriToFile ).map( wrapDoubleQuotes )
-                               : ü_others.map( uriToFile )
-                               ;
+    const ü_items = ü_verbatimArgs ? ü_others.map( uriToFile ).map( wrapDoubleQuotes )
+                                   : ü_others.map( uriToFile )
+                                   ;
                                               ü_args.push( ... ü_items );
   //
     return ü_args;
@@ -393,6 +394,10 @@ private async _options():Promise<SpawnOptions> {
       };
   //
     Object.assign( ü_opts, ü_more );
+         if ( ü_opts.shell === true )
+            { ü_opts.windowsVerbatimArguments = true; }
+    else if ( ü_opts.windowsVerbatimArguments !== true )
+            { ü_opts.windowsVerbatimArguments = false; }
   //
     return ü_opts;
 }

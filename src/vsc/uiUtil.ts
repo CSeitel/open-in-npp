@@ -93,8 +93,8 @@ constructor(
 }
 
 async echoWhenDone<T>( ü_whenDone:PromiseLike<T>, ü_valueTmpl:TUiXMessageTemplate, ü_errorTmpl?:TUiXMessageTemplate ):Promise<void> {
-    const ü_done = await whenDoneWithUiXMessage( ü_whenDone, ü_valueTmpl, ü_errorTmpl );
-    this.echoMessage( ü_done );
+    return whenDoneWithUiXMessage( ü_whenDone, ü_valueTmpl, ü_errorTmpl )
+                     .then( ü_done => this.echoMessage( ü_done ) );
 }
 
 async echoMessage(   text :       IUiXMessage                                                                    ):Promise<void>

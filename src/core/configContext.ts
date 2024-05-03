@@ -23,9 +23,7 @@
          } from '../lib/asyncUtil';
   import { whenExecutable
          , whenKnownAsFolder
-         , onNewExecutable
-         , onNewWorkingDir
-         , onNewVirtualDocsDir
+         , onPathChanged
          } from '../core/configUtil';
 //====================================================================
 
@@ -110,7 +108,7 @@ export function getConfigSnapshot():ConfigSnapshot {
 
 //--------------------------------------------------------------------
 
-export async function configModificationSignalled( ü_change:ConfigurationChangeEvent ):Promise<void> {
+export function configModificationSignalled( ü_change:ConfigurationChangeEvent ):void {
     if ( ! ü_change.affectsConfiguration( CXtnCfgPrefix ) ) { return; }
   //
     ß_trc&& ß_trc( `Event: Configuration changed`, 'Configuration' );
@@ -123,9 +121,9 @@ export async function configModificationSignalled( ü_change:ConfigurationChange
     ß_cfgIsDirty = true;
     ß_whatIsDirty = undefined;
   //
-           if ( ü_change.affectsConfiguration( CXtnCfgId.executable                ) ) { ß_whatIsDirty = 'executable'               ; onNewExecutable    ( getConfigSnapshot() );
-    } else if ( ü_change.affectsConfiguration( CXtnCfgId.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; onNewWorkingDir    ( getConfigSnapshot() );
-    } else if ( ü_change.affectsConfiguration( CXtnCfgId.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; onNewVirtualDocsDir( getConfigSnapshot() );
+           if ( ü_change.affectsConfiguration( CXtnCfgId.executable                ) ) { ß_whatIsDirty = 'executable'               ; onPathChanged( getConfigSnapshot().whenExecutable    , LCConfig.executable_Y     );
+    } else if ( ü_change.affectsConfiguration( CXtnCfgId.workingDirectory          ) ) { ß_whatIsDirty = 'workingDirectory'         ; onPathChanged( getConfigSnapshot().whenWorkingDir    , LCConfig.workingDir_Y     );
+    } else if ( ü_change.affectsConfiguration( CXtnCfgId.virtualDocumentsDirectory ) ) { ß_whatIsDirty = 'virtualDocumentsDirectory'; onPathChanged( getConfigSnapshot().whenVirtualDocsDir, LCConfig.virtualDocsDir_Y );
     } else if ( ü_change.affectsConfiguration( CXtnCfgId.developerTrace            ) ) { ß_toggleDevTrace ();
     } else {
     }

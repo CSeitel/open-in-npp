@@ -38,20 +38,20 @@
          } from '../lib/asyncUtil';
 //====================================================================
 
-async function ß_whenPath( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMessageVars, ü_warn = LCConfig.notAbsolute ):Promise<void> {
+export function onPathChanged( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMessageVars, ü_warn = LCConfig.notAbsolute ):void {
   //
     ß_StatusBarItem.echoWhenDone(
         ü_whenPath.then( function( ü_path ){
             if (             ü_path.length === 0 ) { return ü_path; }
             if ( isAbsolute( ü_path )            ) { return ü_path;
-                   // throw new ErrorWithUixMessage( ü_yes, ü_path ).asInfo   ();
+                   // throw new ErrorWithUixMessage( ü_yes  , ü_path ).asInfo   ();
              } else { throw new ErrorWithUixMessage( ü_warn , ü_path ).asWarning(); }
-        }), ü_yes, 'Unknown {0}' );
+        })
+      , ü_yes, 'Unknown {0}'
+    );
 }
 
-export async function onNewExecutable    ( ü_cfg:ConfigSnapshot ):Promise<void> { return ß_whenPath( ü_cfg.whenExecutable    , LCConfig.executable_Y     ); }
-export async function onNewWorkingDir    ( ü_cfg:ConfigSnapshot ):Promise<void> { return ß_whenPath( ü_cfg.whenWorkingDir    , LCConfig.workingDir_Y     ); }
-export async function onNewVirtualDocsDir( ü_cfg:ConfigSnapshot ):Promise<void> { return ß_whenPath( ü_cfg.whenVirtualDocsDir, LCConfig.virtualDocsDir_Y ); }
+//====================================================================
 
 export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string ):Promise<string> {
     if ( ü_cfgPath.length === 0 ) { return whenDefaultExecutable( ü_useHistory ); }
