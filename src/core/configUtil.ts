@@ -42,8 +42,8 @@ async function ß_whenPath( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMe
   //
     ß_StatusBarItem.echoWhenDone(
         ü_whenPath.then( function( ü_path ){
-            if ( ü_path.length === 0 ) { return ü_path; }
-            if ( isAbsolute( ü_path ) ) {
+            if (             ü_path.length === 0 ) { return ü_path; }
+            if ( isAbsolute( ü_path )            ) { return ü_path;
                    // throw new ErrorWithUixMessage( ü_yes, ü_path ).asInfo   ();
              } else { throw new ErrorWithUixMessage( ü_warn , ü_path ).asWarning(); }
         }), ü_yes, 'Unknown {0}' );

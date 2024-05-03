@@ -7,11 +7,12 @@
   import { CEExecutable
          } from '../../../constants/extension';
 //--------------------------------------------------------------------
+  import { ß_trc
+         } from '../../../runtime/context';
   import { pickPair
          } from '../../../lib/arrayUtil';
-  import { whenPromiseSettled
+  import { createAsyncPostProcessor
          , whenDoneAndPostProcessed
-         , createAsyncPostProcessor
          } from '../../../lib/asyncUtil';
   import { whenChildProcessSpawned
          } from '../../../lib/cpUtil';
@@ -115,13 +116,16 @@ export async function tst_whenKnownAsFolder():Promise<void> {
 
 export async function tst_isWin32Exe(){
     const ü_thenTrue   = createAsyncPostProcessor<boolean       ,any>( ()=> true                                            );
-    const ü_thenNoMsg  = createAsyncPostProcessor<boolean|string,any>( ()=> true , ü_err => ''+ü_err                        );
+    const ü_thenNoMsg  = createAsyncPostProcessor<boolean|string,any>(  ö_stop_1 , ö_stop_2                                 );
     const ü_thenENOENT = createAsyncPostProcessor<boolean       ,any>( ()=> false, ü_err => hasErrorCode( ü_err, 'ENOENT' ) );
     const ü_detached = !true;
     const ü_files_n = [] as string[];
     const ü_files_v = [ testSrc( 'a b.txt' ) ];
     const ü_files_q = ü_files_v.map( wrapDoubleQuotes );
-    const ü_npp = expandEnvVariables( CEExecutable.x64_64bit );
+    const ü_npp  = expandEnvVariables( CEExecutable.x64_64bit );
+    const ü_npp_q = wrapDoubleQuotes( ü_npp );
+    ß_trc&& ß_trc( ü_npp );
+    
   //
     const ü_data_cmd =
       [ [ testSrc( 'cmd.cmd'       ), true ]
@@ -155,15 +159,26 @@ export async function tst_isWin32Exe(){
     1&& await whenAsyncFunctionTested( ü_cmd_cp_1, ü_data_cmd );
     1&& await whenAsyncFunctionTested( ü_cmd_cp_2, ü_data_cmd );
   //
-    const ü_npp_run_1 = await ü_thenNoMsg ( whenChildProcessSpawned(                   ü_npp  , ü_files_v, { detached:ü_detached                                } ) );
-    const ü_npp_run_2 = await ü_thenENOENT( whenChildProcessSpawned( wrapDoubleQuotes( ü_npp ), ü_files_q, { detached:ü_detached, windowsVerbatimArguments:true } ) );
-    const ü_npp_run_3 = await ü_thenNoMsg ( whenChildProcessSpawned(                   ü_npp  , ü_files_q, { detached:ü_detached, windowsVerbatimArguments:true } ) );
-    testEqual( ü_npp_run_1, true , 'quoting as Service' );
-    testEqual( ü_npp_run_2, true , 'Verbatim & quoted exe fails' );
-    testEqual( ü_npp_run_3, true , 'But opens unquoted exe part' );
+    const ü_npp_run_a = await ü_thenNoMsg ( whenChildProcessSpawned( ü_npp  , ü_files_q, { shell:true, windowsVerbatimArguments:false, detached:ü_detached } ) );
+    const ü_npp_run_b = await ü_thenNoMsg ( whenChildProcessSpawned( ü_npp_q, ü_files_q, { shell:true, windowsVerbatimArguments:false, detached:ü_detached } ) );
+    const ü_npp_run_1 = await ü_thenNoMsg ( whenChildProcessSpawned( ü_npp  , ü_files_v, {                                             detached:ü_detached } ) );
+    const ü_npp_run_2 = await ü_thenENOENT( whenChildProcessSpawned( ü_npp_q, ü_files_q, {             windowsVerbatimArguments:true , detached:ü_detached } ) );
+    const ü_npp_run_3 = await ü_thenNoMsg ( whenChildProcessSpawned( ü_npp  , ü_files_q, {             windowsVerbatimArguments:true , detached:ü_detached } ) );
+    testEqual( ü_npp_run_a, true , 'shell with verbatim ignored/enforced " dir exe  ""a b"' ); // does not work
+    testEqual( ü_npp_run_b, true , 'shell with verbatim ignored/enforced ""dir exe" ""a b"' ); // works (quote all)
+    testEqual( ü_npp_run_1, true ,            'quoting as Service'                          ); // works (quote nothing)
+    testEqual( ü_npp_run_2, true , 'Verbatim & quoted exe fails'                            ); // does not work
+    testEqual( ü_npp_run_3, true , 'But opens unquoted exe part'                            ); // does not work
   /*
-indowsVerbatimArguments: No quoting ... is set to true automatically when shell is specified and is CMD.
+windowsVerbatimArguments: No quoting ... is set to true automatically when shell is specified and is CMD.
+C:\PROGRA~1\Notepad++\notepad++.exe
+C:\\PROGRA~1\\Notepad++\\notepad++.exe
+C:\Program Files\Notepad++\notepad++.exe
+C:\\Program Files\\Notepad++\\notepad++.exe
+C:/zzz_Dev/node_modules/open-in-npp/.vscode-temp/Notepad++.lnk
   */
+function ö_stop_1(           ):true   { return true    ; }
+function ö_stop_2( ü_err:any ):string { return ''+ü_err; }
 }
 
 //====================================================================
