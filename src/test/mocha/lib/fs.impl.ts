@@ -38,9 +38,7 @@
          , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
-
-  export const tst_dispatch = tst_isWin32Exe;
-
+//export const tst_dispatch = tst_isWin32Exe;
 //====================================================================
 
 export async function tst_whenFileInfoRead(){

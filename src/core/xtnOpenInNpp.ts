@@ -68,9 +68,10 @@ private _onDidCloseTextDocument = ( ü_anyDoc:TextDocument )=>{
     if ( ! ü_anyDoc.isClosed
       ||   ü_anyDoc.uri.scheme === CEUriScheme.file
        ) { return; }
-    ß_trc&& ß_trc( `Closing shadow ${ ü_anyDoc.fileName }`, 'Runtime' );
     if ( this.shadowDocsBfr.has   ( ü_anyDoc ) )
-       { this.shadowDocsBfr.delete( ü_anyDoc ); }
+       { this.shadowDocsBfr.delete( ü_anyDoc );
+    ß_trc&& ß_trc( `Shadow ${ ü_anyDoc.fileName } was closed`, 'Runtime' );
+       }
 }
 
 constructor(

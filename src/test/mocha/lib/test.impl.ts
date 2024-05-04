@@ -27,13 +27,7 @@
          , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
-
-export async function tst_dispatch(){
-  //return;
-    return tst_function();
-    await  tst_function();
-}
-
+//export const tst_dispatch = tst_function;
 //====================================================================
 
 export async function tst_bindArguments(){

@@ -2,7 +2,7 @@
 */
   import { ß_trc
          } from '../../../runtime/context';
-  import { testSummary_
+  import { testSrc
          , testEqual
          } from '../../../lib/testUtil';
 //--------------------------------------------------------------------
@@ -12,19 +12,21 @@
          , AsyncCalculation
          } from '../../../lib/asyncUtil';
 //====================================================================
+  export const tst_dispatch = tst_UniqueResource;
+//====================================================================
 
-export async function tst_UR(){
-    const ö_usrc = new UniqueResource( {a:1} );
+export async function tst_UniqueResource(){
+    const ö_uSrc = new UniqueResource( {a:1} );
     const ü_id = 'init';
-    const ü_when = ö_usrc.whenAvailable( 'init' );
-    testEqual( ö_usrc.isPending( ü_id ), true );
+    const ü_when = ö_uSrc.whenAvailable( 'init' );
+    testEqual( ö_uSrc.isPending( ü_id ), true );
   //
     const ü_done = await ü_when;
-    testEqual( ö_usrc.getResource( ü_done ).a, 1 );
+    testEqual( ö_uSrc.getResource( ü_done ).a, 1 );
     try {
-        ö_usrc.getResource( async()=>{} )
+        ö_uSrc.getResource( async()=>{} )
     } catch ( ü_eX ) {
-        testEqual( ü_eX, ö_usrc.locked );
+        testEqual( ü_eX, ö_uSrc.locked );
     }
   //
     const ü_eX = new TypeError( 'Dummy' );
@@ -48,10 +50,9 @@ export async function tst_UR(){
     await whenDelay( 5 * 100 );
     testEqual( ö_some, 1  );
   //
-    testSummary_( 'UniqueResource' );
 //
 async function ö_access( ü_secs:number ):Promise<void> {
-    const ü_done = await ö_usrc.whenAvailable( ''+ü_secs );
+    const ü_done = await ö_uSrc.whenAvailable( ''+ü_secs );
     await whenDelay( ü_secs * 100 );
     ü_done();
     ü_done();
@@ -74,7 +75,6 @@ export async function tst_XY(){
         ü_y = 0;
     }
     testEqual( ü_y, 0, 'Reached'+ ü_calc.lazy );
-    testSummary_( 'AsyncCalculation' );
   }
 //
 async function ö_whenY( ü_x:number ):Promise<number> {
@@ -104,3 +104,7 @@ async function ö_cycle( ü_secs:number ):Promise<void> {
 
 }
 }
+
+//====================================================================
+/*
+*/

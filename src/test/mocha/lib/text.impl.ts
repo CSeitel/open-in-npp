@@ -35,12 +35,8 @@
          , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
-
-export async function tst_dispatch(){
-  //return tst_encodeURIC();
-    return tst_win32Names();
-    await  tst_js_escape();
-}
+//export const tst_dispatch = tst_win32Names;
+//export const tst_dispatch = tst_encodeURIC;
 //====================================================================
 
 export async function tst_expandEnvVariables(){

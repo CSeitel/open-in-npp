@@ -208,7 +208,7 @@ isPending( ö_actionId ?:string ):boolean {
     return ü_hit !== undefined;
 }
 
-async whenAvailable<R>( ö_actionId?:string ):Promise<IReleaseResource<R>> {
+whenAvailable<R>( ö_actionId?:string ):Promise<IReleaseResource<R>> {
   //
     const ö_when = Date.now() - this._birth_date;
     ß_trc&& ß_trc( `Queueing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
@@ -217,24 +217,22 @@ async whenAvailable<R>( ö_actionId?:string ):Promise<IReleaseResource<R>> {
     const ü_whenPrevious = this._cursor;
                            this._cursor = ü_next.promise;
     const ö_releaseNext                 = ü_next.resolve;
-    const ö_done = ö_doneImpl.bind( this );
+    const ö_release = ö_doneImpl.bind( this );
     this._consumers.push(
       [ ö_when
       , ö_actionId ?? ''
-      , ö_done
+      , ö_release
       ]
     );
   //
-    await ü_whenPrevious;
-  //const ü_done = ü_currentLock.then(function(){ return ö_release as IReleaseResource<T>; });
-    return ö_done;
+    return ü_whenPrevious.then( ()=> ö_release );
 
 function ö_doneImpl( this:UniqueResource<T>                 ):void
 function ö_doneImpl( this:UniqueResource<T>, ...  err:any[] ):     Promise<R>
 function ö_doneImpl( this:UniqueResource<T>, ...ü_err:any[] ):void|Promise<R> {
     //
       if ( this._consumers.length > 0
-        && this._consumers[0][2] === ö_done
+        && this._consumers[0][2] === ö_release
          ) {
           this._consumers.shift();
           ß_trc&& ß_trc( `Releasing ${ ö_actionId ?? '<???>' }@${ ö_when }` );

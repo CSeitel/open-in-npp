@@ -11,6 +11,8 @@
     "-nosession"
   ],
   "openInNpp.globPattern": " ",
-  "openInNpp.filesInFolderPattern": "**/*.json"
+  "openInNpp.filesInFolderPattern": "**/*.json",
+  "openInNpp.Executable": "",
+  "openInNpp.developerTrace": true
 },
 }

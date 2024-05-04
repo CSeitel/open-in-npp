@@ -28,11 +28,7 @@
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-
-export async function tst_dispatch(){
-    return tst_UiX();
-}
-
+  export const tst_dispatch = tst_UiX;
 //====================================================================
 
 export async function tst_print(){
@@ -94,9 +90,10 @@ function ö_error( ü_x:object, ü_eX:any ):string {
 }
 }
 
-//--------------------------------------------------------------------
+//====================================================================
+
 export async function tst_error(){
-class ö_ErrorX        extends Error        { more = 12; }
+class ö_ErrorX        extends Error               { more = 12; }
 class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
   //
     const ü_errMsg  = new   ErrorWithUixMessage ('w','u');
@@ -138,7 +135,6 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
         ü_txt = summarizeError( ü_eX, 'TEST' );
     }
     testEqual( ü_txt, '' );
-    testSummary_( 'Error' );
 }
 
 //====================================================================
