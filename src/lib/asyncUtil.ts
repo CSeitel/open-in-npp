@@ -181,62 +181,67 @@ get whenY():PromiseLike<Ty> {
 }
 
 //====================================================================
-  type TAccessAttempt = [number,string,IReleaseResource<any>]
+  type TAccessAttempt =
+    { when:number
+    , id  :string
+    , release:IReleaseResource<any>
+    }
 
 export class UniqueResource<T> {
 
-    private readonly _birth_date = Date.now();
-    private readonly _consumers  = [] as TAccessAttempt[];
-    private          _cursor:Promise<T>
-    public  readonly  locked = new Error( 'Resource is not available' );
+    private readonly _birthDate    = Date.now();
+    private readonly _lockRequests = [] as TAccessAttempt[];
+    private          _whenNotLocked    :Promise<T>
 constructor(
     private readonly _resource:T
  ){
-    this._cursor = Promise.resolve( this._resource );
+    this._whenNotLocked = Promise.resolve( this._resource );
 }
 
-getResource( ü_done:IReleaseResource<any> ):T {
-    if ( ü_done !== this._consumers[0][2] ) { throw this.locked; }
+getResource( ü_release:IReleaseResource<any> ):T {
+    if ( ü_release !== this._lockRequests[0].release ) {
+        throw new Error( 'Resource is not available' );
+    }
     return this._resource;
 }
 
 isPending( ö_actionId ?:string ):boolean {
     if ( ö_actionId === undefined ) {
-        return this._consumers.length > 0;
+        return this._lockRequests.length > 0;
     }
-    const ü_hit = this._consumers.find(function(ü_action){ return ü_action[1] === ö_actionId; });
+    const ü_hit = this._lockRequests.find(function(ü_request){ return ü_request.id === ö_actionId; });
     return ü_hit !== undefined;
 }
 
 whenAvailable<R>( ö_actionId?:string ):Promise<IReleaseResource<R>> {
   //
-    const ö_when = Date.now() - this._birth_date;
+    const ö_when = Date.now() - this._birthDate;
     ß_trc&& ß_trc( `Queueing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
   //
     const ü_next = createPromise<T>();
-    const ü_whenPrevious = this._cursor;
-                           this._cursor = ü_next.promise;
-    const ö_releaseNext                 = ü_next.resolve;
-    const ö_release = ö_doneImpl.bind( this );
-    this._consumers.push(
-      [ ö_when
-      , ö_actionId ?? ''
-      , ö_release
-      ]
+    const ü_whenNotLocked = this._whenNotLocked;
+                            this._whenNotLocked = ü_next.promise;
+    const ö_resolveNotLocked                    = ü_next.resolve;
+    const ö_releaseLock = ö_releaseLock_.bind( this );
+    this._lockRequests.push(
+        { when   : ö_when
+        , id     : ö_actionId ?? ''
+        , release: ö_releaseLock
+        }
     );
   //
-    return ü_whenPrevious.then( ()=> ö_release );
+    return ü_whenNotLocked.then( ()=> ö_releaseLock );
 
-function ö_doneImpl( this:UniqueResource<T>                 ):void
-function ö_doneImpl( this:UniqueResource<T>, ...  err:any[] ):     Promise<R>
-function ö_doneImpl( this:UniqueResource<T>, ...ü_err:any[] ):void|Promise<R> {
+function ö_releaseLock_( this:UniqueResource<T>                 ):void
+function ö_releaseLock_( this:UniqueResource<T>, ...  err:any[] ):     Promise<R>
+function ö_releaseLock_( this:UniqueResource<T>, ...ü_err:any[] ):void|Promise<R> {
     //
-      if ( this._consumers.length > 0
-        && this._consumers[0][2] === ö_release
+      if ( this._lockRequests.length > 0
+        && this._lockRequests[0].release === ö_releaseLock
          ) {
-          this._consumers.shift();
+          this._lockRequests.shift();
           ß_trc&& ß_trc( `Releasing ${ ö_actionId ?? '<???>' }@${ ö_when }` );
-          ö_releaseNext( this._resource );
+          ö_resolveNotLocked( this._resource );
       } else {
           ß_trc&& ß_trc( 'Second Invocation' );
       }

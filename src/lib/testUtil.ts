@@ -157,7 +157,15 @@ export function testSummary( ü_testName:string ):void {
 
 //====================================================================
 
-export function testFailed<T=any>( ü_reason:any, ü_message?:string ):false {
+export function testNever( ü_message?:string ):false {
+    
+    CSeriesOfTests.push( failurePrefix
+                       + ( ü_message ? ü_message +' '
+                                     :            '' )
+                       + 'should not be reached' );
+    return false;
+}
+export function testFailed( ü_reason:any, ü_message?:string ):false {
                                                              const ü_echo = 'Exception caught: '+ ß_echo( ü_reason, 200 );
     CSeriesOfTests.push( failurePrefix
                        + ( ü_message === undefined ?               ü_echo

@@ -7,7 +7,8 @@
          } from '../types/lib.functionUtil.d';
 //====================================================================
 
-export function nullOperation():void {}
+export function      nullOperation():        void  {}
+export function asyncNullOperation():Promise<void> { return Promise.resolve(); }
 
 export function identityMap<Tx>( ü_x:Tx ):Tx {
     return ü_x;

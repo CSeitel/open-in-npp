@@ -1,47 +1,48 @@
 /*
 */
+//--------------------------------------------------------------------
   import { ß_trc
          } from '../../../runtime/context';
-  import { testSrc
-         , testEqual
-         } from '../../../lib/testUtil';
-//--------------------------------------------------------------------
   import { whenDelay
          , UniqueResource
          , LockHandler
          , AsyncCalculation
          } from '../../../lib/asyncUtil';
+  import { asyncNullOperation
+         , bindAppending
+         } from '../../../lib/functionUtil';
+  import { testSrc
+         , testNever
+         , testEqual
+         } from '../../../lib/testUtil';
 //====================================================================
   export const tst_dispatch = tst_UniqueResource;
 //====================================================================
 
 export async function tst_UniqueResource(){
-    const ö_uSrc = new UniqueResource( {a:1} );
+  //
+    const ü_data = {a:1};
+    const ö_uSrc = new UniqueResource( ü_data );
     const ü_id = 'init';
-    const ü_when = ö_uSrc.whenAvailable( 'init' );
-    testEqual( ö_uSrc.isPending( ü_id ), true );
+    testEqual( ö_uSrc.isPending( ü_id ), false );
+    const ü_when = ö_uSrc.whenAvailable<undefined>( 'init' );
+    testEqual( ö_uSrc.isPending( ü_id ), true  );
+    const ü_release = await ü_when;
+    testEqual( ö_uSrc.isPending( ü_id ), true  );
   //
-    const ü_done = await ü_when;
-    testEqual( ö_uSrc.getResource( ü_done ).a, 1 );
+    testEqual( ö_uSrc.getResource( ü_release ), ü_data );
+  //
     try {
-        ö_uSrc.getResource( async()=>{} )
+        ö_uSrc.getResource( asyncNullOperation );
+        testNever();
     } catch ( ü_eX ) {
-        testEqual( ü_eX, ö_uSrc.locked );
+        testEqual( ü_eX instanceof Error, true );
     }
   //
-    const ü_eX = new TypeError( 'Dummy' );
-    try {
-        throw ü_eX;
-        ü_done();
-    } catch ( ü_eX ) {
-        try {
-            await ü_done( ü_eX );
-            testEqual( 1, 0 );
-        } catch (error) {
-            testEqual( error, ü_eX );
-        }
-  //} finally {
-    }
+               const ü_eX = new TypeError( 'Dummy' );
+    await ü_release( ü_eX ).then(                testNever
+                                , bindAppending( testEqual, ü_eX, 'Rethrow' )
+                                );
   //
     let ö_some = 0;
     ö_access( 3 )
@@ -50,7 +51,6 @@ export async function tst_UniqueResource(){
     await whenDelay( 5 * 100 );
     testEqual( ö_some, 1  );
   //
-//
 async function ö_access( ü_secs:number ):Promise<void> {
     const ü_done = await ö_uSrc.whenAvailable( ''+ü_secs );
     await whenDelay( ü_secs * 100 );

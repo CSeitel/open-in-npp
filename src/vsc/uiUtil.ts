@@ -92,13 +92,13 @@ constructor(
 ){
 }
 
-async echoWhenDone<T>( ü_whenDone:PromiseLike<T>, ü_valueTmpl:TUiXMessageTemplate, ü_errorTmpl?:TUiXMessageTemplate ):Promise<void> {
+echoWhenDone<T>( ü_whenDone:PromiseLike<T>, ü_valueTmpl:TUiXMessageTemplate, ü_errorTmpl?:TUiXMessageTemplate ):Promise<void> {
     return whenDoneWithUiXMessage( ü_whenDone, ü_valueTmpl, ü_errorTmpl )
-                     .then( ü_done => this.echoMessage( ü_done ) );
+                            .then( ü_msg => this.echoMessage( ü_msg ) );
 }
 
-async echoMessage(   text :       IUiXMessage                                                                    ):Promise<void>
-async echoMessage( ü_text :string            , ü_type:TUiXMessageType                        , ü_tooltip?:string ):Promise<void>
+async echoMessage(   msg  :       IUiXMessage                                                                    ):Promise<void>
+async echoMessage(   text :string            , ü_type:TUiXMessageType                        , ü_tooltip?:string ):Promise<void>
 async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXMessageType.info, ü_tooltip?:string ):Promise<void> {
   //
     const ü_msg = typeof( ü_text_ ) === 'string'
