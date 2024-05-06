@@ -7,6 +7,7 @@
          , UniqueResource
          , LockHandler
          , AsyncCalculation
+         , createTimer
          } from '../../../lib/asyncUtil';
   import { asyncNullOperation
          , bindAppending
@@ -16,7 +17,7 @@
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_UniqueResource;
+  export const tst_dispatch = tst_AsyncCalculation;
 //====================================================================
 
 export async function tst_UniqueResource(){
@@ -43,41 +44,56 @@ export async function tst_UniqueResource(){
     await ü_release( ü_eX ).then(                testNever
                                 , bindAppending( testEqual, ü_eX, 'Rethrow' )
                                 );
+}
+
+//--------------------------------------------------------------------
+
+export async function tst_UniqueResourceOrder(){
   //
-    let ö_some = 0;
-    ö_access( 3 )
-    ö_access( 1 )
-    await whenDelay( 0 );
-    await whenDelay( 5 * 100 );
-    testEqual( ö_some, 1  );
+    const ü_data = {};
+    const ö_uSrc = new UniqueResource( ü_data );
+    const ö_timer = createTimer();
   //
-async function ö_access( ü_secs:number ):Promise<void> {
-    const ü_done = await ö_uSrc.whenAvailable( ''+ü_secs );
-    await whenDelay( ü_secs * 100 );
-    ü_done();
-    ü_done();
-    ö_some = ü_secs;
+    const ö_expOrder = [200,100,10,1];
+    const ö_actOrder = [] as number[];
+    const ö_times    = [] as number[];
+    await Promise.allSettled( ö_expOrder.map( ü_secs => ö_whenAccessed( ü_secs ) ) );
+    testEqual( ö_actOrder.join(), ö_expOrder.join(), 'Order' );
+    ß_trc&& ß_trc( ö_times );
+  //
+async function ö_whenAccessed( ü_ms:number ):Promise<void> {
+    const ü_release = await ö_uSrc.whenAvailable( `${ ü_ms }` );
+    await whenDelay( ü_ms );
+  //ü_release();
+    ö_uSrc.getResource( ü_release );
+    ö_actOrder.push( ü_ms );
+    ö_times.push( ö_timer() );
+    ü_release();
 }
 }
 
 //====================================================================
 
-export async function tst_XY(){
-  for ( const ü_step of [1,2] ) {
-    const ü_calc = new AsyncCalculation( 200 as number, ö_whenY, ü_step === 2 );
-    const ü_whenY = ü_calc.whenY;
+export async function tst_AsyncCalculation(){
+  for ( const ü_lazy of [false] ) {
+    const ü_calc = new AsyncCalculation( 200 as number, ö_whenY, ü_lazy );
+    const ü_whenY_200 = ü_calc.whenY;
     ü_calc.x = 10;
-    testEqual( await ü_calc.whenY,  23 );
-    let ü_y = 0;
+    const ü_whenY_10  = ü_calc.whenY;
+    ü_calc.x = 20;
+    const ü_whenY_20  = ü_calc.whenY;
+    const ü_20 = await ü_whenY_20;
+    testEqual( ü_20, 33 );
     try {
-        ü_y = await ü_whenY;
+        await ü_whenY_200;
+        testNever()
     } catch (error) {
-        ü_y = 0;
+        testEqual( error instanceof Error, true, 'Reached'+ ü_calc.lazy );
     }
-    testEqual( ü_y, 0, 'Reached'+ ü_calc.lazy );
   }
 //
 async function ö_whenY( ü_x:number ):Promise<number> {
+    ß_trc &&ß_trc( ü_x );
     await whenDelay( ü_x );
     return ü_x + 13;
 }

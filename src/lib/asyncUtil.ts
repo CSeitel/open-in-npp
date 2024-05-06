@@ -172,7 +172,7 @@ get whenY():PromiseLike<Ty> {
     return this._whenY!.then( ü_y => {
                       const ö_current = this.lazy ? this._tag : this._whenY;
         if ( ö_pendingY === ö_current ) { return ü_y; }
-        throw new Error( `Outdated ${ ö_x }` )
+        throw new Error( `Outdated ${ ö_x }` );
                                            return this.whenY;
 
     });
