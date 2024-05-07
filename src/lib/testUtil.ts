@@ -112,13 +112,22 @@ function ö_addWhenTested( ä_testImpl:TAsyncTestFunction, ä_testName:string|nu
     ö_whenDone = ö_whenDone.then( ä_whenTested );
   //
 function ä_whenTested( ü_rc:number ):PromiseLike<number> {
-    return ä_testImpl().then(function(){
+    let ü_impl:PromiseLike<void>
+    try {
+        ü_impl = ä_testImpl();
+    } catch (error) {
+        ü_impl = Promise.reject( error );
+    }
+    return  ü_impl.then(function(){
+    //ä_testImpl()
+    //
         try {
             testSummary( ä_testName as string );
         } catch ( ü_eX ) {
             ü_rc ++ ;
         }
             return ü_rc;
+    //
                      }).then( function(){ return ü_rc; }
                             , function( ü_err ){
             ß_writeStdOut( ß_echo( ü_err, 300 ) );

@@ -11,13 +11,62 @@
          } from '../../../lib/asyncUtil';
   import { asyncNullOperation
          , bindAppending
+         , nullOperation
          } from '../../../lib/functionUtil';
   import { testSrc
          , testNever
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_AsyncCalculation;
+  export const tst_dispatch = tst_syntay; //AsyncCalculation;
+//====================================================================
+
+export async function tst_syntay(){
+    throw new Error('d');
+}
+export async function tst_syntax(){
+    const ü_1 = Promise.resolve(1);
+    const ü_2 = Promise.resolve(2);
+    const ü_3 = Promise.resolve(3);
+  //await Promise.resolve();
+  //.then(undefined,ü_err => { return Promise.reject(ü_err) } );
+    const ö_eX = new Error();
+  //
+    try {
+        await ö_syntax()
+        testEqual(1,1)
+    } catch ( ü_eX ) {
+        testNever();
+        testEqual( ü_eX, ö_eX );
+    }
+async function ö_syntax(){
+    const ü_p = Promise.resolve();
+  //
+    try {
+    const ü_4 = ü_p.then(function(){ 
+      throw ö_eX; });
+    const ü_5 = ü_p.then(function(){
+      return 4  ; });
+        await ü_5;
+        const ü_6 = Promise.resolve().then(function(){ 
+          return; });
+        await ü_6;
+        let ü_r:()=>void
+        const ü_p2 = new Promise<void>((resolve)=>{ ü_r = ()=> { 
+          resolve();
+        } });
+        setTimeout( ü_r!, 1 );
+        await ü_p2
+        .then(undefined,(ü_eX)=>{
+            return Promise.reject( ü_eX );
+        });
+      //await whenDelay( 0 );
+  } catch ( ü_eX ) {
+        testNever();
+    }
+}
+}
+
 //====================================================================
 
 export async function tst_UniqueResource(){
