@@ -13,12 +13,14 @@
          , bindAppending
          , nullOperation
          } from '../../../lib/functionUtil';
+  import { whenFileInfoRead
+         } from '../../../lib/fsUtil';
   import { testSrc
          , testNever
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_syntay; //AsyncCalculation;
+  export const tst_dispatch = tst_syntax; //AsyncCalculation;
 //====================================================================
 
 export async function tst_syntay(){
@@ -51,6 +53,8 @@ async function ö_syntax(){
         const ü_6 = Promise.resolve().then(function(){ 
           return; });
         await ü_6;
+      //await whenFileInfoRead( __filename );
+      /*
         let ü_r:()=>void
         const ü_p2 = new Promise<void>((resolve)=>{ ü_r = ()=> { 
           resolve();
@@ -60,6 +64,7 @@ async function ö_syntax(){
         .then(undefined,(ü_eX)=>{
             return Promise.reject( ü_eX );
         });
+      */
       //await whenDelay( 0 );
   } catch ( ü_eX ) {
         testNever();
