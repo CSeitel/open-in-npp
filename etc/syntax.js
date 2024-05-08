@@ -1,8 +1,15 @@
 const fsProm = require('fs').promises;
 
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Application specific logging, throwing an error, or other logic here
+});
+
+
+
 async function codeWithUnhandledPromise(){
     const notAwaited = Promise.resolve().then(function(){
-      //throw new Error('Irrelevant');
+        throw new Error('Irrelevant');
     });
     const ss = await fsProm.stat( __filename );
     console.log( ss, 'fs Not reached' );

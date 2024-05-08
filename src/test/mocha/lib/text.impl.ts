@@ -98,47 +98,5 @@ async function ö_whenRenamed( ü_char:string ):Promise<string> {
 }
 
 //====================================================================
-
-export async function tst_win32Names_(){
-    const ö_stub = await whenTempFile( 'qqqqqq' );
-    let ü_file = ö_stub + '.txt';
-                   await whenFileWritten( ü_file, '' );
-  //
-    let ü_indx = 0x21;
-    do {
-        const ü_char = String.fromCharCode( ü_indx );
-        try {
-            ü_file = await ö_whenRenamed( ü_file, ü_char );
-        } catch ( error ) {
-            switch ( ü_char ) {
-                case '"': //\x22
-                case '*': //\x2a
-                case '/': //\x2f
-                case ':': //\x3a
-                case '<': //\x3c
-                case '>': //\x3e
-                case '?': //\x3f
-                case '\\'://\x5c
-                case '|': //\x7c
-                  testEqual( ü_char, ü_char, ü_indx.toString(16) );
-                  break;
-                default:
-                  testEqual( ü_indx.toString(16), ü_char );
-            }
-            continue;
-        }
-        
-        testEqual( true, await whenKnownAsFile( ü_file ), ü_file );
-      //break;
-    } while ( ü_indx ++ < 0x100 );
-  //
-async function ö_whenRenamed( ü_file:string, ü_char:string ):Promise<string> {
-    const ü_done = ö_stub+ü_char+'.txt';
-    await whenItemRenamed( ü_file, ü_done );
-    return ü_done;
-}
-}
-
-//====================================================================
 /*
 */

@@ -8,6 +8,7 @@
          , LockHandler
          , AsyncCalculation
          , createTimer
+         , whenDoneAndPostProcessed
          } from '../../../lib/asyncUtil';
   import { asyncNullOperation
          , bindAppending
@@ -18,58 +19,22 @@
   import { testSrc
          , testNever
          , testEqual
+         , testRejected
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_syntax; //AsyncCalculation;
+  export const tst_dispatch = tst_asyncLike;
 //====================================================================
 
-export async function tst_syntay(){
+export function tst_asyncLike():PromiseLike<void> {
     throw new Error('d');
 }
+
+//====================================================================
+
 export async function tst_syntax(){
     const ü_1 = Promise.resolve(1);
     const ü_2 = Promise.resolve(2);
     const ü_3 = Promise.resolve(3);
-  //await Promise.resolve();
-  //.then(undefined,ü_err => { return Promise.reject(ü_err) } );
-    const ö_eX = new Error();
-  //
-    try {
-        await ö_syntax()
-        testEqual(1,1)
-    } catch ( ü_eX ) {
-        testNever();
-        testEqual( ü_eX, ö_eX );
-    }
-async function ö_syntax(){
-    const ü_p = Promise.resolve();
-  //
-    try {
-    const ü_4 = ü_p.then(function(){ 
-      throw ö_eX; });
-    const ü_5 = ü_p.then(function(){
-      return 4  ; });
-        await ü_5;
-        const ü_6 = Promise.resolve().then(function(){ 
-          return; });
-        await ü_6;
-      //await whenFileInfoRead( __filename );
-      /*
-        let ü_r:()=>void
-        const ü_p2 = new Promise<void>((resolve)=>{ ü_r = ()=> { 
-          resolve();
-        } });
-        setTimeout( ü_r!, 1 );
-        await ü_p2
-        .then(undefined,(ü_eX)=>{
-            return Promise.reject( ü_eX );
-        });
-      */
-      //await whenDelay( 0 );
-  } catch ( ü_eX ) {
-        testNever();
-    }
-}
 }
 
 //====================================================================
@@ -129,25 +94,37 @@ async function ö_whenAccessed( ü_ms:number ):Promise<void> {
 //====================================================================
 
 export async function tst_AsyncCalculation(){
-  for ( const ü_lazy of [false] ) {
+    const ö_timer = createTimer();
+    const ö_times = [] as [number,number][];
+  for ( const ü_lazy of [false,true] ) {
     const ü_calc = new AsyncCalculation( 200 as number, ö_whenY, ü_lazy );
-    const ü_whenY_200 = ü_calc.whenY;
+  //
+    await whenDelay( 50 ); // lazy -> no delta 50
+  //
+    const ü_whenY_200 = testRejected( ü_calc.whenY, '200' );
     ü_calc.x = 10;
-    const ü_whenY_10  = ü_calc.whenY;
+    const ü_whenY_10  = testRejected( ü_calc.whenY,  '10' );
     ü_calc.x = 20;
     const ü_whenY_20  = ü_calc.whenY;
+  //
     const ü_20 = await ü_whenY_20;
     testEqual( ü_20, 33 );
-    try {
-        await ü_whenY_200;
-        testNever()
-    } catch (error) {
-        testEqual( error instanceof Error, true, 'Reached'+ ü_calc.lazy );
-    }
+    testEqual( await ü_whenY_200, true, 'Rejected 200' );
+  //
+    ü_calc.x = 30; // lazy -> no entry
+    ü_calc.x = 40; // delta 200
+    const ü_40 = await ü_calc.whenY;
+    testEqual( ü_40, 53 );
+  //
+    ß_trc&& ß_trc( ö_times );
+    testEqual( ö_times.length, ü_lazy ? 4 : 5, 'Count' );
+    testEqual( ö_times[1][1] - ö_times[0][1] >=  50, !ü_lazy, 'Delta 50'  );
+    testEqual( ö_times[3][1] - ö_times[2][1] >= 200,  ü_lazy, 'Delta 200' );
+    ö_times.length = 0;
   }
 //
 async function ö_whenY( ü_x:number ):Promise<number> {
-    ß_trc &&ß_trc( ü_x );
+    ö_times.push([ ü_x, ö_timer() ]);
     await whenDelay( ü_x );
     return ü_x + 13;
 }

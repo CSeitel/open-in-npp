@@ -170,7 +170,7 @@
     "testVscMocha"     : "node  ./out/test/suite/npmRunVscTests.js  xtnRunVscTestsMocha",
     "testMocha"    : "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/all.spec.js",
     "testMochaLike": "( node.exe                                 ./out/test/mocha/all.spec.js ) & ( echo %ErrorLevel% )",
-    "testSyntax"   : "  node.exe                                 ./etc/syntax.js                          ",
+    "testSyntax"   : "  node.exe   --unhandled-rejections=throw    ./etc/syntax.js                          ",
     "vscode:package": "vsce package",
     "vscode:install": "code --install-extension open-in-npp-0.1.6.vsix",
     "vscode:pre_publish": "npm run compile",
