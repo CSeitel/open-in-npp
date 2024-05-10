@@ -22,7 +22,7 @@
          , testRejected
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_asyncLike;
+  export const tst_dispatch = tst_AsyncCalculation; //tst_asyncLike;
 //====================================================================
 
 export function tst_asyncLike():PromiseLike<void> {
@@ -96,9 +96,9 @@ async function ö_whenAccessed( ü_ms:number ):Promise<void> {
 export async function tst_AsyncCalculation(){
     const ö_timer = createTimer();
     const ö_times = [] as [number,number][];
-  for ( const ü_lazy of [false,true] ) {
-    const ü_calc = new AsyncCalculation( 200 as number, ö_whenY, ü_lazy );
-  //
+  for ( const ü_lazy of [true,false] ) {
+    const ü_calc = new AsyncCalculation( ö_whenY, ü_lazy );
+          ü_calc.x = 200;
     await whenDelay( 50 ); // lazy -> no delta 50
   //
     const ü_whenY_200 = testRejected( ü_calc.whenY, '200' );
@@ -120,6 +120,15 @@ export async function tst_AsyncCalculation(){
     testEqual( ö_times.length, ü_lazy ? 4 : 5, 'Count' );
     testEqual( ö_times[1][1] - ö_times[0][1] >=  50, !ü_lazy, 'Delta 50'  );
     testEqual( ö_times[3][1] - ö_times[2][1] >= 200,  ü_lazy, 'Delta 200' );
+    ö_times.length = 0;
+  //
+    const ü_repe = new AsyncCalculation( ö_whenY, ü_lazy );
+    ü_repe.x = 17;
+    const ü_whenY_17  = testRejected( ü_repe.whenY,  '17' );
+    ü_repe.x = 17;
+    const ü_17 = await ü_repe.whenY;
+    testEqual( ü_17, 30 );
+  //
     ö_times.length = 0;
   }
 //

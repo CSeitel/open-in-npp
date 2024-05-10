@@ -62,24 +62,23 @@ export class ConfigSnapshot extends ConfigProxy {
 //static get api():ConfgContext { }
 //
 constructor(
-    private          _whenExecutable     :AsyncCalculation<string>|null = null
-  , private          _whenWorkingDir     :AsyncCalculation<string>|null = null
-  , private          _whenVirtualDocsDir :AsyncCalculation<string>|null = null
+    private          _whenExecutable     = new AsyncCalculation( whenExecutable   .bind( null, true                      ) )
+  , private          _whenWorkingDir     = new AsyncCalculation( whenKnownAsFolder.bind( null, LCConfig.workingDir_N     ) )
+  , private          _whenVirtualDocsDir = new AsyncCalculation( whenKnownAsFolder.bind( null, LCConfig.virtualDocsDir_N ) )
 ){
     super();
 }
 //
-get whenExecutable    ():PromiseLike<string> { return ( this._whenExecutable
-                                                   || ( this._whenExecutable     = new AsyncCalculation( this.executable               , whenExecutable   .bind( null, true                      ) ) ) ).whenY; }
-get whenWorkingDir    ():PromiseLike<string> { return ( this._whenWorkingDir
-                                                   || ( this._whenWorkingDir     = new AsyncCalculation( this.workingDirectory         , whenKnownAsFolder.bind( null, LCConfig.workingDir_N     ) ) ) ).whenY; }
-get whenVirtualDocsDir():PromiseLike<string> { return ( this._whenVirtualDocsDir
-                                                   || ( this._whenVirtualDocsDir = new AsyncCalculation( this.virtualDocumentsDirectory, whenKnownAsFolder.bind( null, LCConfig.virtualDocsDir_N ) ) ) ).whenY; }
+get whenExecutable    ():PromiseLike<string> { this._whenExecutable    .x = this.executable               ; return this._whenExecutable    .whenY; }
+get whenWorkingDir    ():PromiseLike<string> { this._whenWorkingDir    .x = this.workingDirectory         ; return this._whenWorkingDir    .whenY; }
+get whenVirtualDocsDir():PromiseLike<string> { this._whenVirtualDocsDir.x = this.virtualDocumentsDirectory; return this._whenVirtualDocsDir.whenY; }
+
 clone( ü_what ?:TXtnCfgIds ):ConfigSnapshot {
     const ü_cfg = new ConfigSnapshot( this._whenExecutable
                                     , this._whenWorkingDir
                                     , this._whenVirtualDocsDir
                                     );
+    return ü_cfg;
     switch ( ü_what ) {
         case 'executable'               : if ( ü_cfg._whenExecutable     !== null ) { ü_cfg._whenExecutable    .x = ü_cfg.executable               ; } break;
         case 'workingDirectory'         : if ( ü_cfg._whenWorkingDir     !== null ) { ü_cfg._whenWorkingDir    .x = ü_cfg.workingDirectory         ; } break;
@@ -87,7 +86,6 @@ clone( ü_what ?:TXtnCfgIds ):ConfigSnapshot {
     }
     return ü_cfg;
 }
-
 }
 
 //====================================================================

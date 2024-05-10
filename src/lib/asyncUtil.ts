@@ -150,11 +150,15 @@ export class AsyncCalculation<Ty,Tx=Ty> {
     private          _tag  :PromiseLike<Ty>|null = null;
     private          _whenY:PromiseLike<Ty>|null = null;
     private          _x    :            Tx       = undefined as any;
-constructor(        ü_x    :            Tx
-  , private readonly _whenCalculated:TAsyncFunctionSingleArg<Ty,Tx>
-  , public  readonly  lazy = false
+constructor( 
+    private readonly _whenCalculated:TAsyncFunctionSingleArg<Ty,Tx>
+  , public  readonly  lazy = true
 ){
+}
+
+setX( ü_x:Tx ):this {
     this.x = ü_x;
+    return this;
 }
 
 set x( ü_x:Tx ) {
@@ -172,10 +176,9 @@ get whenY():PromiseLike<Ty> {
     return this._whenY!.then( ü_y => {
                       const ö_current = this.lazy ? this._tag : this._whenY;
         if ( ö_pendingY === ö_current ) { return ü_y; }
-        throw                  new Error( `Outdated ${ ö_x }` )  ;
-        return Promise.reject( new Error( `Outdated ${ ö_x }` ) );
-                                           return this.whenY;
-
+        throw                  new Error( `Outdated calculation${ this._whenCalculated.name }( ${ ö_x } )` )  ;
+      //return Promise.reject( new Error( `Outdated ${ ö_x }` ) );
+      //                                  return this.whenY;
     });
 }
 
