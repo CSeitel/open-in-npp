@@ -68,7 +68,7 @@ export async function whenFileInfoRead( ü_fileUri:TFileUri ):Promise<FileStat|n
     try {
         return await CVscFs.stat(  fileToUri( ü_fileUri ) );
     } catch ( ü_eX ) {
-        return expectErrorCode<TVscFSErrorCodes|TNodeFSErrorCodes,null>( ü_eX, 'FileNotFound', null ); // ['ELOOP','ENOENT'] realpath
+        return expectErrorCode<TVscFSErrorCodes|TNodeFSErrorCodes,null>( 'FileNotFound', ü_eX, null ); // ['ELOOP','ENOENT'] realpath
     }
 }
 

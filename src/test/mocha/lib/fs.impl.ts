@@ -106,7 +106,7 @@ export async function tst_whenKnownAsFolder():Promise<void> {
     await whenAsyncFunctionTested( whenKnownAsFile   , ü_05, ö_expectError );
     await whenAsyncFunctionTested(         ü_LFile   , ü_06  );
  function ö_expectError( ü_path:string, ü_eX:any, ü_x_y:[string,boolean|null] ):boolean|null {
-     return ü_path.endsWith( 'virtual_3_d' ) && expectErrorCode( ü_eX, 'ELOOP', null ); 
+     return ü_path.endsWith( 'virtual_3_d' ) && expectErrorCode( 'ELOOP', ü_eX, null ); 
 }
 }
 
@@ -115,7 +115,7 @@ export async function tst_whenKnownAsFolder():Promise<void> {
 export async function tst_isWin32Exe(){
     const ü_thenTrue   = createAsyncPostProcessor<boolean       ,any>( ()=> true                                            );
     const ü_thenNoMsg  = createAsyncPostProcessor<boolean|string,any>(  ö_stop_1 , ö_stop_2                                 );
-    const ü_thenENOENT = createAsyncPostProcessor<boolean       ,any>( ()=> false, ü_err => hasErrorCode( ü_err, 'ENOENT' ) );
+    const ü_thenENOENT = createAsyncPostProcessor<boolean       ,any>( ()=> false, ü_err => hasErrorCode( 'ENOENT', ü_err ) );
     const ü_detached = !true;
     const ü_files_n = [] as string[];
     const ü_files_v = [ testSrc( 'a b.txt' ) ];

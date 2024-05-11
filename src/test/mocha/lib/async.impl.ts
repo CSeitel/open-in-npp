@@ -10,6 +10,9 @@
          , createTimer
          , whenDoneAndPostProcessed
          } from '../../../lib/asyncUtil';
+  import { hasErrorCode
+         , createErrorWithCode
+         } from '../../../lib/errorUtil';
   import { asyncNullOperation
          , bindAppending
          , nullOperation
@@ -94,6 +97,9 @@ async function ö_whenAccessed( ü_ms:number ):Promise<void> {
 //====================================================================
 
 export async function tst_AsyncCalculation(){
+    const ö_outdated   = hasErrorCode.bind( null, 'OUTDATED_PROMISE' );
+    const ö_no_initial = hasErrorCode.bind( null, 'NO_INITIAL_VALUE' );
+    const ö_internal   = hasErrorCode.bind( null, 'NNN' );
     const ö_timer = createTimer();
     const ö_times = [] as [number,number][];
   for ( const ü_lazy of [false,true] ) {
@@ -101,9 +107,9 @@ export async function tst_AsyncCalculation(){
           ü_calc_1.x = 200;
     await whenDelay( 50 ); // lazy -> no delta 50
   //
-    const ü_whenY_200 = testRejected( ü_calc_1.whenY, '200' );
+    const ü_whenY_200 = testRejected( ü_calc_1.whenY, '200', ö_outdated );
     ü_calc_1.x = 10;
-    const ü_whenY_10  = testRejected( ü_calc_1.whenY,  '10' );
+    const ü_whenY_10  = testRejected( ü_calc_1.whenY,  '10', ö_outdated );
     ü_calc_1.x = 20;
     const ü_whenY_20  =               ü_calc_1.whenY;
   //
@@ -124,7 +130,7 @@ export async function tst_AsyncCalculation(){
   //
     const ü_calc_2 = new AsyncCalculation( ö_whenY, ü_lazy );
     ü_calc_2.x = 17;
-    testRejected( ü_calc_2.whenY, '17' );
+    testRejected( ü_calc_2.whenY, '17', ö_outdated );
     ü_calc_2.x = 17;
     const ü_17 = await ü_calc_2.whenY;
     testEqual( ü_17, 30 );
@@ -134,13 +140,13 @@ export async function tst_AsyncCalculation(){
     if ( ü_lazy ) {
         testEqual( isNaN( await ü_NaN ), true, 'NaN' );
     } else {
-        const ü_whenY_init = testRejected( ü_NaN, 'Undefined X' );
+        const ü_whenY_init = testRejected( ü_NaN, 'Undefined X', ö_no_initial );
         await whenDelay( 0 );
     }
     ü_calc_3.x = 55;
-    const ü_whenY_55 = testRejected( ü_calc_3.whenY, '55' );
+    const ü_whenY_55 = testRejected( ü_calc_3.whenY, '55', ö_outdated );
     ü_calc_3.x = 66;
-    const ü_whenY_66 = testRejected( ü_calc_3.whenY, '66' );
+    const ü_whenY_66 = testRejected( ü_calc_3.whenY, '66', ö_internal );
         await whenDelay( 0 );
         await ü_whenY_66;
   //
@@ -154,7 +160,7 @@ async function ö_whenY( ü_x:number ):Promise<number> {
     switch ( ü_x ) {
         case 55:
         case 66:
-            throw new Error( ''+ü_x );
+            throw createErrorWithCode( 'NNN', ''+ü_x );
     }
     return ü_x + 13;
 }

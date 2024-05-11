@@ -35,7 +35,7 @@ export async function whenFileInfoRead( ü_path:PathLike, ü_slnk = false ):Prom
         return await ß_fs_p[ ü_slnk ? 'lstat'
                                     :  'stat' ]( ü_path );
     } catch ( ü_eX ) {
-        return expectErrorCode<TNodeFSErrorCodes,null>( ü_eX, 'ENOENT', null );
+        return expectErrorCode<TNodeFSErrorCodes,null>( 'ENOENT', ü_eX, null );
     }
 }
 

@@ -21,6 +21,9 @@
   export type TUiXMessageTemplate = TTextTemplate|IExpandUiXMessageVars
 
 //====================================================================
+  export type tc<C extends string=string> = Error &
+    { code:C }
+
   export type TFSError = Error &
   ( { code   : TNodeFSErrorCodes
     , errno  : number

@@ -95,7 +95,7 @@ export async function tst_whenFileTypeKnown(){
     await whenAsyncFunctionTested( whenKnownAsFolder, ü_02, ö_err );
     testSummary_();
 function ö_err( ü_x:string, ü_eX:any ):-9      {
-    return ü_x.endsWith( 'virtual_3_d' ) && expectErrorCode( ü_eX, 'Unknown', true )
+    return ü_x.endsWith( 'virtual_3_d' ) && expectErrorCode( 'Unknown', ü_eX, true )
          ? -6 as -9
          : -5 as -9
          ;

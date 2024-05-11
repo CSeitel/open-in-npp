@@ -169,15 +169,23 @@ export function testSummary( ü_testName:string ):void {
 export function testNever( ü_message?:string ):false {
     
     CSeriesOfTests.push( failurePrefix
+                       + 'Should not be reached: '
                        + ( ü_message ? ü_message +' '
                                      :            '' )
-                       + 'should not be reached' );
+                       );
     return false;
 }
-export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ü_message?:string ):PromiseLike<boolean> {
-    return ü_whenDone.then( function( ü_value:T    ){  return testNever(                                  `Result @ ${ ü_message } = ${ ü_value  }` ); }
-                          , function( ü_reason:any ){  return testEqual( ü_reason instanceof Error, true, `Result = ${ ü_reason } @ ${ ü_message }` ); }
-                          );
+export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ü_message?:string, ü_expError?:( ü_reason:any )=>boolean ):PromiseLike<boolean> {
+    const ü_err =                                                    ü_expError === undefined
+                ? function( ü_reason:any ) {                  return             ü_reason instanceof Error;   }
+                : function( ü_reason:any ) { try            { return ü_expError( ü_reason )               ; }
+                                             catch ( ü_eX ) { return false                                ; } }
+                ;
+    return ü_whenDone.then(
+        function( ü_value:T    ){
+                                   return testNever(                          `Result @ ${ ü_message } = ${ ü_value  }` ); }
+      , function( ü_reason:any ){  return testEqual( ü_err( ü_reason ), true, `Result @ ${ ü_message } = ${ ü_reason }` ); }
+      );
 }
 export function testFailed( ü_reason:any, ü_message?:string ):false {
                                                              const ü_echo = 'Exception caught: '+ ß_echo( ü_reason, 200 );

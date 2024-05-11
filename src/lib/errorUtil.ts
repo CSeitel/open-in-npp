@@ -6,6 +6,7 @@
          , type TUiXMessageTemplate
          , type TTextTemplate
          , type IExpandUiXMessageVars
+         , type tc
          } from '../types/lib.errorUtil.d';
   import { CEUiXMessageType
          , CEUiXText
@@ -22,12 +23,11 @@
 //====================================================================
   type TErrorCodes<C extends string> = C|readonly C[]
 
-export function hasErrorCode<C extends string>( ü_eX:any, ü_code:TErrorCodes<C> ):boolean {
-    type tc = Error & { code:C }
+export function hasErrorCode<C extends string>( ü_code:TErrorCodes<C>, ü_eX:any ):boolean {
     //&&   typeof( ü_eX ) === 'object'
     //&&           ü_eX   !== null
     if (               ü_eX instanceof Error
-      && typeof( (<tc> ü_eX).code ) === 'string' ) {
+      && typeof( ( ü_eX as tc<C> ).code ) === 'string' ) {
       return Array.isArray( ü_code )
                           ? ü_code.includes( (<tc> ü_eX).code )
                           : ü_code ===       (<tc> ü_eX).code
@@ -36,11 +36,17 @@ export function hasErrorCode<C extends string>( ü_eX:any, ü_code:TErrorCodes<C
       return false;
 }
 
-export function expectErrorCode<C extends string              >(   eX:any,   code:TErrorCodes<C>             ):void
-export function expectErrorCode<C extends string,T extends any>(   eX:any,   code:TErrorCodes<C>,   value :T ):     T
-export function expectErrorCode<C extends string,T extends any>(   eX:any,   code:TErrorCodes<C>, ü_value :T ):     T
-export function expectErrorCode<C extends string,T            >( ü_eX:any, ü_code:TErrorCodes<C>, ü_value?:T ):void|T {
-    if ( hasErrorCode( ü_eX, ü_code ) ) { return ü_value; }
+export function createErrorWithCode<C extends string>( ü_code:C, ü_message?:string ):tc<C> {
+     const ü_eX = new Error( ü_message ) as tc<C>;
+           ü_eX.code = ü_code;
+    return ü_eX;
+}
+
+export function expectErrorCode<C extends string              >(   code:TErrorCodes<C>,   eX:any,            ):void
+export function expectErrorCode<C extends string,T extends any>(   code:TErrorCodes<C>,   eX:any,   value :T ):     T
+export function expectErrorCode<C extends string,T extends any>(   code:TErrorCodes<C>,   eX:any,   value :T ):     T
+export function expectErrorCode<C extends string,T            >( ü_code:TErrorCodes<C>, ü_eX:any, ü_value?:T ):void|T {
+    if ( hasErrorCode( ü_code, ü_eX ) ) { return ü_value; }
     throw ü_eX;
 }
 

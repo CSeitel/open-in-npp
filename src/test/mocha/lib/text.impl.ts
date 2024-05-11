@@ -82,7 +82,7 @@ export async function tst_win32Names(){
                    await whenFileWritten( ö_file, '' );
   //
     await whenAsyncFunctionTested( ö_whenRenamed, ö_data, function( ü_char, ü_eX, x_y ){
-        expectErrorCode( ü_eX, 'ENOENT' );
+        expectErrorCode( 'ENOENT', ü_eX );
         return CCharSet.fs_win32.includes( ü_char.charCodeAt(0) )
              ? x_y[1]
              : '';

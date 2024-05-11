@@ -21,6 +21,7 @@
          } from '../runtime/context';
   import { ErrorWithUixMessage
          , UiXMessage
+         , createErrorWithCode
          } from '../lib/errorUtil';
 //====================================================================
   export const whenImmediate = setImmediate.__promisify__;
@@ -171,7 +172,7 @@ constructor(
                    )
     if ( ! this.lazy ) {
     }
-        this._whenY = { then:( ()=>Promise.reject( new Error( 'X not set' ) ) ) as any //TThen
+        this._whenY = { then:( ()=>Promise.reject( createErrorWithCode( 'NO_INITIAL_VALUE', 'X not set' ) ) ) as any //TThen
                       };
 }
 
@@ -209,7 +210,7 @@ private _on( ü_err:boolean, ü_before:TBefore<Ty,Tx>, ü_y_    :any ):Ty {
         if ( ü_err ) { throw ü_y_; }
                       return ü_y_ as Ty;
     }
-        throw                  new Error( `Outdated calculation${ this._whenCalculated.name }( ${ 'ö_x_before' } )` )  ;
+        throw createErrorWithCode( 'OUTDATED_PROMISE', `Outdated calculation: ${ this._whenCalculated.name }( ${ 'ö_x_before' } )` )  ;
       //return Promise.reject( new Error( `Outdated ${ ö_x }` ) );
       //                                  return this.whenY;
 
