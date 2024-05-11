@@ -145,17 +145,19 @@ export function createPromise<T>():TPromise<T> {
 }
 
 //====================================================================
+    type TBefore<Ty,Tx> = {
+        pendingY:PromiseLike<Ty>
+      , x:Tx
+    }
 
 export class AsyncCalculation<Ty,Tx=Ty> {
-    private          _tag  :PromiseLike<Ty>
+    private          _pendingY  :PromiseLike<Ty>|null|undefined = undefined;
     private          _whenY:PromiseLike<Ty>
     private          _x    :            Tx = undefined as any;
 constructor( 
     private readonly _whenCalculated:TAsyncFunctionSingleArg<Ty,Tx>
   , public  readonly  lazy = true
 ){
-    if ( ! this.lazy ) {
-    }
     type T1 = Ty
     type T2 = never
     type TThen = 
@@ -167,11 +169,10 @@ constructor(
                              ,onRejected ?:( (reason?:any)=>T1|PromiseLike<T1> )|null
                              )=>void
                    )
-        this._tag   =
-        this._whenY = { then:( ()=>Promise.reject( new Error( 'X not set' ) )
-
-         ) as any //TThen
-                      }
+    if ( ! this.lazy ) {
+    }
+        this._whenY = { then:( ()=>Promise.reject( new Error( 'X not set' ) ) ) as any //TThen
+                      };
 }
 
 setX( ü_x:Tx ):this {
@@ -180,24 +181,38 @@ setX( ü_x:Tx ):this {
 }
 
 set x( ü_x:Tx ) {
-                       this._x     =                           ü_x  ;
-    if ( this.lazy ) { this._tag   = Promise.resolve() as Promise<Ty>; }
-    else             { this._whenY = this._whenCalculated( this._x ); }
+                       this._x        =                           ü_x  ;
+    if ( this.lazy ) { this._pendingY = null; } // another y shall be pending, this one is obsolete
+    else             { this._whenY    = this._whenCalculated( this._x ); }
 }
 
 get whenY():PromiseLike<Ty> {
-    if ( this.lazy ) { this._tag   =
-                       this._whenY = this._whenCalculated( this._x ); }
+    if ( this.lazy ) { this._pendingY =
+                       this._whenY    = this._whenCalculated( this._x ); }
   //
-    let ö_pendingY = this._whenY;
-    let ö_x        = this._x    ;
-    return this._whenY!.then( ü_y => {
-                      const ö_current = this.lazy ? this._tag : this._whenY;
-        if ( ö_pendingY === ö_current ) { return ü_y; }
-        throw                  new Error( `Outdated calculation${ this._whenCalculated.name }( ${ ö_x } )` )  ;
+    const ü_before:TBefore<Ty,Tx> =
+      { pendingY: this._whenY
+      , x       : this._x
+      };
+  //
+    const ü_onY   = this._on.bind( this, false as any, ü_before );
+    const ü_onErr = this._on.bind( this, true        , ü_before );
+    return this._whenY.then( ü_onY, ü_onErr );
+}
+
+private _on(   err:false  ,   before:TBefore<Ty,Tx>,   y     :Ty  ):Ty
+private _on(   err:true   ,   before:TBefore<Ty,Tx>,   reason:any ):never
+private _on( ü_err:boolean, ü_before:TBefore<Ty,Tx>, ü_y_    :any ):Ty {
+                  const ü_pendingY_after = this.lazy ? this._pendingY
+                                                     : this._whenY;
+    if ( ü_before.pendingY === ü_pendingY_after ) {
+        if ( ü_err ) { throw ü_y_; }
+                      return ü_y_ as Ty;
+    }
+        throw                  new Error( `Outdated calculation${ this._whenCalculated.name }( ${ 'ö_x_before' } )` )  ;
       //return Promise.reject( new Error( `Outdated ${ ö_x }` ) );
       //                                  return this.whenY;
-    });
+
 }
 
 }

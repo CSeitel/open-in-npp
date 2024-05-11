@@ -96,7 +96,7 @@ async function ö_whenAccessed( ü_ms:number ):Promise<void> {
 export async function tst_AsyncCalculation(){
     const ö_timer = createTimer();
     const ö_times = [] as [number,number][];
-  for ( const ü_lazy of [true,false] ) {
+  for ( const ü_lazy of [false,true] ) {
     const ü_calc_1 = new AsyncCalculation( ö_whenY, ü_lazy );
           ü_calc_1.x = 200;
     await whenDelay( 50 ); // lazy -> no delta 50
@@ -105,7 +105,7 @@ export async function tst_AsyncCalculation(){
     ü_calc_1.x = 10;
     const ü_whenY_10  = testRejected( ü_calc_1.whenY,  '10' );
     ü_calc_1.x = 20;
-    const ü_whenY_20  = ü_calc_1.whenY;
+    const ü_whenY_20  =               ü_calc_1.whenY;
   //
     const ü_20 = await ü_whenY_20;
     testEqual( ü_20, 33 );
@@ -124,21 +124,38 @@ export async function tst_AsyncCalculation(){
   //
     const ü_calc_2 = new AsyncCalculation( ö_whenY, ü_lazy );
     ü_calc_2.x = 17;
-    const ü_whenY_17  = testRejected( ü_calc_2.whenY,  '17' );
+    testRejected( ü_calc_2.whenY, '17' );
     ü_calc_2.x = 17;
     const ü_17 = await ü_calc_2.whenY;
     testEqual( ü_17, 30 );
   //
     const ü_calc_3 = new AsyncCalculation( ö_whenY, ü_lazy );
-    const ü_whenY_init = testRejected( ü_calc_3.whenY, 'Undefined' );
+    const ü_NaN = ü_calc_3.whenY;
+    if ( ü_lazy ) {
+        testEqual( isNaN( await ü_NaN ), true, 'NaN' );
+    } else {
+        const ü_whenY_init = testRejected( ü_NaN, 'Undefined X' );
+        await whenDelay( 0 );
+    }
+    ü_calc_3.x = 55;
+    const ü_whenY_55 = testRejected( ü_calc_3.whenY, '55' );
+    ü_calc_3.x = 66;
+    const ü_whenY_66 = testRejected( ü_calc_3.whenY, '66' );
+        await whenDelay( 0 );
+        await ü_whenY_66;
   //
-    await whenDelay( 0 );
     ö_times.length = 0;
   }
+      //await whenDelay( 5 );
 //
 async function ö_whenY( ü_x:number ):Promise<number> {
     ö_times.push([ ü_x, ö_timer() ]);
     await whenDelay( ü_x );
+    switch ( ü_x ) {
+        case 55:
+        case 66:
+            throw new Error( ''+ü_x );
+    }
     return ü_x + 13;
 }
 }

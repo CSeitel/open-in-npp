@@ -80,9 +80,9 @@ clone( ü_what ?:TXtnCfgIds ):ConfigSnapshot {
                                     );
     return ü_cfg;
     switch ( ü_what ) {
-        case 'executable'               : if ( ü_cfg._whenExecutable     !== null ) { ü_cfg._whenExecutable    .x = ü_cfg.executable               ; } break;
-        case 'workingDirectory'         : if ( ü_cfg._whenWorkingDir     !== null ) { ü_cfg._whenWorkingDir    .x = ü_cfg.workingDirectory         ; } break;
-        case 'virtualDocumentsDirectory': if ( ü_cfg._whenVirtualDocsDir !== null ) { ü_cfg._whenVirtualDocsDir.x = ü_cfg.virtualDocumentsDirectory; } break;
+        case 'executable'               :
+        case 'workingDirectory'         :
+        case 'virtualDocumentsDirectory':
     }
     return ü_cfg;
 }
