@@ -147,13 +147,31 @@ export function createPromise<T>():TPromise<T> {
 //====================================================================
 
 export class AsyncCalculation<Ty,Tx=Ty> {
-    private          _tag  :PromiseLike<Ty>|null = null;
-    private          _whenY:PromiseLike<Ty>|null = null;
-    private          _x    :            Tx       = undefined as any;
+    private          _tag  :PromiseLike<Ty>
+    private          _whenY:PromiseLike<Ty>
+    private          _x    :            Tx = undefined as any;
 constructor( 
     private readonly _whenCalculated:TAsyncFunctionSingleArg<Ty,Tx>
   , public  readonly  lazy = true
 ){
+    if ( ! this.lazy ) {
+    }
+    type T1 = Ty
+    type T2 = never
+    type TThen = 
+                   (        (onFulfilled?:( (value :Ty  )=>T1|PromiseLike<T1> )|null
+                             ,onRejected ?:( (reason?:any)=>T2|PromiseLike<T2> )|null
+                             )=>void
+                   ) |
+                   (        (onFulfilled?:( (value :Ty  )=>T2|PromiseLike<T2> )|null
+                             ,onRejected ?:( (reason?:any)=>T1|PromiseLike<T1> )|null
+                             )=>void
+                   )
+        this._tag   =
+        this._whenY = { then:( ()=>Promise.reject( new Error( 'X not set' ) )
+
+         ) as any //TThen
+                      }
 }
 
 setX( ü_x:Tx ):this {
@@ -163,7 +181,7 @@ setX( ü_x:Tx ):this {
 
 set x( ü_x:Tx ) {
                        this._x     =                           ü_x  ;
-    if ( this.lazy ) { this._tag   = null; }
+    if ( this.lazy ) { this._tag   = Promise.resolve() as Promise<Ty>; }
     else             { this._whenY = this._whenCalculated( this._x ); }
 }
 

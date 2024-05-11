@@ -175,8 +175,8 @@ export function testNever( ü_message?:string ):false {
     return false;
 }
 export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ü_message?:string ):PromiseLike<boolean> {
-    return ü_whenDone.then( function( ü_value:T    ){  return testNever(                                  ü_message ); }
-                          , function( ü_reason:any ){  return testEqual( ü_reason instanceof Error, true, ü_message ); }
+    return ü_whenDone.then( function( ü_value:T    ){  return testNever(                                  `Result @ ${ ü_message } = ${ ü_value  }` ); }
+                          , function( ü_reason:any ){  return testEqual( ü_reason instanceof Error, true, `Result = ${ ü_reason } @ ${ ü_message }` ); }
                           );
 }
 export function testFailed( ü_reason:any, ü_message?:string ):false {

@@ -97,23 +97,23 @@ export async function tst_AsyncCalculation(){
     const ö_timer = createTimer();
     const ö_times = [] as [number,number][];
   for ( const ü_lazy of [true,false] ) {
-    const ü_calc = new AsyncCalculation( ö_whenY, ü_lazy );
-          ü_calc.x = 200;
+    const ü_calc_1 = new AsyncCalculation( ö_whenY, ü_lazy );
+          ü_calc_1.x = 200;
     await whenDelay( 50 ); // lazy -> no delta 50
   //
-    const ü_whenY_200 = testRejected( ü_calc.whenY, '200' );
-    ü_calc.x = 10;
-    const ü_whenY_10  = testRejected( ü_calc.whenY,  '10' );
-    ü_calc.x = 20;
-    const ü_whenY_20  = ü_calc.whenY;
+    const ü_whenY_200 = testRejected( ü_calc_1.whenY, '200' );
+    ü_calc_1.x = 10;
+    const ü_whenY_10  = testRejected( ü_calc_1.whenY,  '10' );
+    ü_calc_1.x = 20;
+    const ü_whenY_20  = ü_calc_1.whenY;
   //
     const ü_20 = await ü_whenY_20;
     testEqual( ü_20, 33 );
     testEqual( await ü_whenY_200, true, 'Rejected 200' );
   //
-    ü_calc.x = 30; // lazy -> no entry
-    ü_calc.x = 40; // delta 200
-    const ü_40 = await ü_calc.whenY;
+    ü_calc_1.x = 30; // lazy -> no entry
+    ü_calc_1.x = 40; // delta 200
+    const ü_40 = await ü_calc_1.whenY;
     testEqual( ü_40, 53 );
   //
     ß_trc&& ß_trc( ö_times );
@@ -122,13 +122,17 @@ export async function tst_AsyncCalculation(){
     testEqual( ö_times[3][1] - ö_times[2][1] >= 200,  ü_lazy, 'Delta 200' );
     ö_times.length = 0;
   //
-    const ü_repe = new AsyncCalculation( ö_whenY, ü_lazy );
-    ü_repe.x = 17;
-    const ü_whenY_17  = testRejected( ü_repe.whenY,  '17' );
-    ü_repe.x = 17;
-    const ü_17 = await ü_repe.whenY;
+    const ü_calc_2 = new AsyncCalculation( ö_whenY, ü_lazy );
+    ü_calc_2.x = 17;
+    const ü_whenY_17  = testRejected( ü_calc_2.whenY,  '17' );
+    ü_calc_2.x = 17;
+    const ü_17 = await ü_calc_2.whenY;
     testEqual( ü_17, 30 );
   //
+    const ü_calc_3 = new AsyncCalculation( ö_whenY, ü_lazy );
+    const ü_whenY_init = testRejected( ü_calc_3.whenY, 'Undefined' );
+  //
+    await whenDelay( 0 );
     ö_times.length = 0;
   }
 //
