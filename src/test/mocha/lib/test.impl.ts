@@ -20,6 +20,7 @@
   import { bindArguments
          , bindAppending
          , identityMap
+         , asyncNullOperation
          } from '../../../lib/functionUtil';
   import { testSrc
          , testEqual
@@ -27,7 +28,13 @@
          , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
-//export const tst_dispatch = tst_function;
+  export const tst_dispatch = asyncNullOperation;
+//====================================================================
+
+function tst_asyncLike():PromiseLike<void> {
+    throw new Error('d');
+}
+
 //====================================================================
 
 export async function tst_bindArguments(){

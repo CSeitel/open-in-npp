@@ -15,7 +15,6 @@
          } from '../../../lib/errorUtil';
   import { asyncNullOperation
          , bindAppending
-         , nullOperation
          } from '../../../lib/functionUtil';
   import { whenFileInfoRead
          } from '../../../lib/fsUtil';
@@ -25,13 +24,7 @@
          , testRejected
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_AsyncCalculation; //tst_asyncLike;
-//====================================================================
-
-export function tst_asyncLike():PromiseLike<void> {
-    throw new Error('d');
-}
-
+  export const tst_dispatch = asyncNullOperation;
 //====================================================================
 
 export async function tst_syntax(){
@@ -103,7 +96,7 @@ export async function tst_AsyncCalculation(){
     const ö_timer = createTimer();
     const ö_times = [] as [number,number][];
   for ( const ü_lazy of [false,true] ) {
-    const ü_calc_1 = new AsyncCalculation( ö_whenY, ü_lazy );
+    const ü_calc_1 = new AsyncCalculation( ö_whenY, ü_lazy, 'WhenYofX' );
           ü_calc_1.x = 200;
     await whenDelay( 50 ); // lazy -> no delta 50
   //

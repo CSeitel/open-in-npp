@@ -23,7 +23,7 @@
 //--------------------------------------------------------------------
   const ß_single =
     { dispatch: ß_fs.tst_dispatch
-    , bbcee   : ß_fs.tst_whenFileInfoRead
+  //, bbcee   : ß_fs.tst_whenFileInfoRead
   //, ccee    : ß_fs.tst_whenFileInfoRead
     } as TTestSuite;
 //--------------------------------------------------------------------

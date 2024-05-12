@@ -21,7 +21,8 @@
          } from '../../../lib/arrayUtil';
   import { expectErrorCode
          } from '../../../lib/errorUtil';
-  import { bindArguments
+  import { asyncNullOperation
+         , bindArguments
          , identityMap
          } from '../../../lib/functionUtil';
   import { whenTempFile
@@ -35,8 +36,7 @@
          , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
-//export const tst_dispatch = tst_win32Names;
-//export const tst_dispatch = tst_encodeURIC;
+  export const tst_dispatch = asyncNullOperation;
 //====================================================================
 
 export async function tst_expandEnvVariables(){
@@ -49,19 +49,22 @@ export async function tst_expandEnvVariables(){
       ] as TOrderedPairs<string,string>;
     testFunction( expandEnvVariables, ü_data );
   //
-    const ü_temp =
-      [ [ 'a-${ 0 } ${1}'  , 'a-00 11'   ]
-      , [ 'a-${ hugo}', 'a-HUGO'  ]
-      ] as TOrderedPairs<string,string>;
+}
+
+export async function tst_expandTemplateString(){
+  //
     const ü_vars = ['00','11'];
-    const ö_expandTemplateString_o = bindArguments( expandTemplateString, { arrangeBound:[1], realFirst:true }
-                                           , Object.assign( ü_vars, {hugo : 'HUGO'} ) );
-    testFunction( ö_expandTemplateString_o, ü_temp );
+    const ü_temp =
+      [ [ 'a-{ 0 } {1}'  , 'a-00 11' ]
+      , [ 'a-{ hugo}'    , 'a-HUGO'  ]
+      ] as TOrderedPairs<string,string>;
   //
-    const ö_expandTemplateString_a = bindArguments( expandTemplateString, { arrangeBound:[1], realFirst:true }
-                                           , ...            ü_vars                    );
-    testFunction( ö_expandTemplateString_a, ü_temp );
+    const ö_object = bindArguments( expandTemplateString, { realFirst:true, arrangeBound:[1] }, Object.assign( ü_vars, { hugo:'HUGO' } ) );
+    const ö_array  = bindArguments( expandTemplateString, { realFirst:true, arrangeBound:[1] }, ...            ü_vars                    );
   //
+    testFunction( ö_object, ü_temp );
+                            ü_temp[1][1] = ü_temp[1][0];
+    testFunction( ö_array , ü_temp );
 }
 
 //====================================================================

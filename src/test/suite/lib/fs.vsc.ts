@@ -22,17 +22,12 @@
   import { bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-
-export async function tst_dispatch(){
-    return tst_whenFileTypeKnown();
-}
-
+  export const tst_dispatch = tst_whenFileTypeKnown;
 //====================================================================
 
 export async function tst_whenFileInfoRead(){
@@ -48,7 +43,6 @@ export async function tst_whenFileInfoRead(){
     
     testEqual( ü_a!.mtime, ü_b!.mtime );
   //
-    testSummary_();
 
 async function ö_whenCtime( ü_path:string ):Promise<string> {
     const ü_info = ( await whenFileInfoRead( ü_path ) )!;
@@ -64,7 +58,6 @@ async function ö_whenCtime( ü_path:string ):Promise<string> {
 export async function tst_whenFilesFound(){
     const ü_files = await whenFilesFound( testSrc(), '**/*e*.txt' );
     testEqual( ü_files.length, 5 );
-    testSummary_();
 }
 
 //====================================================================
@@ -85,20 +78,21 @@ export async function tst_whenFileTypeKnown(){
       , [ testSrc( 'virtual_1_j' ), CEFileType.SymLinkFolder  , true  ]
       , [ testSrc( 'virtual_1_d' ), CEFileType.SymLinkFolder  , true  ]
       , [ testSrc( 'virtual_2_d' ), CEFileType.SymLinkFolder  , true  ]
-      , [ testSrc( 'virtual_3_d' ), -9                        , true  ]
+      , [ testSrc( 'virtual_3_d' ),                
+                              -9 as CEFileType.Unknown        , true  ]
       , [ testSrc( 'virtual_6_d' ), CEFileType.SymLinkUnknown , false ]
       ];
-    const ü_01 = ü_data.map( pickPair<string,CEFileType|-9  ,boolean   |-9  >( 0, 1 ) );
-    const ü_02 = ü_data.map( pickPair<string,boolean   |-9  ,CEFileType|-9  >( 0, 2 ) );
+    const ü_01 = ü_data.map( pickPair<string,CEFileType,boolean   >( 0, 1 ) );
+    const ü_02 = ü_data.map( pickPair<string,boolean   ,CEFileType>( 0, 2 ) );
     
     await whenAsyncFunctionTested( whenFileTypeKnown, ü_01, ö_err );
     await whenAsyncFunctionTested( whenKnownAsFolder, ü_02, ö_err );
-    testSummary_();
-function ö_err( ü_x:string, ü_eX:any ):-9      {
-    return ü_x.endsWith( 'virtual_3_d' ) && expectErrorCode( 'Unknown', ü_eX, true )
-         ? -6 as -9
-         : -5 as -9
-         ;
+function ö_err( ü_x:string, ü_eX:any, ü_x_y:[any,any] ):any {
+    if ( ü_x.endsWith( 'virtual_3_d' ) ) {
+        expectErrorCode( 'Unknown', ü_eX );
+        return ü_x_y[1];
+    }
+    throw ü_eX;
 }
 }
 
@@ -112,7 +106,6 @@ export async function tst_whenWS(){
       , [ testSrc( 'virtual_6_d' ), false ]
       ] as TOrderedPairs<string,boolean>;
     testFunction( bindArguments( isContainedInWorkspace, { prepare: {0:fileToUri} } ), ü_data )
-    testSummary_();
 }
 
 //====================================================================

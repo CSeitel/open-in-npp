@@ -8,7 +8,7 @@
 
   const ß_skipTests =  true; // = except single test
   whenAllTestsRun([
-      [ 'Single', [ ß_any.tst_dbg
+      [ 'Single', [ ß_any.tst_dispatch
                       ], !ß_skipTests ]
     , [ 'Any'   , ß_any,  ß_skipTests ]
     ]);

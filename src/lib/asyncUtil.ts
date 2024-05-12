@@ -152,28 +152,20 @@ export function createPromise<T>():TPromise<T> {
     }
 
 export class AsyncCalculation<Ty,Tx=Ty> {
-    private          _pendingY  :PromiseLike<Ty>|null|undefined = undefined;
-    private          _whenY:PromiseLike<Ty>
-    private          _x    :            Tx = undefined as any;
-constructor( 
+    private          _pendingY:PromiseLike<Ty>|null = undefined as any;
+    private          _whenY   :PromiseLike<Ty>
+    private          _x       :            Tx       = undefined as any;
+constructor(
     private readonly _whenCalculated:TAsyncFunctionSingleArg<Ty,Tx>
   , public  readonly  lazy = true
+  , private readonly _name = _whenCalculated.name
 ){
-    type T1 = Ty
-    type T2 = never
-    type TThen = 
-                   (        (onFulfilled?:( (value :Ty  )=>T1|PromiseLike<T1> )|null
-                             ,onRejected ?:( (reason?:any)=>T2|PromiseLike<T2> )|null
-                             )=>void
-                   ) |
-                   (        (onFulfilled?:( (value :Ty  )=>T2|PromiseLike<T2> )|null
-                             ,onRejected ?:( (reason?:any)=>T1|PromiseLike<T1> )|null
-                             )=>void
-                   )
     if ( ! this.lazy ) {
     }
-        this._whenY = { then:( ()=>Promise.reject( createErrorWithCode( 'NO_INITIAL_VALUE', 'X not set' ) ) ) as any //TThen
-                      };
+        this._whenY = { then:ö_alwaysReject as any };
+function ö_alwaysReject():Promise<Ty> {
+    return Promise.reject( createErrorWithCode( 'NO_INITIAL_VALUE', `Input for ${ _name } not set` ) );
+}
 }
 
 setX( ü_x:Tx ):this {
@@ -196,24 +188,23 @@ get whenY():PromiseLike<Ty> {
       , x       : this._x
       };
   //
-    const ü_onY   = this._on.bind( this, false as any, ü_before );
-    const ü_onErr = this._on.bind( this, true        , ü_before );
+    const ü_onY   = this._onDone.bind( this, false as any, ü_before );
+    const ü_onErr = this._onDone.bind( this, true        , ü_before );
     return this._whenY.then( ü_onY, ü_onErr );
 }
 
-private _on(   err:false  ,   before:TBefore<Ty,Tx>,   y     :Ty  ):Ty
-private _on(   err:true   ,   before:TBefore<Ty,Tx>,   reason:any ):never
-private _on( ü_err:boolean, ü_before:TBefore<Ty,Tx>, ü_y_    :any ):Ty {
-                  const ü_pendingY_after = this.lazy ? this._pendingY
-                                                     : this._whenY;
+private _onDone(   err:false  ,   before:TBefore<Ty,Tx>,   y     :Ty  ):Ty
+private _onDone(   err:true   ,   before:TBefore<Ty,Tx>,   reason:any ):never
+private _onDone( ü_err:boolean, ü_before:TBefore<Ty,Tx>, ü_y_    :any ):Ty {
+                         const ü_pendingY_after = this.lazy ? this._pendingY
+                                                            : this._whenY;
     if ( ü_before.pendingY === ü_pendingY_after ) {
         if ( ü_err ) { throw ü_y_; }
                       return ü_y_ as Ty;
     }
-        throw createErrorWithCode( 'OUTDATED_PROMISE', `Outdated calculation: ${ this._whenCalculated.name }( ${ 'ö_x_before' } )` )  ;
+        throw createErrorWithCode( 'OUTDATED_PROMISE', `Outdated calculation: ${ this._name }( ${ ü_before.x } )` );
       //return Promise.reject( new Error( `Outdated ${ ö_x }` ) );
       //                                  return this.whenY;
-
 }
 
 }

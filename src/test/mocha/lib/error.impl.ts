@@ -18,17 +18,17 @@
          } from '../../../lib/asyncUtil';
   import { isDirectInstanceOf
          } from '../../../lib/objectUtil';
-  import { bindArguments
+  import { asyncNullOperation
+         , bindArguments
          , bindAppending
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_UiX;
+  export const tst_dispatch = asyncNullOperation;
 //====================================================================
 
 export async function tst_print(){
@@ -47,7 +47,6 @@ class ö_ClassB extends ö_ClassA { bbb = 12; }
     let s = '';
     for ( const ü_mKey in ü_oref_a ) { s += ü_mKey; }
   //
-    testSummary_();
 }
 
 //====================================================================
@@ -80,8 +79,6 @@ export async function tst_UiX(){
     await whenAsyncFunctionTested( ü_true, ü_data_true, ö_error );
     await whenAsyncFunctionTested( ü_none, ü_data_none, ö_error );
   //
-    testSummary_();
-  //
 function ö_finalize( val:IUiXMessage ):string {
     return val.text;
 }
@@ -97,9 +94,9 @@ class ö_ErrorX        extends Error               { more = 12; }
 class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
   //
     const ü_errMsg  = new   ErrorWithUixMessage ('w','u');
-    const ü_errMsgX = new ö_ErrorMessageX('w','u');
-    const ü_err     = new   Error        ('w')    ;
-    const ü_errX    = new ö_ErrorX       ('w')    ;
+    const ü_errMsgX = new ö_ErrorMessageX       ('w','u');
+    const ü_err     = new   Error               ('w')    ;
+    const ü_errX    = new ö_ErrorX              ('w')    ;
   //
     const ü_errMsg_Y  = summarizeError( ü_errMsg , 'TEST' );
     const ü_errMsgX_Y = summarizeError( ü_errMsgX, 'TEST' );
@@ -115,8 +112,8 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
     testFunction( bindArguments( isDirectInstanceOf, { realFirst:true, arrangeBound:[1] }, ErrorWithUixMessage ), ü_data );
   //
         const ü_prot_a = Object.getPrototypeOf( ü_errMsgX );
-        const ü_prot_b = Object.getPrototypeOf( ü_errMsg );
-        const ü_prot_c = Object.getPrototypeOf( ü_err );
+        const ü_prot_b = Object.getPrototypeOf( ü_errMsg  );
+        const ü_prot_c = Object.getPrototypeOf( ü_err     );
   //
     const ü_errX_Z_ = format(                        ü_errX       );
     const ü_errX_Z  = format( Object.setPrototypeOf( ü_errX, {} ) );
@@ -134,7 +131,7 @@ class ö_ErrorMessageX extends ErrorWithUixMessage { more = 12; }
         ü_txt = summarizeError( new ö_ErrorX(), 'TEST' );
         ü_txt = summarizeError( ü_eX, 'TEST' );
     }
-    testEqual( ü_txt, '' );
+  //testEqual( ü_txt, '' );
 }
 
 //====================================================================

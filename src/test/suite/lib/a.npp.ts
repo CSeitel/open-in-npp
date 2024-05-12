@@ -36,24 +36,12 @@
   import { expandEnvVariables
          } from '../../../lib/textUtil';
   import { testSrc
-         , testSummary_
          , testEqual
          , testNotEqual
          , testCondition
          } from '../../../lib/testUtil';
 //====================================================================
-
-export async function tst_dbg(){
-    return tst_settings();
-    return tst_manual();
-}
-
-//====================================================================
-
-export async function tst_manual(){
-    await whenDelay( 30 * 1000 );
-}
-
+  export const tst_dispatch = tst_settings;
 //====================================================================
 
 export async function tst_settings(){
@@ -75,11 +63,11 @@ export async function tst_settings(){
     const ü_cfg_1 = ß_getConfigSnapshot();
     const ü_dir = await ü_cfg_1.whenWorkingDir;
   //
-    testSummary_();
-  //
 function ö_setExe( ü_exe:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.executable      , ü_exe, ConfigurationTarget.Workspace ); }
 function ö_setDir( ü_dir:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.workingDirectory, ü_dir, ConfigurationTarget.Workspace ); }
 }
+
+//====================================================================
 
 export async function tst_history(){
     const ü_extn = await ß_whenXtnAvailable();
@@ -119,10 +107,7 @@ export async function tst_history(){
     const ü_cfgData = ü_cfgHist.dataRef;
     testEqual( ü_cfgData.executable, '', 'Executable' );
   //
-  //
-    testSummary_();
     return;
-  //
 }
 
 export async function tst_b(){
@@ -137,8 +122,6 @@ export async function tst_b(){
     testEqual( ü_pid_1, ü_pid_2, 'Pid' );
   //
     testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
-  //
-    testSummary_( 'tst_' );
   //
     return;
   /*
@@ -189,7 +172,6 @@ export async function tst_a(){
     await whenNewTextEditorOpened( { content:'{"a":33}' } );
     const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
   //
-    testSummary_( 'tst_' );
   //
 }
 

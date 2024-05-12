@@ -77,14 +77,13 @@
       "preLaunchTask": "npm: watch"
     }
 
-  , { "name"                   : "Vsc Test Suite"
+  , { "name"                   : "Vsc Test Suite: xtnRunVscTestsMocha"
     , "presentation": { "group": "Test", "order": 10, "hidden": false },
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args":
-        [ "--extensionDevelopmentPath=${workspaceFolder}"
-        , "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+      "args": [ "--extensionDevelopmentPath=${workspaceFolder}"
+              , "--extensionTestsPath=${workspaceFolder}/out/test/suite/xtnRunVscTestsMocha"
         , "${workspaceFolder}/etc/test/workspaces/Some.code-workspace"
         , "${workspaceFolder}/etc/test/workspaceFolder/Has Blank.txt"
         , "--disable-extensions"

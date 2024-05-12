@@ -8,7 +8,7 @@
 //--------------------------------------------------------------------
   import { ß_trc
          } from '../../../runtime/context';
-  import { bindArguments
+  import { asyncNullOperation
          } from '../../../lib/functionUtil';
   import { testSrc
          , testEqual
@@ -16,7 +16,7 @@
          , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_class;
+  export const tst_dispatch = asyncNullOperation;
 //====================================================================
 
 export async function tst_syntax(){

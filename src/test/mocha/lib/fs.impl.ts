@@ -28,7 +28,8 @@
   import { expandEnvVariables
          , wrapDoubleQuotes
          } from '../../../lib/textUtil';
-  import { bindArguments
+  import { asyncNullOperation
+         , bindArguments
          } from '../../../lib/functionUtil';
 //--------------------------------------------------------------------
   import { testSrc
@@ -38,7 +39,7 @@
          , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
-//export const tst_dispatch = tst_isWin32Exe;
+  export const tst_dispatch = asyncNullOperation;
 //====================================================================
 
 export async function tst_whenFileInfoRead(){

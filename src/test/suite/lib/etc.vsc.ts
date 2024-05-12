@@ -20,7 +20,6 @@
   import { bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
-         , testSummary_
          , whenAsyncFunctionTested
          , testFunction
          , testEqual

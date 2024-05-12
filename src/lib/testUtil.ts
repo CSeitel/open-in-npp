@@ -41,6 +41,11 @@
 //--------------------------------------------------------------------
 //const ß_escape = escapeFF( CRgXp.specialChars );
   const CSeriesOfTests = [] as TTestResult[];
+   const LCHeader =
+    {
+      REJECTED_0: (ü_msg:string,ü_val:string)=> `No rejection for "${ ü_msg }" due to result "${ ü_val }"`
+    , REJECTED_1: (ü_msg:string,ü_err:string)=> `Rejection for "${ ü_msg }" due to "${ ü_err }"`
+    };
 //====================================================================
 
 function ß_echo( ü_oref:any, ü_length:number ):string {
@@ -140,10 +145,6 @@ function ä_whenTested( ü_rc:number ):PromiseLike<number> {
 
 //--------------------------------------------------------------------
 
-export function testSummary_( ü_series?:string ):void {
-    ß_trc&& ß_trc( 'testSummary_' );
-  //testSummary();
-}
 export function testSummary( ü_testName:string ):void {
     const ü_crlf    = ß_RuntimeContext.lineSep;
     const ü_results = CSeriesOfTests.slice(0);
@@ -175,16 +176,16 @@ export function testNever( ü_message?:string ):false {
                        );
     return false;
 }
-export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ü_message?:string, ü_expError?:( ü_reason:any )=>boolean ):PromiseLike<boolean> {
-    const ü_err =                                                    ü_expError === undefined
-                ? function( ü_reason:any ) {                  return             ü_reason instanceof Error;   }
-                : function( ü_reason:any ) { try            { return ü_expError( ü_reason )               ; }
-                                             catch ( ü_eX ) { return false                                ; } }
+export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ü_message = 'Anonymous', ü_expectError?:( ü_reason:any )=>boolean ):PromiseLike<boolean> {
+    const ü_err =                                                    ü_expectError === undefined
+                ? function( ü_reason:any ) {                  return                ü_reason instanceof Error;   }
+                : function( ü_reason:any ) { try            { return ü_expectError( ü_reason )               ; }
+                                             catch ( ü_eX ) { return false                                   ; } }
                 ;
     return ü_whenDone.then(
         function( ü_value:T    ){
-                                   return testNever(                          `Result @ ${ ü_message } = ${ ü_value  }` ); }
-      , function( ü_reason:any ){  return testEqual( ü_err( ü_reason ), true, `Result @ ${ ü_message } = ${ ü_reason }` ); }
+                                   return testNever(                          LCHeader.REJECTED_0( ü_message, ''+ü_value  ) ); }
+      , function( ü_reason:any ){  return testEqual( ü_err( ü_reason ), true, LCHeader.REJECTED_1( ü_message,    ü_reason ) ); }
       );
 }
 export function testFailed( ü_reason:any, ü_message?:string ):false {
