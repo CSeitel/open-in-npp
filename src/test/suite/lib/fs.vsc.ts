@@ -19,7 +19,8 @@
          } from '../../../lib/arrayUtil';
   import { expectErrorCode
          } from '../../../lib/errorUtil';
-  import { bindArguments
+  import { asyncNullOperation
+         , bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
          , whenAsyncFunctionTested
@@ -27,7 +28,7 @@
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = tst_whenFileTypeKnown;
+  export const tst_dispatch = asyncNullOperation;
 //====================================================================
 
 export async function tst_whenFileInfoRead(){
@@ -56,8 +57,9 @@ async function ö_whenCtime( ü_path:string ):Promise<string> {
 //====================================================================
 
 export async function tst_whenFilesFound(){
-    const ü_files = await whenFilesFound( testSrc(), '**/*e*.txt' );
-    testEqual( ü_files.length, 5 );
+    const ü_pattern = '**/*e*.txt';
+    const ü_files = await whenFilesFound( testSrc(), ü_pattern );
+    testEqual( ü_files.length, 5, ü_pattern );
 }
 
 //====================================================================
@@ -98,18 +100,20 @@ function ö_err( ü_x:string, ü_eX:any, ü_x_y:[any,any] ):any {
 
 //====================================================================
 
-export async function tst_whenWS(){
+export async function tst_isContainedInWorkspace(){
+    const ü_wsFolder = testSrc( '../etc/test/workspaceFolder' );
   //
-    const ü_data = [
-        [ __filename, true ]
-      , [ testSrc( '../etc/test/workspaceFolder/temp' ), true ]
-      , [ testSrc( 'virtual_6_d' ), false ]
+    const ü_data =
+      [ [ ü_wsFolder                                   , true  ]
+      , [ testSrc( '../etc/test/workspaceFolder/temp' ), true  ]
+      , [ __filename                                   , false ]
+      , [ testSrc( 'virtual_6_d'                      ), false ]
       ] as TOrderedPairs<string,boolean>;
-    testFunction( bindArguments( isContainedInWorkspace, { prepare: {0:fileToUri} } ), ü_data )
+    const ü_ws = bindArguments( isContainedInWorkspace, { prepare:{0:fileToUri} } );
+    testFunction( ü_ws, ü_data );
 }
 
 //====================================================================
 /*
-    const ü_data_2 = structuredClone( ü_data );
-    ü_data_2[ ü_data_2.length - 3 ][1] = CEFileType.Folder;
+    structuredClone( ü_data );
 */

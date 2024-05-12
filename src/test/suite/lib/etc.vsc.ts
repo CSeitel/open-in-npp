@@ -17,7 +17,8 @@
   import { whenPromiseSettled
          } from '../../../lib/asyncUtil';
 //--------------------------------------------------------------------
-  import { bindArguments
+  import { asyncNullOperation
+         , bindArguments
          } from '../../../lib/functionUtil';
   import { testSrc
          , whenAsyncFunctionTested
@@ -25,24 +26,15 @@
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
+  export const tst_dispatch = asyncNullOperation;
+//====================================================================
 
-export async function tst_(){
-  //ß_trc&& ß_trc( ü_done.reason )
-  //
-    await whenChildProcessSpawned( __filename, [] );
-  //whenShownInWindowsExplorer( __filename );
-  //whenShownInOSExplorer( __filename );
-  //
+export async function tst_a(){
 }
 
 //====================================================================
 
-export async function tst_show(){
-    try {
-        
-    } catch ( ü_eX ) {
-        threadShowError( ü_eX, 'Outer' );
-    }
+export async function tst_b(){
 }
 
 //====================================================================

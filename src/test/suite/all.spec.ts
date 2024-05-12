@@ -1,21 +1,21 @@
 /*
 */
-  import { TTDDSuite
-         , TTDDTest
-         , TTestSuites as TTestSuitesCore
+  import { TTestSuites as TTestSuitesCore
          , TAsyncTestFunction
          } from '../../types/lib.testUtil.d';
   import { TNotReadonly
          } from '../../types/generic.d';
 //--------------------------------------------------------------------
   import '../../runtime/context-XTN';
+  import { ß_trc
+         } from '../../runtime/context';
   import { whenAllTestsRun
          , testSummary
          } from '../../lib/testUtil';
 //--------------------------------------------------------------------
   import * as ß_etc from './lib/etc.vsc';
   import * as ß_fs  from './lib/fs.vsc' ;
-  import * as ß_any from './lib/a.npp';
+  import * as ß_npp from './lib/npp.vsc';
 //====================================================================
   type TTestSuite           = Record<string,TAsyncTestFunction>
   type TTestSuiteDefinition = [string,TTestSuite,boolean,number]
@@ -28,14 +28,14 @@
     } as TTestSuite;
 //--------------------------------------------------------------------
   const ß_proxy     = [] as TAsyncTestFunction[][];
-  const ß_debugUI   =                     !true;
+  const ß_debugUI   =                      true;
   const ß_skipTests = ß_debugUI ? false :  true; // = except single test
   const ß_SKIPTests = ß_debugUI ? false : !ß_skipTests;
   const ß_suites =
     [ [ 'Single', ß_single,  ß_SKIPTests, 3 ]
     , [ 'Etc'   , ß_etc   ,  ß_skipTests, 3 ]
-    , [ 'Fs'    , ß_fs    ,  ß_skipTests, 4 ]
-    , [ 'Npp'   , ß_any   ,  ß_skipTests    ]
+    , [ 'Fs'    , ß_fs    ,  ß_skipTests, 5 ]
+    , [ 'Npp'   , ß_npp   ,  ß_skipTests, 5 ]
     ] as TTestSuites
     ;
 //====================================================================
@@ -46,33 +46,8 @@
 
 //====================================================================
 
-function ß_wrapTestSuite( ü_suite:TTestSuiteDefinition, ü_sIndx:number ):string[] {
-        if ( ü_suite[2] ) { return []; }
-    const ö_proxy = ß_proxy[ ü_sIndx ] = [] as TAsyncTestFunction[];
-    const ö_tests = ü_suite[1];
-    const ü_testKeys = ( Object.keys( ö_tests ) as (keyof typeof ö_tests)[] ).sort();
-    ü_testKeys.forEach(function( ü_testName, ü_tIndx ){
-        const ö_testImpl = ö_tests[ ü_testName ];
-        ö_proxy[ ü_tIndx ] = ö_wrap;
-function ö_wrap():PromiseLike<void> {
-    return ö_testImpl().then( testSummary as any );
-}
-    });
-    return ü_testKeys;
-}
-
-//--------------------------------------------------------------------
-
-async function ß_when( ü_suite:number, ü_test:number ){
-    const ü_whenTest = ß_proxy[ ü_suite ][ ü_test ];
-    if ( ü_whenTest === undefined ) { throw new Error( ''+ü_test ) }
-    await ü_whenTest();
-}
-
-//====================================================================
-
 function ß_expandSuite( ö_suite:TTestSuiteDefinition, ü_sIndx:number ):void {
-  //const ö_suite = ß_suites[ ü_sIndx ];
+  //
     suite( ö_suite[0], function(){
         const ü_names_ = ß_wrapTestSuite( ö_suite, ü_sIndx );
         const ü_names = [0,1,2,3,4,5,6,7,8,9].slice(0,ö_suite[3]);
@@ -83,6 +58,40 @@ function ß_expandSuite( ö_suite:TTestSuiteDefinition, ü_sIndx:number ):void {
     });
 /*
 */
+}
+
+//--------------------------------------------------------------------
+
+function ß_wrapTestSuite( ü_suite:TTestSuiteDefinition, ä_sIndx:number ):string[] {
+    if ( ü_suite[2] ) { return []; }
+  //
+    const ö_proxy = ß_proxy[ ä_sIndx ] = [] as TAsyncTestFunction[];
+    const ö_tests = ü_suite[1];
+  //
+     const ü_testNames = ( Object.keys( ö_tests ) as (keyof typeof ö_tests)[] );
+         //ü_testNames.sort();
+    const ö_names = ü_testNames.map( (ü_testName,ü_tIndx)=> `${ ü_testName } [${ ä_sIndx}-${ ü_tIndx }]` );
+           ü_testNames.forEach( ö_compileProxy );
+    ß_trc&& ß_trc( ö_names, ü_suite[0] );
+    return ü_testNames;
+  //
+function ö_compileProxy( ü_testName:string, ä_tIndx:number ):void {
+        const ö_testImpl = ö_tests[ ü_testName ];
+        ö_proxy[ ä_tIndx ] = ö_wrap;
+function ö_wrap():PromiseLike<void> {
+    return ö_testImpl().then( ()=>{
+        testSummary( ö_names[ ä_tIndx ] );
+    });
+}
+}
+}
+
+//--------------------------------------------------------------------
+
+async function ß_when( ü_sIndx:number, ü_tIndx:number ):Promise<void> {
+    const ü_whenTest = ß_proxy[ ü_sIndx ][ ü_tIndx ];
+    if ( ü_whenTest === undefined ) { throw new Error( ''+ü_tIndx ) }
+    await ü_whenTest();
 }
 
 //====================================================================

@@ -10,6 +10,9 @@
          } from '../../../runtime/context';
   import { asyncNullOperation
          } from '../../../lib/functionUtil';
+  import { whenShownInWindowsExplorer
+         , whenChildProcessSpawned
+         } from '../../../lib/cpUtil';
   import { testSrc
          , testEqual
          , testFunction
@@ -17,6 +20,13 @@
          } from '../../../lib/testUtil';
 //====================================================================
   export const tst_dispatch = asyncNullOperation;
+//====================================================================
+
+export async function tst_cp(){
+    const ü_done = await whenShownInWindowsExplorer( __filename );
+    testEqual( ü_done, true );
+}
+
 //====================================================================
 
 export async function tst_syntax(){
