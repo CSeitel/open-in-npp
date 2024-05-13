@@ -2,10 +2,20 @@
 */
   import { type Disposable
          } from 'vscode';
+  import { workspace
+         , ConfigurationTarget
+         } from 'vscode';
 //--------------------------------------------------------------------
   import { ß_RuntimeContext
          , ß_trc
          } from '../runtime/context';
+//====================================================================
+//update(section: string, value: any, configurationTarget?: ConfigurationTarget | boolean | null, overrideInLanguage?: boolean): Thenable<void>;
+
+export function setConfig<T=any>( ü_cfgId:string, ü_value:T ):Thenable<void> {
+    return workspace.getConfiguration().update( ü_cfgId, ü_value, ConfigurationTarget.Workspace );
+}
+
 //====================================================================
 
 export abstract class RootDisposable implements Disposable {

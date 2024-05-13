@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "path": "../workspaceFolder"
+    }
+  ],
+  "settings": {
+    "openInNpp.spawnOptions": {
+      "env": {
+        "TEMP": "C:\\${HOME}\\"
+      }
+    },
+    "openInNpp.Executable": "",
+    "openInNpp.workingDirectory": "",
+  }
+}

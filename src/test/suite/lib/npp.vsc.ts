@@ -9,7 +9,6 @@
          } from '../../../constants/extension';
 //--------------------------------------------------------------------
   import * as ßß_vsCode from 'vscode';
-  import * as ßß_assert from 'assert';
   import { join
          , resolve
          } from 'path';
@@ -25,29 +24,37 @@
          } from '../../../runtime/context-XTN';
   import { ß_trc
          } from '../../../runtime/context';
+  import { whenDelay
+         } from '../../../lib/asyncUtil';
+  import { bindAppending
+         } from '../../../lib/functionUtil';
+  import { testSrc
+         , testEqual
+         , testNotEqual
+         , testCondition
+         } from '../../../lib/testUtil';
+//--------------------------------------------------------------------
+  import { setConfig
+         } from '../../../vsc/anyUtil';
   import { CVscFs
          , fileToUri
          } from '../../../vsc/fsUtil';
   import { whenTextEditorOpened
          , whenNewTextEditorOpened
          } from '../../../vsc/docUtil';
-  import { whenDelay
-         } from '../../../lib/asyncUtil';
-  import { expandEnvVariables
-         } from '../../../lib/textUtil';
-  import { testSrc
-         , testEqual
-         , testNotEqual
-         , testCondition
-         } from '../../../lib/testUtil';
 //====================================================================
   export const tst_dispatch = tst_settings;
 //====================================================================
 
 export async function tst_settings(){
+    const ö_setExe = ( setConfig<string> ).bind( null, CXtnCfgId.executable       );
+    const ö_setDir = ( setConfig<string> ).bind( null, CXtnCfgId.workingDirectory );
+    try {
+  //const ö_setEx_ = bindAppending( setConfig<string>, CXtnCfgId.executable );
     const ü_extn = await ß_whenXtnAvailable();
   //
     const ü_cfg_0 = ß_getConfigSnapshot();
+  //ß_trc&& ß_trc( Object.assign( {}, ü_cfg_0 ) );
     const ü_mod_a = ö_setExe( '' );
     testEqual   ( ß_getConfigSnapshot(), ü_cfg_0 );
     await ü_mod_a;
@@ -63,8 +70,12 @@ export async function tst_settings(){
     const ü_cfg_1 = ß_getConfigSnapshot();
     const ü_dir = await ü_cfg_1.whenWorkingDir;
   //
-function ö_setExe( ü_exe:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.executable      , ü_exe, ConfigurationTarget.Workspace ); }
-function ö_setDir( ü_dir:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.workingDirectory, ü_dir, ConfigurationTarget.Workspace ); }
+//function ö_setExe( ü_exe:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.executable      , ü_exe, ConfigurationTarget.Workspace ); }
+//function ö_setDir( ü_dir:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.workingDirectory, ü_dir, ConfigurationTarget.Workspace ); }
+    } finally {
+        await ö_setExe('');
+        await ö_setDir('');
+    }
 }
 
 //====================================================================
@@ -155,13 +166,26 @@ vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
 
 //====================================================================
 
-export async function tst_a(){
+export async function tst_openInNpp(){
+  /*
     const ü_extn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
     if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
     testEqual( ü_extn.id, CXtnId );
     testEqual( ü_extn.isActive, false, 'isActive' );
     await ü_extn.activate();
     testEqual( ü_extn.isActive, true , 'isActive' );
+    await whenNewTextEditorOpened( { content:'{"a":33}' } );
+  */
+    await whenTextEditorOpened( fileToUri( __filename ) );
+  //
+    const ü_pid = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) {
+        process.kill( ü_pid );
+    }
+}
+
+//====================================================================
+
   /*
     const ü_hist = ü_extn.exports.globalHistory;
     const ü_config = await ü_hist.whenConfig();
@@ -169,14 +193,6 @@ export async function tst_a(){
           const ü_done = ü_hist.release( 'config' );
     testEqual( ü_done, true );
   */
-    await whenNewTextEditorOpened( { content:'{"a":33}' } );
-    const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
-  //
-  //
-}
-
-//====================================================================
-
 class VscTestSpec {
 
 static async test_0():Promise<void> {
@@ -219,22 +235,6 @@ static async test_0():Promise<void> {
     ßß_assert.notStrictEqual ( ü_dummy1, ü_dummy2 );
     ßß_assert.deepStrictEqual( ü_dummy1, ü_dummy2 );
   */
-}
-
-static async test_2():Promise<void> {
-  //const ü_delay = await whenDelay( 4000 );
-    const ü_act = expandEnvVariables( '%TEMP%' );
-    const ü_exp = process.env.TEMP;
-    ßß_assert.strictEqual( ü_act, ü_exp );
-    ßß_vsCode.window.showInformationMessage( 'Done' );
-}
-
-static async openInNpp():Promise<void> {
-    const ü_pid = ( await ßß_vsCode.commands.executeCommand<number>( 'extension.openInNpp' ) )!;
-    if ( ü_pid > 0 ) { process.kill( ü_pid ); }
-    else {
-      ßß_assert.fail( 'pid <= 0' );
-    }
 }
 
 }

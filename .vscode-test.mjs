@@ -5,8 +5,10 @@ https://code.visualstudio.com/api/working-with-extensions/testing-extension
 /*
   require('out/test/vscode-test' );
   d.ß_cfg_1.mocha.timeout
+  //, extensionDevelopmentPath: './src'
 */
 //--------------------------------------------------------------------
+//  IBaseTestConfiguration
 
   let ß_files = 'out/test/suite/**/vsc*.spec.js';
       ß_files = 'out/test/suite/all.spec.js';
@@ -14,8 +16,11 @@ https://code.visualstudio.com/api/working-with-extensions/testing-extension
     { label: 'unitTests'
     , files: ß_files
   //, version: 'insiders'
-    , workspaceFolder: './etc/test/workspaceFolder'
-  //, extensionDevelopmentPath: './src'
+  //
+    , launchArgs     :['./etc/test/workspaceFolder/b b.txt']
+  //, workspaceFolder: './etc/test/workspaceFolder'
+    , workspaceFolder: './etc/test/workspaces/folder.code-workspace'
+  //
     , mocha:
 	      { ui: 'tdd'
 	      , timeout: 10 * 1000
