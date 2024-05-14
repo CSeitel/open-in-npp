@@ -54,5 +54,12 @@ export function pickProperty<T,P extends keyof T>( ü_oref:T, ü_mKey:P ):T[P] {
 }
 
 //====================================================================
+
+export function hideProperty<T,P extends keyof T>( ü_oref:T, ü_mKey:P ):T {
+    Object.defineProperty( ü_oref, ü_mKey, { enumerable:false } );
+                    return ü_oref;
+}
+
+//====================================================================
 /*
 */

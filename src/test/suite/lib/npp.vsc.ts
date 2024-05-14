@@ -8,7 +8,6 @@
          , CXtnCfgId
          } from '../../../constants/extension';
 //--------------------------------------------------------------------
-  import * as ßß_vsCode from 'vscode';
   import { join
          , resolve
          } from 'path';
@@ -26,11 +25,14 @@
          } from '../../../runtime/context';
   import { whenDelay
          } from '../../../lib/asyncUtil';
+  import { ErrorWithUixMessage
+         } from '../../../lib/errorUtil';
   import { bindAppending
          } from '../../../lib/functionUtil';
   import { testSrc
          , testEqual
          , testNotEqual
+         , testRejected
          , testCondition
          } from '../../../lib/testUtil';
 //--------------------------------------------------------------------
@@ -45,37 +47,54 @@
 //====================================================================
   export const tst_dispatch = tst_settings;
 //====================================================================
+    const ß_setExe = ( setConfig<string> ).bind( null, CXtnCfgId.executable                );
+    const ß_setDir = ( setConfig<string> ).bind( null, CXtnCfgId.workingDirectory          );
+    const ß_setVDc = ( setConfig<string> ).bind( null, CXtnCfgId.virtualDocumentsDirectory );
+  //const ö_setEx_ = bindAppending( setConfig<string>, CXtnCfgId.executable );
+//====================================================================
 
 export async function tst_settings(){
-    const ö_setExe = ( setConfig<string> ).bind( null, CXtnCfgId.executable       );
-    const ö_setDir = ( setConfig<string> ).bind( null, CXtnCfgId.workingDirectory );
-    try {
-  //const ö_setEx_ = bindAppending( setConfig<string>, CXtnCfgId.executable );
+    ß_trc&& ß_trc( __dirname    , 'src' );
+    ß_trc&& ß_trc( process.cwd(), 'cwd' );
+    ß_trc&& ß_trc( ((workspace.workspaceFolders??[])[0])?.uri.fsPath, 'ws0' );
+    await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
+  /*
     const ü_extn = await ß_whenXtnAvailable();
+    const ü_extn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
+    if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
+    testEqual( ü_extn.id, CXtnId );
+    testEqual( ü_extn.isActive, false, 'isActive' );
+    await ü_extn.activate();
+    testEqual( ü_extn.isActive, true , 'isActive' );
+  */
+//
+  try {
   //
     const ü_cfg_0 = ß_getConfigSnapshot();
-  //ß_trc&& ß_trc( Object.assign( {}, ü_cfg_0 ) );
-    const ü_mod_a = ö_setExe( '' );
-    testEqual   ( ß_getConfigSnapshot(), ü_cfg_0 );
-    await ü_mod_a;
-    testNotEqual( ß_getConfigSnapshot(), ü_cfg_0 );
+    ß_trc&& ß_trc( Object.assign( {}, ü_cfg_0 ), 'Initial Config' );
+    const ü_exe_0 = await ü_cfg_0.whenExecutable;
   //
-    const ü_exe_a = await ß_getConfigSnapshot().whenExecutable;
-    await ö_setExe( '2otepad.exe' );
-    const ü_exe_b = await ß_getConfigSnapshot().whenExecutable;
-    ß_trc&& ß_trc( ü_exe_a );
-    ß_trc&& ß_trc( process.cwd() );
+    const ü_whenMod_exe_0 = ß_setExe( '' );
+    testEqual( ß_getConfigSnapshot(), ü_cfg_0, 'Old Snapshot' );
+    await ü_whenMod_exe_0;
+    testEqual( ß_getConfigSnapshot(), ü_cfg_0, 'Old Snapshot' );
   //
-    await ö_setDir( resolve( '../a' ) );
+    const ü_new_exe = '2otepad.exe';
+    const ü_whenMod_exe_1 = await ß_setExe( ü_new_exe );
     const ü_cfg_1 = ß_getConfigSnapshot();
-    const ü_dir = await ü_cfg_1.whenWorkingDir;
+    testNotEqual( ü_cfg_1, ü_cfg_0, 'New Snapshot' );
+    testEqual( await ü_cfg_1.whenExecutable, ü_new_exe, 'New value' );
   //
-//function ö_setExe( ü_exe:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.executable      , ü_exe, ConfigurationTarget.Workspace ); }
-//function ö_setDir( ü_dir:string ):PromiseLike<void> { return workspace.getConfiguration().update( CXtnCfgId.workingDirectory, ü_dir, ConfigurationTarget.Workspace ); }
-    } finally {
-        await ö_setExe('');
-        await ö_setDir('');
-    }
+    const ü_dirNot = join( process.cwd(), '../aaaaa' );
+    await ß_setDir( ü_dirNot );
+    const ü_cfg_2 = ß_getConfigSnapshot();
+    await testRejected( ü_cfg_2.whenWorkingDir, ü_dirNot, ü_eX => ü_eX instanceof ErrorWithUixMessage );
+  //
+  } finally {
+      await ß_setExe('');
+      await ß_setDir('');
+      await ß_setVDc('%TEMP%');
+  }
 }
 
 //====================================================================
@@ -118,23 +137,11 @@ export async function tst_history(){
     const ü_cfgData = ü_cfgHist.dataRef;
     testEqual( ü_cfgData.executable, '', 'Executable' );
   //
-    return;
 }
 
+//====================================================================
+
 export async function tst_b(){
-    const ü_extn = await ß_whenXtnAvailable();
-  //
-    await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
-    await whenTextEditorOpened( testSrc( '../etc/test/workspaceFolder/a.txt' ) );
-    const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
-    await whenDelay( 2000 );
-    const ü_pid_2 = await commands.executeCommand<number>( CEXtnCommands.oActive );
-    await whenDelay( 2000 );
-    testEqual( ü_pid_1, ü_pid_2, 'Pid' );
-  //
-    testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
-  //
-    return;
   /*
 var setting: vscode.Uri = vscode.Uri.parse("untitled:" + "C:\summary.txt");
 vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
@@ -163,25 +170,24 @@ vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
   */
 }
 
-
 //====================================================================
 
 export async function tst_openInNpp(){
-  /*
-    const ü_extn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
-    if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
-    testEqual( ü_extn.id, CXtnId );
-    testEqual( ü_extn.isActive, false, 'isActive' );
-    await ü_extn.activate();
-    testEqual( ü_extn.isActive, true , 'isActive' );
-    await whenNewTextEditorOpened( { content:'{"a":33}' } );
-  */
-    await whenTextEditorOpened( fileToUri( __filename ) );
+    const ü_noKill = !true;
   //
-    const ü_pid = await commands.executeCommand<number>( CEXtnCommands.oActive );
-    if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) {
-        process.kill( ü_pid );
-    }
+    await whenTextEditorOpened( fileToUri( __filename ) );
+    const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+  //
+    await whenNewTextEditorOpened( { content:'{"a":33}' } );
+    const ü_pid_2 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    testNotEqual( ü_pid_1, ü_pid_2, '2 Pids' );
+  //
+    await whenDelay( 2000 );
+  //
+    let ü_pid:number
+    ü_pid = ü_pid_1; if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) { !true || ü_noKill || process.kill( ü_pid ); }
+    ü_pid = ü_pid_2; if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) {  true || ü_noKill || process.kill( ü_pid ); }
+  //testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
 }
 
 //====================================================================
@@ -197,7 +203,7 @@ class VscTestSpec {
 
 static async test_0():Promise<void> {
   //
-    const ü_wsFolders = ßß_vsCode.workspace.workspaceFolders;
+    const ü_wsFolders = workspace.workspaceFolders;
     const ü_folders   = ü_wsFolders?.map( ü_folder => ü_folder.uri.fsPath );
     const ü_file = join( ü_folders![0], 'Has Blank ß.txt' );
     if(ß_trc){ß_trc( `Test: "${ __filename }"` );}

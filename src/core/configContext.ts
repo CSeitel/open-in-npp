@@ -13,6 +13,7 @@
   import { workspace
          , ConfigurationChangeEvent
          , ConfigurationTarget
+         , WorkspaceConfiguration
          } from 'vscode';
   import { ß_trc
          , ß_toggleDevTrace
@@ -25,6 +26,8 @@
          , whenKnownAsFolder
          , onPathChanged
          } from '../core/configUtil';
+  import { hideProperty
+         } from '../lib/objectUtil';
 //====================================================================
 
 class ConfigProxy {
@@ -46,6 +49,9 @@ class ConfigProxy {
 constructor(
     private _vscConfig = workspace.getConfiguration()
 ){
+    hideProperty( this, '_vscConfig' as any );
+  //hideProperty( this as any as {_vscConfig:1}, '_vscConfig' );
+    //configurable: true value: 42,
     for ( const ü_cfgId of CXtnCfgIds ) {
         Object.defineProperty( this, ü_cfgId, { enumerable:true, get: ()=>{ return this._vscConfig.get<any>( CXtnCfgId[ ü_cfgId ] ); } } );
     }
@@ -67,6 +73,9 @@ constructor(
   , private          _whenVirtualDocsDir = new AsyncCalculation( whenKnownAsFolder.bind( null, LCConfig.virtualDocsDir_N ) )
 ){
     super();
+    hideProperty( this, '_whenExecutable'     as any );
+    hideProperty( this, '_whenWorkingDir'     as any );
+    hideProperty( this, '_whenVirtualDocsDir' as any );
 }
 //
 get whenExecutable    ():PromiseLike<string> { this._whenExecutable    .x = this.executable               ; return this._whenExecutable    .whenY; }
