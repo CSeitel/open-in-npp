@@ -11,7 +11,7 @@
       }
     },
     "openInNpp.developerTrace": true,
-    "openInNpp.Executable": "",
+    "openInNpp.Executable": "2otepad.exe",
     "openInNpp.workingDirectory": "",
     "openInNpp.virtualDocumentsDirectory": "%TEMP%",
     "openInNpp.virtualDocumentsFileReuse": true,

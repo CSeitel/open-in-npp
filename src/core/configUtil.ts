@@ -1,7 +1,5 @@
 /*
 */
-  import { type ConfigSnapshot
-         } from '../core/configContext';
   import { type TUiXMessageTemplate
          , type IExpandUiXMessageVars
          } from '../types/lib.errorUtil.d';

@@ -152,6 +152,14 @@ export function isContainedInWorkspace( ü_fileUri:Uri ):boolean {
          ;
 }
 
+export function firstWorkspaceFolder():Uri|null {
+  //
+   const ü_wsFolders = workspace.workspaceFolders;
+    if ( ü_wsFolders        === undefined
+      || ü_wsFolders.length === 0 ) { return null              ; }
+    else                            { return ü_wsFolders[0].uri; }
+}
+
 //====================================================================
 /*
 */

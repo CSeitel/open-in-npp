@@ -10,9 +10,7 @@
   "openInNpp.commandLineArguments_": [
     "-nosession"
   ],
-  "openInNpp.globPattern": " ",
   "openInNpp.filesInFolderPattern": "**/*.json",
-  "openInNpp.Executable": "",
   "openInNpp.developerTrace": true
 },
 }

@@ -17,9 +17,9 @@ https://code.visualstudio.com/api/working-with-extensions/testing-extension
     , files: ß_files
   //, version: 'insiders'
   //
-    , launchArgs     :['./etc/test/workspaceFolder/b b.txt']
-  //, workspaceFolder: './etc/test/workspaceFolder'
-    , workspaceFolder: './etc/test/workspaces/folder.code-workspace'
+    , launchArgs     :       [ './etc/test/workspaceFolder/b b.txt' ]
+    , workspaceFolder:  true ? './etc/test/workspaceFolder' //
+                             : './etc/test/workspaces/folder.code-workspace'
   //
     , mocha:
 	      { ui: 'tdd'

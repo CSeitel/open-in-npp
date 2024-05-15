@@ -1,5 +1,7 @@
 /*
 */
+  import { type ConfigSnapshot
+         } from '../../../core/configContext';
   import { type XtnOpenInNpp
          , type IGlobalHistoryData
          } from '../../../types/vsc.extension.d';
@@ -36,28 +38,30 @@
          , testCondition
          } from '../../../lib/testUtil';
 //--------------------------------------------------------------------
-  import { setConfig
+  import { whenConfigSet
          } from '../../../vsc/anyUtil';
-  import { CVscFs
-         , fileToUri
-         } from '../../../vsc/fsUtil';
   import { whenTextEditorOpened
          , whenNewTextEditorOpened
          } from '../../../vsc/docUtil';
+  import { CVscFs
+         , fileToUri
+         , firstWorkspaceFolder
+         } from '../../../vsc/fsUtil';
 //====================================================================
   export const tst_dispatch = tst_settings;
 //====================================================================
-    const ß_setExe = ( setConfig<string> ).bind( null, CXtnCfgId.executable                );
-    const ß_setDir = ( setConfig<string> ).bind( null, CXtnCfgId.workingDirectory          );
-    const ß_setVDc = ( setConfig<string> ).bind( null, CXtnCfgId.virtualDocumentsDirectory );
+    const ß_setExe = ( whenConfigSet<string> ).bind( null, CXtnCfgId.executable                );
+    const ß_setDir = ( whenConfigSet<string> ).bind( null, CXtnCfgId.workingDirectory          );
+    const ß_setVDc = ( whenConfigSet<string> ).bind( null, CXtnCfgId.virtualDocumentsDirectory );
   //const ö_setEx_ = bindAppending( setConfig<string>, CXtnCfgId.executable );
 //====================================================================
 
 export async function tst_settings(){
-    ß_trc&& ß_trc( __dirname    , 'src' );
-    ß_trc&& ß_trc( process.cwd(), 'cwd' );
-    ß_trc&& ß_trc( ((workspace.workspaceFolders??[])[0])?.uri.fsPath, 'ws0' );
+    ß_trc&& ß_trc( __dirname    , 'source' );
+    ß_trc&& ß_trc( process.cwd(), 'cwd'    );
     await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
+  //await whenDelay( 2000 );
+  //
   /*
     const ü_extn = await ß_whenXtnAvailable();
     const ü_extn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
@@ -102,16 +106,6 @@ export async function tst_settings(){
 export async function tst_history(){
     const ü_extn = await ß_whenXtnAvailable();
   //
-    const ü_home = workspace.workspaceFolders![0].uri.fsPath
-    ß_trc&& ß_trc( ü_home );
-    const ü_wsCfg = join( ü_home, '.vscode', 'settings.json' );
-    const ü_data = await CVscFs.readFile( fileToUri( ü_wsCfg ) );
-    const ü_jso_ = JSON.parse( Buffer.from( ü_data ).toString( 'utf8' ) );
-    const ü_doc = await workspace.openTextDocument( fileToUri( ü_wsCfg ) );
-        //ü_doc.
-    const ü_json = JSON.parse( ü_doc.getText() );
-    ß_trc&& ß_trc( ü_json );
-  //
     const ü_dummyHist = ü_extn.globalHistory.dummy;
     ß_trc&& ß_trc( 'Hello'+ JSON.stringify( ü_dummyHist.dataRef ) );
   //testEqual( ü_dummyHist.dataRef[0], 2, 'DataRef[0]' );
@@ -141,7 +135,20 @@ export async function tst_history(){
 
 //====================================================================
 
-export async function tst_b(){
+export async function tst_readFile(){
+    const ü_home = firstWorkspaceFolder()?.fsPath;
+    const ü_wsCfg = join( ü_home??'', '.vscode', 'settings.json' );
+    ß_trc&& ß_trc( ü_home       , 'home'     );
+    ß_trc&& ß_trc( ü_wsCfg      , 'home-cfg' );
+  //
+    const ü_data = await CVscFs.readFile( fileToUri( ü_wsCfg ) );
+    const ü_jso_ = JSON.parse( Buffer.from( ü_data ).toString( 'utf8' ) );
+    const ü_doc = await workspace.openTextDocument( fileToUri( ü_wsCfg ) );
+        //ü_doc.
+    const ü_json = JSON.parse( ü_doc.getText() ) as Record<'openInNpp.Executable',string>;
+    ß_trc&& ß_trc( ü_json, 'Json' );
+    const ü_cfg_0 = ß_getConfigSnapshot();
+    testEqual( ü_cfg_0.executable, ü_json['openInNpp.Executable'], 'Exe' );
   /*
 var setting: vscode.Uri = vscode.Uri.parse("untitled:" + "C:\summary.txt");
 vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
@@ -188,59 +195,10 @@ export async function tst_openInNpp(){
     ü_pid = ü_pid_1; if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) { !true || ü_noKill || process.kill( ü_pid ); }
     ü_pid = ü_pid_2; if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) {  true || ü_noKill || process.kill( ü_pid ); }
   //testNotEqual( ü_pid_1, 0, 'pid' ) && testEqual( process.kill( ü_pid_1 ), true, 'Killed' );
+  //
+    await whenTextEditorOpened( join( firstWorkspaceFolder()!.fsPath, 'b b.txt' ) );
 }
 
 //====================================================================
-
-  /*
-    const ü_hist = ü_extn.exports.globalHistory;
-    const ü_config = await ü_hist.whenConfig();
-    testEqual( ü_config .executable   , ''  );
-          const ü_done = ü_hist.release( 'config' );
-    testEqual( ü_done, true );
-  */
-class VscTestSpec {
-
-static async test_0():Promise<void> {
-  //
-    const ü_wsFolders = workspace.workspaceFolders;
-    const ü_folders   = ü_wsFolders?.map( ü_folder => ü_folder.uri.fsPath );
-    const ü_file = join( ü_folders![0], 'Has Blank ß.txt' );
-    if(ß_trc){ß_trc( `Test: "${ __filename }"` );}
-    if(ß_trc){ß_trc( `Workspace: "${ ü_file }"` );}
-    await whenTextEditorOpened( ü_file );
-  //
-    const ü_activeInstance = await ß_whenXtnAvailable();
-    if(ß_trc){ß_trc( `Extension: "${ ü_activeInstance.extensionApi.id }"` );}
-  //
-  /*
-                          ü_dummy1.push( 6 );
-    ßß_assert.strictEqual( ü_count , 0        );
-    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
-  //
-                     ü_hist.dummy = ü_dummy1;
-                     await whenDelay( 1 );
-          ü_dummy2 = ü_hist.dummy;
-    ßß_assert.notStrictEqual ( ü_dummy1, ü_dummy2 );
-    ßß_assert.deepStrictEqual( ü_dummy1, ü_dummy2 );
-  //
-          ü_count  = await ü_hist.whenIdle();
-          ü_dummy2 = ü_hist.dummy;
-    ßß_assert.strictEqual    ( ü_count , 1        );
-    ßß_assert.notStrictEqual ( ü_dummy1, ü_dummy2 );
-    ßß_assert.deepStrictEqual( ü_dummy1, ü_dummy2 );
-  //
-          ü_dummy2 = ü_hist.dummy = ü_dummy1 = [3,4,5];
-    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
-                          ü_dummy1.shift();
-          ü_dummy2 = ü_hist.dummy;
-    ßß_assert.strictEqual( ü_dummy1, ü_dummy2 );
-          ü_count  = await ü_hist.whenIdle();
-          ü_dummy2 = ü_hist.dummy;
-    ßß_assert.strictEqual    ( ü_count , 1        );
-    ßß_assert.notStrictEqual ( ü_dummy1, ü_dummy2 );
-    ßß_assert.deepStrictEqual( ü_dummy1, ü_dummy2 );
-  */
-}
-
-}
+/*
+*/
