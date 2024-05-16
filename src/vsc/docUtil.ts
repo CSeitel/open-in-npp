@@ -63,6 +63,18 @@ export async function whenTextEditorOpened( ü_fileUri:TFileUri, ü_preview = fa
     return ü_edt;
 }
 
+  /*
+var setting: vscode.Uri = vscode.Uri.parse("untitled:" + "C:\summary.txt");
+vscode.workspace.openTextDocument(setting).then((a: vscode.TextDocument) => {
+    vscode.window.showTextDocument(a, 1, false).then(e => {
+        e.edit(edit => {
+            edit.insert(new vscode.Position(0, 0), "Your advertisement here");
+        });
+    });
+}, (error: any) => {
+    debugger;
+});
+  */
 //====================================================================
 //CancellationTokenSource
 

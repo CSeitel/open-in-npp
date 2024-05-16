@@ -1,4 +1,5 @@
 {
+    "openInNpp.developerTrace": true,
     "openInNpp.Executable": "",
     "openInNpp.workingDirectory": "",
     "openInNpp.virtualDocumentsDirectory": "%TEMP%"

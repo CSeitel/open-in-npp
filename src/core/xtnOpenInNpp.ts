@@ -55,7 +55,8 @@ export default class XtnOpenInNpp {
     readonly  localHistory :TLocalHistoryProxy
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
-    readonly version      :string
+  //readonly version      :string
+    private readonly _version      :string
     readonly commands     :TXtnCommand[]
     readonly settings     :TXtnCfgJSON
 
@@ -92,7 +93,7 @@ constructor(
     this.extensionApi = this.vscContext.extension;// extensions.getExtension( CExtensionId )!;
   //
                  const ü_json = this.extensionApi.packageJSON;
-    this.version     = ü_json.version;
+    this._version    = ü_json.version;
     this.commands    = ü_json.contributes.commands;
     this.settings    = ü_json.contributes.configuration.properties;
   //
@@ -120,21 +121,26 @@ constructor(
 }
 
 private async _whenActivationFinalized():Promise<this> {
-    const ü_versionToNumber = /\./g;
-    const ü_current = parseInt( this.version.replace( ü_versionToNumber, '' ) );
   //
     const ü_admin = this.globalHistory.admin;
     ß_trc&& ß_trc( ü_admin.dataRef, 'Admin-History' );
   //ß_trc&& ß_trc( this.version, 'Admin-History' );
+    const ü_current = this.version;
     if ( ü_current > ü_admin.dataRef.version ) {
       //
         ü_admin.dataRef.version = ü_current;
         this.globalHistory.admin.whenCommitted();
       //
-        ß_whenNewVersionInfoShown( this.version );
+        ß_whenNewVersionInfoShown( this._version );
     }
     return this;
   //
+}
+
+get version():number {
+               const ü_main = this._version.split('.');
+                     ü_main.pop();
+    return parseInt( ü_main.join('') );
 }
 
 }
