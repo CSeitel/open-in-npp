@@ -121,6 +121,12 @@ constructor(
 }
 
 private async _whenActivationFinalized():Promise<this> {
+    try {
+        const ü_dummy = this.globalHistory.dummy.dataRef;
+        ß_trc&& ß_trc( ü_dummy, 'Dummy-History' );
+              ü_dummy[0] = new Date().valueOf();
+                        this.globalHistory.dummy.triggerCommit();
+    } finally {}
   //
     const ü_admin = this.globalHistory.admin;
     ß_trc&& ß_trc( ü_admin.dataRef, 'Admin-History' );
@@ -129,7 +135,7 @@ private async _whenActivationFinalized():Promise<this> {
     if ( ü_current > ü_admin.dataRef.version ) {
       //
         ü_admin.dataRef.version = ü_current;
-        this.globalHistory.admin.whenCommitted();
+        this.globalHistory.admin.triggerCommit(); //whenCommitted();
       //
         ß_whenNewVersionInfoShown( this._version );
     }

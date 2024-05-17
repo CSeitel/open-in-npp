@@ -106,8 +106,8 @@ clone( ü_what ?:TXtnCfgIds ):ConfigSnapshot {
 
 export function getConfigSnapshot():ConfigSnapshot {
     if ( ß_cfgIsDirty ) {
+      ß_trc&& ß_trc( 'ConfigSnapshot is dirty' );
          ß_cfgIsDirty = false;
-    //ß_trc&& ß_trc( 'Dirty' );
         ß_cfgSnapshot = ß_cfgSnapshot?.clone( ß_whatIsDirty ) ?? new ConfigSnapshot();
     }
       return ß_cfgSnapshot;

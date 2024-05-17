@@ -34,7 +34,8 @@
 //--------------------------------------------------------------------
 
   export interface IGlobalHistoryData {
-      dummy :number[]
+      dummy    :number[]
+    //dummyRef :number[]
       admin :
         { version    :number
         }

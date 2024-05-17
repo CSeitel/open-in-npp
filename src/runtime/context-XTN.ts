@@ -23,15 +23,16 @@
          } from './context';
   import { LCHeader
          } from '../l10n/generic';
-  import { getConfigSnapshot
-         } from '../core/configContext';
   import { TextDocViewer
          } from '../vsc/docUtil';
   import { XtnStatusBarItem
          } from '../vsc/uiUtil';
 //====================================================================
   type TInitialRuntimeContext = TWritable<IXtnRuntimeContext>
+           let ß_notNull:XtnOpenInNpp
   export const ß_XtnOpenInNpp      = null as unknown as XtnOpenInNpp;
+  import { getConfigSnapshot
+         } from '../core/configContext';
   export const ß_getConfigSnapshot = getConfigSnapshot;
   export const ß_StatusBarItem     = new XtnStatusBarItem();
   export const ß_ViewErrorDetails  = new TextDocViewer( CXtnTxtScheme, LCHeader.DETAILS() );
@@ -62,14 +63,21 @@ export async function ß_whenXtnAvailable():Promise<XtnOpenInNpp> {
 export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):Promise<XtnOpenInNpp> {
     if ( ß_XtnOpenInNpp === null ) {
         ü_vscXtnContext.subscriptions.push( ß_ViewErrorDetails );
-        (ß_XtnOpenInNpp as TNotReadonly<XtnOpenInNpp> ) = await new XtnOpenInNpp( ü_vscXtnContext ).whenReady;
-        ß_trc&& ß_trc( 'Done', 'Activation' );
+        ß_notNull = await new XtnOpenInNpp( ü_vscXtnContext ).whenReady;
+        console.trace( ß_notNull, 'Activation-Done' )
+        ß_trc&& ß_trc( ß_notNull, 'Activation-Done' );
+        (ß_XtnOpenInNpp as TNotReadonly<XtnOpenInNpp> ) = ß_notNull;
     } else {
         if ( ß_XtnOpenInNpp.vscContext === ü_vscXtnContext )
              { ß_trc&& ß_trc( 'Old context', 'Re-Activation' ); }
         else { ß_trc&& ß_trc( 'New Context', 'Re-Activation' ); }
     }
   //
+    return ß_XtnOpenInNpp;
+}
+
+export function getXtnOpenInNpp() {
+              ß_trc&& ß_trc( ß_notNull, 'GGGGGGGGGGGGGGGG' );
     return ß_XtnOpenInNpp;
 }
 

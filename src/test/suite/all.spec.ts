@@ -1,7 +1,7 @@
 /*
 */
-  import { TTestSuites as TTestSuitesCore
-         , TAsyncTestFunction
+  import { type TTestSuites as TTestSuitesCore
+         , type TAsyncTestFunction
          } from '../../types/lib.testUtil.d';
   import { TNotReadonly
          } from '../../types/generic.d';
@@ -22,17 +22,19 @@
   type TTestSuites          = TTestSuiteDefinition[]
 //--------------------------------------------------------------------
   const ß_single =
-    { dispatch: ß_fs.tst_dispatch
+    { dispatch: 
+             // ß_fs .tst_dispatch
+                ß_npp.tst_dispatch
   //, bbcee   : ß_fs.tst_whenFileInfoRead
   //, ccee    : ß_fs.tst_whenFileInfoRead
     } as TTestSuite;
 //--------------------------------------------------------------------
   const ß_proxy     = [] as TAsyncTestFunction[][];
-  const ß_debugUI   =                      true;
+  const ß_debugUI   =                     !true;
   const ß_skipTests = ß_debugUI ? false :  true; // = except single test
   const ß_SKIPTests = ß_debugUI ? false : !ß_skipTests;
   const ß_suites =
-    [ [ 'Single', ß_single,  ß_SKIPTests, 3 ]
+    [ [ 'Single', ß_single,  ß_SKIPTests, 1 ]
     , [ 'Etc'   , ß_etc   ,  ß_skipTests, 3 ]
     , [ 'Fs'    , ß_fs    ,  ß_skipTests, 5 ]
     , [ 'Npp'   , ß_npp   ,  ß_skipTests, 5 ]

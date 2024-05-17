@@ -469,10 +469,10 @@ private async _whenSelected( ü_uris:Uri[], ö_limit:number ):Promise<boolean> {
     switch ( ü_todo?._button ) {
 
       case CButton.selectFiles: {
-          const ü_list = ü_uris.map( (ü_ri,ü_indx) => new ListItem(     basename( ü_ri.fsPath )
-                                                            , shortenText( dirname ( ü_ri.fsPath ), 72 )
-                                                            ,                        ü_ri
-                                                            ).setPicked( ü_indx < ö_limit ) );
+          const ü_list = ü_uris.map( (ü_ri,ü_indx) => new ListItem(              basename( ü_ri.fsPath )
+                                                                  , shortenText( dirname ( ü_ri.fsPath ), 72 )
+                                                                  ,                        ü_ri
+                                                                  ).setPicked( ü_indx < ö_limit ) );
           ü_uris.length = 0;
         //
           const ü_opts:TDropDownListOptions<never> =

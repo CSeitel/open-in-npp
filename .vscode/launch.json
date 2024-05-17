@@ -21,12 +21,7 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": [ "--extensionDevelopmentPath=${workspaceFolder}"
-      , "${workspaceFolder}/etc/test/workspaces/Some.code-workspace"
-      ],
-      "env": {
-          "CwdNotFound": "aaaa"
-      },
+      "args": [ "--extensionDevelopmentPath=${workspaceFolder}", "${workspaceFolder}/etc/test/workspaces/Some.code-workspace" ],
       "outFiles": [ "${workspaceFolder}/out/**/*.js" ],
       "skipFiles": [ "<node_internals>/**" ],
     }

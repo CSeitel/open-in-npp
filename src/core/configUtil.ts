@@ -5,35 +5,27 @@
          } from '../types/lib.errorUtil.d';
   import { CEExecutable
          } from '../constants/extension';
-  import { CEUiXMessageType
-         } from '../constants/error';
 //--------------------------------------------------------------------
   import { normalize
          , isAbsolute
          } from 'path';
-  import { FileSystemError
-         } from 'vscode';
 //--------------------------------------------------------------------
-  import { ß_trc
-         , ß_err
-         } from '../runtime/context';
   import { ß_XtnOpenInNpp
          , ß_StatusBarItem
+         , getXtnOpenInNpp
          } from '../runtime/context-XTN';
-  import { LCXtn
-         , LCConfig
+  import { ß_trc
+         } from '../runtime/context';
+  import { LCConfig
          } from '../l10n/i18n';
-  import { shortenText
-         , expandEnvVariables
-         } from '../lib/textUtil';
+  import { ErrorWithUixMessage
+         } from '../lib/errorUtil';
   import { isWin32ShellExecutable
          , hasWin32ShellExecutableExtension
          , whenKnownAsFolder as fsWhenKnownAsFolder
          } from '../lib/fsUtil';
-  import { ErrorWithUixMessage
-         } from '../lib/errorUtil';
-  import {
-         } from '../lib/asyncUtil';
+  import { expandEnvVariables
+         } from '../lib/textUtil';
 //====================================================================
 
 export function onPathChanged( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMessageVars, ü_warn = LCConfig.notAbsolute ):void {
@@ -67,7 +59,8 @@ export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string )
 export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<string> {
   //
     if ( ü_useHistory ) {
-        const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
+        const ü_cfgHist  //ß_XtnOpenInNpp
+                        = getXtnOpenInNpp().globalHistory.config;
         const ü_release = await ü_cfgHist.whenDataRef<string>();
         try {
 
@@ -75,13 +68,14 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
             ß_trc&& ß_trc( ü_cfgData, 'Config-History' );
             const ü_lastExe = ü_cfgData.executable;
             if ( ü_lastExe.length > 0 ) {
+                //                  ü_cfgHist.triggerCommit();
                 ß_trc&& ß_trc( `Stored: "${ ü_lastExe }"`, 'Executable' );
                 return ü_lastExe;
             } else {
-                const ü_nextExe = await whenDefaultExecutable( false );
-                ß_trc&& ß_trc( `Found: "${ ü_nextExe }"`, 'Executable' );
-                                   ü_cfgData.executable = ü_nextExe;
-                ü_cfgHist.dataRef = ü_cfgData;
+                const ü_nextExe = ü_cfgData.executable = await whenDefaultExecutable( false );
+                ß_trc&& ß_trc( `Found: "${ ü_nextExe }"`, 'Set-History-Executable' );
+                                    ü_cfgHist.triggerCommit();
+              //ü_cfgHist.dataRef = ü_cfgData;
                 return ü_nextExe;
             }
 

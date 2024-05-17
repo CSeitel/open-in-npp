@@ -1,7 +1,5 @@
 /*
 */
-  import { type ConfigSnapshot
-         } from '../../../core/configContext';
   import { type XtnOpenInNpp
          , type IGlobalHistoryData
          } from '../../../types/vsc.extension.d';
@@ -29,7 +27,7 @@
          } from '../../../lib/asyncUtil';
   import { ErrorWithUixMessage
          } from '../../../lib/errorUtil';
-  import { bindAppending
+  import { asyncNullOperation
          } from '../../../lib/functionUtil';
   import { testSrc
          , testEqual
@@ -48,7 +46,8 @@
          , firstWorkspaceFolder
          } from '../../../vsc/fsUtil';
 //====================================================================
-  export const tst_dispatch = tst_settings;
+  export const tst_dispatch = true ? tst_settings
+                                   : asyncNullOperation;
 //====================================================================
     const ß_setExe = ( whenConfigSet<string> ).bind( null, CXtnCfgId.executable                );
     const ß_setDir = ( whenConfigSet<string> ).bind( null, CXtnCfgId.workingDirectory          );
@@ -60,17 +59,10 @@ export async function tst_settings(){
     ß_trc&& ß_trc( __dirname    , 'source' );
     ß_trc&& ß_trc( process.cwd(), 'cwd'    );
     await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
+    const ü_extn_0 = await extensions.getExtension<XtnOpenInNpp>( CXtnId )!.activate();
+    ß_trc&& ß_trc( ü_extn_0.globalHistory.dummy.mKey, 'Global-History' );
   //await whenDelay( 2000 );
   //
-  /*
-    const ü_extn = await ß_whenXtnAvailable();
-    const ü_extn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
-    if ( ! testNotEqual( ü_extn, undefined ) ) { return; }
-    testEqual( ü_extn.id, CXtnId );
-    testEqual( ü_extn.isActive, false, 'isActive' );
-    await ü_extn.activate();
-    testEqual( ü_extn.isActive, true , 'isActive' );
-  */
 //
   try {
   //
@@ -122,39 +114,52 @@ export async function tst_readFile(){
 //====================================================================
 
 export async function tst_history(){
-    const ü_extn = await ß_whenXtnAvailable();
   //
-    const ü_dummyHist = ü_extn.globalHistory.dummy;
+    const ü_extn_0 = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
+    testEqual( ü_extn_0.id      , CXtnId );
+  //testEqual( ü_extn_0.isActive, false, 'isActive' );
+         await ü_extn_0.activate();
+    testEqual( ü_extn_0.isActive, true , 'isActive' );
+  //
+    const ü_extn_1 = ü_extn_0.exports;
+    const ü_extn_2 = await ß_whenXtnAvailable();
+    testEqual( ü_extn_1, ü_extn_2, 'Npp' );
+  //
+    const ü_dummyHist = ü_extn_1.globalHistory.dummy;
     ß_trc&& ß_trc( ü_dummyHist.dataRef, 'Dummy-History' );
+    testEqual( await ü_dummyHist.whenCommitted(), 1, 'Count' );
   //
     const ü_dummyDat1 = [] as IGlobalHistoryData['dummy'];
     const ü_dummyDat2 = [] as IGlobalHistoryData['dummy'];
-    ü_dummyHist.dataRef = ü_dummyDat1;
-    testEqual( ü_dummyHist.dataRef, ü_dummyDat1, 'DataRef' );
-    ü_dummyDat1.push( 1 );
-    testEqual( ü_dummyHist.dataRef[0], ü_dummyDat1[0], 'DataRef[0]' );
-    ü_dummyHist.dataRef = ü_dummyDat2;
-    testEqual( ü_dummyHist.dataRef, ü_dummyDat2, 'DataRef' );
   //
-    ü_dummyDat2.push( 2 );
-  //ü_dummyHist.triggerCommit();
-    const ü_count = await ü_dummyHist.whenCommitted();
-    ß_trc&& ß_trc( 'Co'+ ü_count );
+    testNotEqual(
+               ü_dummyHist.dataRef , ü_dummyDat1, 'DataRef' );
+               ü_dummyHist.dataRef = ü_dummyDat2;
+               ü_dummyHist.dataRef = ü_dummyDat1;
+    testEqual( ü_dummyHist.dataRef , ü_dummyDat1, 'DataRef' );
+    testEqual( await ü_dummyHist.whenCommitted(), 2, 'Count' );
+    testEqual( await ü_dummyHist.whenCommitted(), 1, 'Count' );
   //
-    const ü_adminHist = ü_extn.globalHistory.admin;
+    ü_dummyHist.dataRef.push(1);
+    ü_dummyHist.triggerCommit();
+    testEqual( await ü_dummyHist.whenCommitted(), 1, 'Count' );
+  //
+    const ü_adminHist = ü_extn_1.globalHistory.admin;
     const ü_adminData = ü_adminHist.dataRef;
-    testEqual( ü_adminData.version, ü_extn.version, 'Version' );
+    testEqual( ü_adminData.version, ü_extn_1.version, 'Version' );
   //
-    const ü_cfgHist = ü_extn.globalHistory.config;
+    const ü_exe = await ß_getConfigSnapshot().whenExecutable;
+    const ü_cfgHist = ü_extn_1.globalHistory.config;
     const ü_cfgData = ü_cfgHist.dataRef;
-    testEqual( ü_cfgData.executable, '', 'Executable' );
+    testEqual( await ü_cfgHist.whenCommitted(), 1, 'Npp count' );
+    testEqual( ü_cfgData.executable, ü_exe, 'Executable' );
   //
 }
 
 //====================================================================
 
 export async function tst_openInNpp(){
-    const ü_noKill =  true;
+    const ü_noKill = !true;
   //
     await whenTextEditorOpened( fileToUri( __filename ) );
     const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
