@@ -56,7 +56,11 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IXtnRuntimeContext {
 
 export async function ß_whenXtnAvailable():Promise<XtnOpenInNpp> {
     const ü_eXtn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
-    if ( ! ü_eXtn.isActive ) { await ü_eXtn.activate(); }
+    const ü_isActive = ü_eXtn.isActive;
+              ß_trc&& ß_trc( `Is active = ${ ü_isActive }`, 'External-Activation-Request' );
+    if ( ! ü_isActive ) {
+        await ü_eXtn.activate();
+    }
     return ü_eXtn.exports;
 }
 

@@ -2,5 +2,6 @@
     "openInNpp.developerTrace":  true,
     "openInNpp.Executable": "",
     "openInNpp.workingDirectory": "",
-    "openInNpp.virtualDocumentsDirectory": "%TEMP%"
+    "openInNpp.virtualDocumentsDirectory": "%TEMP%",
+    "openInNpp.spawnOptions": { "env":{ "VSCTST":"ABC" } }
 }

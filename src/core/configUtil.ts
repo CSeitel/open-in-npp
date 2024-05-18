@@ -60,7 +60,7 @@ export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<str
   //
     if ( ü_useHistory ) {
         const ü_XtnOpenInNpp = ß_XtnOpenInNpp || await ß_whenXtnAvailable();
-        ß_trc&& ß_trc( ü_XtnOpenInNpp === null, 'zzzzzz' );
+      //ß_trc&& ß_trc( ü_XtnOpenInNpp === null, 'zzzzzz' );
         const ü_cfgHist = ü_XtnOpenInNpp.globalHistory.config;
         const ü_release = await ü_cfgHist.whenDataRef<string>();
         try {

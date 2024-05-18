@@ -1,6 +1,8 @@
 /*
 */
-  import { type TTestSuites as TTestSuitesCore
+  import { type TTestSuites
+         , type TTestSuiteDefinition
+         , type TTestSuiteObject
          , type TAsyncTestFunction
          } from '../../types/lib.testUtil.d';
   import { TNotReadonly
@@ -17,83 +19,90 @@
   import * as ß_fs  from './lib/fs.vsc' ;
   import * as ß_npp from './lib/npp.vsc';
 //====================================================================
-  type TTestSuite           = Record<string,TAsyncTestFunction>
-  type TTestSuiteDefinition = [string,TTestSuite,boolean,number]
-  type TTestSuites          = TTestSuiteDefinition[]
+//type TTestSuite           = Record<string,TAsyncTestFunction>
+//type TTestSuiteDefinition = [string,TTestSuite,boolean]
+//type TTestSuites          = TTestSuiteDefinition[]
 //--------------------------------------------------------------------
   const ß_single =
-    { dispatch: 
+    { tst_dispatch:
              // ß_fs .tst_dispatch
                 ß_npp.tst_dispatch
   //, bbcee   : ß_fs.tst_whenFileInfoRead
   //, ccee    : ß_fs.tst_whenFileInfoRead
-    } as TTestSuite;
+    } as TTestSuiteObject;
 //--------------------------------------------------------------------
   const ß_proxy     = [] as TAsyncTestFunction[][];
   const ß_debugUI   =                     !true;
   const ß_skipTests = ß_debugUI ? false :  true; // = except single test
   const ß_SKIPTests = ß_debugUI ? false : !ß_skipTests;
   const ß_suites =
-    [ [ 'Single', ß_single,  ß_SKIPTests, 1 ]
-    , [ 'Etc'   , ß_etc   ,  ß_skipTests, 3 ]
-    , [ 'Fs'    , ß_fs    ,  ß_skipTests, 5 ]
-    , [ 'Npp'   , ß_npp   ,  ß_skipTests, 5 ]
+    [ [ 'Single', ß_single,  ß_SKIPTests ,1] as unknown as TTestSuiteDefinition
+    , [ 'Etc'   , ß_etc   ,  ß_skipTests ,3] as unknown as TTestSuiteDefinition
+    , [ 'Fs'    , ß_fs    ,  ß_skipTests ,5] as unknown as TTestSuiteDefinition
+    , [ 'Npp'   , ß_npp   ,  ß_skipTests ,5] as unknown as TTestSuiteDefinition
     ] as TTestSuites
     ;
 //====================================================================
 
-  if ( ß_debugUI ) {
+  if ( ß_debugUI ||  true ) {
                             ß_suites.forEach( ß_expandSuite );
-  } else { whenAllTestsRun( ß_suites as unknown as TTestSuitesCore ); }
+  } else { whenAllTestsRun( ß_suites ); }
+
+//====================================================================
+
+async function ß_when( ü_sIndx:number, ü_tIndx:number ):Promise<void> {
+    const ü_suite = ß_proxy[ ü_sIndx ];
+    if ( ü_suite    === undefined ) { throw new Error( 'No Suite: '+ü_sIndx ); }
+    const ü_whenTest = ü_suite[ ü_tIndx ];
+    if ( ü_whenTest === undefined ) { throw new Error( ''+ü_tIndx ); }
+    await ü_whenTest();
+}
 
 //====================================================================
 
 function ß_expandSuite( ö_suite:TTestSuiteDefinition, ü_sIndx:number ):void {
+    if ( ö_suite[2] ) { return; }
   //
     suite( ö_suite[0], function(){
-        const ü_names_ = ß_wrapTestSuite( ö_suite, ü_sIndx );
-        const ü_names = [0,1,2,3,4,5,6,7,8,9].slice(0,ö_suite[3]);
-        ü_names.forEach(function( ü_name, ü_tIndx ) {
-            test(                                  ü_sIndx +'-'+ ü_tIndx
-                , async function(){ return ß_when( ü_sIndx,      ü_tIndx ); } );
+        const ü_names   = ß_wrapTestSuite( ö_suite, ü_sIndx );
+        const ü_unknown = ü_names.length === 0;
+        const ü_render  = ü_unknown ?  ö_suite[3 as 2] as undefined
+                                    : ü_names.length;
+        const ü_tIds  = [0,1,2,3,4,5,6,7,8,9].slice( 0, ü_render );
+        ü_tIds.forEach(function( ü_tId, ü_tIndx ){
+            test(                    ü_sIndx +'-'+ ü_tIndx
+              //, async function(){ return ß_when( ü_sIndx,      ü_tIndx ); }
+                , ß_when.bind( null, ü_sIndx     , ü_tIndx )
+                );
         });
     });
-/*
-*/
 }
 
 //--------------------------------------------------------------------
 
-function ß_wrapTestSuite( ü_suite:TTestSuiteDefinition, ä_sIndx:number ):string[] {
-    if ( ü_suite[2] ) { return []; }
+function ß_wrapTestSuite( ä_suite:TTestSuiteDefinition, ä_sIndx:number ):string[] {
   //
     const ö_proxy = ß_proxy[ ä_sIndx ] = [] as TAsyncTestFunction[];
-    const ö_tests = ü_suite[1];
+    const ö_tests = ä_suite[1] as TTestSuiteObject;
+    const ü_testNames = Object.keys( ö_tests );
+    if ( ü_testNames.length === 0 ) { return ü_testNames; }
+        //ü_testNames.sort();
   //
-     const ü_testNames = ( Object.keys( ö_tests ) as (keyof typeof ö_tests)[] );
-         //ü_testNames.sort();
-    const ö_names = ü_testNames.map( (ü_testName,ü_tIndx)=> `${ ü_testName } [${ ä_sIndx}-${ ü_tIndx }]` );
            ü_testNames.forEach( ö_compileProxy );
-    ß_trc&& ß_trc( ö_names, ü_suite[0] );
     return ü_testNames;
   //
 function ö_compileProxy( ü_testName:string, ä_tIndx:number ):void {
+    const ä_testName = `[${ ä_sIndx}-${ ä_tIndx }] ${ ü_testName }`;
+    ß_trc&& ß_trc( ä_testName, ä_suite[0]+'-Prepare' );
         const ö_testImpl = ö_tests[ ü_testName ];
         ö_proxy[ ä_tIndx ] = ö_wrap;
 function ö_wrap():PromiseLike<void> {
+    ß_trc&& ß_trc( ä_testName, ä_suite[0]+'-Execute' );
     return ö_testImpl().then( ()=>{
-        testSummary( ö_names[ ä_tIndx ] );
+        testSummary( ä_testName );
     });
 }
 }
-}
-
-//--------------------------------------------------------------------
-
-async function ß_when( ü_sIndx:number, ü_tIndx:number ):Promise<void> {
-    const ü_whenTest = ß_proxy[ ü_sIndx ][ ü_tIndx ];
-    if ( ü_whenTest === undefined ) { throw new Error( ''+ü_tIndx ) }
-    await ü_whenTest();
 }
 
 //====================================================================
