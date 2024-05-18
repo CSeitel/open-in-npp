@@ -64,9 +64,9 @@ export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):P
     if ( ß_XtnOpenInNpp === null ) {
         ü_vscXtnContext.subscriptions.push( ß_ViewErrorDetails );
         ß_notNull = await new XtnOpenInNpp( ü_vscXtnContext ).whenReady;
-        console.trace( ß_notNull, 'Activation-Done' )
-        ß_trc&& ß_trc( ß_notNull, 'Activation-Done' );
+        console.trace( ß_notNull instanceof XtnOpenInNpp, 'Activation-Done' );
         (ß_XtnOpenInNpp as TNotReadonly<XtnOpenInNpp> ) = ß_notNull;
+        ß_trc&& ß_trc( (ß_XtnOpenInNpp as any).globalHistory !== null, 'Activation-Done '+Date.now() );
     } else {
         if ( ß_XtnOpenInNpp.vscContext === ü_vscXtnContext )
              { ß_trc&& ß_trc( 'Old context', 'Re-Activation' ); }
@@ -76,7 +76,7 @@ export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):P
     return ß_XtnOpenInNpp;
 }
 
-export function getXtnOpenInNpp() {
+ function getXtnOpenInNpp() {
               ß_trc&& ß_trc( ß_notNull, 'GGGGGGGGGGGGGGGG' );
     return ß_XtnOpenInNpp;
 }

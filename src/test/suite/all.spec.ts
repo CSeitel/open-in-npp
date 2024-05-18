@@ -6,13 +6,13 @@
   import { TNotReadonly
          } from '../../types/generic.d';
 //--------------------------------------------------------------------
-  import '../../runtime/context-XTN';
   import { ß_trc
          } from '../../runtime/context';
   import { whenAllTestsRun
          , testSummary
          } from '../../lib/testUtil';
 //--------------------------------------------------------------------
+//import '../../runtime/context-XTN';
   import * as ß_etc from './lib/etc.vsc';
   import * as ß_fs  from './lib/fs.vsc' ;
   import * as ß_npp from './lib/npp.vsc';

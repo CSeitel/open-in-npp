@@ -58,7 +58,7 @@
 export async function tst_settings(){
     ß_trc&& ß_trc( __dirname    , 'source' );
     ß_trc&& ß_trc( process.cwd(), 'cwd'    );
-    await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
+  //await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
     const ü_extn_0 = await extensions.getExtension<XtnOpenInNpp>( CXtnId )!.activate();
     ß_trc&& ß_trc( ü_extn_0.globalHistory.dummy.mKey, 'Global-History' );
   //await whenDelay( 2000 );

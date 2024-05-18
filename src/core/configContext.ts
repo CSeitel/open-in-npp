@@ -15,6 +15,8 @@
          , ConfigurationTarget
          , WorkspaceConfiguration
          } from 'vscode';
+  import { ß_XtnOpenInNpp
+         } from '../runtime/context-XTN';
   import { ß_trc
          , ß_toggleDevTrace
          } from '../runtime/context';
@@ -49,6 +51,7 @@ class ConfigProxy {
 constructor(
     private _vscConfig = workspace.getConfiguration()
 ){
+    //ß_trc&& ß_trc( typeof( _vscConfig ), 'WWW' );
     hideProperty( this, '_vscConfig' as any );
   //hideProperty( this as any as {_vscConfig:1}, '_vscConfig' );
     //configurable: true value: 42,
@@ -106,7 +109,7 @@ clone( ü_what ?:TXtnCfgIds ):ConfigSnapshot {
 
 export function getConfigSnapshot():ConfigSnapshot {
     if ( ß_cfgIsDirty ) {
-      ß_trc&& ß_trc( 'ConfigSnapshot is dirty' );
+      ß_trc&& ß_trc( ß_XtnOpenInNpp === null, 'ConfigSnapshot is dirty' );
          ß_cfgIsDirty = false;
         ß_cfgSnapshot = ß_cfgSnapshot?.clone( ß_whatIsDirty ) ?? new ConfigSnapshot();
     }

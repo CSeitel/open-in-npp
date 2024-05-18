@@ -12,7 +12,7 @@
 //--------------------------------------------------------------------
   import { ß_XtnOpenInNpp
          , ß_StatusBarItem
-         , getXtnOpenInNpp
+         , ß_whenXtnAvailable
          } from '../runtime/context-XTN';
   import { ß_trc
          } from '../runtime/context';
@@ -59,8 +59,9 @@ export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string )
 export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<string> {
   //
     if ( ü_useHistory ) {
-        const ü_cfgHist  //ß_XtnOpenInNpp
-                        = getXtnOpenInNpp().globalHistory.config;
+        const ü_XtnOpenInNpp = ß_XtnOpenInNpp || await ß_whenXtnAvailable();
+        ß_trc&& ß_trc( ü_XtnOpenInNpp === null, 'zzzzzz' );
+        const ü_cfgHist = ü_XtnOpenInNpp.globalHistory.config;
         const ü_release = await ü_cfgHist.whenDataRef<string>();
         try {
 
