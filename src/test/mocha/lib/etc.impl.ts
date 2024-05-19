@@ -13,7 +13,7 @@
   import { whenShownInWindowsExplorer
          , whenChildProcessSpawned
          } from '../../../lib/cpUtil';
-  import { testSrc
+  import { testNever
          , testEqual
          , testFunction
          , whenAsyncFunctionTested
@@ -25,7 +25,9 @@
 export async function tst_cp(){
     const ü_done = await whenShownInWindowsExplorer( __filename );
     testEqual( ü_done, true );
-    throw new TypeError('ÄÄÄ')
+    testNever( 'eee' );
+  //testEqual( false, true, 'SS' );
+  //throw new TypeError('ÄÄÄ')
 }
 
 //====================================================================
