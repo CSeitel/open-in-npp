@@ -18,8 +18,7 @@
          , ConfigurationTarget
          } from 'vscode';
 //--------------------------------------------------------------------
-  import { ß_whenXtnAvailable
-         , ß_getConfigSnapshot
+  import { ß_whenXtnActivated_External
          } from '../../../runtime/context-XTN';
   import { ß_trc
          } from '../../../runtime/context';
@@ -59,31 +58,32 @@ export async function tst_settings(){
     ß_trc&& ß_trc( __dirname    , 'source' );
     ß_trc&& ß_trc( process.cwd(), 'cwd'    );
   //await commands.executeCommand<unknown>( CEXtnCommands.oSettings );
-    const ü_extn_0 = await ß_whenXtnAvailable();
+    const ü_extn_0 = await ß_whenXtnActivated_External();
+    const ü_cfgApi = ü_extn_0.configApi;
   //ß_trc&& ß_trc( ü_extn_0.globalHistory.dummy, 'Global-History' );
   //await whenDelay( 2000 );
   //
 //
   try {
   //
-    const ü_cfg_0 = ß_getConfigSnapshot();
+    const ü_cfg_0 = ü_cfgApi.configSnapshot;
     ß_trc&& ß_trc( Object.assign( {}, ü_cfg_0 ), 'Initial Config' );
     const ü_exe_0 = await ü_cfg_0.whenExecutable;
   //
     const ü_whenMod_exe_0 = ß_setExe( '' );
-    testEqual( ß_getConfigSnapshot(), ü_cfg_0, 'Old Snapshot' );
+    testEqual( ü_cfgApi.configSnapshot, ü_cfg_0, 'Old Snapshot' );
     await ü_whenMod_exe_0;
-    testEqual( ß_getConfigSnapshot(), ü_cfg_0, 'Old Snapshot' );
+    testEqual( ü_cfgApi.configSnapshot, ü_cfg_0, 'Old Snapshot' );
   //
     const ü_new_exe = '2otepad.exe';
     const ü_whenMod_exe_1 = await ß_setExe( ü_new_exe );
-    const ü_cfg_1 = ß_getConfigSnapshot();
+    const ü_cfg_1 = ü_cfgApi.configSnapshot;
     testNotEqual( ü_cfg_1, ü_cfg_0, 'New Snapshot' );
     testEqual( await ü_cfg_1.whenExecutable, ü_new_exe, 'New value' );
   //
     const ü_dirNot = join( process.cwd(), '../aaaaa' );
     await ß_setDir( ü_dirNot );
-    const ü_cfg_2 = ß_getConfigSnapshot();
+    const ü_cfg_2 = ü_cfgApi.configSnapshot;
     await testRejected( ü_cfg_2.whenWorkingDir, ü_dirNot, ü_eX => ü_eX instanceof ErrorWithUixMessage );
   //
   } finally {
@@ -107,8 +107,9 @@ export async function tst_readFile(){
         //ü_doc.
     const ü_json = JSON.parse( ü_doc.getText() ) as Record<'openInNpp.Executable',string>;
     ß_trc&& ß_trc( ü_json, 'Json' );
-    const ü_cfg_0 = ß_getConfigSnapshot();
-    testEqual( ü_cfg_0.executable, ü_json['openInNpp.Executable'], 'Exe' );
+    const ü_extn_0 = await ß_whenXtnActivated_External();
+    const ü_exe    = ü_extn_0.configApi.configSnapshot.executable;
+    testEqual( ü_exe, ü_json['openInNpp.Executable'], 'Exe' );
 }
 
 //====================================================================
@@ -122,7 +123,7 @@ export async function tst_history(){
     testEqual( ü_extn_0.isActive, true , 'isActive' );
   //
     const ü_extn_1 = ü_extn_0.exports;
-    const ü_extn_2 = await ß_whenXtnAvailable();
+    const ü_extn_2 = await ß_whenXtnActivated_External();
     testEqual( ü_extn_1, ü_extn_2, 'Npp' );
   //
     const ü_dummyHist = ü_extn_1.globalHistory.dummy;
@@ -148,7 +149,7 @@ export async function tst_history(){
     const ü_adminData = ü_adminHist.dataRef;
     testEqual( ü_adminData.version, ü_extn_1.version, 'Version' );
   //
-    const ü_exe = await ß_getConfigSnapshot().whenExecutable;
+    const ü_exe     = ü_extn_1.configApi.configSnapshot.executable;
     const ü_cfgHist = ü_extn_1.globalHistory.config;
     const ü_cfgData = ü_cfgHist.dataRef;
     testEqual( await ü_cfgHist.whenCommitted(), 1, 'Npp count' );

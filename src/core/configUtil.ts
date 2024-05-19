@@ -11,8 +11,8 @@
          } from 'path';
 //--------------------------------------------------------------------
   import { ß_XtnOpenInNpp
-         , ß_StatusBarItem
-         , ß_whenXtnAvailable
+         , ß_RuntimeContext
+         , ß_whenXtnActivated_External
          } from '../runtime/context-XTN';
   import { ß_trc
          } from '../runtime/context';
@@ -30,7 +30,7 @@
 
 export function onPathChanged( ü_whenPath:PromiseLike<string>, ü_yes:IExpandUiXMessageVars, ü_warn = LCConfig.notAbsolute ):void {
   //
-    ß_StatusBarItem.echoWhenDone(
+    ß_RuntimeContext.statusBarItem.echoWhenDone(
         ü_whenPath.then( function( ü_path ){
             if (             ü_path.length === 0 ) { return ü_path; }
             if ( isAbsolute( ü_path )            ) { return ü_path;
@@ -59,7 +59,7 @@ export async function whenExecutable( ü_useHistory:boolean, ü_cfgPath:string )
 export async function whenDefaultExecutable( ü_useHistory:boolean ):Promise<string> {
   //
     if ( ü_useHistory ) {
-        const ü_XtnOpenInNpp = ß_XtnOpenInNpp || await ß_whenXtnAvailable();
+        const ü_XtnOpenInNpp = ß_XtnOpenInNpp || await ß_whenXtnActivated_External();
       //ß_trc&& ß_trc( ü_XtnOpenInNpp === null, 'zzzzzz' );
         const ü_cfgHist = ü_XtnOpenInNpp.globalHistory.config;
         const ü_release = await ü_cfgHist.whenDataRef<string>();

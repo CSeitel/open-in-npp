@@ -3,14 +3,19 @@
   import { type IRuntimeContext
          } from '../types/runtime.context.d';
   import   type TXtnOpenInNpp
-          from '../core/xtnOpenInNpp';
+           from '../core/xtnOpenInNpp';
+  import { type TextDocViewer
+         } from '../vsc/docUtil';
   import { type MementoFacade
          } from '../vsc/histUtil';
+  import { type XtnStatusBarItem
+         } from '../vsc/uiUtil';
 //====================================================================
 
   export type XtnOpenInNpp = TXtnOpenInNpp
   export interface IXtnRuntimeContext extends IRuntimeContext<{}> {
-      readonly xtnOpenInNpp:XtnOpenInNpp
+      readonly statusBarItem   :XtnStatusBarItem
+      readonly viewErrorDetails:TextDocViewer
   }
 
 //====================================================================

@@ -23,11 +23,11 @@
          , QuickPickItem
          , QuickInputButton
          } from 'vscode';
+  import { ß_RuntimeContext
+         } from '../runtime/context-XTN';
   import { ß_trc
          , ß_err
          } from '../runtime/context';
-  import { ß_ViewErrorDetails
-         } from '../runtime/context-XTN';
   import { summarizeError
         , expandTemplate
          } from '../lib/errorUtil';
@@ -73,7 +73,7 @@ export async function threadShowError( ü_eX:any, ü_context:string ):Promise<vo
     const ü_done = await window.showErrorMessage( ü_info, ü_more );
     switch ( ü_done ) {
         case ü_more:
-          ß_ViewErrorDetails.whenNewDocumentShown( summarizeError( ü_eX, ü_context ) );
+          ß_RuntimeContext.viewErrorDetails.whenNewDocumentShown( summarizeError( ü_eX, ü_context ) );
           break;
     }
 }

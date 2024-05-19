@@ -27,10 +27,8 @@
          , window
          } from 'vscode';
   import { ß_trc
-         , ß_toggleDevTrace
          } from '../runtime/context';
-  import { configModificationSignalled
-         , getConfigSnapshot
+  import { ConfigHandler
          } from '../core/configContext';
   import { LCXtn
          } from '../l10n/i18n';
@@ -53,6 +51,7 @@ export default class XtnOpenInNpp {
     readonly vscDisposables:ReadonlyArray<IDisposableLike> & { push:( ... item:IDisposableLike[] )=>void }
     readonly globalHistory :TGlobalHistoryProxy
     readonly  localHistory :TLocalHistoryProxy
+    readonly configApi:ConfigHandler
   //
     readonly extensionApi :Extension<XtnOpenInNpp>
   //readonly version      :string
@@ -78,7 +77,7 @@ private _onDidCloseTextDocument = ( ü_anyDoc:TextDocument )=>{
 constructor(
     readonly vscContext   :ExtensionContext
 ){
-    getConfigSnapshot().developerTrace || ß_toggleDevTrace();
+    this.configApi = new ConfigHandler();
   //
     this.globalHistory =
       { admin  : new MementoFacade( this.vscContext, 'admin' , { version   : 0                 }, true )
@@ -113,7 +112,7 @@ constructor(
     }
   //
       this.vscDisposables.push(             this
-      , workspace.onDidChangeConfiguration( configModificationSignalled  )
+      , workspace.onDidChangeConfiguration( this.configApi.configModificationSignalled.bind( this.configApi ) )
       , workspace.onDidCloseTextDocument  ( this._onDidCloseTextDocument )
       );
   //

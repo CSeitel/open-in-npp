@@ -18,7 +18,7 @@
   import { extensions
          } from 'vscode';
 //--------------------------------------------------------------------
-  import { ß_RuntimeContext
+  import { ß_RuntimeContext as ß_rtCntxt
          , ß_trc
          } from './context';
   import { LCHeader
@@ -29,14 +29,9 @@
          } from '../vsc/uiUtil';
 //====================================================================
   type TInitialRuntimeContext = TWritable<IXtnRuntimeContext>
-           let ß_notNull:XtnOpenInNpp
-  export const ß_XtnOpenInNpp      = null as unknown as XtnOpenInNpp;
-  import { getConfigSnapshot
-         } from '../core/configContext';
-  export const ß_getConfigSnapshot = getConfigSnapshot;
-  export const ß_StatusBarItem     = new XtnStatusBarItem();
-  export const ß_ViewErrorDetails  = new TextDocViewer( CXtnTxtScheme, LCHeader.DETAILS() );
-         const ß_that              = ß_implement( ß_RuntimeContext as TInitialRuntimeContext );
+  export const ß_XtnOpenInNpp   = null as unknown as XtnOpenInNpp;
+         const ß_that           = ß_implement( ß_rtCntxt as TInitialRuntimeContext );
+  export const ß_RuntimeContext = ß_that;
   import   XtnOpenInNpp
            from '../core/xtnOpenInNpp';
 //====================================================================
@@ -47,30 +42,19 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IXtnRuntimeContext {
          ü_rtCntxt.typeCode    = 'xtn';
          ü_rtCntxt.tracePrefix = 'XTN';
       //
-        ü_rtCntxt .xtnOpenInNpp = ß_XtnOpenInNpp ;
+        ü_rtCntxt .statusBarItem    = new XtnStatusBarItem();
+        ü_rtCntxt .viewErrorDetails = new TextDocViewer( CXtnTxtScheme, LCHeader.DETAILS() );
     }
     return ü_rtCntxt;
 }
 
 //====================================================================
 
-export async function ß_whenXtnAvailable():Promise<XtnOpenInNpp> {
-    const ü_eXtn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
-    const ü_isActive = ü_eXtn.isActive;
-              ß_trc&& ß_trc( `Is active = ${ ü_isActive }`, 'External-Activation-Request' );
-    if ( ! ü_isActive ) {
-        await ü_eXtn.activate();
-    }
-    return ü_eXtn.exports;
-}
-
-export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):Promise<XtnOpenInNpp> {
+export async function ß_whenXtnActivated_Internal( ü_vscXtnContext:ExtensionContext ):Promise<XtnOpenInNpp> {
     if ( ß_XtnOpenInNpp === null ) {
-        ü_vscXtnContext.subscriptions.push( ß_ViewErrorDetails );
-        ß_notNull = await new XtnOpenInNpp( ü_vscXtnContext ).whenReady;
-        console.trace( ß_notNull instanceof XtnOpenInNpp, 'Activation-Done' );
-        (ß_XtnOpenInNpp as TNotReadonly<XtnOpenInNpp> ) = ß_notNull;
-        ß_trc&& ß_trc( (ß_XtnOpenInNpp as any).globalHistory !== null, 'Activation-Done '+Date.now() );
+        ü_vscXtnContext.subscriptions.push( ß_that.viewErrorDetails );
+                       (ß_XtnOpenInNpp as TNotReadonly<XtnOpenInNpp> ) = await new XtnOpenInNpp( ü_vscXtnContext ).whenReady;
+        ß_trc&& ß_trc( (ß_XtnOpenInNpp as any                        ) instanceof XtnOpenInNpp, 'Activation-Done' );
     } else {
         if ( ß_XtnOpenInNpp.vscContext === ü_vscXtnContext )
              { ß_trc&& ß_trc( 'Old context', 'Re-Activation' ); }
@@ -80,9 +64,14 @@ export async function ß_whenXtnActivated( ü_vscXtnContext:ExtensionContext ):P
     return ß_XtnOpenInNpp;
 }
 
- function getXtnOpenInNpp() {
-              ß_trc&& ß_trc( ß_notNull, 'GGGGGGGGGGGGGGGG' );
-    return ß_XtnOpenInNpp;
+export async function ß_whenXtnActivated_External():Promise<XtnOpenInNpp> {
+    const ü_eXtn = extensions.getExtension<XtnOpenInNpp>( CXtnId )!;
+    const ü_isActive = ü_eXtn.isActive;
+              ß_trc&& ß_trc( `Is active = ${ ü_isActive }`, 'External-Activation-Request' );
+    if ( ! ü_isActive ) {
+        await ü_eXtn.activate();
+    }
+    return ü_eXtn.exports;
 }
 
 //====================================================================

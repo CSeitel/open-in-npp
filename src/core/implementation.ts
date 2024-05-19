@@ -33,8 +33,7 @@ https://code.visualstudio.com/api/references/vscode-api
   import { ß_trc
          , ß_err
          } from '../runtime/context';
-  import { ß_getConfigSnapshot
-         , ß_XtnOpenInNpp
+  import { ß_XtnOpenInNpp
          } from '../runtime/context-XTN';
 //--------------------------------------------------------------------
   import { LCDoIt
@@ -186,7 +185,7 @@ async whenShadowUpToDate( ü_resetShadowDir?:string ):Promise<this> {
 //====================================================================
 
 class CliArgs {
-    private readonly _config                   = ß_getConfigSnapshot();
+    private readonly _config                   = ß_XtnOpenInNpp.configApi.configSnapshot;
     private readonly _whenReady    :Promise<boolean>
     private readonly _mode         :CETrigger
   //

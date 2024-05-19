@@ -15,8 +15,6 @@
          , ConfigurationTarget
          , WorkspaceConfiguration
          } from 'vscode';
-  import { ß_XtnOpenInNpp
-         } from '../runtime/context-XTN';
   import { ß_trc
          , ß_toggleDevTrace
          } from '../runtime/context';
@@ -101,16 +99,58 @@ clone( ü_what ?:TXtnCfgIds ):ConfigSnapshot {
 }
 
 //====================================================================
+
+export class ConfigHandler {
+    private _cfgSnapshot = new ConfigSnapshot();
+    private _cfgIsDirty  = true;
+    private _whatIsDirty = undefined as TXtnCfgIds|undefined;
+constructor(){
+    this._cfgSnapshot.developerTrace || ß_toggleDevTrace(); // adjust hard-coded initial value 'true' to config-setting if necessary
+}
+get configSnapshot():ConfigSnapshot {
+    if ( this._cfgIsDirty ) {
+         this._cfgIsDirty = false;
+        ß_trc&& ß_trc( 'Is dirty', 'ConfigSnapshot' );
+        this._cfgSnapshot = this._cfgSnapshot.clone( this._whatIsDirty );
+    }
+      return this._cfgSnapshot;
+}
+
+configModificationSignalled( ü_change:ConfigurationChangeEvent ):void {
+    if ( ! ü_change.affectsConfiguration( CXtnCfgPrefix ) ) { return; }
+  //
+    ß_trc&& ß_trc( `Event: Configuration changed`, 'Configuration' );
+  //
+    if ( ü_change.affectsConfiguration( CXtnCfgId.extendExplorerContextMenu )
+      || ü_change.affectsConfiguration( CXtnCfgId.extendEditorContextMenu   )
+      || ü_change.affectsConfiguration( CXtnCfgId.extendEditorTitleMenu     )
+       ) { return; }
+  //
+    this._cfgIsDirty  = true;
+    this._whatIsDirty = undefined;
+  //
+           if ( ü_change.affectsConfiguration( CXtnCfgId.executable                ) ) { this._whatIsDirty = 'executable'               ; onPathChanged( this.configSnapshot.whenExecutable    , LCConfig.executable_Y     );
+    } else if ( ü_change.affectsConfiguration( CXtnCfgId.workingDirectory          ) ) { this._whatIsDirty = 'workingDirectory'         ; onPathChanged( this.configSnapshot.whenWorkingDir    , LCConfig.workingDir_Y     );
+    } else if ( ü_change.affectsConfiguration( CXtnCfgId.virtualDocumentsDirectory ) ) { this._whatIsDirty = 'virtualDocumentsDirectory'; onPathChanged( this.configSnapshot.whenVirtualDocsDir, LCConfig.virtualDocsDir_Y );
+    } else if ( ü_change.affectsConfiguration( CXtnCfgId.developerTrace            ) ) { ß_toggleDevTrace ();
+    } else {
+    }
+  //
+}
+
+}
+
+//====================================================================
     let ß_cfgIsDirty  = true;
     let ß_whatIsDirty = undefined as TXtnCfgIds|undefined;
     let ß_cfgSnapshot = undefined as unknown as ConfigSnapshot;
         ß_cfgSnapshot = getConfigSnapshot();
 //====================================================================
 
-export function getConfigSnapshot():ConfigSnapshot {
+ function getConfigSnapshot():ConfigSnapshot {
     if ( ß_cfgIsDirty ) {
-      ß_trc&& ß_trc( ß_XtnOpenInNpp === null, 'ConfigSnapshot is dirty' );
          ß_cfgIsDirty = false;
+        ß_trc&& ß_trc( 'Is dirty', 'ConfigSnapshot' );
         ß_cfgSnapshot = ß_cfgSnapshot?.clone( ß_whatIsDirty ) ?? new ConfigSnapshot();
     }
       return ß_cfgSnapshot;
@@ -118,7 +158,7 @@ export function getConfigSnapshot():ConfigSnapshot {
 
 //--------------------------------------------------------------------
 
-export function configModificationSignalled( ü_change:ConfigurationChangeEvent ):void {
+ function configModificationSignalled( ü_change:ConfigurationChangeEvent ):void {
     if ( ! ü_change.affectsConfiguration( CXtnCfgPrefix ) ) { return; }
   //
     ß_trc&& ß_trc( `Event: Configuration changed`, 'Configuration' );
