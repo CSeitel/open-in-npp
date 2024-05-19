@@ -6,6 +6,7 @@
          , type TOrderedPairsRO
          } from '../types/generic.d';
   import { type TTestResult
+         , type TTestSummary
          , type TAsyncTestFunction
          , type TTestSuites
          , type TTestSuiteDefinition
@@ -27,6 +28,7 @@
 //--------------------------------------------------------------------
   export const successSymbol = String.fromCharCode( 0x2705 ); // 0x221a
   export const failureSymbol = String.fromCharCode( 0x274c );
+         const okSymbol      = String.fromCharCode( 0x2714 );
          const notEqual      = String.fromCharCode( 0x2260 );
          const ß_whiteSquare = String.fromCharCode( 0x25a1 );
          const ß_pilcrow     = String.fromCharCode( 0x00ba );
@@ -71,7 +73,7 @@ function ö_expandTests():void {
 function ä_expandTest( ü_testImpl:TAsyncTestFunction, ü_testName:string|number ):void {
     if ( typeof( ü_testName ) === 'number' ) { ü_testName = ü_testImpl.name; }
     test( ü_testName
-        , function(){  return ü_testImpl().then(  testSummary.bind( null, ü_testName as string )  );  }
+        , function(){  return ü_testImpl().then(  testSummary.bind( null, ü_testName as string, true )  );  }
         );
 }
 }
@@ -79,14 +81,14 @@ function ä_expandTest( ü_testImpl:TAsyncTestFunction, ü_testName:string|numbe
 
 //====================================================================
 
-export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<number> {
+export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<TTestSummary> {
   //
     if ( CWithMocha ) {
         ü_suites.forEach( expandTestSuite );
-        return Promise.resolve( -1 );
+        return Promise.resolve({ all:-1, failed:-1 });
     }
   //
-    let ö_whenDone = Promise.resolve( 0 );
+    let ö_whenDone = Promise.resolve({ all:0, failed:0 });
     ü_suites.forEach(function( ü_suite ){
         if ( ü_suite[2] ) { return; }
         ö_whenDone = ö_whenDone.then(function( ü_errCount ){
@@ -94,19 +96,19 @@ export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<number> {
         });
     });
   //
-    return ö_whenDone.then(function( ü_errCount ){
-        ß_writeStdOut( ü_errCount > 0 ? `Overall result: ${ ü_errCount } tests have failed.`
-                                      : 'Overall result: All tests have been passed successfully.' );
-        process.exitCode = ü_errCount;
-        process.exit( ü_errCount );
-        return ü_errCount;
+    return ö_whenDone.then(function( ü_sum ){
+        ß_writeStdOut( ü_sum.failed > 0 ? `Overall result: ${ ü_sum.failed } tests have failed. ${ Math.round( ü_sum.all / ü_sum.failed * 100 ) }%`
+                                        : `Overall result: ${ ü_sum.all    } tests have been passed successfully.` );
+        process.exitCode = ü_sum.failed  ;
+        process.exit     ( ü_sum.failed );
+                    return ü_sum;
     });
 }
 
-function ß_whenTestSuite( ü_rc:number, ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):PromiseLike<number> {
+function ß_whenTestSuite( ü_sum:TTestSummary, ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):PromiseLike<TTestSummary> {
   //
     ß_writeStdOut( `Suite: ${ ü_title }` );
-    let ö_whenDone = Promise.resolve( ü_rc );
+    let ö_whenDone = Promise.resolve( ü_sum );
     if ( Array.isArray( ü_tests ) ) { ü_tests.forEach(          ö_addWhenTested ); }
     else                            {         forEach( ü_tests, ö_addWhenTested ); }
   //
@@ -116,28 +118,31 @@ function ö_addWhenTested( ä_testImpl:TAsyncTestFunction, ä_testName:string|nu
     if ( typeof( ä_testName ) === 'number' ) { ä_testName = ä_testImpl.name; }
     ö_whenDone = ö_whenDone.then( ä_whenTested );
   //
-function ä_whenTested( ü_rc:number ):PromiseLike<number> {
-    let ü_impl:PromiseLike<void>
+function ä_whenTested( ö_sum:TTestSummary ):PromiseLike<TTestSummary> {
+    ö_sum.all ++ ;
+    let ü_whenDone:PromiseLike<void>
     try {
-        ü_impl = ä_testImpl();
-    } catch (error) {
-        ü_impl = Promise.reject( error );
+        ü_whenDone = ä_testImpl();
+    } catch ( ü_eX ) {
+        ü_whenDone = Promise.reject( ü_eX );
     }
-    return  ü_impl.then(function(){
-    //ä_testImpl()
-    //
-        try {
-            testSummary( ä_testName as string );
-        } catch ( ü_eX ) {
-            ü_rc ++ ;
-        }
-            return ü_rc;
-    //
-                     }).then( function(){ return ü_rc; }
-                            , function( ü_err ){
-            ß_writeStdOut( ß_echo( ü_err, 300 ) );
-            return ü_rc + 1;
-        });
+    return ü_whenDone.then( undefined, testFailed )
+                     .then(
+      function(){
+           const ü_sum = testSummary( ä_testName as string );
+            if ( ü_sum.failed > 0 )
+               { ö_sum.failed ++ ; }
+          return ö_sum;
+      }
+  /*).then( undefined
+    , function( ü_err ){
+          testFailed( ü_err, '' );
+          ß_writeStdOut( ß_echo( ü_err, 300 ) );
+                 ö_sum.failed ++ ;
+          return ö_sum;
+      }
+*/
+    );
 }
 }
   //
@@ -145,24 +150,36 @@ function ä_whenTested( ü_rc:number ):PromiseLike<number> {
 
 //--------------------------------------------------------------------
 
-export function testSummary( ü_testName:string ):void {
+export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummary {
     const ü_crlf    = ß_RuntimeContext.lineSep;
     const ü_results = CSeriesOfTests.slice(0);
                       CSeriesOfTests.length = 0;
-    const ü_all     = ü_results.length;
-      let ü_failed  = '';
+      let ü_head:string
+      let ü_failedErr = '';
+    const ü_all       = ü_results.length;
+    const ü_sum:TTestSummary =
+      { all   : ü_all
+      , failed: 0
+      }
     if ( ü_all === 0 ) {
-        ü_results.unshift( `${ ü_testName }: No checks` );
+        ü_head = `${ ü_testName }: No checks`;
     } else {
         const ü_success = ü_results.filter( ü_test => ü_test.startsWith( successSymbol ) );
-        const ü_ok  = ü_success.length;
+        const ü_ok = ü_success.length;
         const ü_ratio = Math.round( ü_ok / ü_all * 100 );
-        if ( ü_ok < ü_all ) { ü_failed = `${ ü_all - ü_ok } Failures`; }
-        ü_results.unshift( `${ ü_testName }: Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%` );
+        ü_head = `${ ü_testName }: Success-rate: ${ ü_ok }/${ ü_all } = ${ ü_ratio }%`;
+        if ( ü_all > ü_ok ) {
+                                            ü_sum.failed = ü_all - ü_ok;
+            if ( ü_throw ) { ü_failedErr = `${ ü_sum.failed } Failures`; }
+        }
     }
   //
-    ß_writeStdOut(  ü_results.join( ü_crlf ) + ü_crlf  );
-    if ( ü_failed.length > 0 ) { throw new Error( ü_failed ); }
+                    ü_results.unshift( ü_head );
+                    ü_results.push   ( ''     );
+    ß_writeStdOut(  ü_results.join( ü_crlf )  );
+  //
+    if ( ü_failedErr.length > 0 ) { throw new Error( ü_failedErr ); }
+    return ü_sum;
 }
 
 //====================================================================
@@ -189,7 +206,7 @@ export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ü_message = 'A
       );
 }
 export function testFailed( ü_reason:any, ü_message?:string ):false {
-                                                             const ü_echo = 'Exception caught: '+ ß_echo( ü_reason, 200 );
+                                                             const ü_echo = 'Exception caught: '+ ß_echo( ü_reason, 256 );
     CSeriesOfTests.push( failurePrefix
                        + ( ü_message === undefined ?               ü_echo
                                                  : ü_message +' '+ ü_echo ) );
@@ -201,10 +218,10 @@ export function testNotEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message?:strin
 
 export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:unknown, ü_exp:T, ü_message?:string ):boolean {
     const ü_echo = ü_cond
-                 ? successPrefix + `${ ß_echo( ü_exp, 50 ) }`
-                 : failurePrefix + `${ ß_echo( ü_exp, 50 ) } ${ ü_icon } ${ ß_echo( ü_act, 50 ) }`
+                 ? successPrefix + `${ ß_echo( ü_act, 50 ) }`
+                 : failurePrefix + `${ ß_echo( ü_act, 50 ) } ${ ü_icon } ${ ß_echo( ü_exp, 50 ) }`
                  ;
-    CSeriesOfTests.push( ü_message ? ü_echo +' '+ ü_message
+    CSeriesOfTests.push( ü_message ? ü_echo +' @ '+ ü_message
                                    : ü_echo );
     return ü_cond;
 }

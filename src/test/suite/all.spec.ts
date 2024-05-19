@@ -32,6 +32,7 @@
     } as TTestSuiteObject;
 //--------------------------------------------------------------------
   const ß_proxy     = [] as TAsyncTestFunction[][];
+  const ß_DebugUI   =                     !true; // enforce debug-UI
   const ß_debugUI   =                     !true;
   const ß_skipTests = ß_debugUI ? false :  true; // = except single test
   const ß_SKIPTests = ß_debugUI ? false : !ß_skipTests;
@@ -44,7 +45,7 @@
     ;
 //====================================================================
 
-  if ( ß_debugUI ||  true ) {
+  if ( ß_debugUI || ß_DebugUI ) {
                             ß_suites.forEach( ß_expandSuite );
   } else { whenAllTestsRun( ß_suites ); }
 

@@ -27,13 +27,15 @@
          } from '../vsc/docUtil';
   import { XtnStatusBarItem
          } from '../vsc/uiUtil';
+  import   XtnOpenInNpp
+           from '../core/xtnOpenInNpp';
 //====================================================================
   type TInitialRuntimeContext = TWritable<IXtnRuntimeContext>
   export const ß_XtnOpenInNpp   = null as unknown as XtnOpenInNpp;
          const ß_that           = ß_implement( ß_rtCntxt as TInitialRuntimeContext );
   export const ß_RuntimeContext = ß_that;
-  import   XtnOpenInNpp
-           from '../core/xtnOpenInNpp';
+//--------------------------------------------------------------------
+// post-export imports ?
 //====================================================================
 
 function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IXtnRuntimeContext {

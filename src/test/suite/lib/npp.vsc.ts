@@ -3,6 +3,8 @@
   import { type XtnOpenInNpp
          , type IGlobalHistoryData
          } from '../../../types/vsc.extension.d';
+  import { type ErrorWithUixMessage
+         } from '../../../lib/errorUtil';
   import { CXtnId
          , CEXtnCommands
          , CXtnCfgId
@@ -24,8 +26,6 @@
          } from '../../../runtime/context';
   import { whenDelay
          } from '../../../lib/asyncUtil';
-  import { ErrorWithUixMessage
-         } from '../../../lib/errorUtil';
   import { asyncNullOperation
          } from '../../../lib/functionUtil';
   import { testSrc
@@ -45,8 +45,8 @@
          , firstWorkspaceFolder
          } from '../../../vsc/fsUtil';
 //====================================================================
-  export const tst_dispatch = true ? tst_settings
-                                   : asyncNullOperation;
+  export const tst_dispatch =  true ? asyncNullOperation
+                                    : tst_settings;
 //====================================================================
     const ß_setExe = ( whenConfigSet<string> ).bind( null, CXtnCfgId.executable                );
     const ß_setDir = ( whenConfigSet<string> ).bind( null, CXtnCfgId.workingDirectory          );
@@ -84,7 +84,7 @@ export async function tst_settings(){
     const ü_dirNot = join( process.cwd(), '../aaaaa' );
     await ß_setDir( ü_dirNot );
     const ü_cfg_2 = ü_cfgApi.configSnapshot;
-    await testRejected( ü_cfg_2.whenWorkingDir, ü_dirNot, ü_eX => ü_eX instanceof ErrorWithUixMessage );
+    await testRejected( ü_cfg_2.whenWorkingDir, ü_dirNot, ü_eX => ü_eX instanceof Error && ( ü_eX as ErrorWithUixMessage ).text.indexOf( ü_dirNot ) > -1 );
   //
   } finally {
       await ß_setExe('');
@@ -149,7 +149,7 @@ export async function tst_history(){
     const ü_adminData = ü_adminHist.dataRef;
     testEqual( ü_adminData.version, ü_extn_1.version, 'Version' );
   //
-    const ü_exe     = ü_extn_1.configApi.configSnapshot.executable;
+    const ü_exe     = await ü_extn_1.configApi.configSnapshot.whenExecutable;
     const ü_cfgHist = ü_extn_1.globalHistory.config;
     const ü_cfgData = ü_cfgHist.dataRef;
     testEqual( await ü_cfgHist.whenCommitted(), 1, 'Npp count' );

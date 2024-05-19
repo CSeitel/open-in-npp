@@ -15,7 +15,8 @@
   export type TTestSuiteDefinition = [string,TTestSuite,boolean|undefined]
   export type TTestSuites          = TTestSuiteDefinition[]
 
-  export type TTestResult = string
+  export type TTestResult  = string
+  export type TTestSummary = { all:number, failed:number }
 
 //====================================================================
 /*
