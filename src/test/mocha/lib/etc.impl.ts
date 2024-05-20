@@ -25,9 +25,6 @@
 export async function tst_cp(){
     const ü_done = await whenShownInWindowsExplorer( __filename );
     testEqual( ü_done, true );
-    testNever( 'eee' );
-  //testEqual( false, true, 'SS' );
-  //throw new TypeError('ÄÄÄ')
 }
 
 //====================================================================

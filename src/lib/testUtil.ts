@@ -26,10 +26,14 @@
   import { shortenText
          } from './textUtil';
 //--------------------------------------------------------------------
-  export const successSymbol = String.fromCharCode( 0x2705 ); // 0x221a
-  export const failureSymbol = String.fromCharCode( 0x274c );
-         const okSymbol      = String.fromCharCode( 0x2714 );
-         const notEqual      = String.fromCharCode( 0x2260 );
+  export const successSymbol   = String.fromCharCode( 0x2705 ); // 0x221a
+  export const failureSymbol   = String.fromCharCode( 0x274c );
+         const okSymbol        = String.fromCharCode( 0x2714 );
+         const undefinedSymbol   = String.fromCharCode( 0xfffd )+' ';
+         const emptyStringSymboL = '\u2036\u2033';//String.fromCharCode( 0xff02 );
+         const emptyStringSymbOl = '\u2035\u2032';//String.fromCharCode( 0xff02 );
+         const emptyStringSymbol = '\u201e\u2033';//String.fromCharCode( 0xff02 );
+         const notEqual          = String.fromCharCode( 0x2260 );
          const ß_whiteSquare = String.fromCharCode( 0x25a1 );
          const ß_pilcrow     = String.fromCharCode( 0x00ba );
          const latinEpigraphicLetterReversedP = String.fromCharCode(0xa7fc);
@@ -45,8 +49,11 @@
 //const ß_escape = escapeFF( CRgXp.specialChars );
   const CSeriesOfTests = [] as TTestResult[];
   const LCHeader =
-    { NEVER     : (ü_msg   :string               )=> failurePrefix+`Should NEVER be reached: \`\`${ ü_msg }\`\``
-    , REJECTED_0: (ü_msg   :string,ü_val  :string)=> `No rejection for '${ ü_msg }' due to result '${ ü_val }'`
+    { should    : (ü_msg   :string               )=> successPrefix+`Should have happened: ${ ü_msg }`
+    , shouldNot : (ü_msg   :string               )=> failurePrefix+`Should not have happened: ${ ü_msg }`
+    , noError   : (ü_msg   :string,ü_err  :string)=> failurePrefix+`For \`\`${ ü_msg }\`\` an exception has occurred: ${ ü_err }`
+    , never     : (ü_msg   :string               )=> failurePrefix+`Shouldn't have been reached: ${ ü_msg }`
+    , REJECTED_0: (ü_msg   :string,ü_val  :string)=> `No rejection for \`\`${ ü_msg }\`\` due to result: ${ ü_val }`
     , REJECTED_1: (ü_msg   :string,ü_err  :string)=> `Rejection for '${ ü_msg }' due to '${ ü_err }'`
     , TEST_0    : (ü_test  :string               )=>      okPrefix+`Result of "${ ü_test }": Test contains no checks.`
     , TEST_OK   : (ü_test  :string,ü_all  :number)=>      okPrefix+`Result of "${ ü_test }": ${ ü_all    } checks have been passed successfully.`
@@ -91,7 +98,7 @@ function ö_whenTested(){
     } catch ( ü_eX ) {
         ü_whenDone = Promise.reject( ü_eX );
     }
-    return ü_whenDone.then( undefined, testFailed ).then(  ö_testSummary  );
+    return ü_whenDone.then( undefined, testNoError ).then(  ö_testSummary  );
 }
 }
 }
@@ -145,7 +152,7 @@ function ä_whenTested( ö_sum:TTestSummary ):PromiseLike<TTestSummary> {
     } catch ( ü_eX ) {
         ü_whenDone = Promise.reject( ü_eX );
     }
-    return ü_whenDone.then( undefined, testFailed )
+    return ü_whenDone.then( undefined, testNoError )
                      .then(
       function(){
            const ü_sum = testSummary( ä_testName as string );
@@ -203,38 +210,41 @@ export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummar
 
 //====================================================================
 
-export function testNever( ü_message?:string ):false {
-    CSeriesOfTests.push(  LCHeader.NEVER( ü_message ?? '???' ) );
+export function testShould   ( ü_message = undefinedSymbol ):true  { CSeriesOfTests.push(  LCHeader.should   ( ü_message ) ); return true ; }
+//port function testShouldNot( ü_message = undefinedSymbol ):false { CSeriesOfTests.push(  LCHeader.shouldNot( ü_message ) ); return false; }
+export function testNever    ( ü_message = undefinedSymbol ):false { CSeriesOfTests.push(  LCHeader.never    ( ü_message ) ); return false; }
+export function testNoError( ü_reason:any, ü_message = undefinedSymbol ):false {
+    CSeriesOfTests.push(  LCHeader.noError( ü_message, ß_echo( ü_reason, 256 ) )  );
     return false;
 }
 
-export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ü_message = 'Anonymous', ü_expectError?:( ü_reason:any )=>boolean ):PromiseLike<boolean> {
-    const ü_xErr =                                                    ü_expectError === undefined
+export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ö_message = undefinedSymbol, ü_expectError?:( ü_reason:any )=>boolean ):PromiseLike<boolean> {
+    const ö_xErr =                                                    ü_expectError === undefined
                  ? function( ü_reason:any ) {                  return                ü_reason instanceof Error;   }
                  : function( ü_reason:any ) { try            { return ü_expectError( ü_reason )               ; }
                                               catch ( ü_eX ) { return false                                   ; } }
                  ;
-    return ü_whenDone.then(
-        function( ü_value:T    ){
-                                   return testNever(                                           LCHeader.REJECTED_0( ü_message, ß_echo( ''+ü_value ,  50 ) ) ); }
-      , function( ü_reason:any ){  return ü_xErr( ü_reason ) ? testEqual ( ü_reason, ü_reason, LCHeader.REJECTED_1( ü_message, ß_echo(    ü_reason, 256 ) ) )
-                                                             : testFailed( ü_reason, ü_message ); }
-      );
+    return ü_whenDone.then( ö_onFulfilled, ö_onRejected );
+function ö_onFulfilled( ü_value:T ):boolean {
+    return        testNever  ( LCHeader.REJECTED_0( ö_message, ß_echo( ''+ü_value ,  50 ) ) );
 }
-export function testFailed( ü_reason:any, ü_message?:string ):false {
-                                                             const ü_echo = 'Exception caught: '+ ß_echo( ü_reason, 256 );
-    CSeriesOfTests.push( failurePrefix
-                       + ( ü_message === undefined ?               ü_echo
-                                                 : ü_message +' '+ ü_echo ) );
-    return false;
+function ö_onRejected( ü_reason:any ):boolean {
+    let ü_ok = false;
+    try {
+      ü_ok = ö_xErr( ü_reason );
+    } finally {}
+    return ü_ok ? testShould ( LCHeader.REJECTED_1( ö_message, ß_echo( ü_reason, 256 ) ) )
+                : testNoError( ü_reason, ö_message )
+                ;
+}
 }
 
-export function testEqual   <T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):boolean { return testCondition<T>( ü_act === ü_exp, notEqual, ü_act, ü_exp, ü_message ); }
-export function testNotEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message?:string ):boolean { return testCondition<T>( ü_act !== ü_exp, '='     , ü_act, ü_exp, ü_message ); }
+export function testEqual   <T=any>( ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean { return testCondition<T>( ü_act === ü_exp, notEqual, ü_act, ü_exp, ü_message ); }
+export function testNotEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean { return testCondition<T>( ü_act !== ü_exp, '='     , ü_act, ü_exp, ü_message ); }
 
-export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:unknown, ü_exp:T, ü_message?:string ):boolean {
+export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean {
     const ü_echo = ü_cond
-                 ? successPrefix + `${ ß_echo( ü_act, 50 ) }`
+                 ? successPrefix + `${ ß_echo( ü_act, 50 ) || emptyStringSymbol }`
                  : failurePrefix + `${ ß_echo( ü_act, 50 ) } ${ ü_icon } ${ ß_echo( ü_exp, 50 ) }`
                  ;
     CSeriesOfTests.push( ü_message ? ü_echo +' @ '+ ü_message
@@ -270,11 +280,11 @@ export function testFunction<Tx,Ty>( ö_fref:TAnyFunctionSingleArg<Ty,Tx>, ö_ex
                                   : ö_expectError( ü_x_y[0], ü_eX, ü_x_y    )
                                   ;
               } catch ( ü_eX_user ) {
-                ö_overall = testFailed( ü_eX, ü_count );
+                ö_overall = testNoError( ü_eX, ü_count );
                 return;
               }
             } else {
-                ö_overall = testFailed( ü_eX, ü_count );
+                ö_overall = testNoError( ü_eX, ü_count );
                 return;
             }
         }
@@ -316,7 +326,7 @@ function ä_fulfilled( ü_act_Y:Ty ):void {
 }
 function ä_rejected( ü_reason:any ):void {
     ö_overall ++ ;
-    testFailed( ü_reason, ä_count );
+    testNoError( ü_reason, ä_count );
 }
     });
     return ö_whenDone.then( ()=> ö_overall === 0 );

@@ -17,19 +17,19 @@
   const ß_skipTests =  true; // = except single test
 
     whenAllTestsRun([
-        [ 'Single', [ 
+        [ 'Single', [
                   //ß_async.tst_dispatch
-                  //ß_error.tst_dispatch
-                    ß_etc  .tst_dispatch
+                    ß_error.tst_dispatch
+                  //ß_etc  .tst_dispatch
                   //ß_fs
                   //ß_test.tst_dispatch
                   //ß_text
                   //ß_dummy.tst_dispatch
-                 ].slice(0),  ß_skipTests ]
+                 ].slice(0), !ß_skipTests ]
       , [ 'Array' , ß_array,  ß_skipTests ]
       , [ 'Async' , ß_async,  ß_skipTests ]
       , [ 'Error' , ß_error,  ß_skipTests ]
-      , [ 'Etc'   , ß_etc  , !ß_skipTests ]
+      , [ 'Etc'   , ß_etc  ,  ß_skipTests ]
       , [ 'Fs'    , ß_fs   ,  ß_skipTests ]
       , [ 'Test'  , ß_test ,  ß_skipTests ]
       , [ 'Text'  , ß_text ,  ß_skipTests ]

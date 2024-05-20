@@ -25,10 +25,28 @@
   import { testSrc
          , whenAsyncFunctionTested
          , testFunction
+         , testShould
+       //, testShouldNot
+         , testNever
+         , testNoError
+         , testRejected
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = asyncNullOperation;
+  export const tst_dispatch = !true ? asyncNullOperation
+                                    : tst_test;
+//====================================================================
+
+export async function tst_test(){
+    testShould   ();
+  //testShouldNot();
+    testNever    ();
+    testNoError  ( new TypeError('ÖÖÖ') );
+    testRejected( Promise.resolve() );
+    testRejected( Promise.reject ( new TypeError('äää') ) );
+    testEqual( '', '' );
+}
+
 //====================================================================
 
 export async function tst_print(){
