@@ -4,6 +4,7 @@
          , type TTestSuiteDefinition
          , type TTestSuiteObject
          , type TAsyncTestFunction
+         , type TTestSummary
          } from '../../types/lib.testUtil.d';
   import { TNotReadonly
          } from '../../types/generic.d';
@@ -31,6 +32,7 @@
   //, ccee    : ß_fs.tst_whenFileInfoRead
     } as TTestSuiteObject;
 //--------------------------------------------------------------------
+    let ß_whenTestSummary:PromiseLike<TTestSummary>
   const ß_proxy     = [] as TAsyncTestFunction[][];
   const ß_DebugUI   =                     !true; // enforce debug-UI
   const ß_debugUI   =                     !true;
@@ -38,7 +40,7 @@
   const ß_SKIPTests = ß_debugUI ? false : !ß_skipTests;
   const ß_suites =
     [ [ 'Single', ß_single,  ß_SKIPTests ,1] as unknown as TTestSuiteDefinition
-    , [ 'Etc'   , ß_etc   ,  ß_skipTests ,3] as unknown as TTestSuiteDefinition
+    , [ 'Etc'   , ß_etc   , !ß_skipTests ,3] as unknown as TTestSuiteDefinition
     , [ 'Fs'    , ß_fs    ,  ß_skipTests ,5] as unknown as TTestSuiteDefinition
     , [ 'Npp'   , ß_npp   ,  ß_skipTests ,5] as unknown as TTestSuiteDefinition
     ] as TTestSuites
@@ -47,11 +49,10 @@
 
   if ( ß_debugUI || ß_DebugUI ) {
                             ß_suites.forEach( ß_expandSuite );
-  } else { whenAllTestsRun( ß_suites ).then(function( ü_sum ){
-      console.trace( ü_sum )
-      ß_trc&& ß_trc( ü_sum, 'ALL' );
-  }); }
-
+            ß_whenTestSummary = Promise.resolve<TTestSummary>({ all:0, failed:0 });
+  } else {  ß_whenTestSummary = whenAllTestsRun( ß_suites );
+  }
+  export const whenAllTestsExecuted:PromiseLike<TTestSummary> = ß_whenTestSummary;
 //====================================================================
 
 async function ß_when( ü_sIndx:number, ü_tIndx:number ):Promise<void> {

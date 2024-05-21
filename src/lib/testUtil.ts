@@ -120,6 +120,7 @@ function ö_whenTested(){
 //====================================================================
 
 export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<TTestSummary> {
+    ß_trc&& ß_trc( CWithMocha, 'Mocha' );
   //
     if ( CWithMocha ) {
         ü_suites.forEach( expandTestSuite );
@@ -127,21 +128,27 @@ export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<TTestSummar
     }
   //
     let ö_whenDone = Promise.resolve({ all:0, failed:0 });
-    ü_suites.forEach(function( ü_suite ){
-        if ( ü_suite[2] ) { return; }
-        ö_whenDone = ö_whenDone.then(function( ü_errCount ){
-            return ß_whenTestSuite( ü_errCount, ü_suite[0], ü_suite[1] );
-        });
-    });
+    ü_suites.forEach( ö_appendSuite );
   //
-    return ö_whenDone.then(function( ü_sum ){
+    return ö_whenDone.then( ö_fulfilled );
+  //
+function ö_appendSuite( ü_suite:TTestSuiteDefinition ):void {
+    if ( ü_suite[2] ) { return; }
+    ö_whenDone = ö_whenDone.then(function( ü_errCount ){
+        return ß_whenTestSuite( ü_errCount, ü_suite[0], ü_suite[1] );
+    });
+}
+function ö_fulfilled( ü_sum:TTestSummary ):TTestSummary {
         ß_writeStdOut( ü_sum.failed > 0 ? LCHeader.SUM_ERR( ü_sum.all, ü_sum.failed, Math.round( ( 1 - ü_sum.failed / ü_sum.all ) * 100 ) )
                                         : LCHeader.SUM_OK ( ü_sum.all )
                                         );
       //process.exitCode = ü_sum.failed  ;
       //process.exit     ( ü_sum.failed );
-                    return ü_sum;
-    });
+    return ü_sum;
+}
+function ö_rejected( ü_reason:any ):never {
+    throw ü_reason;
+}
 }
 
 function ß_whenTestSuite( ü_sum:TTestSummary, ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):PromiseLike<TTestSummary> {
@@ -171,6 +178,7 @@ function ä_whenTested( ö_sum:TTestSummary ):PromiseLike<TTestSummary> {
            const ü_sum = testSummary( ä_testName as string );
             if ( ü_sum.failed > 0 )
                { ö_sum.failed ++ ; }
+  //ß_trc&& ß_trc( ö_sum, 'Mocha' );
           return ö_sum;
       }
     );
