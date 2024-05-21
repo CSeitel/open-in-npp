@@ -11,7 +11,6 @@
          } from '../../../constants/extension';
 //--------------------------------------------------------------------
   import { join
-         , resolve
          } from 'path';
 //--------------------------------------------------------------------
   import { commands
@@ -28,11 +27,9 @@
          } from '../../../lib/asyncUtil';
   import { asyncNullOperation
          } from '../../../lib/functionUtil';
-  import { testSrc
-         , testEqual
+  import { testEqual
          , testNotEqual
          , testRejected
-         , testCondition
          } from '../../../lib/testUtil';
 //--------------------------------------------------------------------
   import { whenConfigSet

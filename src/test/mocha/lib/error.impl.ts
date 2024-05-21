@@ -31,20 +31,24 @@
          , testNoError
          , testRejected
          , testEqual
+         , testNotEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = !true ? asyncNullOperation
+  export const tst_dispatch =  true ? asyncNullOperation
                                     : tst_test;
 //====================================================================
 
-export async function tst_test(){
+       async function tst_test(){
     testShould   ();
   //testShouldNot();
     testNever    ();
     testNoError  ( new TypeError('ÖÖÖ') );
     testRejected( Promise.resolve() );
     testRejected( Promise.reject ( new TypeError('äää') ) );
-    testEqual( '', '' );
+    testEqual   ( '' , '' );
+    testEqual   ( ' ', '' );
+    testNotEqual( '' , '' );
+    testNotEqual( ' ', '' );
 }
 
 //====================================================================

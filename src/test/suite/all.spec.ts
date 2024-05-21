@@ -47,7 +47,10 @@
 
   if ( ß_debugUI || ß_DebugUI ) {
                             ß_suites.forEach( ß_expandSuite );
-  } else { whenAllTestsRun( ß_suites ); }
+  } else { whenAllTestsRun( ß_suites ).then(function( ü_sum ){
+      console.trace( ü_sum )
+      ß_trc&& ß_trc( ü_sum, 'ALL' );
+  }); }
 
 //====================================================================
 

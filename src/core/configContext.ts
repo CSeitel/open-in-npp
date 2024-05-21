@@ -140,6 +140,7 @@ configModificationSignalled( ü_change:ConfigurationChangeEvent ):void {
 
 }
 
+/*
 //====================================================================
     let ß_cfgIsDirty  = true;
     let ß_whatIsDirty = undefined as TXtnCfgIds|undefined;
@@ -181,5 +182,4 @@ configModificationSignalled( ü_change:ConfigurationChangeEvent ):void {
 }
 
 //====================================================================
-/*
 */

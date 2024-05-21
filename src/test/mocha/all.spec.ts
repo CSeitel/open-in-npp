@@ -13,18 +13,16 @@
   import * as ß_test  from './lib/test.impl' ;
   import * as ß_text  from './lib/text.impl' ;
 //====================================================================
-  const ß_dummy = {tst_dispatch:async ()=>{}}
-  const ß_skipTests =  true; // = except single test
+  const ß_skipTests = !true; // = except single test
 
     whenAllTestsRun([
         [ 'Single', [
                   //ß_async.tst_dispatch
                     ß_error.tst_dispatch
                   //ß_etc  .tst_dispatch
-                  //ß_fs
-                  //ß_test.tst_dispatch
-                  //ß_text
-                  //ß_dummy.tst_dispatch
+                  //ß_fs   .tst_dispatch
+                  //ß_test .tst_dispatch
+                  //ß_text .tst_dispatch
                  ].slice(0), !ß_skipTests ]
       , [ 'Array' , ß_array,  ß_skipTests ]
       , [ 'Async' , ß_async,  ß_skipTests ]

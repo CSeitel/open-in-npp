@@ -26,17 +26,22 @@
   import { shortenText
          } from './textUtil';
 //--------------------------------------------------------------------
-  export const successSymbol   = String.fromCharCode( 0x2705 ); // 0x221a
-  export const failureSymbol   = String.fromCharCode( 0x274c );
-         const okSymbol        = String.fromCharCode( 0x2714 );
+  export const successSymbol     = String.fromCharCode( 0x2705 ); // 0x221a
+  export const failureSymbol     = String.fromCharCode( 0x274c );
+         const okSymbol          = String.fromCharCode( 0x2714 );
          const undefinedSymbol   = String.fromCharCode( 0xfffd )+' ';
          const emptyStringSymboL = '\u2036\u2033';//String.fromCharCode( 0xff02 );
          const emptyStringSymbOl = '\u2035\u2032';//String.fromCharCode( 0xff02 );
          const emptyStringSymbol = '\u201e\u2033';//String.fromCharCode( 0xff02 );
-         const notEqual          = String.fromCharCode( 0x2260 );
+
          const ß_whiteSquare = String.fromCharCode( 0x25a1 );
          const ß_pilcrow     = String.fromCharCode( 0x00ba );
          const latinEpigraphicLetterReversedP = String.fromCharCode(0xa7fc);
+//--------------------------------------------------------------------
+  export const enum CECheckIcon {
+      notEqual = '≠' //String.fromCharCode( 0x2260 );
+    ,    equal = '='
+  }
 //--------------------------------------------------------------------
          const successPrefix = successSymbol + ' ';
          const failurePrefix = failureSymbol + ' ';
@@ -62,6 +67,14 @@
     , SUM_OK    : (ü_all   :number               )=>      okPrefix+`Overall test result: ${ ü_all    } tests have been passed successfully.`
     , SUM_ERR   : (ü_all   :number
                   ,ü_failed:number,ü_ratio:number)=> failurePrefix+`Overall test result: ${ ü_failed } (out of ${ ü_all }) tests have failed. Success-ratio: ${  ü_ratio }%`
+    , cond_s1   : (ü_msg   :string,ü_icon :string
+                  ,ü_both  :string               )=> successPrefix+`${ ü_icon } ${ ü_both } for ${ ü_msg }`
+    , cond_f1   : (ü_msg   :string,ü_icon :string
+                  ,ü_both  :string               )=> failurePrefix+`${ ü_icon } ${ ü_both } for ${ ü_msg }`
+    , cond_s2   : (ü_msg   :string,ü_icon :string
+                  ,ü_act   :string,ü_exp  :string)=> successPrefix+`${ ü_act } ${ ü_icon } ${ ü_exp } for ${ ü_msg }`
+    , cond_f2   : (ü_msg   :string,ü_icon :string
+                  ,ü_act   :string,ü_exp  :string)=> failurePrefix+`${ ü_act } ${ ü_icon } ${ ü_exp } for ${ ü_msg }`
     };
 //====================================================================
 
@@ -125,8 +138,8 @@ export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<TTestSummar
         ß_writeStdOut( ü_sum.failed > 0 ? LCHeader.SUM_ERR( ü_sum.all, ü_sum.failed, Math.round( ( 1 - ü_sum.failed / ü_sum.all ) * 100 ) )
                                         : LCHeader.SUM_OK ( ü_sum.all )
                                         );
-        process.exitCode = ü_sum.failed  ;
-        process.exit     ( ü_sum.failed );
+      //process.exitCode = ü_sum.failed  ;
+      //process.exit     ( ü_sum.failed );
                     return ü_sum;
     });
 }
@@ -239,16 +252,22 @@ function ö_onRejected( ü_reason:any ):boolean {
 }
 }
 
-export function testEqual   <T=any>( ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean { return testCondition<T>( ü_act === ü_exp, notEqual, ü_act, ü_exp, ü_message ); }
-export function testNotEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean { return testCondition<T>( ü_act !== ü_exp, '='     , ü_act, ü_exp, ü_message ); }
+export function testEqual   <T=any>( ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean { return ß_testCondition<T>( ü_act === ü_exp, CECheckIcon.   equal, ü_act, ü_exp, ü_message ); }
+export function testNotEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean { return ß_testCondition<T>( ü_act !== ü_exp, CECheckIcon.notEqual, ü_act, ü_exp, ü_message ); }
 
-export function testCondition<T=any>( ü_cond:boolean, ü_icon:string, ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean {
-    const ü_echo = ü_cond
-                 ? successPrefix + `${ ß_echo( ü_act, 50 ) || emptyStringSymbol }`
-                 : failurePrefix + `${ ß_echo( ü_act, 50 ) } ${ ü_icon } ${ ß_echo( ü_exp, 50 ) }`
-                 ;
-    CSeriesOfTests.push( ü_message ? ü_echo +' @ '+ ü_message
-                                   : ü_echo );
+function ß_testCondition<T=any>( ü_cond:boolean, ü_icon:CECheckIcon, ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean {
+    switch ( ü_icon ) {
+      case CECheckIcon.equal   :
+          CSeriesOfTests.push(  ü_cond ? LCHeader.cond_s1( ü_message, ü_icon, ß_echo( ü_act, 50 ) || emptyStringSymbol )
+                                       : LCHeader.cond_f2( ü_message, ü_icon, ß_echo( ü_act, 50 ) || emptyStringSymbol
+                                                                            , ß_echo( ü_exp, 50 ) || emptyStringSymbol )
+                             ); break;
+      case CECheckIcon.notEqual:
+          CSeriesOfTests.push( !ü_cond ? LCHeader.cond_f1( ü_message, ü_icon, ß_echo( ü_act, 50 ) || emptyStringSymbol )
+                                       : LCHeader.cond_s2( ü_message, ü_icon, ß_echo( ü_act, 50 ) || emptyStringSymbol
+                                                                            , ß_echo( ü_exp, 50 ) || emptyStringSymbol )
+                             ); break;
+    }
     return ü_cond;
 }
 
@@ -299,7 +318,7 @@ export function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<
 export function whenAsyncFunctionTested<Tx,Ty>(   aFref:TAsyncFunctionSingleArg<Ty,Tx>,   expData:           TOrderedPairs<Tx,Ty>, ö_expectError?:TExpectErrorArr<Tx,Ty> ):PromiseLike<boolean>
 export function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSingleArg<Ty,Tx>, ö_expData:Map<Tx,Ty>|TOrderedPairs<Tx,Ty>, ö_expectError?:TExpectErrorAll<Tx,Ty> ):PromiseLike<boolean> {
     const ö_name = ö_aFref.name;
-      let ö_overall = 0;
+      let ö_errCount = 0;
   //
      let ö_isMap = false;
     if ( ö_expData instanceof Map )
@@ -307,14 +326,15 @@ export function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSingleArg
          ö_isMap = true; }
   //
       let ö_whenDone = Promise.resolve();
-    const ü_all_whenY = ö_expData.map(function( ä_x_y, ä_indx ){
-        const ä_count = `${ ö_name }-${ ä_indx }(${ ß_echo( ä_x_y[0], 50 ) })`;
+    ö_expData.forEach(
+function( ä_x_y, ä_indx ){
+        const ä_count = `${ ö_name }-${ ä_indx }(${ ß_echo( ä_x_y[0], 50 ) || emptyStringSymbOl })`;
         const ä_x     = ä_x_y[0];
         const ä_exp_y = ä_x_y[1];
-           let ü_whenDone = ö_whenDone.then( function(){  return ö_aFref( ä_x );  });
-        if ( typeof( ö_expectError ) === 'function' )
-             { ü_whenDone = ü_whenDone.then( undefined  , ä_expectError ); }
-        return ö_whenDone = ü_whenDone.then( ä_fulfilled, ä_rejected    );
+             let ü_whenDone = ö_whenDone.then( function(){  return ö_aFref( ä_x );  });
+    if ( typeof( ö_expectError ) === 'function' )
+               { ü_whenDone = ü_whenDone.then( undefined, ä_expectError ); }
+    ö_whenDone = ü_whenDone.then( ä_fulfilled, ä_rejected );
   //
 function ä_expectError( ü_reason:any ):Ty {
     return ö_isMap ? ö_expectError!( ä_x, ü_reason, ä_exp_y )
@@ -322,57 +342,16 @@ function ä_expectError( ü_reason:any ):Ty {
                    ;
 }
 function ä_fulfilled( ü_act_Y:Ty ):void {
-    testEqual( ü_act_Y, ä_exp_y, ä_count )||( ö_overall ++ );
+    testEqual( ü_act_Y, ä_exp_y, ä_count )||( ö_errCount ++ );
 }
 function ä_rejected( ü_reason:any ):void {
-    ö_overall ++ ;
+    ö_errCount ++ ;
     testNoError( ü_reason, ä_count );
 }
-    });
-    return ö_whenDone.then( ()=> ö_overall === 0 );
 }
-
-/*
-    const ü_failed = {} as Record<number,any>;
-    const ö_last = ö_expData.length -1;
-    //let ö_all_Y:PromiseSettledResult<Awaited<Ty>>[] = [];
-            try {
-                return Promise.resolve( ü_x_y[0] ).then(  ö_aFref );
-              //return ö_aFref( ü_x_y[0] );
-            } catch ( ü_eX ) {
-                return Promise.reject( ü_eX );
-            }
-    forEach( ü_failed, function( ü_reason, ü_mKey ){ ö_all_Y[ ü_mKey] = { status:'rejected' , reason:  ü_reason }; });
-  //
-     const ö_all_Y = await Promise.allSettled( ü_all_whenY );
-  //
-    ö_expData.forEach(function( ü_x_y, ü_indx ){
-        const ü_count = `${ ö_name }-${ ü_indx }(${ ß_echo( ü_x_y[0], 50 ) })`;
-        const ü_exp_y = ü_x_y[1];
-        const ü_act_Y = ö_all_Y[ ü_indx ];
-        let ü_act_y:Ty
-        if ( ü_act_Y.status === 'fulfilled' ) {
-            ü_act_y = ü_act_Y.value;
-        } else {
-            if ( typeof( ö_expectError ) === 'function' ) {
-              try {
-                ü_act_y = ö_isMap ? ö_expectError( ü_x_y[0], ü_act_Y.reason, ü_exp_y )
-                                  : ö_expectError( ü_x_y[0], ü_act_Y.reason, ü_x_y   )
-                                  ;
-              } catch ( ü_eX_user ) {
-                ö_overall = testFailed( ü_act_Y.reason, ü_count );
-                return;
-              }
-            } else {
-                ö_overall = testFailed( ü_act_Y.reason, ü_count );
-                return;
-            }
-        }
-        testEqual( ü_act_y, ü_exp_y, ü_count )||( ö_overall = false );
-    });
-  //
-    return ö_overall;
-*/
+    );
+    return ö_whenDone.then( ()=> ö_errCount === 0 );
+}
 
 //====================================================================
 /*
