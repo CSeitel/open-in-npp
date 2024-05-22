@@ -16,7 +16,15 @@
   export type TTestSuites          = TTestSuiteDefinition[]
 
   export type TTestResult  = string
-  export type TTestSummary = { all:number, failed:number }
+  export type TTestSummary = {
+      all   :number
+      failed:number
+    }
+
+  export type TTestOptions = {
+      dirName  ?:string
+      withMocha :boolean
+    }
 
 //====================================================================
 /*

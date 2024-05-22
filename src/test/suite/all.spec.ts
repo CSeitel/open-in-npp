@@ -6,8 +6,8 @@
          , type TAsyncTestFunction
          , type TTestSummary
          } from '../../types/lib.testUtil.d';
-  import { TNotReadonly
-         } from '../../types/generic.d';
+  import { TAllSpecsModule
+         } from '../../types/test.d';
 //--------------------------------------------------------------------
   import { ß_trc
          } from '../../runtime/context';
@@ -32,7 +32,6 @@
   //, ccee    : ß_fs.tst_whenFileInfoRead
     } as TTestSuiteObject;
 //--------------------------------------------------------------------
-    let ß_whenTestSummary:PromiseLike<TTestSummary>
   const ß_proxy     = [] as TAsyncTestFunction[][];
   const ß_DebugUI   =                     !true; // enforce debug-UI
   const ß_debugUI   =                     !true;
@@ -46,13 +45,13 @@
     ] as TTestSuites
     ;
 //====================================================================
-
+        let ß_whenTestSummary:TAllSpecsModule['whenTestSummary']
   if ( ß_debugUI || ß_DebugUI ) {
                             ß_suites.forEach( ß_expandSuite );
             ß_whenTestSummary = Promise.resolve<TTestSummary>({ all:0, failed:0 });
   } else {  ß_whenTestSummary = whenAllTestsRun( ß_suites );
   }
-  export const whenAllTestsExecuted:PromiseLike<TTestSummary> = ß_whenTestSummary;
+  export const whenTestSummary = ß_whenTestSummary;
 //====================================================================
 
 async function ß_when( ü_sIndx:number, ü_tIndx:number ):Promise<void> {

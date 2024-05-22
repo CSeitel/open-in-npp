@@ -13,10 +13,11 @@
   import * as ß_test  from './lib/test.impl' ;
   import * as ß_text  from './lib/text.impl' ;
 //====================================================================
-  const ß_skipTests = !true; // = except single test
+  const ß_skipTests =  true; // = except single test
 
     whenAllTestsRun([
         [ 'Single', [
+                  //ß_array.tst_dispatch
                   //ß_async.tst_dispatch
                     ß_error.tst_dispatch
                   //ß_etc  .tst_dispatch

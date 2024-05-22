@@ -26,15 +26,18 @@
          , testEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = asyncNullOperation;
+  export const tst_dispatch =  true ? asyncNullOperation
+                                    : tst_a;
 //====================================================================
 
 export async function tst_a(){
+    testEqual( '2', '1' );
 }
 
 //====================================================================
 
 export async function tst_b(){
+    testEqual( '2', '1' );
 }
 
 //====================================================================

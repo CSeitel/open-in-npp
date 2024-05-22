@@ -7,10 +7,15 @@
          } from '../types/generic.d';
   import { type TTestResult
          , type TTestSummary
+         , type TTestOptions
          , type TAsyncTestFunction
          , type TTestSuites
          , type TTestSuiteDefinition
          } from '../types/lib.testUtil.d';
+  import { successSymbol
+         , failureSymbol
+         , CECheckIcon
+         } from '../constants/test';
 //--------------------------------------------------------------------
   import { join
          } from 'path';
@@ -26,10 +31,8 @@
   import { shortenText
          } from './textUtil';
 //--------------------------------------------------------------------
-  export const successSymbol     = String.fromCharCode( 0x2705 ); // 0x221a
-  export const failureSymbol     = String.fromCharCode( 0x274c );
-         const okSymbol          = String.fromCharCode( 0x2714 );
-         const undefinedSymbol   = String.fromCharCode( 0xfffd )+' ';
+         const okSymbol          = '\u2714'      ;//String.fromCharCode( 0x2714 );
+         const undefinedSymbol   = '\ufffd '     ;//String.fromCharCode( 0xfffd )+' ';
          const emptyStringSymboL = '\u2036\u2033';//String.fromCharCode( 0xff02 );
          const emptyStringSymbOl = '\u2035\u2032';//String.fromCharCode( 0xff02 );
          const emptyStringSymbol = '\u201e\u2033';//String.fromCharCode( 0xff02 );
@@ -38,18 +41,16 @@
          const ß_pilcrow     = String.fromCharCode( 0x00ba );
          const latinEpigraphicLetterReversedP = String.fromCharCode(0xa7fc);
 //--------------------------------------------------------------------
-  export const enum CECheckIcon {
-      notEqual = '≠' //String.fromCharCode( 0x2260 );
-    ,    equal = '='
-  }
-//--------------------------------------------------------------------
          const successPrefix = successSymbol + ' ';
          const failurePrefix = failureSymbol + ' ';
          const      okPrefix =      okSymbol + ' ';
 //--------------------------------------------------------------------
-  export const CWithMocha = typeof( suite ) !== 'undefined'
-                         && typeof( test  ) !== 'undefined';
-  export const CTestDirName = join( __dirname, '../../.vscode-temp' );
+       //let ß_TestDirName = join( __dirname, '../../.vscode-temp' );
+         const ß_options =
+           { dirName  : join( __dirname, '../../.vscode-temp' )
+           , withMocha: typeof( suite ) !== 'undefined'
+                     && typeof( test  ) !== 'undefined'
+           };
 //--------------------------------------------------------------------
 //const ß_escape = escapeFF( CRgXp.specialChars );
   const CSeriesOfTests = [] as TTestResult[];
@@ -84,7 +85,7 @@ function ß_echo( ü_oref:any, ü_length:number ):string {
 }
 
 export function testSrc( ...ü_segs:string[] ):string {
-    return join( CTestDirName, ...ü_segs );
+    return join( ß_options.dirName, ...ü_segs );
 }
 
 //====================================================================
@@ -119,10 +120,9 @@ function ö_whenTested(){
 
 //====================================================================
 
-export function whenAllTestsRun( ü_suites:TTestSuites ):PromiseLike<TTestSummary> {
-    ß_trc&& ß_trc( CWithMocha, 'Mocha' );
+export function whenAllTestsRun( ü_suites:TTestSuites, ü_opts:TTestOptions = ß_options ):PromiseLike<TTestSummary> {
   //
-    if ( CWithMocha ) {
+    if ( ü_opts.withMocha ) {
         ü_suites.forEach( expandTestSuite );
         return Promise.resolve({ all:-1, failed:-1 });
     }
@@ -139,11 +139,15 @@ function ö_appendSuite( ü_suite:TTestSuiteDefinition ):void {
     });
 }
 function ö_fulfilled( ü_sum:TTestSummary ):TTestSummary {
-        ß_writeStdOut( ü_sum.failed > 0 ? LCHeader.SUM_ERR( ü_sum.all, ü_sum.failed, Math.round( ( 1 - ü_sum.failed / ü_sum.all ) * 100 ) )
-                                        : LCHeader.SUM_OK ( ü_sum.all )
-                                        );
+    ß_writeStdOut( ü_sum.failed > 0
+                 ? LCHeader.SUM_ERR( ü_sum.all, ü_sum.failed, Math.round( ( 1 - ü_sum.failed / ü_sum.all ) * 100 ) )
+                 : LCHeader.SUM_OK ( ü_sum.all )
+                 );
+    if ( ! ü_opts.withMocha ) {
+        ß_trc&& ß_trc( ü_sum, 'Test-Summary-Exit' );
       //process.exitCode = ü_sum.failed  ;
-      //process.exit     ( ü_sum.failed );
+        process.exit     ( ü_sum.failed );
+    }
     return ü_sum;
 }
 function ö_rejected( ü_reason:any ):never {

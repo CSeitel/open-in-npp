@@ -31,9 +31,9 @@ async function main():Promise<void> {
         process.exit( ü_rc );
 
     } catch ( ü_eX ) {
-        ß_err( ü_eX, 'ExtensionTest-FatalError' );
-        process.exitCode = ß_RuntimeContext.fatalExitCode;
-        process.exit();
+        ß_trc&& ß_trc( typeof( ü_eX ), 'Cli-Arguments' );
+        ß_err( ü_eX, 'ExtensionTestWrapper-Exception' );
+        process.exit( ß_RuntimeContext.fatalExitCode );
     }
 }
 

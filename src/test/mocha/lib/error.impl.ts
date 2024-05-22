@@ -34,7 +34,7 @@
          , testNotEqual
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch =  true ? asyncNullOperation
+  export const tst_dispatch = !true ? asyncNullOperation
                                     : tst_test;
 //====================================================================
 
