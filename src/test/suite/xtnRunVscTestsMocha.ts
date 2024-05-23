@@ -2,6 +2,8 @@
 */
   import { type MochaOptions
          } from 'mocha';
+  import { type TTestSummary
+         } from '../../types/lib.testUtil.d';
 //--------------------------------------------------------------------
   import * as ß_glob  from 'glob' ;
   import * as ß_Mocha from 'mocha';
@@ -20,16 +22,16 @@
   const ß_timeout = 99;
 //====================================================================
 
-export async function run():Promise<number> {
+export async function run():Promise<void> {
+  // externalApi
     ß_trc&& ß_trc( __filename, 'Mocha-Wrapper' );
-    const ü_specs = await ß_whenSpecsFound();
-    const ü_rc    = await ß_whenSpecsRun( ü_specs );
-    ß_trc&& ß_trc( ü_rc, 'Mocha-ErrorCount' );
-    if ( ü_rc > 0 ) {
-      //process.exit( ü_rc+1 )
-      //throw new Error( `rc=${ ü_rc }` );
+    const ü_specs  = await ß_whenSpecsFound();
+    const ü_failed = await ß_whenSpecsRun( ü_specs );
+    if ( ü_failed > 0 ) {
+             ß_trc&& ß_trc( `Overall test result: ${ ü_failed } tests have failed.`       , 'Mocha-Done' );
+    } else { ß_trc&& ß_trc( 'Overall test result: All tests have been passed successfully', 'Mocha-Done' );
     }
-    return ü_rc;
+    process.exit( ü_failed );
 }
 
 //====================================================================
@@ -50,19 +52,20 @@ async function ß_whenSpecsRun( ü_specs:string[] ):Promise<number> {
       { ui     : 'tdd'
       , timeout: ß_timeout * 1000
       };
+  //
     const ü_mocha = new ß_Mocha( ü_opts );
         //ü_mocha.useColors( true );
-  //
     for ( const ü_spec of ü_specs ) { ü_mocha.addFile( ü_spec ); }
+    const ü_whenAllTestsRun = ß_promisifyMochaRun( ü_mocha );
   //
-    return ß_whenRun( ü_mocha )();
+    return ü_whenAllTestsRun();
 }
 
-//====================================================================
+//--------------------------------------------------------------------
 
-function ß_whenRun( ö_mocha:globalThis.Mocha ):()=>Promise<number> {
-    return ö_whenRun;
-function ö_whenRun():Promise<number> {
+function ß_promisifyMochaRun( ö_mocha:globalThis.Mocha ):()=>Promise<number> {
+    return ö_whenErrorCount;
+function ö_whenErrorCount():Promise<number> {
            const ä_prms = createPromise<number>();
     ö_mocha.run( ä_onDone );
           return ä_prms.promise;
@@ -74,12 +77,4 @@ function ä_onDone( ü_errorCount:number ):void {
 
 //====================================================================
 /*
-    try {
-        ö_mocha.run( ü_errorCount => {
-          if ( ü_errorCount === 0 ) { ü_prms.resolve( ü_errorCount ); }
-          else                      { ü_prms.reject( new Error( `${ ü_errorCount } tests failed.` ) ); }
-        });
-    } catch ( ü_eX ) {
-        ü_prms.reject( ü_eX );
-    }
 */
