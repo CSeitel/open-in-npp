@@ -6,7 +6,7 @@ https://code.visualstudio.com/api/references/vscode-api
          } from 'child_process';
   import { type TNotReadonly
          } from '../types/generic.d';
-  import { type TShadowDoc
+  import { type TShadowDocAccess
          } from '../types/vsc.extension.d';
   import { type TDropDownListOptions
          } from '../vsc/uiUtil';
@@ -75,6 +75,7 @@ https://code.visualstudio.com/api/references/vscode-api
          , threadShowError
          , SCancelButtonId
          , whenFolderSelected
+         , whenFileSelected
          , ListItem
          , DropDownList
          } from '../vsc/uiUtil';
@@ -90,38 +91,11 @@ export async function openInNppExplorer( ü_uri:Uri, ü_all:Uri[]    ):Promise<n
 //====================================================================
 
 class VirtualDocumentView {
-  //
-    private readonly _isInitial :boolean
-    public  readonly  content   :string
-    private readonly _newHash   :string
-    private readonly _docViewBE :TShadowDoc
-    private readonly _docViews  = ß_XtnOpenInNpp.shadowDocsBfr;
-    private readonly _encoding  = 'utf8';
-    public  readonly whenReady:Promise<this> 
-constructor(
-    public  readonly  doc      :TextDocument
-  , public  readonly  reuse    :boolean
-  ,                 ü_shadowDir:string
-){
-    this._isInitial = ! this._docViews.has( this.doc );
-    this.content    = this.doc.getText();
-    this._newHash   = createHash( 'sha1' ).update( this.content ).digest('hex');
-    this._docViewBE = this._isInitial
-                    ? { file: ''// await whenTempFile( ü_stub, '', ü_tempDir, ! ü_silent ) // silent = reuse
-                      , hash: this._newHash
-                      }
-                    : this._docViews.get( this.doc )!
-                    ;
-    this.whenReady  = this._isInitial ? this._whenReady( ü_shadowDir )
-                                      : Promise.resolve( this );
+private static _compileHash( ü_content:string ):string {
+    return createHash( 'sha1' ).update( ü_content ).digest( 'hex' );
 }
-
-get uri     ():Uri    { return Uri.file( this._docViewBE.file ); }
-get fileName():string { return           this._docViewBE.file  ; }
-
-private _compileFsStub():string {
+private static _compileFsStub( ü_uri:Uri ):string {
     const ü_sep = '\u2014'; //'-\u2e3a'
-    const ü_uri      = this.doc.uri;
     const ü_wsName   = workspace.name;
     const ü_wsFolder = workspace.getWorkspaceFolder( ü_uri );
       let ü_stub     = ( ü_wsName ?? ' ' ) + ü_sep;
@@ -136,46 +110,99 @@ private _compileFsStub():string {
     }
     return escapeFF( CRgXp.fs_win32 )( ü_stub );
 }
+  //
+    private readonly _encoding  = 'utf-8';
+    public  readonly  content       :string
+    private readonly _contentHash   :string
+    private readonly _accessBfr = ß_XtnOpenInNpp.shadowDocsBfr;
+    private readonly _accessInfo    :TShadowDocAccess
+    private readonly _isFirstAccess :boolean
+    public  readonly  whenReady     :Promise<this>
+constructor(
+    public  readonly  doc      :TextDocument
+  , public  readonly  reuse    :boolean
+  ,                 ü_shadowDir:string
+){
+    this. content       = this.doc.getText();
+    this._contentHash   = VirtualDocumentView._compileHash( this.content );
+    this._isFirstAccess = ! this._accessBfr.has( this.doc );
+    if ( this._isFirstAccess ) {
+        this._accessInfo = { file: ''
+                           , hash: ''
+                           };
+
+        this.whenReady   = this._whenReady( ü_shadowDir );
+    } else {
+        this._accessInfo = this._accessBfr.get( this.doc )!;
+        this.whenReady   = this.reuse
+                         ? Promise.resolve( this )
+                         : this._whenReady( ü_shadowDir )
+                         ;
+    }
+}
+
+get uri     ():Uri    { return Uri.file( this._accessInfo.file ); }
+get fileName():string { return           this._accessInfo.file  ; }
 
 private async _whenReady( ü_shadowDir:string ):Promise<this> {
-    this._docViewBE.file = await whenTempFile( this._compileFsStub(), '', ü_shadowDir, ! this.reuse  );
+    const ü_old = this._accessInfo.file;
+    const ü_new = await whenTempFile( VirtualDocumentView._compileFsStub( this.doc.uri ), '', ü_shadowDir, ! this.reuse );
+    if ( ü_new !== ü_old ) {
+        if ( this._accessInfo.hash.length > 0 ) {
+            ß_trc&& ß_trc( `Dropping ${ ü_old }`, CETraceIds.shadowDoc );
+        }
+                  this._accessInfo.file = ü_new;
+                  this._accessInfo.hash = '';
+    }
     return this;
 }
 
 async whenShadowUpToDate( ü_resetShadowDir?:string ):Promise<this> {
+  //
     if ( ü_resetShadowDir ) {
-        await this._whenReady( ü_resetShadowDir );
+        const ü_old = this._accessInfo.file;
+        const ü_new = ü_resetShadowDir;
+      //await this._whenReady( ü_resetShadowDir );
+        if ( ü_new !== ü_old ) {
+                  this._accessInfo.file = ü_new;
+                  this._accessInfo.hash = '';
+        }
     }
   //
     let ü_writeFlag = 'w';
-    if ( this._isInitial ) {
+    const ü_hash = this._accessInfo.hash;
+    if ( ü_hash.length === 0 ) {
         if ( this.reuse ) {
-            const ü_info = await whenFileInfoRead( this._docViewBE.file );
+            const ü_info = await whenFileInfoRead( this._accessInfo.file );
             if ( ü_info === null ) {
                 ü_writeFlag = 'wx';
             } else {
-                if ( ! ü_info.isFile() ) { throw new ErrorWithUixMessage( '"{0}" exists, but is not a file', this._docViewBE.file ); }
-                const ü_content = await whenFileRead( this._docViewBE.file, this._encoding );
+                if ( ! ü_info.isFile() ) { throw new ErrorWithUixMessage( '"{0}" exists, but is not a file', this._accessInfo.file ); }
+                const ü_content = await whenFileRead( this._accessInfo.file, this._encoding );
                 const ü_oldHash = createHash( 'sha1' ).update(  ü_content  ).digest('hex');
-                if ( ü_oldHash === this._newHash ) { ü_writeFlag = ''; }
+                if ( ü_oldHash === this._contentHash ) { ü_writeFlag = ''; }
             }
         } else { ü_writeFlag = 'wx'; }
-    } else {
-        if ( this._docViewBE.hash === this._newHash ) { ü_writeFlag = ''; }
-    }
-    const ü_done = ü_writeFlag.length > 0;
-    if ( ü_done ) {
-        ß_trc&& ß_trc( `Updating shadow "${ this._docViewBE.file }"`, CETraceIds.shadowDoc );
-        await whenFileWritten( this._docViewBE.file, this.content, { encoding: this._encoding
-                                                                   , flag    : ü_writeFlag } );
+    } else if ( ü_hash === this._contentHash ) { ü_writeFlag = ''; }
+  //
+    if ( ü_writeFlag.length > 0 ) {
+        ß_trc&& ß_trc( `Updating shadow "${ this._accessInfo.file }"`, CETraceIds.shadowDoc );
+        const ü_opts = { encoding: this._encoding as 'utf-8'
+                       , flag    : ü_writeFlag    //as any
+                       };
+        await whenFileWritten( this._accessInfo.file, this.content, ü_opts );
+        this._accessInfo.hash = this._contentHash;
     } else {
         ß_trc&& ß_trc( 'Shadow is recent. No write', CETraceIds.shadowDoc );
     }
-    if ( this._isInitial ) {
-        if ( ! this.doc.isClosed ) { this._docViews.set( this.doc, this._docViewBE ); }
-    } else {
-        this._docViewBE.hash = this._newHash;
+  //
+  // buffer update
+    if ( this._isFirstAccess ) {
+        if ( ! this.doc.isClosed ) {
+            this._accessBfr.set( this.doc, this._accessInfo );
+        }
     }
+  //
     return this;
   //return ü_done;
 }
@@ -285,13 +312,13 @@ private async whenReady():Promise<boolean> {
   //
     if ( ü_refUri !== null ) {
         const ü_refDoc    = await workspace.openTextDocument( ü_refUri );
-        const ü_shadowDir = await this._config.whenVirtualDocsDir;
-        if ( ü_shadowDir.length === 0 ) {
-            this._threadShadowDone( ü_refDoc );
+        if ( this._config.virtualDocumentsDirectory.length === 0 ) {
+            this._threadShadowDone( ü_refDoc ); // not silent = with UI
             return false;
         }
-            this._setShadow( await this._whenShadowReady( ü_refDoc, ü_shadowDir, true ) // silent without UI
-                                                                                 );// switch to Editor mode
+            const ü_shadowDir = await this._config.whenVirtualDocsDir;
+            const ü_docView   = await this._whenShadowReady( ü_refDoc, ü_shadowDir, true ); // silent = without UI
+            this._setShadow( ü_docView );// switch to Editor mode
     }
   //
     return true;
@@ -511,7 +538,7 @@ async submit():Promise<number> {
 
 private async _threadShadowDone( ü_doc:TextDocument ):Promise<void> {
     try {
-        const ü_docView = await this._whenShadowReady( ü_doc, '', false ); // not silent with UI
+        const ü_docView = await this._whenShadowReady( ü_doc, '', false ); // not silent = with UI
     } catch ( ü_eX ) {
         threadShowError( ü_eX, 'Shadow' );
     }
@@ -525,26 +552,39 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
         ß_trc&& ß_trc( ü_shadowDir, 'History-Shadow-Folder' );
     }
   //
+    const ü_fileReuse = this._config.virtualDocumentsFileReuse;
     const ü_docView = await new VirtualDocumentView( ü_doc
-                                                   , this._config.virtualDocumentsFileReuse
+                                                   , ü_fileReuse
                                                    , ü_shadowDir
                                                    ).whenReady;
   //
-    if ( ü_silent ) { return ü_docView.whenShadowUpToDate(); }
+    if ( ü_silent ) {
+        return ü_docView.whenShadowUpToDate();
+    }
   //
         const ü_todo = await window.showInformationMessage( LCDoIt.createShadow( ü_doc.fileName, ü_docView.fileName )
-                                                          , new MessageButton( CButton.YES             )
-                                                          , new MessageButton( CButton.selectShadowDir ) );
+                                                          , new MessageButton( CButton.YES            )
+                                                          , new MessageButton( CButton.changeFileName )
+                                                          );
         switch ( ü_todo?._button ) {
 
-            case CButton.selectShadowDir:
+            case CButton.changeFileName: {
+                const ü_selectedFile = await whenFileSelected( ü_docView.fileName, LCHeader.selectShadowFile() );
+                if ( ü_selectedFile.length > 0 ) {
+                    ß_whenHistory( dirname( ü_selectedFile ) );
+                                 await ü_docView.whenShadowUpToDate( ü_selectedFile );
+                    ß_openInNppShadow( ü_docView );
+                }
+              } break;
+
+            case CButton.selectShadowDir: {
                 const ü_selectedDir = await whenFolderSelected( ü_shadowDir, LCHeader.selectShadowDir() );
                 if ( ü_selectedDir.length > 0 ) {
                     ß_whenHistory( ü_selectedDir );
                                  await ü_docView.whenShadowUpToDate( ü_selectedDir );
                     ß_openInNppShadow( ü_docView );
                 }
-                break;
+              } break;
 
             case CButton.YES:
                              await ü_docView.whenShadowUpToDate();
@@ -558,16 +598,18 @@ private async _whenShadowReady( ü_doc:TextDocument, ü_shadowDir:string, ü_sil
 
 //--------------------------------------------------------------------
 
-async function ß_whenHistory( ü_resetShadowDir:string ):Promise<void> {
+async function ß_whenHistory( ü_resetShadowDir:string ):Promise<boolean> {
     const ü_cfgHist = ß_XtnOpenInNpp.globalHistory.config;
     const ü_release = await ü_cfgHist.whenDataRef();
     try {
+        const ü_hasDelta = ü_cfgHist.dataRef.shadowDir !== ü_resetShadowDir 
            //const ü_cfgData = ü_cfgHist.dataRef;
-        if ( ü_cfgHist.dataRef.shadowDir !== ü_resetShadowDir ) {
+        if ( ü_hasDelta ) {
            //ü_cfgData.shadowDir          =  ü_selectedDir ;
              ü_cfgHist.dataRef.shadowDir  =  ü_resetShadowDir ;
              ü_cfgHist.triggerCommit();
         }
+        return ü_hasDelta;
     } finally { ü_release(); }
 }
 

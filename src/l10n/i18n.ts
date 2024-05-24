@@ -25,6 +25,7 @@
     };
   export const LCHeader =
     { selectShadowDir :                      ()=>l10n.t( 'Select folder for shadow copy creation'                                       )
+    , selectShadowFile:                      ()=>l10n.t( 'Select file for shadow copy creation'                                         )
     };
 
 //--------------------------------------------------------------------

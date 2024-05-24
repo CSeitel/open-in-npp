@@ -32,7 +32,7 @@
 			dispose():any
 		}
 
-  export type TShadowDoc = {
+  export type TShadowDocAccess = {
       file :string
       hash :string
     }

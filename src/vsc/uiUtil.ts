@@ -1,6 +1,6 @@
 /*
 */
-  import { type MessageItem
+  import { SaveDialogOptions, type MessageItem
          , type Disposable as TDisposable
          } from 'vscode';
   import { type IUiXMessage
@@ -136,6 +136,20 @@ async echoMessage( ü_text_:string|IUiXMessage, ü_type:TUiXMessageType = CEUiXM
 }
 
 //====================================================================
+
+export async function whenFileSelected( ü_previousFile:string, ü_dialogTitle = '', ü_buttonText = '' ):Promise<string> {
+  //
+    const ü_opts:SaveDialogOptions =
+      { defaultUri : fileToUri( ü_previousFile )
+      , title      : ü_dialogTitle
+      , saveLabel  : ü_buttonText
+      };
+  //
+    const ü_uri = await window.showSaveDialog( ü_opts );
+    if ( ü_uri        === undefined
+       ) { return ''; }
+           return uriToFile( ü_uri );
+}
 
 export async function whenFolderSelected( ü_previousFolder:string, ü_dialogTitle = '', ü_buttonText = '' ):Promise<string> {
   //

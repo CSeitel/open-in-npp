@@ -22,10 +22,11 @@ export const CButton =
   , OK             : { text: LCButtonText    .OK      } as TButton
   , CANCEL         : { text: LCButtonText    .CANCEL  } as TButton
 
-  , selectAll      : { text:()=>l10n.t( 'Open All'      ) } as TButton
-  , selectFiles    : { text:()=>l10n.t( 'Open a Subset' ) } as TButton
-  , showDetails    : { text:()=>l10n.t( 'Show Details'  ) } as TButton
-  , selectShadowDir: { text:()=>l10n.t( 'Select Folder' ) } as TButton
+  , selectAll       : { text:()=>l10n.t( 'Open All'      ) } as TButton
+  , selectFiles     : { text:()=>l10n.t( 'Open a Subset' ) } as TButton
+  , showDetails     : { text:()=>l10n.t( 'Show Details'  ) } as TButton
+  , selectShadowDir : { text:()=>l10n.t( 'Select Folder' ) } as TButton
+  , changeFileName: { text:()=>l10n.t( 'Choose file'   ) } as TButton
   };
 
 //====================================================================

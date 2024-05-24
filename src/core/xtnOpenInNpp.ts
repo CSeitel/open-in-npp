@@ -9,7 +9,7 @@
   import { type TXtnCommand
          , type TGlobalHistoryProxy
          , type TLocalHistoryProxy
-         , type TShadowDoc
+         , type TShadowDocAccess
          , type IDisposableLike
          } from '../types/vsc.extension.d';
   import { type TXtnCfgJSON
@@ -47,7 +47,7 @@
 export default class XtnOpenInNpp {
     readonly whenReady:Promise<this>
   //
-    readonly shadowDocsBfr = new Map<TextDocument,TShadowDoc>();
+    readonly shadowDocsBfr = new Map<TextDocument,TShadowDocAccess>();
     readonly vscDisposables:ReadonlyArray<IDisposableLike> & { push:( ... item:IDisposableLike[] )=>void }
     readonly globalHistory :TGlobalHistoryProxy
     readonly  localHistory :TLocalHistoryProxy
