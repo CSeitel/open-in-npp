@@ -31,7 +31,7 @@ async function main():Promise<void> {
                ß_trc&& ß_trc( ü_opts, 'ExtensionTest-Options' );
         const ü_rc = await whenVscTestsRun( ü_opts );
         if ( ü_rc > 0 )
-             { ß_trc&& ß_trc( failureSymbol, 'ExtensionTest-Result'    ); } // Never ?
+             { ß_trc&& ß_trc( failureSymbol, 'ExtensionTest-Result'    ); } // never ? (ends up in catch)
         else { ß_trc&& ß_trc( successSymbol, 'ExtensionTest-Result'    ); }
 
     } catch ( ü_eX ) {

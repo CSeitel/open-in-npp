@@ -39,7 +39,7 @@
   const ß_SKIPTests = ß_debugUI ? false : !ß_skipTests;
   const ß_suites =
     [ [ 'Single', ß_single,  ß_SKIPTests ,1] as unknown as TTestSuiteDefinition
-    , [ 'Etc'   , ß_etc   , !ß_skipTests ,3] as unknown as TTestSuiteDefinition
+    , [ 'Etc'   , ß_etc   ,  ß_skipTests ,3] as unknown as TTestSuiteDefinition
     , [ 'Fs'    , ß_fs    ,  ß_skipTests ,5] as unknown as TTestSuiteDefinition
     , [ 'Npp'   , ß_npp   ,  ß_skipTests ,5] as unknown as TTestSuiteDefinition
     ] as TTestSuites

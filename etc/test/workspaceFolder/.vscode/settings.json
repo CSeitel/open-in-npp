@@ -3,5 +3,10 @@
     "openInNpp.Executable": "",
     "openInNpp.workingDirectory": "",
     "openInNpp.virtualDocumentsDirectory": "%TEMP%",
-    "openInNpp.spawnOptions": { "env":{ "VSCTST":"ABC" } }
+    "openInNpp.spawnOptions": {
+        "env": {
+            "VSCTST": "ABC"
+        }
+    },
+    "openInNpp.virtualDocumentsFileReuse": false
 }

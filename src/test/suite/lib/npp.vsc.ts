@@ -27,7 +27,8 @@
          } from '../../../lib/asyncUtil';
   import { asyncNullOperation
          } from '../../../lib/functionUtil';
-  import { testEqual
+  import { testSrc
+         , testEqual
          , testNotEqual
          , testRejected
          } from '../../../lib/testUtil';
@@ -40,14 +41,16 @@
   import { CVscFs
          , fileToUri
          , firstWorkspaceFolder
+         , whenFilesFound
          } from '../../../vsc/fsUtil';
 //====================================================================
-  export const tst_dispatch =  true ? asyncNullOperation
-                                    : tst_settings;
+  export const tst_dispatch = !true ? asyncNullOperation
+                                    : tst_openInNpp;
 //====================================================================
-    const ß_setExe = ( whenConfigSet<string> ).bind( null, CXtnCfgId.executable                );
-    const ß_setDir = ( whenConfigSet<string> ).bind( null, CXtnCfgId.workingDirectory          );
-    const ß_setVDc = ( whenConfigSet<string> ).bind( null, CXtnCfgId.virtualDocumentsDirectory );
+    const ß_setExe = ( whenConfigSet<string > ).bind( null, CXtnCfgId.executable                );
+    const ß_setDir = ( whenConfigSet<string > ).bind( null, CXtnCfgId.workingDirectory          );
+    const ß_setVDc = ( whenConfigSet<string > ).bind( null, CXtnCfgId.virtualDocumentsDirectory );
+    const ß_setUse = ( whenConfigSet<boolean> ).bind( null, CXtnCfgId.virtualDocumentsFileReuse );
   //const ö_setEx_ = bindAppending( setConfig<string>, CXtnCfgId.executable );
 //====================================================================
 
@@ -157,24 +160,55 @@ export async function tst_history(){
 //====================================================================
 
 export async function tst_openInNpp(){
-    const ü_noKill = !true;
+  //const ü_extn = await ß_whenXtnActivated_External();
+  //const ü_cfgApi = ü_extn.configApi;
+    const ü_pattern = '**/workspaceFolder—untitled—*';
+    const ü_root = testSrc( 'shadowRoot' );
+    const ü_Root = fileToUri( ü_root );
+    const ü_sub = join( ü_root, 'abc' );
+    await CVscFs.createDirectory( fileToUri( ü_sub ) );
+    const ü_delme = await whenFilesFound( ü_Root, ü_pattern );
+    const ü_clean = await Promise.all( ü_delme.map( ü_file => CVscFs.delete( ü_file ) ) );
+    ß_trc&& ß_trc( ü_clean.length, 'Cleanup-Deletions' );
+  try {
+    const ü_noKill =  true;
   //
-    await whenTextEditorOpened( fileToUri( __filename ) );
+    await whenTextEditorOpened( fileToUri( testSrc( 'a b.txt' ) ) );
     const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
-  //
-    await whenNewTextEditorOpened( { content:'{"a":33}' } );
-    const ü_pid_2 = await commands.executeCommand<number>( CEXtnCommands.oActive );
-    testNotEqual( ü_pid_1, ü_pid_2, '2 Pids' );
+    testNotEqual( ü_pid_1, 0, 'Pid 1' );
   //
     await whenTextEditorOpened( join( firstWorkspaceFolder()!.fsPath, 'b b.txt' ) );
+    const ü_pid_2 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    testNotEqual( ü_pid_2, 0, 'Pid 2' );
+    testNotEqual( ü_pid_1, ü_pid_2, '2 Pids' );
+  //
+    await ß_setVDc( ü_sub );
+  //
+    await whenNewTextEditorOpened( { content:'{"a":33}' } );
     const ü_pid_3 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+  //
+    const ü_pid_4 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    await ß_setVDc( ü_root );
+    await ß_setUse( true );
+    const ü_pid_5 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    const ü_pid_6 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    await whenNewTextEditorOpened( { content:'{"a":33}' } );
+    const ü_pid_7 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    const ü_pid_8 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    const ü_files = await whenFilesFound( ü_Root, ü_pattern );
+    testEqual( ü_files.length, 3, 'Shadows-Count' );
   //
     await whenDelay( 1000 );
   //
     let ü_pid:number
     ü_pid = ü_pid_1; if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) { !true || ü_noKill || process.kill( ü_pid ); }
-    ü_pid = ü_pid_2; if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) {  true || ü_noKill || process.kill( ü_pid ); }
     ü_pid = ü_pid_3; if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) {  true || ü_noKill || process.kill( ü_pid ); }
+    ü_pid = ü_pid_2; if ( testEqual( ü_pid>0, true, `PID: ${ ü_pid }` ) ) {  true || ü_noKill || process.kill( ü_pid ); }
+  //
+  } finally {
+      await ß_setVDc( '%TEMP%' );
+      await ß_setUse( false );
+  }
 }
 
 //====================================================================
