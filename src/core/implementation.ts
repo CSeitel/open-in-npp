@@ -36,6 +36,8 @@ https://code.visualstudio.com/api/references/vscode-api
   import { ß_XtnOpenInNpp
          } from '../runtime/context-XTN';
 //--------------------------------------------------------------------
+  import { LCMessage
+         } from '../l10n/error';
   import { LCDoIt
          , LCHeader
          } from '../l10n/i18n';
@@ -100,6 +102,8 @@ private static _compileFsStub( ü_uri:Uri ):string {
     const ü_wsFolder = workspace.getWorkspaceFolder( ü_uri );
       let ü_stub     = ( ü_wsName ?? ' ' ) + ü_sep;
     if ( ü_wsFolder === undefined ) {
+      //private constructor(scheme: string, authority: string, path: string, query: string, fragment: string);
+      //const ü_name = `{workspaceFolder}—{scheme}—{authority}`;
           ü_stub    += decodeURI(          ü_uri.toString().replace( ':', ü_sep ) )
     } else {
           ü_stub    += ü_wsFolder.name
@@ -177,12 +181,13 @@ async whenShadowUpToDate( ü_resetShadowDir?:string ):Promise<this> {
             if ( ü_info === null ) {
                 ü_writeFlag = 'wx';
             } else {
-                if ( ! ü_info.isFile() ) { throw new ErrorWithUixMessage( '"{0}" exists, but is not a file', this._accessInfo.file ); }
+                if ( ! ü_info.isFile() ) { throw new ErrorWithUixMessage( LCMessage.not_a_file, this._accessInfo.file ); }
                 const ü_content = await whenFileRead( this._accessInfo.file, this._encoding );
-                const ü_oldHash = createHash( 'sha1' ).update(  ü_content  ).digest('hex');
-                if ( ü_oldHash === this._contentHash ) { ü_writeFlag = ''; }
+                if ( VirtualDocumentView._compileHash( ü_content ) === this._contentHash ) { ü_writeFlag = ''; }
             }
-        } else { ü_writeFlag = 'wx'; }
+        } else {
+            if ( ! ü_resetShadowDir ) { ü_writeFlag = 'wx'; }
+        }
     } else if ( ü_hash === this._contentHash ) { ü_writeFlag = ''; }
   //
     if ( ü_writeFlag.length > 0 ) {

@@ -11,6 +11,8 @@
     "-nosession"
   ],
   "openInNpp.filesInFolderPattern": "**/*.json",
-  "openInNpp.developerTrace": true
+  "openInNpp.developerTrace": true,
+  "openInNpp.virtualDocumentsFileReuse": false,
+  "openInNpp.virtualDocumentsDirectory": "%TEMP%"
 },
 }

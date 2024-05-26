@@ -29,7 +29,7 @@ This is the initial release.
   7. `openInNpp.filesInFolderPattern`
 - enablement of option `openInNpp.Executable` for consumption of path names containing windows environment variables
 
-## [0.2.0] - 2024-04-30
+## [0.2.0] - 2024-05-30
 ### Added
 
 - Handling of [_Virtual Documents_](https://code.visualstudio.com/api/extension-guides/virtual-documents)

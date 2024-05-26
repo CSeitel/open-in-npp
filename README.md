@@ -10,15 +10,18 @@ Multiple configuration options are available (see below).
 ### Keyboard Shortcut
 A keyboard shortcut `Ctrl+K Ctrl+N` is set for triggering this command.
 
-### Context menus
+### Context Menus
 The context menus of the _VS-Code_ editor and explorer are extended correspondingly by an additional entry.
 This can be configured via the extension settings (see below).
+
+### Whats's New (June 2024)
+Support for displaying [_virtual documents_](https://code.visualstudio.com/api/extension-guides/virtual-documents) as described below by the corresponding configuration options
 
 ## Requirements
 
 _Notepad++_ needs to be installed. See https://notepad-plus-plus.org/downloads/
 
-## Extension Settings
+## Extension Settings (Configuration Options)
 
 The following settings are provided and can conveniently be accessed via command `Open Settings for 'Open in Notepad++'`:
 
@@ -43,7 +46,7 @@ The following settings are provided and can conveniently be accessed via command
 * `openInNpp.openFolderAsWorkspace`: When passing a folder path along to _Notepad++_ let this folder be handled as a _workspace_ (default: *false*); corresponds to command line parameter [-openFoldersAsWorkspace](https://npp-user-manual.org/docs/command-prompt/)
 * `openInNpp.filesInFolderPattern`: Instead of passing a folder path along to _Notepad++_ find all files (relative to this folder) matching the specified [glob pattern](https://code.visualstudio.com/api/references/vscode-api#GlobPattern) and let the result list become the arguments of the execution of _Notepad++_; _Notepad++_'s default handling of a folder path likely corresponds to applying the pattern _``**/*.*``_ (i.e. subfolders are recursively taken into account, due to this the pattern ``*.*`` is possibly a good choice)
 #### Virtual Documents
-* `openInNpp.virtualDocumentsDirectory`: When a file does not exist in the local filesystem as it is actually a [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) a _shadow_ copy of this document will automatically be created in the specified folder and then shown in _Notepad++_. If no folder is specified here a info message with the options to use a _Windows_ standard temporary folder or to launch a folder selection dialog will be presented.
+* `openInNpp.virtualDocumentsDirectory`: When a file does not exist in the local filesystem as it is actually a [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) a _shadow_ copy of this document will automatically be created in the specified folder and then shown in _Notepad++_. If no folder is specified here an info message will present the options to either accept a file path comprising the _Windows_ standard temporary folder _%TEMP%_ or to perform a _File-Save-As_ selection.
 * `openInNpp.virtualDocumentsFileReuse"`: When file reuse is enabled all _VS-Code_ editor instances referring to the same [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) will share a common file _shadow_ for being opened in _Notepad++_. Note that _VS-Code_ editor instances may show different versions of the same _virtual document_ and hence their contents may not be identical. As a consequence the contents of the shadow file will be overwritten to always reflect the particular version to be opened in _Notepad++_.
 #### Expert Settings
 * `openInNpp.commandLineArguments`: Specifies additional arguments to be passed along to _Notepad++_; a comprehensive overview of the command line parameters of _Notepad++_ is available [here](https://npp-user-manual.org/docs/command-prompt/)
@@ -52,10 +55,19 @@ The following settings are provided and can conveniently be accessed via command
 
 
 
+## How to
+
+* Using a [shortcut/link](https://en.wikipedia.org/wiki/Shortcut_(computing)#Microsoft_Windows) as value for option `openInNpp.Executable`: the value _{ shell: true }_ for option `openInNpp.spawnOptions` is required when specifying a _Windows_ shortcut pointing to the _Notepad++_ executable
+
+
+
 ## Known Issues
 
-* _None_
-[Please report @](https://github.com/CSeitel/open-in-npp/issues)
+* _None_:
+Please report [here](https://github.com/CSeitel/open-in-npp/issues)
+
+* _Good to know for expert setting `openInNpp.spawnOptions`_:
+Issue [windowsverbatimarguments](https://stackoverflow.com/questions/78422012/executable-name-gets-argument-with-windowsverbatimarguments-true-node-child)
 
 -----------------------------------------------------------------------------------------------------------
 

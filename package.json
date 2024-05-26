@@ -121,7 +121,7 @@
         },
         "openInNpp.virtualDocumentsDirectory": {
           "type": "string",
-          "markdownDescription": "When a file does not exist in the local filesystem as it is actually a [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) a _shadow_ copy of this document will automatically be created in the specified folder and then shown in _Notepad++_. If no folder is specified here a info message with the options to use a _Windows_ standard temporary folder or to launch a folder selection dialog will be presented."
+          "markdownDescription": "When a file does not exist in the local filesystem as it is actually a [_virtual document_](https://code.visualstudio.com/api/extension-guides/virtual-documents) a _shadow_ copy of this document will automatically be created in the specified folder and then shown in _Notepad++_. If no folder is specified here an info message will present the options to either accept a file path comprising the _Windows_ standard temporary folder _%TEMP%_ or to perform a _File-Save-As_ selection."
         },
         "openInNpp.virtualDocumentsFileReuse": {
           "type": "boolean",
@@ -159,7 +159,7 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "scripts": {
     "watch": "tsc -watch -p ./src/",
     "compile": "tsc -p ./src/",
