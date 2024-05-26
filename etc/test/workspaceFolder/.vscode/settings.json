@@ -6,7 +6,8 @@
     "openInNpp.spawnOptions": {
         "env": {
             "VSCTST": "ABC"
-        }
+        },
+        "shell": true
     },
     "openInNpp.virtualDocumentsFileReuse": false
 }

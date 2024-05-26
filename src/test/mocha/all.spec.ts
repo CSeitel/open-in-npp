@@ -24,7 +24,7 @@
                   //ß_fs   .tst_dispatch
                   //ß_test .tst_dispatch
                   //ß_text .tst_dispatch
-                 ].slice(0), !ß_skipTests ]
+                 ].slice(0),  ß_skipTests ]
       , [ 'Array' , ß_array,  ß_skipTests ]
       , [ 'Async' , ß_async,  ß_skipTests ]
       , [ 'Error' , ß_error,  ß_skipTests ]

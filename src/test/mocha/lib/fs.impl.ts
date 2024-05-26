@@ -64,7 +64,7 @@ function ö_delta( ü_info:Stats|null ):string {
 export async function tst_whenKnownAsFolder():Promise<void> {
 /*
 <SYMLINKD>     virtual_1_d [.\real_1]
-<JUNCTION>     virtual_1_j [C:\zzz_Dev\node_modules\open-in-npp\.vscode-temp\real_1]
+<JUNCTION>     virtual_1_j [C:\zzz_Dev\node_modules\open-in-npp\etc\test\real_1]
 <SYMLINKD>     virtual_2_d [.\virtual_1_d]  2 -> 1 -> r1
 <SYMLINKD>     virtual_3_d [.\virtual_4_d]  3 -> 4 -> 5 -> 3
 <SYMLINKD>     virtual_4_d [.\virtual_5_d]  3 -> 4 -> 5 -> 3
@@ -174,7 +174,7 @@ C:\PROGRA~1\Notepad++\notepad++.exe
 C:\\PROGRA~1\\Notepad++\\notepad++.exe
 C:\Program Files\Notepad++\notepad++.exe
 C:\\Program Files\\Notepad++\\notepad++.exe
-C:/zzz_Dev/node_modules/open-in-npp/.vscode-temp/Notepad++.lnk
+C:/zzz_Dev/node_modules/open-in-npp/etc/test/Notepad++.lnk
   */
 function ö_stop_1(           ):true   { return true    ; }
 function ö_stop_2( ü_err:any ):string { return ''+ü_err; }

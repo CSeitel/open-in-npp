@@ -17,7 +17,7 @@ https://code.visualstudio.com/api/working-with-extensions/testing-extension
     , files: ß_files
   //, version: 'insiders'
   //
-    , launchArgs     :       [ './etc/test/workspaceFolder/b b.txt' ]
+    , launchArgs     :       [ './etc/test/workspaceFolder/Has Blank ß.txt' ]
     , workspaceFolder:  true ? './etc/test/workspaceFolder' //
                              : './etc/test/workspaces/folder.code-workspace'
   //

@@ -159,7 +159,7 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "main": "./dist/extension.js",
+  "main": "./out/extension.js",
   "scripts": {
     "watch": "tsc -watch -p ./src/",
     "compile": "tsc -p ./src/",
@@ -170,7 +170,8 @@
     "testVscMochaLike" : "node  ./out/test/suite/npmRunVscTests.js  xtnRunVscTestsMochaLike",
     "testMocha"    : "mocha --ui tdd --async-only --timeout 1500 ./out/test/mocha/all.spec.js",
     "testMochaLike": "  node.exe                                 ./out/test/mocha/all.spec.js",
-    "testSyntax"   : "  node.exe   --unhandled-rejections=throw    ./etc/syntax.js                          ",
+    "testSetup"    : "  node.exe   --unhandled-rejections=throw    ./out/build/test.setup.js ",
+    "testSyntax"   : "  node.exe   --unhandled-rejections=throw    ./etc/syntax.js           ",
     "vscode:package": "vsce package",
     "vscode:install": "code --install-extension open-in-npp-0.1.6.vsix",
     "vscode:pre_publish": "npm run compile",

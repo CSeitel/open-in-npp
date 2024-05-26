@@ -1,5 +1,7 @@
 /*
 */
+  import { type SpawnOptions
+         } from 'child_process';
   import { type XtnOpenInNpp
          , type IGlobalHistoryData
          } from '../../../types/vsc.extension.d';
@@ -47,11 +49,11 @@
   export const tst_dispatch = !true ? asyncNullOperation
                                     : tst_openInNpp;
 //====================================================================
-    const ß_setExe = ( whenConfigSet<string > ).bind( null, CXtnCfgId.executable                );
-    const ß_setDir = ( whenConfigSet<string > ).bind( null, CXtnCfgId.workingDirectory          );
-    const ß_setVDc = ( whenConfigSet<string > ).bind( null, CXtnCfgId.virtualDocumentsDirectory );
-    const ß_setUse = ( whenConfigSet<boolean> ).bind( null, CXtnCfgId.virtualDocumentsFileReuse );
-  //const ö_setEx_ = bindAppending( setConfig<string>, CXtnCfgId.executable );
+    const ß_setExe = ( whenConfigSet<string >      ).bind( null, CXtnCfgId.executable                );
+    const ß_setDir = ( whenConfigSet<string >      ).bind( null, CXtnCfgId.workingDirectory          );
+    const ß_setVDc = ( whenConfigSet<string >      ).bind( null, CXtnCfgId.virtualDocumentsDirectory );
+    const ß_setUse = ( whenConfigSet<boolean>      ).bind( null, CXtnCfgId.virtualDocumentsFileReuse );
+    const ß_setSpn = ( whenConfigSet<SpawnOptions> ).bind( null, CXtnCfgId.spawnOptions              );
 //====================================================================
 
 export async function tst_settings(){
@@ -100,6 +102,8 @@ export async function tst_readFile(){
     const ü_wsCfg = join( ü_home??'', '.vscode', 'settings.json' );
     ß_trc&& ß_trc( ü_home       , 'home'     );
     ß_trc&& ß_trc( ü_wsCfg      , 'home-cfg' );
+  //
+    testEqual( ü_home, testSrc( 'workspaceFolder' ), 'WorkspaceFolder');
   //
     const ü_data = await CVscFs.readFile( fileToUri( ü_wsCfg ) );
     const ü_jso_ = JSON.parse( Buffer.from( ü_data ).toString( 'utf8' ) );
@@ -160,24 +164,32 @@ export async function tst_history(){
 //====================================================================
 
 export async function tst_openInNpp(){
-  //const ü_extn = await ß_whenXtnActivated_External();
-  //const ü_cfgApi = ü_extn.configApi;
-    const ü_pattern = '**/workspaceFolder—untitled—*';
+    const ü_extn   = await ß_whenXtnActivated_External();
+    const ü_cfgApi = ü_extn.configApi;
+    const ü_opts   = Object.assign( {}, ü_cfgApi.configSnapshot.spawnOptions );
+  //
     const ü_root = testSrc( 'shadowRoot' );
+    const ü_sub  = join( ü_root, 'abc' );
+    const ü_lnk  = testSrc( 'notepad++.lnk' );
+    const ü_some = testSrc( 'a b.txt' );
     const ü_Root = fileToUri( ü_root );
-    const ü_sub = join( ü_root, 'abc' );
-    await CVscFs.createDirectory( fileToUri( ü_sub ) );
+    const ü_Sub  = fileToUri( ü_sub  );
+    const ü_Some = fileToUri( ü_some );
+    const ü_blnk = testSrc( 'workspaceFolder/Has Blank ß.txt' );
+  //
+    const ü_pattern = '**/workspaceFolder—untitled—*';
+    await CVscFs.createDirectory( ü_Sub );
     const ü_delme = await whenFilesFound( ü_Root, ü_pattern );
     const ü_clean = await Promise.all( ü_delme.map( ü_file => CVscFs.delete( ü_file ) ) );
     ß_trc&& ß_trc( ü_clean.length, 'Cleanup-Deletions' );
   try {
     const ü_noKill =  true;
   //
-    await whenTextEditorOpened( fileToUri( testSrc( 'a b.txt' ) ) );
+    await whenTextEditorOpened( ü_Some );
     const ü_pid_1 = await commands.executeCommand<number>( CEXtnCommands.oActive );
     testNotEqual( ü_pid_1, 0, 'Pid 1' );
   //
-    await whenTextEditorOpened( join( firstWorkspaceFolder()!.fsPath, 'b b.txt' ) );
+    await whenTextEditorOpened( ü_blnk );
     const ü_pid_2 = await commands.executeCommand<number>( CEXtnCommands.oActive );
     testNotEqual( ü_pid_2, 0, 'Pid 2' );
     testNotEqual( ü_pid_1, ü_pid_2, '2 Pids' );
@@ -198,6 +210,13 @@ export async function tst_openInNpp(){
     const ü_files = await whenFilesFound( ü_Root, ü_pattern );
     testEqual( ü_files.length, 3, 'Shadows-Count' );
   //
+      await ß_setExe( ü_lnk );
+                      ü_opts.shell = true;
+      await ß_setSpn( ü_opts );
+    await whenTextEditorOpened( ü_some );
+    const ü_pid_9 = await commands.executeCommand<number>( CEXtnCommands.oActive );
+    testNotEqual( ü_pid_9, 0, 'Pid 9' );
+  //
     await whenDelay( 1000 );
   //
     let ü_pid:number
@@ -208,6 +227,8 @@ export async function tst_openInNpp(){
   } finally {
       await ß_setVDc( '%TEMP%' );
       await ß_setUse( false );
+      await ß_setExe( '' );
+      await ß_setSpn( ü_opts );
   }
 }
 

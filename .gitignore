@@ -2,8 +2,15 @@ node_modules/
 
 out/
 dist/
-etc/test/workspaceFolder/temp/
+
+etc/test/shadowRoot
+etc/test/virtual_1_j
+etc/test/virtual_1_d
+etc/test/virtual_2_d
+etc/test/virtual_3_d
+etc/test/virtual_4_d
+etc/test/virtual_5_d
+etc/test/virtual_6_d
 
 .vscode-test/
-.vscode-temp/
 *.vsix

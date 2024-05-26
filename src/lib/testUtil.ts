@@ -45,9 +45,8 @@
          const failurePrefix = failureSymbol + ' ';
          const      okPrefix =      okSymbol + ' ';
 //--------------------------------------------------------------------
-       //let ß_TestDirName = join( __dirname, '../../.vscode-temp' );
          const ß_options =
-           { dirName  : join( __dirname, '../../.vscode-temp' )
+           { dirName  : join( __dirname, '../../etc/test' )
            , withMocha: typeof( suite ) !== 'undefined'
                      && typeof( test  ) !== 'undefined'
            };
