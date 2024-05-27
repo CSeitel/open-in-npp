@@ -1,19 +1,13 @@
 # Change Log
 
-## [0.0.4] - 2019-11-03
-This is the initial release. 
-
-## [0.0.5] - 2019-11-14
+## [0.2.0] - 2024-05-27
 ### Added
-- editor context menu entry: `Open in Notepad++`
-- configuration option: `openInNpp.preserveCursorPosition`
 
-## [0.1.0] - 2019-11-27
-### Added
-- explorer context menu entry: `Open in Notepad++`
+- support for displaying [_Virtual Documents_](https://code.visualstudio.com/api/extension-guides/virtual-documents)
 - configuration options:
-  1. `openInNpp.extendExplorerContextMenu`
-  2. `openInNpp.extendEditorContextMenu`
+  1. `openInNpp.virtualDocumentsDirectory`
+  2. `openInNpp.virtualDocumentsFileReuse`
+  3. `openInNpp.developerTrace`
 
 ## [0.1.5] - 2020-06-02
 ### Added
@@ -29,11 +23,17 @@ This is the initial release.
   7. `openInNpp.filesInFolderPattern`
 - enablement of option `openInNpp.Executable` for consumption of path names containing windows environment variables
 
-## [0.2.0] - 2024-05-30
+## [0.1.0] - 2019-11-27
 ### Added
-
-- Handling of [_Virtual Documents_](https://code.visualstudio.com/api/extension-guides/virtual-documents)
+- explorer context menu entry: `Open in Notepad++`
 - configuration options:
-  1. `openInNpp.virtualDocumentsDirectory`
-  2. `openInNpp.virtualDocumentsFileReuse`
-  3. `openInNpp.developerTrace`
+  1. `openInNpp.extendExplorerContextMenu`
+  2. `openInNpp.extendEditorContextMenu`
+
+## [0.0.5] - 2019-11-14
+### Added
+- editor context menu entry: `Open in Notepad++`
+- configuration option: `openInNpp.preserveCursorPosition`
+
+## [0.0.4] - 2019-11-03
+This is the initial release. 

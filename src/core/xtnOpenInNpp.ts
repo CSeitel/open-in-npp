@@ -144,7 +144,7 @@ private async _whenActivationFinalized():Promise<this> {
 
 get version():number {
                const ü_main = this._version.split('.');
-                     ü_main.pop();
+                   //ü_main.pop();
     return parseInt( ü_main.join('') );
 }
 
