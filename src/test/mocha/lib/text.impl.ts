@@ -30,13 +30,16 @@
          , whenFileWritten
          , whenItemRenamed
          } from '../../../lib/fsUtil';
+  import { ß_stringify
+         } from '../../../lib/jsonUtil';
   import { testSrc
          , testEqual
          , testFunction
          , whenAsyncFunctionTested
          } from '../../../lib/testUtil';
 //====================================================================
-  export const tst_dispatch = asyncNullOperation;
+  export const tst_dispatch = !true ? asyncNullOperation
+                                    : tst_JSONLike2;
 //====================================================================
 
 export async function tst_expandEnvVariables(){
@@ -98,6 +101,61 @@ async function ö_whenRenamed( ü_char:string ):Promise<string> {
         await whenItemRenamed( ö_file, ü_file[1] );
                         return ö_file= ü_file[1]  ;
 }
+}
+
+//====================================================================
+
+export async function tst_JSONLike(){
+    const ü_date = new Date();
+    const ü_data =
+      [
+    //, [ undefined, 'undefined' ]
+        [ null     , 'null' ]
+      , [ ü_date   , `"${ ü_date.toISOString()}"` ]
+      , [ true     , 'true' ]
+      , [ -1       , '-1'   ]
+      , [ ''       , '""'   ]
+    //, [ '" \\ \n \r \t \v \b \f'   , '"\\" \\\\ \\n \\r \\t \\v \\b \\f"' ]
+      , [ '" \\ \n \r \t \v \b \f'   , '"\\" \\\\ \\n \\r \\t \\u000b \\b \\f"' ]
+     
+       
+
+      , [ '\x09'   , '"\\t"' ]
+      , [ '\x10'   , '"\\u0010"' ]
+      , [ '\u0010' , '"\\u0010"' ]
+      , [ '\u2260' , '"≠"' ]
+      , [ Boolean(), 'false' ]
+      , [ Number (), '0'     ]
+      , [ String (), '""'    ]
+      , [ {a:undefined}, '{}'         ]
+      , [ {a:null     }, '{"a":null}' ]
+      , [ {a:ü_date   }, `{"a":"${ ü_date.toISOString()}"}` ]
+      , [ {a:true     }, '{"a":true}' ]
+      , [ {a:-1       }, '{"a":-1}'   ]
+      ] as TOrderedPairs<any,string>;
+  //ü_data.splice( 0, ü_data.length - 1 );
+    const ö_array  = bindArguments( ß_stringify, { realFirst:true, arrangeBound:[1] },  true                   );
+  //
+    testFunction( JSON.stringify.bind( JSON ) , ü_data );
+    testFunction( ö_array                     , ü_data );
+}
+
+export async function tst_JSONLike2(){
+    const ü_ref_0 = {a0:true};
+    const ü_ref_1 = {a1:true,b1:ü_ref_0};
+    const ü_ref_2 = {a2:true,b2:ü_ref_1};
+          ü_ref_1.b1 = ü_ref_2 as any;
+    const ü_data =
+      [
+    //, [ ü_ref_0   , '{"a":true}' ]
+        [ {a:ü_ref_0,b:ü_ref_0}, '{"a":{"a0":true},"b":{"a0":true}}' ]
+      , [ {a:true,b:ü_ref_1,c:ü_ref_2}, '{"a":true,"b":{"a1":true,"b1":[*2]},"c":{"a0":true},"b1":[*2]}' ]
+      ] as TOrderedPairs<any,string>;
+    ü_data.splice( 0, ü_data.length - 1 );
+    const ö_array  = bindArguments( ß_stringify, { realFirst:true, arrangeBound:[1] },  true                   );
+  //
+    testFunction( JSON.stringify.bind( JSON ) , ü_data );
+    testFunction( ö_array                     , ü_data );
 }
 
 //====================================================================

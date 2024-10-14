@@ -19,12 +19,12 @@
         [ 'Single', [
                   //ß_array.tst_dispatch
                   //ß_async.tst_dispatch
-                    ß_error.tst_dispatch
+                  //ß_error.tst_dispatch
                   //ß_etc  .tst_dispatch
                   //ß_fs   .tst_dispatch
                   //ß_test .tst_dispatch
-                  //ß_text .tst_dispatch
-                 ].slice(0),  ß_skipTests ]
+                    ß_text .tst_dispatch
+                 ].slice(0), !ß_skipTests ]
       , [ 'Array' , ß_array,  ß_skipTests ]
       , [ 'Async' , ß_async,  ß_skipTests ]
       , [ 'Error' , ß_error,  ß_skipTests ]
