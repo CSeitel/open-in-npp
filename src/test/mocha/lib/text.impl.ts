@@ -39,7 +39,7 @@
          } from '../../../lib/testUtil';
 //====================================================================
   export const tst_dispatch = !true ? asyncNullOperation
-                                    : tst_JSONLike2;
+                                    : tst_JSONLike1;
 //====================================================================
 
 export async function tst_expandEnvVariables(){
@@ -105,7 +105,7 @@ async function ö_whenRenamed( ü_char:string ):Promise<string> {
 
 //====================================================================
 
-export async function tst_JSONLike(){
+export async function tst_JSONLike1(){
     const ü_date = new Date();
     const ü_data =
       [
@@ -123,6 +123,7 @@ export async function tst_JSONLike(){
       , [ '\x09'   , '"\\t"' ]
       , [ '\x10'   , '"\\u0010"' ]
       , [ '\u0010' , '"\\u0010"' ]
+      , [ '\ud834\udd1e', '"𝄞"' ]
       , [ '\u2260' , '"≠"' ]
       , [ Boolean(), 'false' ]
       , [ Number (), '0'     ]
@@ -143,15 +144,18 @@ export async function tst_JSONLike(){
 export async function tst_JSONLike2(){
     const ü_ref_0 = {a0:true};
     const ü_ref_1 = {a1:true,b1:ü_ref_0};
-    const ü_ref_2 = {a2:true,b2:ü_ref_1};
-          ü_ref_1.b1 = ü_ref_2 as any;
+    const ü_ref_2 = ü_ref_1.b1 = {a2:true,b2:ü_ref_1} as any;
+       // ü_ref_2 as any;
+    const ü_2 = '{"a":true,"b":<Ref *1>{"a1":true,"b1":{"a2":true,"b2":[ *1]}},"c":<Ref *2>{"a2":true,"b2":{"a1":true,"b1":[ *2]}}}'
+    const ü_3 = '{"a":true,"b":<Ref *1>{"a1":true,"b1":{"a2":true,"b2":[ *1]}},"c":<Ref *2>{"a2":true,"b2":{"a1":true,"b1":[ *2]}}}'
     const ü_data =
       [
     //, [ ü_ref_0   , '{"a":true}' ]
         [ {a:ü_ref_0,b:ü_ref_0}, '{"a":{"a0":true},"b":{"a0":true}}' ]
-      , [ {a:true,b:ü_ref_1,c:ü_ref_2}, '{"a":true,"b":{"a1":true,"b1":[*2]},"c":{"a0":true},"b1":[*2]}' ]
+      , [ {a:true,b:ü_ref_1,c:ü_ref_2}, ü_2 ]
       ] as TOrderedPairs<any,string>;
-    ü_data.splice( 0, ü_data.length - 1 );
+  //console.log( ü_data[0][0] );
+  //ü_data.splice( 0, ü_data.length - 1 );
     const ö_array  = bindArguments( ß_stringify, { realFirst:true, arrangeBound:[1] },  true                   );
   //
     testFunction( JSON.stringify.bind( JSON ) , ü_data );
@@ -160,4 +164,12 @@ export async function tst_JSONLike2(){
 
 //====================================================================
 /*
+{
+  a: true,
+  b: <ref *1> { a1: true, b1: { a2: true, b2: [Circular *1] } }, 
+  c: <ref *2> {
+    a2: true,
+    b2: <ref *1> { a1: true, b1: [Circular *2] }
+  }
+}
 */

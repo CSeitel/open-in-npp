@@ -6,10 +6,10 @@
   const ß_specialChars = /["\\\x00-\x1f\x7f-\x9f]/g;
   const    json_escape = /[\x00-\x1f"\\\x7f-\x9f]/g;
 //--------------------------------------------------------------------
-  const CRecursionRef = {indx:0};
-  const ß_refs = [] as any   [];
+  const CRecursionRef = {posn:0};
+  const ß_allRefs = [] as any   [];
   const ß_posn = [] as number[];
-  const ß_hits = [] as number[];
+  const ß_hits  = [] as number[];
     let ß_frmt = true;
     let ß_indx:number
 //--------------------------------------------------------------------
@@ -19,18 +19,18 @@ export function ß_stringify( ü_data:any, ü_asJSON = false ):string|void {
   //
     if ( ü_data === undefined ) { return undefined; }
   //
-    ß_refs.length = 0;
-    ß_posn.length = 0;
-    ß_hits.length = 0;
+    ß_allRefs.length = 0;
+    ß_posn   .length = 0;
+    ß_hits   .length = 0;
     ß_frmt = ! ü_asJSON;
     ß_indx = -1;
     let ü_done = ß_stringify_I( ü_data );
   //
-    let ü_offset = 0;
-    ß_hits.forEach(function(ü_hit){
-        const ü_def = `<Ref *${ ü_hit }>`;
-        const ü_at  = ß_posn[ ü_hit ] + ü_offset;
-                                        ü_offset += ü_def.length;
+    let ö_offset = 0;
+    ß_hits.forEach(function(ü_posn,ü_indx){
+        const ü_def = `<Ref *${ ü_indx+1 }>`;
+        const ü_at  = ü_posn + ö_offset;
+                               ö_offset += ü_def.length;
         ü_done = ü_done.slice( 0, ü_at )
                + ü_def
                + ü_done.slice( ü_at )
@@ -42,9 +42,10 @@ export function ß_stringify( ü_data:any, ü_asJSON = false ):string|void {
 }
 
 function ß_stringify_I( ü_data:any ):string {
+    let ü_indx = -1;
   //
     switch ( typeof( ü_data ) ) {
-      case 'undefined':        CRecursionRef.indx = -1;     throw CRecursionRef;
+      case 'undefined':        CRecursionRef.posn = -1;     throw CRecursionRef;
       case 'boolean'  :
       case 'number'   :                                    return                 ü_data.toString();
       case 'string'   :                                    return ß_toJSONString( ü_data );
@@ -53,14 +54,27 @@ function ß_stringify_I( ü_data:any ):string {
                           || ü_data instanceof Number  ) { return                 ü_data.toString(); }
                    else if ( ü_data instanceof String  ) { return ß_toJSONString( ü_data );          }
                    else if ( ü_data instanceof Date    ) { return ß_toISOString ( ü_data );          }
-                   else if ( (CRecursionRef.indx = ß_refs.indexOf( ü_data )) > -1 ) { throw CRecursionRef; }
-                   else {    ß_refs.push( ü_data );
-                             ß_posn.push( ++ ß_indx );
-                        const ü_done =  Array.isArray( ü_data ) ? ß_fromArray ( ü_data )
-                                                                : ß_fromObject( ü_data )
-                                                                ;
-                      //ß_refs.pop()
-                        return ü_done;
+                   else if (
+                            //ß_stack  .indexOf( ü_data ) > -1
+                             (ü_indx = ß_allRefs.indexOf( ü_data )) > -1
+                      ) {
+                         ß_hits.push( ß_posn[ ü_indx ] );
+                         CRecursionRef.posn = ß_hits.length;
+                         throw CRecursionRef; }
+                   else {
+                      
+                    //ß_stack  .push( ü_data );
+                      ß_allRefs.push( ü_data );
+                      ß_posn   .push( ++ ß_indx );
+                      const ü_done =  Array.isArray( ü_data ) ? ß_fromArray ( ü_data )
+                                                              : ß_fromObject( ü_data )
+                                                              ;
+                    //ß_stack  .pop();
+                      ß_allRefs.pop();
+                      ß_posn   .pop();
+                      ß_indx -= ü_done.length;
+                    //ß_indx -- ;
+                      return ü_done;
                             
                    }
       case 'function' :
@@ -86,12 +100,11 @@ function ß_fromObject( ü_data:object ):string {
         
       } catch ( ü_eX ) {
         if ( ü_eX === CRecursionRef ) {
-          if ( CRecursionRef.indx < 0 ) { // skip undefined
+          if ( CRecursionRef.posn < 0 ) { // skip undefined
               ß_indx -= ü_start.length;
               continue;
           }
-          ü_json = `[ *${ CRecursionRef.indx }]`;
-          ß_hits.push( CRecursionRef.indx );
+          ü_json = `[ *${ CRecursionRef.posn }]`;
         //continue;
         } else {
           throw ü_eX;
