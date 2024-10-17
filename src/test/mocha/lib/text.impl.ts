@@ -30,7 +30,8 @@
          , whenFileWritten
          , whenItemRenamed
          } from '../../../lib/fsUtil';
-  import { ß_stringify
+  import { echoAsJSON
+         , echoAsString
          } from '../../../lib/jsonUtil';
   import { testSrc
          , testEqual
@@ -39,7 +40,8 @@
          } from '../../../lib/testUtil';
 //====================================================================
   export const tst_dispatch = !true ? asyncNullOperation
-                                    : tst_JSONLike1;
+                                    : tst_JSONLike2;
+  const ß_JSON_stringify = JSON.stringify.bind( JSON ) as ()=>string|void;
 //====================================================================
 
 export async function tst_expandEnvVariables(){
@@ -133,33 +135,51 @@ export async function tst_JSONLike1(){
       , [ {a:ü_date   }, `{"a":"${ ü_date.toISOString()}"}` ]
       , [ {a:true     }, '{"a":true}' ]
       , [ {a:-1       }, '{"a":-1}'   ]
+      , [ {a:[]       }, '{"a":[]}'   ]
+      , [ [undefined,null,false,-1], '[null,null,false,-1]' ]
       ] as TOrderedPairs<any,string>;
   //ü_data.splice( 0, ü_data.length - 1 );
-    const ö_array  = bindArguments( ß_stringify, { realFirst:true, arrangeBound:[1] },  true                   );
+    const ö_array  = bindArguments( echoAsJSON, { realFirst:true, arrangeBound:[1] },  true                   );
   //
-    testFunction( JSON.stringify.bind( JSON ) , ü_data );
-    testFunction( ö_array                     , ü_data );
+    testFunction( ß_JSON_stringify, ü_data );
+    testFunction( echoAsJSON      , ü_data );
 }
 
 export async function tst_JSONLike2(){
     const ü_ref_0 = {a0:true};
     const ü_ref_1 = {a1:true,b1:ü_ref_0};
     const ü_ref_2 = ü_ref_1.b1 = {a2:true,b2:ü_ref_1} as any;
+    const ü_ref_4 = [1,{a4:[] }] as any[];
+          ü_ref_4[1].a4 = ü_ref_4;
+    const ü_ref_3 = {a3:true} as any;
+          ü_ref_3.a = ü_ref_3.b = ü_ref_3;
        // ü_ref_2 as any;
-    const ü_2 = '{"a":true,"b":<Ref *1>{"a1":true,"b1":{"a2":true,"b2":[ *1]}},"c":<Ref *2>{"a2":true,"b2":{"a1":true,"b1":[ *2]}}}'
-    const ü_3 = '{"a":true,"b":<Ref *1>{"a1":true,"b1":{"a2":true,"b2":[ *1]}},"c":<Ref *2>{"a2":true,"b2":{"a1":true,"b1":[ *2]}}}'
+    const ü_2 = '{a:true,b:<*1>{a1:true,b1:{a2:true,b2:(#1)}},c:<*2>{a2:true,b2:{a1:true,b1:(#2)}}}'
+
     const ü_data =
       [
     //, [ ü_ref_0   , '{"a":true}' ]
-        [ {a:ü_ref_0,b:ü_ref_0}, '{"a":{"a0":true},"b":{"a0":true}}' ]
+        [ {a:ü_ref_0,b:ü_ref_0}, '{a:{a0:true},b:{a0:true}}' ]
       , [ {a:true,b:ü_ref_1,c:ü_ref_2}, ü_2 ]
+      , [ ü_ref_3, '<*1>{a3:true,b:(#1),a:(#1)}' ]
+      , [ ü_ref_4, '<*1>[1,{a4:(#1)}]' ]
       ] as TOrderedPairs<any,string>;
-  //console.log( ü_data[0][0] );
-  //ü_data.splice( 0, ü_data.length - 1 );
-    const ö_array  = bindArguments( ß_stringify, { realFirst:true, arrangeBound:[1] },  true                   );
+    console.log( ü_ref_3 );
+    const echoAsStringExp = bindArguments( echoAsString, { realFirst:true, arrangeBound:[1] }, true );
+    testFunction( echoAsString   , ü_data );
+    testFunction( echoAsStringExp, ü_data );
   //
-    testFunction( JSON.stringify.bind( JSON ) , ü_data );
-    testFunction( ö_array                     , ü_data );
+    ü_data.forEach( ü_row => { ü_row[1] = 'Recursion' } );
+    ü_data.splice( 0, ü_data.length - 1 );
+  //
+    testFunction( ß_JSON_stringify, ü_data, ö_expectRecursion );
+    testFunction( echoAsJSON      , ü_data, ö_expectRecursion );
+function ö_expectRecursion( ü_x:any, ü_eX:any, ü_x_y:[any,string|void] ):string|void {
+  //console.log( ü_eX )
+    return ü_eX instanceof TypeError && ü_eX.message.startsWith( 'Converting circular structure to JSON' )
+         ? 'Recursion'
+         : ` ${ ü_eX }`;
+}
 }
 
 //====================================================================
