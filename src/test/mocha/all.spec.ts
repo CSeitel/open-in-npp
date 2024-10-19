@@ -1,7 +1,7 @@
 /*
 */
-  import { ß_writeStdOut
-         } from '../../runtime/context';
+  import { join
+         } from 'path';
   import { whenAllTestsRun
          } from '../../lib/testUtil';
 //--------------------------------------------------------------------
@@ -32,7 +32,10 @@
       , [ 'Fs'    , ß_fs   ,  ß_skipTests ]
       , [ 'Test'  , ß_test ,  ß_skipTests ]
       , [ 'Text'  , ß_text ,  ß_skipTests ]
-      ]);
+      ], { resourceDirName: join( __dirname, '../../../etc/test' )
+       //, summaryOnly: true
+         }
+      );
 
 //====================================================================
 /*

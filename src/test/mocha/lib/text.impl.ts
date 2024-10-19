@@ -159,6 +159,8 @@ export async function tst_JSONLike1(){
 }
 
 export async function tst_JSONLike2(){
+    ß_trc &&ß_trc( testSrc( 'abc' ) );
+  //
     const echoAsStringExp = bindArguments( echoAsString, { realFirst:true, arrangeBound:[1] }, true );
     const ü_code = tst_JSONLike2.toString().slice(0,20);
   //

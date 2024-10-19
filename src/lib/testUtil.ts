@@ -38,12 +38,6 @@
   const successPrefix    = CEResultSymbol.success    + ' ';
   const    failurePrefix = CEResultSymbol.failure    + ' ';
 //--------------------------------------------------------------------
-         const ß_options =
-           { dirName  : join( __dirname, '../../etc/test' )
-           , withMocha: typeof( suite ) !== 'undefined'
-                     && typeof( test  ) !== 'undefined'
-           };
-//--------------------------------------------------------------------
   type TManMsg = string|undefined
   type TOptMsg = string
 //const ß_escape = escapeFF( CRgXp.specialChars );
@@ -71,19 +65,24 @@
     , cond_f2   : (ü_msg   :TManMsg,ü_icon :string
                   ,ü_act   :string ,ü_exp  :string)=> failurePrefix+`${ ü_act } ${ ü_icon } ${ ü_exp } for ${ ü_msg||CEEmptyStringSymbol }`
     };
+//--------------------------------------------------------------------
+//====================================================================
+  const ß_defaultOpts:TTestOptions =
+           { resourceDirName: join( __dirname, '../../' )
+           , withMocha: typeof( suite ) !== 'undefined'
+                     && typeof( test  ) !== 'undefined'
+           , summaryOnly: false
+           };
+  let ß_runtimeOpts:Readonly<TTestOptions>// = null as any as TTestOptions;
 //====================================================================
 
 function ß_echo( ü_oref:any, ü_length:number ):string {
     return shortenText( echoAsString( ü_oref ), ü_length );
 }
 
-export function testSrc( ...ü_segs:string[] ):string {
-    return join( ß_options.dirName, ...ü_segs );
-}
-
 //====================================================================
 
-export function expandTestSuite( ü_suite:TTestSuiteDefinition ):void {
+function ß_expandTestSuite( ü_suite:TTestSuiteDefinition ):void {
                if ( ü_suite[2] ) { return; }
     const ö_tests = ü_suite[1];
              suite( ü_suite[0], ö_expandTests );
@@ -113,10 +112,17 @@ function ö_whenTested(){
 
 //====================================================================
 
-export function whenAllTestsRun( ü_suites:TTestSuites, ü_opts:TTestOptions = ß_options ):PromiseLike<TTestSummary> {
+export function testSrc( ...ü_segs:string[] ):string {
+    return join( ß_runtimeOpts.resourceDirName, ...ü_segs );
+}
+
+export function whenAllTestsRun( ü_suites:TTestSuites, ü_opts?:Partial<TTestOptions> ):PromiseLike<TTestSummary> {
+    ß_runtimeOpts = ü_opts === undefined
+                  ?                    ß_defaultOpts
+                  : Object.assign( {}, ß_defaultOpts, ü_opts );
   //
-    if ( ü_opts.withMocha ) {
-        ü_suites.forEach( expandTestSuite );
+    if ( ß_runtimeOpts.withMocha ) {
+        ü_suites.forEach( ß_expandTestSuite );
         return Promise.resolve({ all:-1, failed:-1 });
     }
   //
@@ -136,7 +142,7 @@ function ö_fulfilled( ü_sum:TTestSummary ):TTestSummary {
                  ? LCHeader.SUM_ERR( ü_sum.all, ü_sum.failed, Math.round( ( 1 - ü_sum.failed / ü_sum.all ) * 100 ) )
                  : LCHeader.SUM_OK ( ü_sum.all )
                  );
-    if ( ! ü_opts.withMocha ) {
+    if ( ! ß_runtimeOpts.withMocha ) {
         ß_trc&& ß_trc( ü_sum, 'Test-Summary-Exit' );
       //process.exitCode = ü_sum.failed  ;
         process.exit     ( ü_sum.failed );
@@ -147,6 +153,8 @@ function ö_rejected( ü_reason:any ):never {
     throw ü_reason;
 }
 }
+
+//--------------------------------------------------------------------
 
 function ß_whenTestSuite( ü_sum:TTestSummary, ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):PromiseLike<TTestSummary> {
   //
@@ -192,15 +200,20 @@ function ä_whenTested( ö_sum:TTestSummary ):PromiseLike<TTestSummary> {
   //
 }
 
-//--------------------------------------------------------------------
+//====================================================================
 
 export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummary {
-    const ü_crlf    = ß_RuntimeContext.lineSep;
-    const ü_results = CSeriesOfTests.slice(0);
+    const ü_results = CSeriesOfTests;
+    const ü_all     = ü_results.length;
+    const ü_success = ü_results.filter( ü_test => ü_test.startsWith( CEResultSymbol.success ) );
+    const ü_output  = ß_runtimeOpts.summaryOnly
+                    ? []
+                    : CSeriesOfTests.slice(0)
+                    ;
                       CSeriesOfTests.length = 0;
+  //
       let ü_head:string
       let ü_throwErrorText = '';
-    const ü_all     = ü_results.length;
     const ü_sum:TTestSummary =
       { all   : ü_all
       , failed: 0
@@ -208,7 +221,6 @@ export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummar
     if ( ü_all === 0 ) {
         ü_head = LCHeader.TEST_0( ü_testName );
     } else {
-        const ü_success = ü_results.filter( ü_test => ü_test.startsWith( CEResultSymbol.success ) );
         const ü_ok      = ü_success.length;
         if ( ü_all > ü_ok ) {
                                                ü_sum.failed = ü_all - ü_ok;
@@ -218,9 +230,10 @@ export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummar
         }
     }
   //
-                    ü_results.unshift( ü_head );
-                    ü_results.push   ( ''     );
-    ß_writeStdOut(  ü_results.join( ü_crlf )  );
+                    ü_output.unshift( ü_head );
+                    ü_output.push   ( ''     );
+                              const ü_crlf = ß_RuntimeContext.lineSep;
+    ß_writeStdOut(  ü_output.join( ü_crlf )  );
   //
     if ( ü_throwErrorText.length > 0 ) { throw new Error( ü_throwErrorText ); }
     return ü_sum;

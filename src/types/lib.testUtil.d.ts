@@ -22,8 +22,9 @@
     }
 
   export type TTestOptions = {
-      dirName  ?:string
-      withMocha :boolean
+      resourceDirName :string
+      withMocha       :boolean
+      summaryOnly     :boolean
     }
 
 //====================================================================
