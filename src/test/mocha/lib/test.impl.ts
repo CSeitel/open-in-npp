@@ -8,7 +8,6 @@
          } from '../../../types/generic.d';
 //--------------------------------------------------------------------
   import { ß_trc
-         , ß_stringify
          } from '../../../runtime/context';
   import { includes
          } from '../../../lib/arrayUtil';
@@ -38,6 +37,9 @@ function tst_asyncLike():PromiseLike<void> {
 //====================================================================
 
 export async function tst_bindArguments(){
+function ß_stringify( ü_data:any ):string {
+    return ''+ü_data;
+}
   //const ö_whenMapped = bindArguments( whenPromiseMapped<number,string>, { realFirst:true }, parseInt );
   //const ö_whenMapped = bindAppending( whenPromiseMapped<number,string>                    , ß_stringify );
     const ü_whenStringified = createAsyncPostProcessor( ß_stringify );

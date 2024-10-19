@@ -43,7 +43,7 @@ function ß_implement( ü_rtCntxt:TInitialRuntimeContext ):IRuntimeContext {
 export const ß_trc:TDeveloperTrace|false = ß_that.devTrace;
 export const ß_err:TDeveloperTrace       = ß_that.errTrace;
 
-export function ß_stringify( ü_oref:any ):string {
+function _stringify( ü_oref:any ):string {
   //return format( '%o', ü_oref );
     return format(       ü_oref );
 }

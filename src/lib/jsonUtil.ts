@@ -181,8 +181,8 @@ export function echoAsJSON( ü_data:any ):string|void {
     return new AsText( ü_data, true ).outputString;
 }
 
-export function echoAsString( ü_data:any, ü_expanded = false ):string|void {
-    return new AsText( ü_data, false, ü_expanded ).outputString;
+export function echoAsString( ü_data:any, ü_expanded = false ):string {
+    return new AsText( ü_data, false, ü_expanded ).outputString!;
 }
 
 //====================================================================

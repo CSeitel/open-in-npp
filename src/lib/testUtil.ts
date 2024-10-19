@@ -12,17 +12,16 @@
          , type TTestSuites
          , type TTestSuiteDefinition
          } from '../types/lib.testUtil.d';
-  import { successSymbol
-         , failureSymbol
+  import { CEResultSymbol
          , CECheckIcon
-         } from '../constants/test';
+         , CEEmptyStringSymbol
+         } from '../constants/testUtil';
 //--------------------------------------------------------------------
   import { join
          } from 'path';
   import { ß_trc
          , ß_RuntimeContext
          , ß_writeStdOut
-         , ß_stringify
          } from '../runtime/context';
   import { toOrderedPair
          } from './arrayUtil';
@@ -30,20 +29,14 @@
          } from './objectUtil';
   import { shortenText
          } from './textUtil';
+  import { echoAsString
+         } from './jsonUtil';
 //--------------------------------------------------------------------
-         const okSymbol          = '\u2714'      ;//String.fromCharCode( 0x2714 );
-         const undefinedSymbol   = '\ufffd '     ;//String.fromCharCode( 0xfffd )+' ';
-         const emptyStringSymboL = '\u2036\u2033';//String.fromCharCode( 0xff02 );
-         const emptyStringSymbOl = '\u2035\u2032';//String.fromCharCode( 0xff02 );
-         const emptyStringSymbol = '\u201e\u2033';//String.fromCharCode( 0xff02 );
-
-         const ß_whiteSquare = String.fromCharCode( 0x25a1 );
-         const ß_pilcrow     = String.fromCharCode( 0x00ba );
-         const latinEpigraphicLetterReversedP = String.fromCharCode(0xa7fc);
-//--------------------------------------------------------------------
-         const successPrefix = successSymbol + ' ';
-         const failurePrefix = failureSymbol + ' ';
-         const      okPrefix =      okSymbol + ' ';
+  const       nonePrefix = CEResultSymbol.none       + ' ';
+  const successfulPrefix = CEResultSymbol.successful + ' ';
+  const    failingPrefix = CEResultSymbol.failing    + ' ';
+  const successPrefix    = CEResultSymbol.success    + ' ';
+  const    failurePrefix = CEResultSymbol.failure    + ' ';
 //--------------------------------------------------------------------
          const ß_options =
            { dirName  : join( __dirname, '../../etc/test' )
@@ -51,36 +44,37 @@
                      && typeof( test  ) !== 'undefined'
            };
 //--------------------------------------------------------------------
+  type TManMsg = string|undefined
+  type TOptMsg = string
 //const ß_escape = escapeFF( CRgXp.specialChars );
   const CSeriesOfTests = [] as TTestResult[];
   const LCHeader =
-    { should    : (ü_msg   :string               )=> successPrefix+`Should have happened: ${ ü_msg }`
-    , shouldNot : (ü_msg   :string               )=> failurePrefix+`Should not have happened: ${ ü_msg }`
-    , noError   : (ü_msg   :string,ü_err  :string)=> failurePrefix+`For \`\`${ ü_msg }\`\` an exception has occurred: ${ ü_err }`
-    , never     : (ü_msg   :string               )=> failurePrefix+`Shouldn't have been reached: ${ ü_msg }`
-    , REJECTED_0: (ü_msg   :string,ü_val  :string)=> `No rejection for \`\`${ ü_msg }\`\` due to result: ${ ü_val }`
-    , REJECTED_1: (ü_msg   :string,ü_err  :string)=> `Rejection for '${ ü_msg }' due to '${ ü_err }'`
-    , TEST_0    : (ü_test  :string               )=>      okPrefix+`Result of "${ ü_test }": Test contains no checks.`
-    , TEST_OK   : (ü_test  :string,ü_all  :number)=>      okPrefix+`Result of "${ ü_test }": ${ ü_all    } checks have been passed successfully.`
-    , TEST_ERR  : (ü_test  :string,ü_all  :number
-                  ,ü_failed:number,ü_ratio:number)=> failurePrefix+`Result of "${ ü_test }": ${ ü_failed } (out of ${ ü_all }) checks have failed. Success-ratio: ${  ü_ratio }%`
-    , SUM_OK    : (ü_all   :number               )=>      okPrefix+`Overall test result: ${ ü_all    } tests have been passed successfully.`
+    { should    : (ü_msg   :TManMsg               )=> successPrefix+`Should have happened: ${ ü_msg||CEEmptyStringSymbol }`
+    , shouldNot : (ü_msg   :TManMsg               )=> failurePrefix+`Should not have happened: ${ ü_msg||CEEmptyStringSymbol }`
+    , noError   : (ü_msg   :TManMsg,ü_err  :string)=> failurePrefix+`For \`\`${ ü_msg||CEEmptyStringSymbol }\`\` an exception has occurred: ${ ü_err }`
+    , never     : (ü_msg   :TManMsg               )=> failurePrefix+`Shouldn't have been reached: ${ ü_msg||CEEmptyStringSymbol }`
+    , REJECTED_0: (ü_msg   :TManMsg,ü_val  :string)=> `No rejection for \`\`${ ü_msg||CEEmptyStringSymbol }\`\` due to result: ${ ü_val }`
+    , REJECTED_1: (ü_msg   :TManMsg,ü_err  :string)=> `Rejection for '${ ü_msg||CEEmptyStringSymbol }' due to '${ ü_err }'`
+    , TEST_0    : (ü_test  :string                )=>       nonePrefix+`Result of "${ ü_test }": Test contains no checks.`
+    , TEST_OK   : (ü_test  :string ,ü_all  :number)=> successfulPrefix+`Result of "${ ü_test }": ${ ü_all    } checks have been passed successfully.`
+    , TEST_ERR  : (ü_test  :string ,ü_all  :number
+                  ,ü_failed:number ,ü_ratio:number)=> failingPrefix   +`Result of "${ ü_test }": ${ ü_failed } (out of ${ ü_all }) checks have failed. Success-ratio: ${  ü_ratio }%`
+    , SUM_OK    : (ü_all   :number                )=> successfulPrefix+`Overall test result: ${ ü_all    } tests have been passed successfully.`
     , SUM_ERR   : (ü_all   :number
-                  ,ü_failed:number,ü_ratio:number)=> failurePrefix+`Overall test result: ${ ü_failed } (out of ${ ü_all }) tests have failed. Success-ratio: ${  ü_ratio }%`
-    , cond_s1   : (ü_msg   :string,ü_icon :string
-                  ,ü_both  :string               )=> successPrefix+`${ ü_icon } ${ ü_both } for ${ ü_msg }`
-    , cond_f1   : (ü_msg   :string,ü_icon :string
-                  ,ü_both  :string               )=> failurePrefix+`${ ü_icon } ${ ü_both } for ${ ü_msg }`
-    , cond_s2   : (ü_msg   :string,ü_icon :string
-                  ,ü_act   :string,ü_exp  :string)=> successPrefix+`${ ü_act } ${ ü_icon } ${ ü_exp } for ${ ü_msg }`
-    , cond_f2   : (ü_msg   :string,ü_icon :string
-                  ,ü_act   :string,ü_exp  :string)=> failurePrefix+`${ ü_act } ${ ü_icon } ${ ü_exp } for ${ ü_msg }`
+                  ,ü_failed:number ,ü_ratio:number)=> failingPrefix   +`Overall test result: ${ ü_failed } (out of ${ ü_all }) tests have failed. Success-ratio: ${  ü_ratio }%`
+    , cond_s1   : (ü_msg   :TManMsg,ü_icon :string
+                  ,ü_both  :string                )=> successPrefix+`${ ü_icon } ${ ü_both } for ${ ü_msg||CEEmptyStringSymbol }`
+    , cond_f1   : (ü_msg   :TManMsg,ü_icon :string
+                  ,ü_both  :string                )=> failurePrefix+`${ ü_icon } ${ ü_both } for ${ ü_msg||CEEmptyStringSymbol }`
+    , cond_s2   : (ü_msg   :TManMsg,ü_icon :string
+                  ,ü_act   :string ,ü_exp  :string)=> successPrefix+`${ ü_act } ${ ü_icon } ${ ü_exp } for ${ ü_msg||CEEmptyStringSymbol }`
+    , cond_f2   : (ü_msg   :TManMsg,ü_icon :string
+                  ,ü_act   :string ,ü_exp  :string)=> failurePrefix+`${ ü_act } ${ ü_icon } ${ ü_exp } for ${ ü_msg||CEEmptyStringSymbol }`
     };
 //====================================================================
 
 function ß_echo( ü_oref:any, ü_length:number ):string {
-    const ü_json = JSON.stringify( ß_stringify( ü_oref ) );
-    return shortenText( ü_json.slice( 1, ü_json.length-1 ), ü_length );
+    return shortenText( echoAsString( ü_oref ), ü_length );
 }
 
 export function testSrc( ...ü_segs:string[] ):string {
@@ -214,7 +208,7 @@ export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummar
     if ( ü_all === 0 ) {
         ü_head = LCHeader.TEST_0( ü_testName );
     } else {
-        const ü_success = ü_results.filter( ü_test => ü_test.startsWith( successSymbol ) );
+        const ü_success = ü_results.filter( ü_test => ü_test.startsWith( CEResultSymbol.success ) );
         const ü_ok      = ü_success.length;
         if ( ü_all > ü_ok ) {
                                                ü_sum.failed = ü_all - ü_ok;
@@ -234,15 +228,15 @@ export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummar
 
 //====================================================================
 
-export function testShould   ( ü_message = undefinedSymbol ):true  { CSeriesOfTests.push(  LCHeader.should   ( ü_message ) ); return true ; }
-//port function testShouldNot( ü_message = undefinedSymbol ):false { CSeriesOfTests.push(  LCHeader.shouldNot( ü_message ) ); return false; }
-export function testNever    ( ü_message = undefinedSymbol ):false { CSeriesOfTests.push(  LCHeader.never    ( ü_message ) ); return false; }
-export function testNoError( ü_reason:any, ü_message = undefinedSymbol ):false {
+export function testShould   (               ü_message ?:TOptMsg ):true  { CSeriesOfTests.push(  LCHeader.should   ( ü_message ) ); return true ; }
+//port function testShouldNot(               ü_message ?:TOptMsg ):false { CSeriesOfTests.push(  LCHeader.shouldNot( ü_message ) ); return false; }
+export function testNever    (               ü_message ?:TOptMsg ):false { CSeriesOfTests.push(  LCHeader.never    ( ü_message ) ); return false; }
+export function testNoError  ( ü_reason:any, ü_message ?:TOptMsg ):false {
     CSeriesOfTests.push(  LCHeader.noError( ü_message, ß_echo( ü_reason, 256 ) )  );
     return false;
 }
 
-export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ö_message = undefinedSymbol, ü_expectError?:( ü_reason:any )=>boolean ):PromiseLike<boolean> {
+export function testRejected<T=any>( ü_whenDone:PromiseLike<T>, ö_message?:TOptMsg, ü_expectError?:( ü_reason:any )=>boolean ):PromiseLike<boolean> {
     const ö_xErr =                                                    ü_expectError === undefined
                  ? function( ü_reason:any ) {                  return                ü_reason instanceof Error;   }
                  : function( ü_reason:any ) { try            { return ü_expectError( ü_reason )               ; }
@@ -263,20 +257,20 @@ function ö_onRejected( ü_reason:any ):boolean {
 }
 }
 
-export function testEqual   <T=any>( ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean { return ß_testCondition<T>( ü_act === ü_exp, CECheckIcon.   equal, ü_act, ü_exp, ü_message ); }
-export function testNotEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean { return ß_testCondition<T>( ü_act !== ü_exp, CECheckIcon.notEqual, ü_act, ü_exp, ü_message ); }
+export function testEqual   <T=any>( ü_act:unknown, ü_exp:T, ü_message?:TOptMsg ):boolean { return ß_testCondition<T>( ü_act === ü_exp, CECheckIcon.   equal, ü_act, ü_exp, ü_message ); }
+export function testNotEqual<T=any>( ü_act:unknown, ü_exp:T, ü_message?:TOptMsg ):boolean { return ß_testCondition<T>( ü_act !== ü_exp, CECheckIcon.notEqual, ü_act, ü_exp, ü_message ); }
 
-function ß_testCondition<T=any>( ü_cond:boolean, ü_icon:CECheckIcon, ü_act:unknown, ü_exp:T, ü_message = undefinedSymbol ):boolean {
+function ß_testCondition<T=any>( ü_cond:boolean, ü_icon:CECheckIcon, ü_act:unknown, ü_exp:T, ü_message:TManMsg ):boolean {
     switch ( ü_icon ) {
       case CECheckIcon.equal   :
-          CSeriesOfTests.push(  ü_cond ? LCHeader.cond_s1( ü_message, ü_icon, ß_echo( ü_act, 50 ) || emptyStringSymbol )
-                                       : LCHeader.cond_f2( ü_message, ü_icon, ß_echo( ü_act, 50 ) || emptyStringSymbol
-                                                                            , ß_echo( ü_exp, 50 ) || emptyStringSymbol )
+          CSeriesOfTests.push(  ü_cond ? LCHeader.cond_s1( ü_message, ü_icon, ß_echo( ü_act, 50 )  )
+                                       : LCHeader.cond_f2( ü_message, ü_icon, ß_echo( ü_act, 50 ) //
+                                                                            , ß_echo( ü_exp, 50 )  )
                              ); break;
       case CECheckIcon.notEqual:
-          CSeriesOfTests.push( !ü_cond ? LCHeader.cond_f1( ü_message, ü_icon, ß_echo( ü_act, 50 ) || emptyStringSymbol )
-                                       : LCHeader.cond_s2( ü_message, ü_icon, ß_echo( ü_act, 50 ) || emptyStringSymbol
-                                                                            , ß_echo( ü_exp, 50 ) || emptyStringSymbol )
+          CSeriesOfTests.push( !ü_cond ? LCHeader.cond_f1( ü_message, ü_icon, ß_echo( ü_act, 50 )  )
+                                       : LCHeader.cond_s2( ü_message, ü_icon, ß_echo( ü_act, 50 ) //
+                                                                            , ß_echo( ü_exp, 50 )  )
                              ); break;
     }
     return ü_cond;
@@ -339,7 +333,7 @@ export function whenAsyncFunctionTested<Tx,Ty>( ö_aFref:TAsyncFunctionSingleArg
       let ö_whenDone = Promise.resolve();
     ö_expData.forEach(
 function( ä_x_y, ä_indx ){
-        const ä_count = `${ ö_name }-${ ä_indx }(${ ß_echo( ä_x_y[0], 50 ) || emptyStringSymbOl })`;
+        const ä_count = `${ ö_name }-${ ä_indx }(${ ß_echo( ä_x_y[0], 50 )  })`;
         const ä_x     = ä_x_y[0];
         const ä_exp_y = ä_x_y[1];
              let ü_whenDone = ö_whenDone.then( function(){  return ö_aFref( ä_x );  });

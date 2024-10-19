@@ -9,9 +9,8 @@ https://code.visualstudio.com/api/working-with-extensions/testing-extension
          , ß_err
          , ß_RuntimeContext
          } from '../../runtime/context';
-  import { failureSymbol
-         , successSymbol
-         } from '../../constants/test';
+  import { CEResultSymbol
+         } from '../../constants/testUtil';
 //--------------------------------------------------------------------
   main();
 //====================================================================
@@ -31,12 +30,12 @@ async function main():Promise<void> {
                ß_trc&& ß_trc( ü_opts, 'ExtensionTest-Options' );
         const ü_rc = await whenVscTestsRun( ü_opts );
         if ( ü_rc > 0 )
-             { ß_trc&& ß_trc( failureSymbol, 'ExtensionTest-Result'    ); } // never ? (ends up in catch)
-        else { ß_trc&& ß_trc( successSymbol, 'ExtensionTest-Result'    ); }
+             { ß_trc&& ß_trc( CEResultSymbol.failure, 'ExtensionTest-Result'    ); } // never ? (ends up in catch)
+        else { ß_trc&& ß_trc( CEResultSymbol.success, 'ExtensionTest-Result'    ); }
 
     } catch ( ü_eX ) {
         if ( ü_eX === 'Failed' )
-             { ß_trc&& ß_trc( failureSymbol, 'ExtensionTest-Result'    ); }
+             { ß_trc&& ß_trc( CEResultSymbol.failure, 'ExtensionTest-Result'    ); }
         else {         ß_err( ü_eX         , 'ExtensionTest-Exception' ); }
         
         process.exit( ß_RuntimeContext.fatalExitCode );

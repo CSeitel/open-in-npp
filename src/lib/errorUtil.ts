@@ -12,8 +12,9 @@
          , CEUiXText
          } from '../constants/error';
 //--------------------------------------------------------------------
+  import { format as ß_stringify
+         } from 'util';
   import { ß_RuntimeContext
-         , ß_stringify
          } from '../runtime/context';
   import { isDirectInstanceOf
          } from '../lib/objectUtil';

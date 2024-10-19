@@ -17,7 +17,6 @@
 //--------------------------------------------------------------------
   import { ß_trc
          , ß_err
-         , ß_stringify
          } from '../runtime/context';
   import { ErrorWithUixMessage
          , UiXMessage
