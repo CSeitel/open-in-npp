@@ -33,9 +33,11 @@ constructor(
     if ( this._likeJSON ) {
          this._skipQuotes = false; // always quote
          this._expanded   = true;
+    //
+      if (         inputData   === undefined
+        || typeof( inputData ) === 'function'
+         ) { return; }
     }
-  //
-    if ( inputData === undefined ) { return; }
   //
     let ö_text = this._stringifyDataItem( inputData );
   //
@@ -57,36 +59,36 @@ constructor(
 private _stringifyDataItem( ü_data:any ):string {
     let ü_refIndx = -1;
     let ü_hitIndx = -1;
+    let ü_isFunc  = false;
   //
     switch ( typeof( ü_data ) ) {
+      case 'undefined':                                    return 'undefined';
       case 'boolean'  :
       case 'number'   :                                    return                 ü_data.toString();
       case 'string'   :                                    return ß_toJSONString( ü_data );
+      case 'function' : ü_isFunc = true;
       case 'object'   :
              if ( ü_data === null           ) { return 'null';                            }
         else if ( ü_data instanceof Boolean                                              //
                || ü_data instanceof Number  ) { return                 ü_data.toString(); }
         else if ( ü_data instanceof String  ) { return ß_toJSONString( ü_data );          }
         else if ( ü_data instanceof Date    ) { return ß_toISOString ( ü_data );          }
-        else if ( (ü_refIndx = this._allRefs.indexOf( ü_data )) > -1 ) {
-            if ( this._likeJSON ) { throw new TypeError( 'Converting circular structure to JSON' ); }
-                 ü_hitIndx = 1 +   this._hitRefs.indexOf( ü_data );
-            if ( ü_hitIndx < 1 ) { 
+        else if ( (ü_refIndx = this._allRefs.indexOf( ü_data )) > -1 )
+            {
+                if ( this._likeJSON ) { throw new TypeError( 'Converting circular structure to JSON' ); }
+                     ü_hitIndx = 1 +   this._hitRefs.indexOf( ü_data );
+                if ( ü_hitIndx < 1 ) { 
                                    this._hitPosn.push   ( this._allPosn[ ü_refIndx ] );
                                    this._hitRefs.push   ( ü_data );
                  ü_hitIndx =       this._hitRefs.length; }
-          //const ü_hitIndx = ü_refIndx in this.ß_hits
-          //                ?              this.ß_hits[ ü_refIndx ]
-          //                :             (this.ß_hits[ ü_refIndx ] = ++ this.ß_refCount)
-          //
-          //          AsText._RecursionHit.text = `(#${ this.ß_hits.length })`;
                       AsText._RecursionHit.text = `(#${ ü_hitIndx })`;
                 throw AsText._RecursionHit;
             } else {
                       this._allRefs.push( ü_data );
                       this._allPosn.push( ++ this.ß_posIndx );
-                      const ü_done = Array.isArray( ü_data ) ? this.ß_fromArray ( ü_data )
-                                                             : this.ß_fromObject( ü_data )
+                      const ü_done = ü_isFunc                ? this._echoFunction( ü_data )
+                                   : Array.isArray( ü_data ) ? this._echoArray   ( ü_data )
+                                                             : this._echoObject  ( ü_data )
                                                              ;
                 if ( this._expanded ) {
                     this._allRefs.pop();
@@ -95,21 +97,27 @@ private _stringifyDataItem( ü_data:any ):string {
                       this.ß_posIndx -= ü_done.length;
                 return ü_done;
             }
-    //case 'undefined':        CRecursionRef.posn = -1;     throw CRecursionRef;
-      case 'function' :
+            break;
+      default:
     }
   //
     return ü_data.toString();
 }
 
+private _echoFunction( ü_data:Function ):string {
+    return ü_data.toString().slice(0,20);
+}
 
-private ß_fromObject( ü_data:object ):string {
+private _echoObject( ü_data:object ):string {
     const ü_list = [] as string[];
       let ü_mKey ;
     for ( ü_mKey in ü_data ) {
       if ( ! ü_data.hasOwnProperty( ü_mKey ) ) { continue; }
       const ü_item = ü_data[ ü_mKey as keyof typeof ü_data ];
-      if ( ü_item === undefined              ) { continue; } // skip undefined
+      if ( this._likeJSON
+        && (         ü_item   === undefined
+          || typeof( ü_item ) === 'function' )
+      ) { continue; } // skip undefined
     //
       const ü_start = ß_toJSONString( ü_mKey, this._skipQuotes )
                     + ':';
@@ -135,7 +143,7 @@ private ß_fromObject( ü_data:object ):string {
 
 //--------------------------------------------------------------------
 
-private ß_fromArray( ü_arry:any[] ):string {
+private _echoArray( ü_arry:any[] ):string {
       const ü_list = [] as string[];
       const ü_lngt = ü_arry.length;
         let ü_indx = 0;
@@ -145,7 +153,9 @@ private ß_fromArray( ü_arry:any[] ):string {
       let ü_text:string
       var ü_eX;
       try {
-          ü_text = ü_item === undefined
+          ü_text = this._likeJSON
+                && (         ü_item   === undefined
+                  || typeof( ü_item ) === 'function' )
                  ? 'null'
                  : this._stringifyDataItem( ü_item )
                  ;
@@ -195,22 +205,11 @@ function ß_escapeChar( ü_char:string ):string {
       case 0x08: return '\\b' ; // backspace
       case 0x09: return '\\t' ; // horizontal tab
       case 0x0a: return '\\n' ; // new line
-      case 0x0b: return '\\v' ; //   vertical tab
+    //case 0x0b: return '\\v' ; //   vertical tab
       case 0x0c: return '\\f' ; // formfeed
       case 0x0d: return '\\r' ; // carriage return
-      case 0x22: return '\\"' ;
-      case 0x5c: return '\\\\';
-  }
-// '\\\$&'
-  switch ( ü_char ) {
-    case '"' : return '\\"' ;
-    case '\\': return '\\\\';
-    case '\n': return '\\n' ; // new line
-    case '\r': return '\\r' ; // carriage return
-    case '\t': return '\\t' ; // horizontal tab
-    case '\v': return '\\v' ; //   vertical tab
-    case '\b': return '\\b' ; // backspace
-    case '\f': return '\\f' ; // formfeed
+      case 0x22: return '\\"' ; // double quote
+      case 0x5c: return '\\\\'; // backslash
   }
 //
   return ( ü_code < 16

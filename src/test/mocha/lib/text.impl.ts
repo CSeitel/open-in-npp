@@ -16,7 +16,7 @@
          , expandTemplateString
          , escapeFF
          } from '../../../lib/textUtil';
-  import { createArray
+  import { pickPair
          , createOrderedPairs
          } from '../../../lib/arrayUtil';
   import { expectErrorCode
@@ -111,41 +111,57 @@ export async function tst_JSONLike1(){
     const ü_date = new Date();
     const ü_data =
       [
-    //, [ undefined, 'undefined' ]
-        [ null     , 'null' ]
+      , [ null     , 'null' ]
       , [ ü_date   , `"${ ü_date.toISOString()}"` ]
       , [ true     , 'true' ]
       , [ -1       , '-1'   ]
       , [ ''       , '""'   ]
-    //, [ '" \\ \n \r \t \v \b \f'   , '"\\" \\\\ \\n \\r \\t \\v \\b \\f"' ]
       , [ '" \\ \n \r \t \v \b \f'   , '"\\" \\\\ \\n \\r \\t \\u000b \\b \\f"' ]
-     
-       
+                                   //, '"\\" \\\\ \\n \\r \\t \\v \\b \\f"' ]
 
-      , [ '\x09'   , '"\\t"' ]
-      , [ '\x10'   , '"\\u0010"' ]
-      , [ '\u0010' , '"\\u0010"' ]
-      , [ '\ud834\udd1e', '"𝄞"' ]
-      , [ '\u2260' , '"≠"' ]
+      , [ {'\x09'        :'\x09'          }, '{"\\t":"\\t"}'         ]
+      , [ {'\x10'        :'\x10'          }, '{"\\u0010":"\\u0010"}' ]
+      , [ {'\u0010'      :'\u0010'        }, '{"\\u0010":"\\u0010"}' ]
+      , [ {'\ud834\udd1e': '\ud834\udd1e' }, '{"𝄞":"𝄞"}'             ]
+      , [ {'\u2260'      :'\u2260'        }, '{"≠":"≠"}'             ]
+
       , [ Boolean(), 'false' ]
       , [ Number (), '0'     ]
       , [ String (), '""'    ]
-      , [ {a:undefined}, '{}'         ]
+
       , [ {a:null     }, '{"a":null}' ]
       , [ {a:ü_date   }, `{"a":"${ ü_date.toISOString()}"}` ]
       , [ {a:true     }, '{"a":true}' ]
       , [ {a:-1       }, '{"a":-1}'   ]
       , [ {a:[]       }, '{"a":[]}'   ]
-      , [ [undefined,null,false,-1], '[null,null,false,-1]' ]
+      , [ [null,false,-1], '[null,false,-1]' ]
       ] as TOrderedPairs<any,string>;
-  //ü_data.splice( 0, ü_data.length - 1 );
     const ö_array  = bindArguments( echoAsJSON, { realFirst:true, arrangeBound:[1] },  true                   );
   //
     testFunction( ß_JSON_stringify, ü_data );
     testFunction( echoAsJSON      , ü_data );
+  //testFunction( echoAsJSON      , ü_data );
+  //
+    const ü_code = tst_JSONLike1.toString().slice(0,20);
+    const ü_data_2 =
+      [
+      , [    undefined                 , undefined,      'undefined'              ]
+      , [                tst_JSONLike1 , undefined,                    ü_code     ]
+      , [ {a:undefined,b:tst_JSONLike1}, '{}'     , '{a:undefined,b:${ ü_code }}' ]
+      , [   [undefined,  tst_JSONLike1], '[null]' ,     '[undefined,${ ü_code }]' ]
+      ] as [any,string,string][];
+    const ü_01 = ü_data_2.map( pickPair<any,string>( 0, 1 ) );
+    const ü_02 = ü_data_2.map( pickPair<any,string>( 0, 2 ) );
+  //
+    testFunction( ß_JSON_stringify, ü_01 );
+    testFunction( echoAsJSON      , ü_01 );
+    testFunction( echoAsString    , ü_02 );
 }
 
 export async function tst_JSONLike2(){
+    const echoAsStringExp = bindArguments( echoAsString, { realFirst:true, arrangeBound:[1] }, true );
+    const ü_code = tst_JSONLike2.toString().slice(0,20);
+  //
     const ü_ref_0 = {a0:true};
     const ü_ref_1 = {a1:true,b1:ü_ref_0};
     const ü_ref_2 = ü_ref_1.b1 = {a2:true,b2:ü_ref_1} as any;
@@ -153,31 +169,57 @@ export async function tst_JSONLike2(){
           ü_ref_4[1].a4 = ü_ref_4;
     const ü_ref_3 = {a3:true} as any;
           ü_ref_3.a = ü_ref_3.b = ü_ref_3;
-       // ü_ref_2 as any;
-    const ü_2 = '{a:true,b:<*1>{a1:true,b1:{a2:true,b2:(#1)}},c:<*2>{a2:true,b2:{a1:true,b1:(#2)}}}'
-
+    const ü_ref_5 = {a5:true,b:tst_JSONLike2,c:[tst_JSONLike2]};
+    const ö_recursion = 'Recursion';
+  //
     const ü_data =
       [
-    //, [ ü_ref_0   , '{"a":true}' ]
-        [ {a:ü_ref_0,b:ü_ref_0}, '{a:{a0:true},b:{a0:true}}' ]
-      , [ {a:true,b:ü_ref_1,c:ü_ref_2}, ü_2 ]
-      , [ ü_ref_3, '<*1>{a3:true,b:(#1),a:(#1)}' ]
-      , [ ü_ref_4, '<*1>[1,{a4:(#1)}]' ]
-      ] as TOrderedPairs<any,string>;
-    console.log( ü_ref_3 );
-    const echoAsStringExp = bindArguments( echoAsString, { realFirst:true, arrangeBound:[1] }, true );
-    testFunction( echoAsString   , ü_data );
-    testFunction( echoAsStringExp, ü_data );
+        [ {a:ü_ref_0,b:ü_ref_0}       
+        , '{a:{a0:true},b:{a0:true}}'
+        , '{a:<*1>{a0:true},b:(#1)}'
+        , '{"a":{"a0":true},"b":{"a0":true}}'
+        ]
+      , [ {a:true,b:ü_ref_1,c:ü_ref_2}
+        , '{a:true,b:<*1>{a1:true,b1:{a2:true,b2:(#1)}},c:<*2>{a2:true,b2:{a1:true,b1:(#2)}}}'
+        , '{a:true,b:<*1>{a1:true,b1:<*2>{a2:true,b2:(#1)}},c:(#2)}'
+        , ö_recursion
+        ]
+      , [ ü_ref_3
+        , '<*1>{a3:true,b:(#1),a:(#1)}'
+        , '<*1>{a3:true,b:(#1),a:(#1)}'
+        , ö_recursion
+        ]
+      , [ ü_ref_4
+        , '<*1>[1,{a4:(#1)}]'
+        , '<*1>[1,{a4:(#1)}]'
+        , ö_recursion
+        ]
+      , [ ü_ref_5
+        , `{a5:true,b:${ ü_code },c:[${ ü_code }]}`
+        , `{a5:true,b:<*1>${ ü_code },c:[(#1)]}`
+        , '{"a5":true,"c":[null]}'
+        ]
+        /*
   //
-    ü_data.forEach( ü_row => { ü_row[1] = 'Recursion' } );
-    ü_data.splice( 0, ü_data.length - 1 );
+    ü_01.forEach( ü_row => { ü_row[1] = 'Recursion' } );
+    ü_01.splice( 0, ü_01  .length - 2 );
+        */
+      ] as [any,string,string,string][];
   //
-    testFunction( ß_JSON_stringify, ü_data, ö_expectRecursion );
-    testFunction( echoAsJSON      , ü_data, ö_expectRecursion );
+    const ü_01 = ü_data.map( pickPair<any,string>( 0, 1 ) ); // Text expanded
+    const ü_02 = ü_data.map( pickPair<any,string>( 0, 2 ) ); // Text
+    const ü_03 = ü_data.map( pickPair<any,string>( 0, 3 ) ); // JSON
+  //
+    testFunction( echoAsString   , ü_02   );
+    testFunction( echoAsStringExp, ü_01   );
+  //
+    testFunction( ß_JSON_stringify, ü_03, ö_expectRecursion );
+    testFunction( echoAsJSON      , ü_03, ö_expectRecursion );
+  //
 function ö_expectRecursion( ü_x:any, ü_eX:any, ü_x_y:[any,string|void] ):string|void {
   //console.log( ü_eX )
     return ü_eX instanceof TypeError && ü_eX.message.startsWith( 'Converting circular structure to JSON' )
-         ? 'Recursion'
+         ? ö_recursion
          : ` ${ ü_eX }`;
 }
 }
