@@ -2,7 +2,6 @@
 */
   import { type TTestSuites
          , type TTestSuiteDefinition
-         , type TTestSuiteObject
          , type TAsyncTestFunction
          , type TTestSummary
          } from '../../types/lib.testUtil.d';
@@ -30,7 +29,7 @@
                 ß_npp.tst_dispatch
   //, bbcee   : ß_fs.tst_whenFileInfoRead
   //, ccee    : ß_fs.tst_whenFileInfoRead
-    } as TTestSuiteObject;
+    } as TTestSuiteDefinition[1];
 //--------------------------------------------------------------------
   const ß_proxy     = [] as TAsyncTestFunction[][];
   const ß_DebugUI   =                     !true; // enforce debug-UI
@@ -87,7 +86,7 @@ function ß_expandSuite( ö_suite:TTestSuiteDefinition, ü_sIndx:number ):void {
 function ß_wrapTestSuite( ä_suite:TTestSuiteDefinition, ä_sIndx:number ):string[] {
   //
     const ö_proxy = ß_proxy[ ä_sIndx ] = [] as TAsyncTestFunction[];
-    const ö_tests = ä_suite[1] as TTestSuiteObject;
+    const ö_tests = ä_suite[1] as Record<string,TAsyncTestFunction>;
     const ü_testNames = Object.keys( ö_tests );
     if ( ü_testNames.length === 0 ) { return ü_testNames; }
         //ü_testNames.sort();

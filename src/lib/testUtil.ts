@@ -8,9 +8,13 @@
   import { type TTestResult
          , type TTestSummary
          , type TTestOptions
+         , type TTestContext
          , type TAsyncTestFunction
          , type TTestSuites
-         , type TTestSuiteDefinition
+         , type TSeveralTestSuites
+         , type TSingleTestSuite
+         , type TSeveralTests
+         , type TSingleTest
          } from '../types/lib.testUtil.d';
   import { CEResultSymbol
          , CECheckIcon
@@ -42,6 +46,7 @@
   type TOptMsg = string
 //const ß_escape = escapeFF( CRgXp.specialChars );
   const CSeriesOfTests = [] as TTestResult[];
+//--------------------------------------------------------------------
   const LCHeader =
     { should    : (ü_msg   :TManMsg               )=> successPrefix+`Should have happened: ${ ü_msg||CEEmptyStringSymbol }`
     , shouldNot : (ü_msg   :TManMsg               )=> failurePrefix+`Should not have happened: ${ ü_msg||CEEmptyStringSymbol }`
@@ -65,7 +70,6 @@
     , cond_f2   : (ü_msg   :TManMsg,ü_icon :string
                   ,ü_act   :string ,ü_exp  :string)=> failurePrefix+`${ ü_act } ${ ü_icon } ${ ü_exp } for ${ ü_msg||CEEmptyStringSymbol }`
     };
-//--------------------------------------------------------------------
 //====================================================================
   const ß_defaultOpts:TTestOptions =
            { resourceDirName: join( __dirname, '../../' )
@@ -73,7 +77,7 @@
                      && typeof( test  ) !== 'undefined'
            , summaryOnly: false
            };
-  let ß_runtimeOpts:Readonly<TTestOptions>// = null as any as TTestOptions;
+  let ß_testContext:TTestContext// = null as any as TTestOptions;
 //====================================================================
 
 function ß_echo( ü_oref:any, ü_length:number ):string {
@@ -82,25 +86,21 @@ function ß_echo( ü_oref:any, ü_length:number ):string {
 
 //====================================================================
 
-function ß_expandTestSuite( ü_suite:TTestSuiteDefinition ):void {
-               if ( ü_suite[2] ) { return; }
+function ß_expandTestSuite( ü_suite:TSingleTestSuite ):void {
     const ö_tests = ü_suite[1];
              suite( ü_suite[0], ö_expandTests );
   //
 function ö_expandTests():void {
-    if ( Array.isArray( ö_tests ) ) { ö_tests.forEach(          ä_expandTest ); }
-    else                            {         forEach( ö_tests, ä_expandTest ); }
+    ö_tests.forEach( ä_expandTest );
   //
-function ä_expandTest( ö_testImpl:TAsyncTestFunction, ö_testName:string|number ):void {
-    if ( typeof( ö_testName ) === 'number' )
-               { ö_testName = ö_testImpl.name; }
-    const ö_testSummary = testSummary.bind( null, ö_testName as string, true );
-    test( ö_testName, ö_whenTested );
+function ä_expandTest( ö_test:TSingleTest ):void {
+    const ö_testSummary = testSummary.bind( null, ö_test[0], true );
+    test( ö_test[0], ö_whenTested );
   //
 function ö_whenTested(){
     let ü_whenDone:PromiseLike<void>
     try {
-        ü_whenDone = ö_testImpl();
+        ü_whenDone = ö_test[1]();
     } catch ( ü_eX ) {
         ü_whenDone = Promise.reject( ü_eX );
     }
@@ -110,18 +110,43 @@ function ö_whenTested(){
 }
 }
 
+function ß_filterSuites( ü_suites:TTestSuites, ü_singleTest?:TAsyncTestFunction ):TSeveralTestSuites {
+    if ( ü_singleTest !== undefined ) {
+        return [['Single TestSuite',[['Single Test',ü_singleTest!]]]];
+    }
+  //
+    const ö_suites:TSeveralTestSuites = [];
+    ü_suites.forEach(function( ü_suite ){
+        if ( ü_suite[2] ) { return; }
+        const ö_tests   = ü_suite[1];
+        const ö_isArray = Array.isArray( ö_tests );
+        const ö_suite:TSeveralTests = [];
+        forEach( ö_tests as Record<string,TAsyncTestFunction>, function( ü_test, ü_name ){
+            if ( ö_isArray ) { ü_name += '-'+ ü_test.name; }
+            ö_suite.push([ ü_name, ü_test ]);
+        });
+        if ( ö_suite.length ) { ö_suites.push([ ü_suite[0], ö_suite ]); }
+    });
+    return ö_suites;
+}
+
 //====================================================================
 
 export function testSrc( ...ü_segs:string[] ):string {
-    return join( ß_runtimeOpts.resourceDirName, ...ü_segs );
+    return join( ß_testContext.resourceDirName, ...ü_segs );
 }
 
-export function whenAllTestsRun( ü_suites:TTestSuites, ü_opts?:Partial<TTestOptions> ):PromiseLike<TTestSummary> {
-    ß_runtimeOpts = ü_opts === undefined
-                  ?                    ß_defaultOpts
-                  : Object.assign( {}, ß_defaultOpts, ü_opts );
+export function whenAllTestsRun( ä_suites:TTestSuites, ü_opts?:Partial<TTestOptions> ):PromiseLike<TTestSummary> {
   //
-    if ( ß_runtimeOpts.withMocha ) {
+    ß_testContext = ü_opts === undefined
+                  ?                    ß_defaultOpts           as TTestContext
+                  : Object.assign( {}, ß_defaultOpts, ü_opts ) as TTestContext
+                  ;
+    ß_testContext.write = ß_writeStdOut;
+  //
+    const ü_suites = ß_filterSuites( ä_suites, ß_testContext.singleTest );
+  //
+    if ( ß_testContext.withMocha ) {
         ü_suites.forEach( ß_expandTestSuite );
         return Promise.resolve({ all:-1, failed:-1 });
     }
@@ -131,18 +156,18 @@ export function whenAllTestsRun( ü_suites:TTestSuites, ü_opts?:Partial<TTestOp
   //
     return ö_whenDone.then( ö_fulfilled );
   //
-function ö_appendSuite( ü_suite:TTestSuiteDefinition ):void {
-    if ( ü_suite[2] ) { return; }
+function ö_appendSuite( ü_suite:TSingleTestSuite ):void {
     ö_whenDone = ö_whenDone.then(function( ü_errCount ){
         return ß_whenTestSuite( ü_errCount, ü_suite[0], ü_suite[1] );
     });
 }
+  //
 function ö_fulfilled( ü_sum:TTestSummary ):TTestSummary {
-    ß_writeStdOut( ü_sum.failed > 0
+    ß_testContext.write( ü_sum.failed > 0
                  ? LCHeader.SUM_ERR( ü_sum.all, ü_sum.failed, Math.round( ( 1 - ü_sum.failed / ü_sum.all ) * 100 ) )
                  : LCHeader.SUM_OK ( ü_sum.all )
                  );
-    if ( ! ß_runtimeOpts.withMocha ) {
+    if ( ! ß_testContext.withMocha ) {
         ß_trc&& ß_trc( ü_sum, 'Test-Summary-Exit' );
       //process.exitCode = ü_sum.failed  ;
         process.exit     ( ü_sum.failed );
@@ -156,34 +181,30 @@ function ö_rejected( ü_reason:any ):never {
 
 //--------------------------------------------------------------------
 
-function ß_whenTestSuite( ü_sum:TTestSummary, ü_title:string, ü_tests:Record<string,TAsyncTestFunction>|TAsyncTestFunction[] ):PromiseLike<TTestSummary> {
+function ß_whenTestSuite( ü_sum:TTestSummary, ü_title:string, ü_tests:TSeveralTests ):PromiseLike<TTestSummary> {
+    ß_trc&& ß_trc( `TestSuite: ${ ü_title }` );
   //
-    ß_writeStdOut( `Suite: ${ ü_title }` );
-    let ö_whenDone = Promise.resolve( ü_sum );
-    if ( Array.isArray( ü_tests ) ) { ü_tests.forEach(          ö_addWhenTested ); }
-    else                            {         forEach( ü_tests, ö_addWhenTested ); }
+       let ö_whenDone = Promise.resolve( ü_sum );
+           ü_tests.forEach(          ö_addWhenTested ); 
+    return ö_whenDone.then( ö_whenLast );
   //
-             return ö_whenDone;
-  //
-function ö_addWhenTested( ä_testImpl:TAsyncTestFunction, ä_testName:string|number ):void {
-    if ( typeof( ä_testName ) === 'number' ) { ä_testName = ä_testImpl.name; }
+function ö_addWhenTested( ä_test:TSingleTest ):void {
     ö_whenDone = ö_whenDone.then( ä_whenTested );
   //
 function ä_whenTested( ö_sum:TTestSummary ):PromiseLike<TTestSummary> {
     ö_sum.all ++ ;
     let ü_whenDone:PromiseLike<void>
     try {
-        ü_whenDone = ä_testImpl();
+        ü_whenDone = ä_test[1]();
     } catch ( ü_eX ) {
         ü_whenDone = Promise.reject( ü_eX );
     }
     return ü_whenDone.then( undefined, testNoError )
                      .then(
       function(){
-           const ü_sum = testSummary( ä_testName as string );
+           const ü_sum = testSummary( ä_test[0] );
             if ( ü_sum.failed > 0 )
                { ö_sum.failed ++ ; }
-  //ß_trc&& ß_trc( ö_sum, 'Mocha' );
           return ö_sum;
       }
     );
@@ -198,6 +219,10 @@ function ä_whenTested( ö_sum:TTestSummary ):PromiseLike<TTestSummary> {
 }
 }
   //
+function ö_whenLast( ü_sum:TTestSummary ):TTestSummary {
+           ß_testContext.write( `TestSuite: ${ ü_title } ${ ü_sum.all }` );
+    return ü_sum;
+}
 }
 
 //====================================================================
@@ -206,7 +231,7 @@ export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummar
     const ü_results = CSeriesOfTests;
     const ü_all     = ü_results.length;
     const ü_success = ü_results.filter( ü_test => ü_test.startsWith( CEResultSymbol.success ) );
-    const ü_output  = ß_runtimeOpts.summaryOnly
+    const ü_output  = ß_testContext.summaryOnly
                     ? []
                     : CSeriesOfTests.slice(0)
                     ;
@@ -230,10 +255,10 @@ export function testSummary( ü_testName:string, ü_throw?:boolean ):TTestSummar
         }
     }
   //
-                    ü_output.unshift( ü_head );
-                    ü_output.push   ( ''     );
+                                         ü_output.unshift( ü_head );
+    if ( ! ß_testContext.summaryOnly ) { ü_output.push   ( ''     ); }
                               const ü_crlf = ß_RuntimeContext.lineSep;
-    ß_writeStdOut(  ü_output.join( ü_crlf )  );
+    ß_testContext.write(  ü_output.join( ü_crlf )  );
   //
     if ( ü_throwErrorText.length > 0 ) { throw new Error( ü_throwErrorText ); }
     return ü_sum;

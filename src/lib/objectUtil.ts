@@ -20,6 +20,7 @@ export function isDirectInstanceOf( ü_oref:object, ü_class:Function ):boolean 
 export function forEach<T extends TAnyObject>(                                                ü_oref:T
                                              , ü_forEach :( ü_value:T[keyof T],ü_mKey:keyof T,ü_oref:T )=>void
                                              , ü_that   ?:any                                      ):T {
+//
       let ü_mKey:keyof T
     for ( ü_mKey in ü_oref ) {
       ü_forEach.call( ü_that
