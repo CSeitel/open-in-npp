@@ -54,13 +54,18 @@
     , never     : (ü_msg   :TManMsg               )=> failurePrefix+`Shouldn't have been reached: ${ ü_msg||CEEmptyStringSymbol }`
     , REJECTED_0: (ü_msg   :TManMsg,ü_val  :string)=> `No rejection for \`\`${ ü_msg||CEEmptyStringSymbol }\`\` due to result: ${ ü_val }`
     , REJECTED_1: (ü_msg   :TManMsg,ü_err  :string)=> `Rejection for '${ ü_msg||CEEmptyStringSymbol }' due to '${ ü_err }'`
-    , TEST_0    : (ü_test  :string                )=>       nonePrefix+`Result of "${ ü_test }": Test contains no checks.`
-    , TEST_OK   : (ü_test  :string ,ü_all  :number)=> successfulPrefix+`Result of "${ ü_test }": ${ ü_all    } checks have been passed successfully.`
-    , TEST_ERR  : (ü_test  :string ,ü_all  :number
-                  ,ü_failed:number ,ü_ratio:number)=> failingPrefix   +`Result of "${ ü_test }": ${ ü_failed } (out of ${ ü_all }) checks have failed. Success-ratio: ${  ü_ratio }%`
-    , SUM_OK    : (ü_all   :number                )=> successfulPrefix+`Overall test result: ${ ü_all    } tests have been passed successfully.`
-    , SUM_ERR   : (ü_all   :number
-                  ,ü_failed:number ,ü_ratio:number)=> failingPrefix   +`Overall test result: ${ ü_failed } (out of ${ ü_all }) tests have failed. Success-ratio: ${  ü_ratio }%`
+    , TEST_0    : (ü_test  :string                )=>       nonePrefix+` Result of "${ ü_test }": Test contains no checks.`
+    , TEST_OK   : (ü_test  :string ,ü_all  :number)=> successfulPrefix+` Result of "${ ü_test }": ${ ü_all    } checks have been passed successfully.`
+    , TEST_ERR  : (ü_test  :string ,ü_all  :number                      //
+                  ,ü_failed:number ,ü_ratio:number)=> failingPrefix   +` Result of "${ ü_test }": ${ ü_failed } (out of ${ ü_all }) checks have failed. Success-ratio: ${  ü_ratio }%`
+                //
+    , SUM_S_OK   : (ü_suite :string,ü_all  :number)=> successfulPrefix+`Result of "${ ü_suite }": ${ ü_all    } tests have been passed successfully.`
+    , SUM_S_ERR  : (ü_suite :string,ü_all  :number
+                   ,ü_failed:number,ü_ratio:number)=> failingPrefix   +`Result of "${ ü_suite }": ${ ü_failed } (out of ${ ü_all }) tests have failed. Success-ratio: ${  ü_ratio }%`
+    , SUM_ALL_OK : (ü_all   :number               )=> successfulPrefix+`Overall test result: ${ ü_all    } tests have been passed successfully.`
+    , SUM_ALL_ERR: (ü_all   :number
+                   ,ü_failed:number,ü_ratio:number)=> failingPrefix   +`Overall test result: ${ ü_failed } (out of ${ ü_all }) tests have failed. Success-ratio: ${  ü_ratio }%`
+                //
     , cond_s1   : (ü_msg   :TManMsg,ü_icon :string
                   ,ü_both  :string                )=> successPrefix+`${ ü_icon } ${ ü_both } for ${ ü_msg||CEEmptyStringSymbol }`
     , cond_f1   : (ü_msg   :TManMsg,ü_icon :string
@@ -83,10 +88,16 @@
 function ß_echo( ü_oref:any, ü_length:number ):string {
     return shortenText( echoAsString( ü_oref ), ü_length );
 }
+function ß_sum( ü_sum:TTestSummary ):[number,number,number] {
+    return [ ü_sum.all
+           , ü_sum.failed
+           , Math.round( ( 1 - ü_sum.failed / ü_sum.all ) * 100 )
+           ];
+}
 
 //====================================================================
 
-function ß_expandTestSuite( ü_suite:TSingleTestSuite ):void {
+function ß_expandSingleTestSuite( ü_suite:TSingleTestSuite ):void {
     const ö_tests = ü_suite[1];
              suite( ü_suite[0], ö_expandTests );
   //
@@ -136,7 +147,7 @@ export function testSrc( ...ü_segs:string[] ):string {
     return join( ß_testContext.resourceDirName, ...ü_segs );
 }
 
-export function whenAllTestsRun( ä_suites:TTestSuites, ü_opts?:Partial<TTestOptions> ):PromiseLike<TTestSummary> {
+export function whenAllTestsRun( ü_testSuites:TTestSuites, ü_opts?:Partial<TTestOptions> ):Promise<TTestSummary> {
   //
     ß_testContext = ü_opts === undefined
                   ?                    ß_defaultOpts           as TTestContext
@@ -144,35 +155,49 @@ export function whenAllTestsRun( ä_suites:TTestSuites, ü_opts?:Partial<TTestOp
                   ;
     ß_testContext.write = ß_writeStdOut;
   //
-    const ü_suites = ß_filterSuites( ä_suites, ß_testContext.singleTest );
+    const ü_suites = ß_filterSuites( ü_testSuites, ß_testContext.singleTest );
   //
     if ( ß_testContext.withMocha ) {
-        ü_suites.forEach( ß_expandTestSuite );
+        ü_suites.forEach( ß_expandSingleTestSuite );
         return Promise.resolve({ all:-1, failed:-1 });
     }
   //
-    let ö_whenDone = Promise.resolve({ all:0, failed:0 });
+    const     ö_allSuitesSum:TTestSummary = { all:0, failed:0 };
+      let ö_whenAllSuites = Promise.resolve();
     ü_suites.forEach( ö_appendSuite );
   //
-    return ö_whenDone.then( ö_fulfilled );
+    return ö_whenAllSuites.then( ö_afterAllSuites );
   //
-function ö_appendSuite( ü_suite:TSingleTestSuite ):void {
-    ö_whenDone = ö_whenDone.then(function( ü_errCount ){
-        return ß_whenTestSuite( ü_errCount, ü_suite[0], ü_suite[1] );
-    });
+function ö_appendSuite( üü_suite:TSingleTestSuite ):void {
+    ö_whenAllSuites = ö_whenAllSuites.then( ä_whenSingleSuite );
+  //
+function ä_whenSingleSuite():PromiseLike<void> {
+        ß_trc&& ß_trc( `TestSuite: ${ üü_suite[0] }` );
+    return ß_whenSingleSuite( üü_suite[1] ).then( öö_afterSingleSuite );
+  //
+function öö_afterSingleSuite( ü_singleSuiteSum:TTestSummary ):void {
+    ö_allSuitesSum.all    += ü_singleSuiteSum.all    ;
+    ö_allSuitesSum.failed += ü_singleSuiteSum.failed ;
+    ß_testContext.write(                             ü_singleSuiteSum.failed > 0
+        ? LCHeader.SUM_S_ERR( üü_suite[0], ... ß_sum( ü_singleSuiteSum )   )
+        : LCHeader.SUM_S_OK ( üü_suite[0],            ü_singleSuiteSum.all )
+    );
+        //? `TestSuite: ${ üü_suite[0] } ${ ü_singleSuiteSum.all }` : ''
+}
+}
 }
   //
-function ö_fulfilled( ü_sum:TTestSummary ):TTestSummary {
-    ß_testContext.write( ü_sum.failed > 0
-                 ? LCHeader.SUM_ERR( ü_sum.all, ü_sum.failed, Math.round( ( 1 - ü_sum.failed / ü_sum.all ) * 100 ) )
-                 : LCHeader.SUM_OK ( ü_sum.all )
-                 );
+function ö_afterAllSuites():TTestSummary {
+    ß_testContext.write(               ö_allSuitesSum.failed > 0
+        ? LCHeader.SUM_ALL_ERR( ... ß_sum( ö_allSuitesSum )   )
+        : LCHeader.SUM_ALL_OK (            ö_allSuitesSum.all )
+        );
     if ( ! ß_testContext.withMocha ) {
-        ß_trc&& ß_trc( ü_sum, 'Test-Summary-Exit' );
+        ß_trc&& ß_trc( ö_allSuitesSum, 'Test-Summary-Exit' );
       //process.exitCode = ü_sum.failed  ;
-        process.exit     ( ü_sum.failed );
+        process.exit     ( ö_allSuitesSum.failed );
     }
-    return ü_sum;
+    return ö_allSuitesSum;
 }
 function ö_rejected( ü_reason:any ):never {
     throw ü_reason;
@@ -181,47 +206,35 @@ function ö_rejected( ü_reason:any ):never {
 
 //--------------------------------------------------------------------
 
-function ß_whenTestSuite( ü_sum:TTestSummary, ü_title:string, ü_tests:TSeveralTests ):PromiseLike<TTestSummary> {
-    ß_trc&& ß_trc( `TestSuite: ${ ü_title }` );
+function ß_whenSingleSuite( ü_tests:TSeveralTests ):Promise<TTestSummary> {
   //
-       let ö_whenDone = Promise.resolve( ü_sum );
-           ü_tests.forEach(          ö_addWhenTested ); 
-    return ö_whenDone.then( ö_whenLast );
+    const      ö_singleSuiteSum:TTestSummary = { all:0, failed:0 };
+       let ö_whenSingleSuite = Promise.resolve();
+           ü_tests.forEach( ö_appendTest ); 
+    return ö_whenSingleSuite.then(function(){
+        return ö_singleSuiteSum;
+    });
   //
-function ö_addWhenTested( ä_test:TSingleTest ):void {
-    ö_whenDone = ö_whenDone.then( ä_whenTested );
+function ö_appendTest( ä_test:TSingleTest ):void {
+    ö_whenSingleSuite = ö_whenSingleSuite.then( ä_whenSingleTest ); // single suite = several single tests
   //
-function ä_whenTested( ö_sum:TTestSummary ):PromiseLike<TTestSummary> {
-    ö_sum.all ++ ;
-    let ü_whenDone:PromiseLike<void>
+function ä_whenSingleTest():PromiseLike<void> {
+  //
+    let ü_whenSingleTest:PromiseLike<void>
     try {
-        ü_whenDone = ä_test[1]();
+        ü_whenSingleTest = ä_test[1]();
     } catch ( ü_eX ) {
-        ü_whenDone = Promise.reject( ü_eX );
+        ü_whenSingleTest = Promise.reject( ü_eX );
     }
-    return ü_whenDone.then( undefined, testNoError )
-                     .then(
-      function(){
-           const ü_sum = testSummary( ä_test[0] );
-            if ( ü_sum.failed > 0 )
-               { ö_sum.failed ++ ; }
-          return ö_sum;
-      }
-    );
-  /*).then( undefined
-    , function( ü_err ){
-          testFailed( ü_err, '' );
-          ß_writeStdOut( ß_echo( ü_err, 300 ) );
-                 ö_sum.failed ++ ;
-          return ö_sum;
-      }
-*/
-}
-}
   //
-function ö_whenLast( ü_sum:TTestSummary ):TTestSummary {
-           ß_testContext.write( `TestSuite: ${ ü_title } ${ ü_sum.all }` );
-    return ü_sum;
+    return ü_whenSingleTest.then( undefined, testNoError )
+                           .then( öö_afterSingleTest );
+function öö_afterSingleTest():void {
+   const ü_testsSum = testSummary( ä_test[0] );
+    if ( ü_testsSum.failed > 0 ) { ö_singleSuiteSum.failed ++ ; }
+                                   ö_singleSuiteSum.all    ++ ;
+}
+}
 }
 }
 
