@@ -30,11 +30,12 @@
       resourceDirName :string
       withMocha       :boolean
       summaryOnly     :boolean
+      failuresOnly    :boolean
       singleTest     ?:TAsyncTestFunction
     }
   export type TTestContext = TTestOptions & {
-    //singleTestMode :boolean
-        write:TOutputWriter
+      write     :TOutputWriter
+      checksSum :TTestResult[]
     }
 
 //====================================================================

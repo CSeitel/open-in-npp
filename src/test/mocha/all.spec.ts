@@ -30,7 +30,8 @@
       , [ 'Test'  , ß_test ,  ß_skipTests ]
       , [ 'Text'  , ß_text , !ß_skipTests ]
       ], { resourceDirName: join( __dirname, '../../../etc/test' )
-         , summaryOnly: ß_allTests
+         , summaryOnly :!ß_allTests
+         , failuresOnly:  true
          , singleTest : ß_allTests ? undefined :
                   //ß_array.tst_dispatch
                   //ß_async.tst_dispatch

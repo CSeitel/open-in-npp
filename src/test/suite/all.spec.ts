@@ -11,7 +11,7 @@
   import { ß_trc
          } from '../../runtime/context';
   import { whenAllTestsRun
-         , testSummary
+         , checksSummary
          } from '../../lib/testUtil';
 //--------------------------------------------------------------------
 //import '../../runtime/context-XTN';
@@ -102,7 +102,7 @@ function ö_compileProxy( ü_testName:string, ä_tIndx:number ):void {
 function ö_wrap():PromiseLike<void> {
     ß_trc&& ß_trc( ä_testName, ä_suite[0]+'-Execute' );
     return ö_testImpl().then( ()=>{
-        testSummary( ä_testName );
+        checksSummary( ä_testName );
     });
 }
 }
